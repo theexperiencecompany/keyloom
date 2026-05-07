@@ -5,7 +5,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   BubbleChatIcon,
   Delete02Icon,
-  ArrowReloadHorizontalIcon,
   Sent02Icon,
 } from "@hugeicons/core-free-icons";
 import type { EditorProps } from "../schema";
@@ -32,10 +31,9 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   const [draft, setDraft] = useState("");
   const [flashKey, setFlashKey] = useState(0);
   const [flashedIndex, setFlashedIndex] = useState<number | null>(null);
-  const lastSide = value[value.length - 1]?.side ?? "right";
-  const [side, setSide] = useState<ChatMessage["side"]>(
-    lastSide === "left" ? "right" : "left",
-  );
+
+  const lastSide = value[value.length - 1]?.side ?? "left";
+  const nextSide: ChatMessage["side"] = lastSide === "left" ? "right" : "left";
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevLength = useRef(value.length);
@@ -59,15 +57,14 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
     onChange(recomputeTimings(next));
   }
 
-  function addMessage(text: string, sendAs: ChatMessage["side"]) {
+  function addMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
     setMessages([
       ...value,
-      { text: trimmed, side: sendAs, typingFrames: 0, delay: 0 },
+      { text: trimmed, side: nextSide, typingFrames: 0, delay: 0 },
     ]);
     setDraft("");
-    setSide(sendAs === "left" ? "right" : "left");
   }
 
   function patchMessage(i: number, patch: Partial<ChatMessage>) {
@@ -95,7 +92,7 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
         {value.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="space-y-3 px-5 py-6">
+          <div className="space-y-2 px-5 py-6">
             {value.map((m, i) => (
               <BubbleRow
                 key={i}
@@ -112,10 +109,9 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
 
       <Composer
         draft={draft}
-        side={side}
+        nextSide={nextSide}
         onDraftChange={setDraft}
-        onSideChange={setSide}
-        onSend={() => addMessage(draft, side)}
+        onSend={() => addMessage(draft)}
       />
     </div>
   );
@@ -134,7 +130,7 @@ function EmptyState() {
       <div>
         <p className="text-sm font-medium">No messages yet</p>
         <p className="mt-1 text-[12px] text-muted-foreground">
-          Type below and pick who said it.
+          Type below. Tap a bubble to flip its side.
         </p>
       </div>
     </div>
@@ -163,20 +159,17 @@ function BubbleRow({
         aria-hidden
       />
 
-      {isRight && (
-        <RowActions onFlip={onFlip} onDelete={onDelete} />
-      )}
+      {isRight && <DeleteAction onDelete={onDelete} />}
 
       <BubbleBody
         msg={msg}
         isRight={isRight}
         flashing={flashing}
         onText={onText}
+        onFlip={onFlip}
       />
 
-      {!isRight && (
-        <RowActions onFlip={onFlip} onDelete={onDelete} />
-      )}
+      {!isRight && <DeleteAction onDelete={onDelete} />}
 
       <div
         className="transition-[flex-grow] duration-300 ease-out"
@@ -192,17 +185,29 @@ function BubbleBody({
   isRight,
   flashing,
   onText,
+  onFlip,
 }: {
   msg: ChatMessage;
   isRight: boolean;
   flashing: boolean;
   onText: (t: string) => void;
+  onFlip: () => void;
 }) {
-  const ref = useRef<HTMLTextAreaElement | null>(null);
   return (
     <div
-      onClick={() => ref.current?.focus()}
-      className={`relative max-w-[78%] cursor-text rounded-[22px] px-4 py-2 transition-[background-color,transform,box-shadow] duration-300 ease-out ${
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onFlip();
+      }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && e.target === e.currentTarget) {
+          e.preventDefault();
+          onFlip();
+        }
+      }}
+      title="Tap to flip side"
+      className={`relative max-w-[78%] cursor-pointer rounded-[22px] px-4 py-2 transition-[background-color,transform,box-shadow] duration-300 ease-out ${
         isRight
           ? "bg-blue-500 text-white shadow-sm shadow-blue-500/30"
           : "bg-zinc-200 text-zinc-900 dark:bg-zinc-700/70 dark:text-zinc-50"
@@ -213,16 +218,19 @@ function BubbleBody({
       }}
     >
       <textarea
-        ref={ref}
         value={msg.text}
         onChange={(e) => onText(e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
         rows={1}
         spellCheck={false}
-        className={`block w-full min-w-[40px] resize-none overflow-hidden bg-transparent text-[14px] leading-snug outline-none placeholder:opacity-60 ${
+        className={`block w-full min-w-[40px] bg-transparent text-[14px] leading-snug outline-none cursor-text placeholder:opacity-60 ${
           isRight ? "placeholder:text-white/60" : ""
         }`}
         style={
           {
+            resize: "none",
+            overflow: "hidden",
             fieldSizing: "content",
           } as React.CSSProperties
         }
@@ -232,88 +240,34 @@ function BubbleBody({
   );
 }
 
-function RowActions({
-  onFlip,
-  onDelete,
-}: {
-  onFlip: () => void;
-  onDelete: () => void;
-}) {
+function DeleteAction({ onDelete }: { onDelete: () => void }) {
   return (
-    <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-      <IconButton
-        onClick={onFlip}
-        icon={ArrowReloadHorizontalIcon}
-        title="Flip side"
-      />
-      <IconButton
+    <div className="flex shrink-0 items-center opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+      <button
         onClick={onDelete}
-        icon={Delete02Icon}
         title="Delete"
-        variant="danger"
-      />
+        className="flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500"
+      >
+        <HugeiconsIcon icon={Delete02Icon} size={15} />
+      </button>
     </div>
-  );
-}
-
-function IconButton({
-  onClick,
-  icon,
-  title,
-  variant,
-}: {
-  onClick: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any;
-  title: string;
-  variant?: "danger";
-}) {
-  const danger = variant === "danger";
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      className={`flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors ${
-        danger
-          ? "hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500"
-          : "hover:bg-muted hover:text-foreground"
-      }`}
-    >
-      <HugeiconsIcon icon={icon} size={15} />
-    </button>
   );
 }
 
 function Composer({
   draft,
-  side,
+  nextSide,
   onDraftChange,
-  onSideChange,
   onSend,
 }: {
   draft: string;
-  side: ChatMessage["side"];
+  nextSide: ChatMessage["side"];
   onDraftChange: (v: string) => void;
-  onSideChange: (s: ChatMessage["side"]) => void;
   onSend: () => void;
 }) {
   const canSend = draft.trim().length > 0;
   return (
-    <div className="shrink-0 space-y-3 border-t border-border bg-background px-5 py-4">
-      <div className="grid grid-cols-2 gap-2">
-        <SideTab
-          active={side === "left"}
-          onClick={() => onSideChange("left")}
-          label="Them"
-          color="left"
-        />
-        <SideTab
-          active={side === "right"}
-          onClick={() => onSideChange("right")}
-          label="You"
-          color="right"
-        />
-      </div>
+    <div className="shrink-0 border-t border-border bg-background px-5 py-4">
       <div className="flex items-center gap-2">
         <input
           value={draft}
@@ -324,7 +278,7 @@ function Composer({
               onSend();
             }
           }}
-          placeholder={`Message as ${side === "right" ? "you" : "them"}…`}
+          placeholder={`Message as ${nextSide === "right" ? "you" : "them"}…`}
           className="flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30"
         />
         <button
@@ -333,7 +287,7 @@ function Composer({
           aria-label="Send message"
           className={`flex size-10 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-all ${
             canSend
-              ? side === "right"
+              ? nextSide === "right"
                 ? "bg-blue-500 hover:bg-blue-600 active:scale-95"
                 : "bg-zinc-500 hover:bg-zinc-600 active:scale-95"
               : "cursor-not-allowed bg-muted text-muted-foreground"
@@ -343,37 +297,5 @@ function Composer({
         </button>
       </div>
     </div>
-  );
-}
-
-function SideTab({
-  active,
-  onClick,
-  label,
-  color,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  color: "left" | "right";
-}) {
-  const dotClass =
-    color === "right" ? "bg-blue-500" : "bg-zinc-400 dark:bg-zinc-500";
-  const activeClasses =
-    color === "right"
-      ? "border-blue-500/60 bg-blue-500/10 text-foreground"
-      : "border-zinc-400/60 bg-zinc-400/10 text-foreground dark:border-zinc-500/60 dark:bg-zinc-500/10";
-  return (
-    <button
-      onClick={onClick}
-      className={`flex h-9 items-center justify-center gap-2 rounded-full border text-[13px] font-medium transition-colors ${
-        active
-          ? activeClasses
-          : "border-border bg-background text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      <span className={`size-1.5 rounded-full ${dotClass}`} />
-      {label}
-    </button>
   );
 }

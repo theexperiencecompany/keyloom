@@ -51,9 +51,9 @@ export function EditorView({ info }: { info: AnyCompositionInfo }) {
   }
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[380px_1fr]">
-      <aside className="flex min-h-0 flex-col border-r border-border">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] lg:min-h-0 lg:flex-1">
+      <aside className="flex flex-col border-b border-border lg:border-b-0 lg:border-r lg:min-h-0">
+        <div className="flex flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
           <FieldsRenderer
             fields={info.fields}
             value={props}
@@ -72,7 +72,7 @@ export function EditorView({ info }: { info: AnyCompositionInfo }) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 items-center justify-center bg-muted/20 p-6">
+      <div className="flex items-center justify-center bg-muted/20 p-6 lg:min-h-0">
         <div
           className="w-full max-w-5xl overflow-hidden rounded-lg border border-border bg-background shadow-sm"
           style={{ aspectRatio: `${info.width} / ${info.height}` }}

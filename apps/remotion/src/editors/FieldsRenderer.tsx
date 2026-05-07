@@ -1,14 +1,8 @@
 "use client";
 
-import type { ComponentType } from "react";
-import type { EditorProps, Field, ShapeField } from "../schema";
+import type { Field } from "../schema";
 import { PrimitiveControl } from "./primitives";
 import { ChatEditor } from "./ChatEditor";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const shapeEditors: Record<ShapeField["kind"], ComponentType<EditorProps<any>>> = {
-  chat: ChatEditor,
-};
 
 type Props = {
   fields: Field[];
@@ -21,27 +15,36 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
     onChange({ ...value, [key]: v });
   }
 
+  const hasChatField = fields.some((f) => f.kind === "chat");
+  const primitives = fields.filter((f) => f.kind !== "chat");
+  const chatField = fields.find((f) => f.kind === "chat");
+
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {fields.map((field) => {
-        if (field.kind === "chat") {
-          const Editor = shapeEditors.chat;
-          return (
-            <div key={field.key} className="flex min-h-0 flex-1 flex-col">
-              <Editor value={value[field.key] ?? []} onChange={(v) => set(field.key, v)} />
-            </div>
-          );
-        }
-        return (
-          <div key={field.key} className="px-5 py-3">
+      {primitives.length > 0 && (
+        <div
+          className={`shrink-0 space-y-4 px-5 py-5 ${
+            hasChatField ? "border-b border-border" : ""
+          }`}
+        >
+          {primitives.map((field) => (
             <PrimitiveControl
+              key={field.key}
               field={field}
               value={value[field.key]}
               onChange={(v) => set(field.key, v)}
             />
-          </div>
-        );
-      })}
+          ))}
+        </div>
+      )}
+      {chatField && (
+        <div className="flex min-h-0 flex-1 flex-col">
+          <ChatEditor
+            value={(value[chatField.key] ?? []) as never}
+            onChange={(v) => set(chatField.key, v)}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -22,8 +22,8 @@ export default async function EditorPage({
   if (!info) notFound();
 
   return (
-    <div className="flex h-screen flex-col">
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
+    <div className="flex min-h-screen flex-col lg:h-screen">
+      <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
         <Link
           href={`/docs/${info.id}`}
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
