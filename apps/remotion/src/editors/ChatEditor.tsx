@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   BubbleChatIcon,
@@ -30,10 +30,18 @@ function recomputeTimings(messages: ChatMessage[]): ChatMessage[] {
 
 export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   const [draft, setDraft] = useState("");
+  const [flashKey, setFlashKey] = useState(0);
+  const [flashedIndex, setFlashedIndex] = useState<number | null>(null);
   const lastSide = value[value.length - 1]?.side ?? "right";
   const [side, setSide] = useState<ChatMessage["side"]>(
     lastSide === "left" ? "right" : "left",
   );
+
+  useEffect(() => {
+    if (flashedIndex === null) return;
+    const t = setTimeout(() => setFlashedIndex(null), 450);
+    return () => clearTimeout(t);
+  }, [flashedIndex, flashKey]);
 
   function setMessages(next: ChatMessage[]) {
     onChange(recomputeTimings(next));
@@ -65,6 +73,8 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   function flipSide(i: number) {
     const cur = value[i]!;
     patchMessage(i, { side: cur.side === "left" ? "right" : "left" });
+    setFlashedIndex(i);
+    setFlashKey((k) => k + 1);
   }
 
   return (
@@ -78,6 +88,7 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
               <BubbleRow
                 key={i}
                 msg={m}
+                flashing={flashedIndex === i}
                 onText={(text) => patchMessage(i, { text })}
                 onFlip={() => flipSide(i)}
                 onDelete={() => deleteMessage(i)}
@@ -120,11 +131,13 @@ function EmptyState() {
 
 function BubbleRow({
   msg,
+  flashing,
   onText,
   onFlip,
   onDelete,
 }: {
   msg: ChatMessage;
+  flashing: boolean;
   onText: (t: string) => void;
   onFlip: () => void;
   onDelete: () => void;
@@ -137,11 +150,11 @@ function BubbleRow({
       }`}
     >
       <div
-        className={`relative max-w-[78%] rounded-[20px] ${
+        className={`relative max-w-[78%] rounded-[20px] transition-[background-color,box-shadow,transform] duration-300 ease-out ${
           isRight
             ? "bg-blue-500 text-white"
             : "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-        }`}
+        } ${flashing ? "ring-2 ring-offset-2 ring-offset-background ring-foreground/40 scale-[1.03]" : ""}`}
         style={{
           borderBottomRightRadius: isRight ? 6 : 20,
           borderBottomLeftRadius: !isRight ? 6 : 20,
@@ -150,7 +163,7 @@ function BubbleRow({
         <input
           value={msg.text}
           onChange={(e) => onText(e.target.value)}
-          className="w-full resize-none bg-transparent px-3.5 py-2 text-[14px] leading-snug outline-none placeholder:opacity-60"
+          className="w-full bg-transparent px-3.5 py-2 text-[14px] leading-snug outline-none placeholder:opacity-60"
           placeholder="Empty message"
         />
       </div>
@@ -214,22 +227,22 @@ function Composer({
 }) {
   const canSend = draft.trim().length > 0;
   return (
-    <div className="shrink-0 space-y-2.5 border-t border-border bg-background/95 px-4 py-4 backdrop-blur">
-      <div className="inline-flex rounded-full border border-border bg-muted/40 p-0.5 text-[12px] font-medium">
+    <div className="shrink-0 space-y-3 border-t border-border bg-background/95 px-4 py-4 backdrop-blur">
+      <div className="grid grid-cols-2 gap-2">
         <SideTab
           active={side === "left"}
           onClick={() => onSideChange("left")}
           label="Them"
-          dotColor="bg-zinc-400"
+          color="left"
         />
         <SideTab
           active={side === "right"}
           onClick={() => onSideChange("right")}
           label="You"
-          dotColor="bg-blue-500"
+          color="right"
         />
       </div>
-      <div className="flex items-end gap-2">
+      <div className="flex items-center gap-2">
         <input
           value={draft}
           onChange={(e) => onDraftChange(e.target.value)}
@@ -265,23 +278,29 @@ function SideTab({
   active,
   onClick,
   label,
-  dotColor,
+  color,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
-  dotColor: string;
+  color: "left" | "right";
 }) {
+  const dotClass =
+    color === "right" ? "bg-blue-500" : "bg-zinc-400 dark:bg-zinc-500";
+  const activeClasses =
+    color === "right"
+      ? "border-blue-500/60 bg-blue-500/10 text-foreground"
+      : "border-zinc-400/60 bg-zinc-400/10 text-foreground dark:border-zinc-500/60 dark:bg-zinc-500/10";
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1 transition-colors ${
+      className={`flex h-9 items-center justify-center gap-2 rounded-full border text-[13px] font-medium transition-colors ${
         active
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground"
+          ? activeClasses
+          : "border-border bg-background text-muted-foreground hover:text-foreground"
       }`}
     >
-      <span className={`size-1.5 rounded-full ${dotColor}`} />
+      <span className={`size-1.5 rounded-full ${dotClass}`} />
       {label}
     </button>
   );
