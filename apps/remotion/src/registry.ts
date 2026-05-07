@@ -9,6 +9,8 @@ import { typingSearchInfo } from "./compositions/TypingSearch/meta";
 import { statCounterInfo } from "./compositions/StatCounter/meta";
 import { tweetCardInfo } from "./compositions/TweetCard/meta";
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
+import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
+import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 
 export const compositions: AnyCompositionInfo[] = [
   titleSlideUpInfo,
@@ -17,6 +19,8 @@ export const compositions: AnyCompositionInfo[] = [
   titleFadeInfo,
   typingSearchInfo,
   cursorWalkthroughInfo,
+  browserWindowInfo,
+  captionTrackInfo,
   statCounterInfo,
   tweetCardInfo,
   messagePopupInfo,

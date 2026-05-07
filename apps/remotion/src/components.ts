@@ -10,6 +10,8 @@ import { TypingSearch } from "./compositions/TypingSearch/TypingSearch";
 import { StatCounter } from "./compositions/StatCounter/StatCounter";
 import { TweetCard } from "./compositions/TweetCard/TweetCard";
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
+import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
+import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentsById: Record<string, ComponentType<any>> = {
@@ -23,4 +25,6 @@ export const componentsById: Record<string, ComponentType<any>> = {
   StatCounter,
   TweetCard,
   CursorWalkthrough,
+  BrowserWindow,
+  CaptionTrack,
 };
