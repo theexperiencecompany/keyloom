@@ -16,6 +16,7 @@ import { whatsappMessagesInfo } from "./compositions/WhatsAppMessages/meta";
 import { slackMessagesInfo } from "./compositions/SlackMessages/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 import { phoneFrameInfo } from "./compositions/PhoneFrame/meta";
+import { laptopFrameInfo } from "./compositions/LaptopFrame/meta";
 import { splitSceneInfo } from "./compositions/SplitScene/meta";
 
 export const compositions: AnyCompositionInfo[] = [
@@ -36,6 +37,7 @@ export const compositions: AnyCompositionInfo[] = [
   slackMessagesInfo,
   discordMessagesInfo,
   phoneFrameInfo,
+  laptopFrameInfo,
   splitSceneInfo,
 ];
 
