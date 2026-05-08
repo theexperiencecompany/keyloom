@@ -1,5 +1,12 @@
 "use client";
 import {
+  ArrowLeft02Icon,
+  ArrowRight02Icon,
+  LockIcon,
+  RefreshIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
   AbsoluteFill,
   Easing,
   Img,
@@ -8,13 +15,6 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  ArrowLeft02Icon,
-  ArrowRight02Icon,
-  LockIcon,
-  RefreshIcon,
-} from "@hugeicons/core-free-icons";
 
 export type BrowserWindowProps = {
   url: string;
@@ -201,11 +201,7 @@ function TitleBar({
           padding: "0 18px",
         }}
       >
-        <HugeiconsIcon
-          icon={LockIcon}
-          size={18}
-          color="rgba(15,16,20,0.55)"
-        />
+        <HugeiconsIcon icon={LockIcon} size={18} color="rgba(15,16,20,0.55)" />
         <div
           style={{
             flex: 1,

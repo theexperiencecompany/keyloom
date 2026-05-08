@@ -25,7 +25,7 @@ export default function Link({
   children,
   ...rest
 }: LinkProps) {
-  const url = typeof href === "string" ? href : href?.pathname ?? "";
+  const url = typeof href === "string" ? href : (href?.pathname ?? "");
   return (
     <a href={url} {...rest}>
       {children}

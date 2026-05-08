@@ -42,7 +42,7 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
     config: { damping: 12, stiffness: 220, mass: 0.5 },
   });
 
-  const word = wordIndex >= 0 ? words[wordIndex] ?? "" : "";
+  const word = wordIndex >= 0 ? (words[wordIndex] ?? "") : "";
 
   return (
     <AbsoluteFill

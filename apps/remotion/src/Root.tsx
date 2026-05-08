@@ -1,43 +1,39 @@
 import "./index.css";
 import { Composition } from "remotion";
-import { MyComposition } from "./compositions/Composition";
+import { componentsById } from "./components";
 import {
-  HeroDemo,
-  HERO_DEMO_DURATION,
-  HERO_DEMO_FPS,
-  HERO_DEMO_WIDTH,
-  HERO_DEMO_HEIGHT,
-} from "./compositions/HeroDemo";
-import {
-  FollowerCelebration,
-  FOLLOWER_DURATION,
-  FOLLOWER_FPS,
-  FOLLOWER_WIDTH,
-  FOLLOWER_HEIGHT,
-  calculateFollowerMetadata,
-} from "./compositions/FollowerCelebration";
-import {
-  IntroText,
-  INTRO_TEXT_DURATION,
-  INTRO_TEXT_FPS,
-  INTRO_TEXT_WIDTH,
-  INTRO_TEXT_HEIGHT,
-} from "./compositions/IntroText";
-import {
-  BrowserScroll,
   BROWSER_SCROLL_DURATION,
   BROWSER_SCROLL_FPS,
-  BROWSER_SCROLL_WIDTH,
   BROWSER_SCROLL_HEIGHT,
+  BROWSER_SCROLL_WIDTH,
+  BrowserScroll,
 } from "./compositions/BrowserScroll";
-import { compositions } from "./registry";
-import { componentsById } from "./components";
-import { ProjectComposition } from "./compositions/Project/Project";
+import { MyComposition } from "./compositions/Composition";
 import {
-  DEFAULT_PROJECT,
-  projectDuration,
-  type Project,
-} from "./project";
+  calculateFollowerMetadata,
+  FOLLOWER_DURATION,
+  FOLLOWER_FPS,
+  FOLLOWER_HEIGHT,
+  FOLLOWER_WIDTH,
+  FollowerCelebration,
+} from "./compositions/FollowerCelebration";
+import {
+  HERO_DEMO_DURATION,
+  HERO_DEMO_FPS,
+  HERO_DEMO_HEIGHT,
+  HERO_DEMO_WIDTH,
+  HeroDemo,
+} from "./compositions/HeroDemo";
+import {
+  INTRO_TEXT_DURATION,
+  INTRO_TEXT_FPS,
+  INTRO_TEXT_HEIGHT,
+  INTRO_TEXT_WIDTH,
+  IntroText,
+} from "./compositions/IntroText";
+import { ProjectComposition } from "./compositions/Project/Project";
+import { DEFAULT_PROJECT, type Project, projectDuration } from "./project";
+import { compositions } from "./registry";
 
 export const RemotionRoot: React.FC = () => {
   return (

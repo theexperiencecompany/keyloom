@@ -3,30 +3,41 @@
  * rendering. The chat-ui components only use it for client-only modules; in
  * Remotion's bundle there's no SSR boundary so we just return the component.
  */
-import { lazy, Suspense, type ComponentType } from "react";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import { type ComponentType, lazy, Suspense } from "react";
 
-type Importer<P> = () => Promise<{ default: ComponentType<P> } | ComponentType<P>>;
+type Importer<P> = () => Promise<
+  { default: ComponentType<P> } | ComponentType<P>
+>;
 
-type DynamicOptions<P> = {
+type DynamicOptions = {
   ssr?: boolean;
-  loading?: ComponentType<{ error?: Error | null; isLoading: boolean; pastDelay: boolean }>;
+  loading?: ComponentType<{
+    error?: Error | null;
+    isLoading: boolean;
+    pastDelay: boolean;
+  }>;
   suspense?: boolean;
-} & Record<string, unknown>;
+};
 
-export default function dynamic<P = Record<string, unknown>>(
+export default function dynamic<P extends object = Record<string, unknown>>(
   importer: Importer<P>,
-  options?: DynamicOptions<P>,
+  options?: DynamicOptions,
 ): ComponentType<P> {
   const Lazy = lazy(async () => {
     const mod = await importer();
     return "default" in mod ? mod : { default: mod };
-  });
+  }) as ComponentType<P>;
   const Loading = options?.loading;
-  return function DynamicShim(props: P) {
+  const DynamicShim: ComponentType<P> = (props) => {
+    const fallback = Loading ? (
+      <Loading isLoading pastDelay error={null} />
+    ) : null;
     return (
-      <Suspense fallback={Loading ? <Loading isLoading pastDelay error={null} /> : null}>
-        <Lazy {...(props as Record<string, unknown>)} />
+      <Suspense fallback={fallback}>
+        <Lazy {...props} />
       </Suspense>
     );
-  } as ComponentType<P>;
+  };
+  return DynamicShim;
 }

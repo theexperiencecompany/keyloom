@@ -1,6 +1,6 @@
 import type { CompositionInfo } from "../../schema";
-import type { Scenario } from "./types";
 import type { GaiaScenarioProps } from "./GaiaScenario";
+import type { Scenario } from "./types";
 
 export const GAIA_SCENARIO_FPS = 60;
 export const GAIA_SCENARIO_WIDTH = 1080;

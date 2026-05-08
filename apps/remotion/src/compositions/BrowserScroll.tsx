@@ -53,16 +53,11 @@ export const BrowserScroll: React.FC<BrowserScrollProps> = ({
   const scrollStart = SCROLL_HOLD_BEFORE;
   const scrollEnd = durationInFrames - SCROLL_HOLD_AFTER;
 
-  const scrollY = interpolate(
-    frame,
-    [scrollStart, scrollEnd],
-    [0, maxScroll],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: Easing.bezier(0.4, 0, 0.2, 1),
-    },
-  );
+  const scrollY = interpolate(frame, [scrollStart, scrollEnd], [0, maxScroll], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.bezier(0.4, 0, 0.2, 1),
+  });
 
   return (
     <AbsoluteFill style={{ background: "#ffffff", overflow: "hidden" }}>

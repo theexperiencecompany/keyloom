@@ -81,7 +81,9 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
     fps,
     config: { damping: 12, stiffness: 200, mass: 0.55 },
   });
-  const followerBump = followed ? 1 - Math.max(0, 1 - followerBumpSpring) * 0.18 : 1;
+  const followerBump = followed
+    ? 1 - Math.max(0, 1 - followerBumpSpring) * 0.18
+    : 1;
   const displayedFollowers = followed ? followers + 1 : followers;
 
   return (
@@ -346,11 +348,11 @@ function Cursor({
     fps,
     config: { damping: 9, stiffness: 220, mass: 0.5 },
   });
-  const ringScale = frame < clickFrame ? 0 : interpolate(clickProgress, [0, 1], [0.5, 1.6]);
+  const ringScale =
+    frame < clickFrame ? 0 : interpolate(clickProgress, [0, 1], [0.5, 1.6]);
   const ringOpacity =
     frame < clickFrame ? 0 : interpolate(clickProgress, [0, 1], [0.55, 0]);
-  const cursorPress =
-    frame >= clickFrame && frame < clickFrame + 8 ? 0.85 : 1;
+  const cursorPress = frame >= clickFrame && frame < clickFrame + 8 ? 0.85 : 1;
 
   const fadeOut = interpolate(
     frame,

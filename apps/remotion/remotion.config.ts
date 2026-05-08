@@ -49,4 +49,6 @@ const chatUiBridge: WebpackOverrideFn = (current) => ({
   },
 });
 
-Config.overrideWebpackConfig((current) => chatUiBridge(enableTailwind(current)));
+Config.overrideWebpackConfig((current) =>
+  chatUiBridge(enableTailwind(current)),
+);

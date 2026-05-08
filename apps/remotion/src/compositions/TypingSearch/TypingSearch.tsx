@@ -57,19 +57,15 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
 
   const cursorStart = typingEnd + POST_TYPE_PAUSE;
   const cursorEnd = cursorStart + CURSOR_TRAVEL;
-  const cursorProgress = interpolate(
-    frame,
-    [cursorStart, cursorEnd],
-    [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: APPLE_EASE,
-    },
-  );
+  const cursorProgress = interpolate(frame, [cursorStart, cursorEnd], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: APPLE_EASE,
+  });
 
   const clickStart = cursorEnd;
-  const clickActive = frame >= clickStart && frame < clickStart + CLICK_FEEDBACK;
+  const clickActive =
+    frame >= clickStart && frame < clickStart + CLICK_FEEDBACK;
   const buttonScale = clickActive ? 0.9 : 1;
 
   const ringScale = interpolate(

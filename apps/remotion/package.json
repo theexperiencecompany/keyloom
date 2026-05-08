@@ -26,7 +26,7 @@
     "@heroui/popover": "^2.3.32",
     "@heroui/progress": "^2.2.25",
     "@heroui/radio": "^2.3.32",
-    "@heroui/react": "^3.0.4",
+    "@heroui/react": "2.8.8",
     "@heroui/scroll-shadow": "^2.3.19",
     "@heroui/select": "^2.4.33",
     "@heroui/skeleton": "^2.2.18",
@@ -36,7 +36,7 @@
     "@heroui/tabs": "^2.2.29",
     "@heroui/tooltip": "^2.2.29",
     "@heroui/user": "^2.2.26",
-    "@heygaia/chat-ui": "0.0.0-feat-chat-ui.547806a",
+    "@heygaia/chat-ui": "0.0.0-feat-chat-ui.e62cbd4",
     "@hookform/resolvers": "^5.2.2",
     "@hugeicons/core-free-icons": "^4.1.1",
     "@hugeicons/react": "^1.1.6",
@@ -110,20 +110,19 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
-    "@remotion/eslint-config-flat": "^4.0.457",
+    "@biomejs/biome": "^2.4.14",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.10",
     "@types/web": "0.0.166",
-    "eslint": "9.19.0",
-    "prettier": "3.8.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "dev": "remotionb studio",
     "build": "remotionb bundle",
     "upgrade": "remotionb upgrade",
-    "lint": "eslint src",
-    "typecheck": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write ."
   },
   "sideEffects": [
     "*.css"

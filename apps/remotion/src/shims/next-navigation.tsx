@@ -30,8 +30,9 @@ export const useSearchParams = () => {
   };
 };
 
-export const useParams = <T extends Record<string, string | string[]> = Record<string, string>>(): T =>
-  ({}) as T;
+export const useParams = <
+  T extends Record<string, string | string[]> = Record<string, string>,
+>(): T => ({}) as T;
 
 export const useSelectedLayoutSegment = (): string | null => null;
 export const useSelectedLayoutSegments = (): string[] => [];

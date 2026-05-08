@@ -78,7 +78,8 @@ export const IntroText: React.FC = () => {
             Math.floor((frame - t.start) / FRAMES_PER_CHAR),
           );
           const visibleText = line.slice(0, charsTyped);
-          const isCurrentlyTyping = i === activeLineIdx && charsTyped < line.length;
+          const isCurrentlyTyping =
+            i === activeLineIdx && charsTyped < line.length;
           const isActiveLine = i === activeLineIdx;
 
           // Subtle line entry — soft fade to keep it premium

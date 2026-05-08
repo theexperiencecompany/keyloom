@@ -1,11 +1,11 @@
 "use client";
 import {
   AbsoluteFill,
+  Img,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
-  Img,
 } from "remotion";
 
 const ICON_SRC = staticFile("message_icon.png");

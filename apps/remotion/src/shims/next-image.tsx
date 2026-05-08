@@ -4,7 +4,7 @@
  */
 import { type ImgHTMLAttributes } from "react";
 
-type NextImageProps = ImgHTMLAttributes<HTMLImageElement> & {
+type NextImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   src: string | { src: string };
   width?: number | string;
   height?: number | string;
@@ -30,7 +30,13 @@ export default function Image({
 }: NextImageProps) {
   const resolvedSrc = typeof src === "string" ? src : src?.src;
   const fillStyle = fill
-    ? { position: "absolute" as const, inset: 0, width: "100%", height: "100%", objectFit: "cover" as const }
+    ? {
+        position: "absolute" as const,
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover" as const,
+      }
     : undefined;
   return <img src={resolvedSrc} style={{ ...fillStyle, ...style }} {...rest} />;
 }
