@@ -1,5 +1,9 @@
 # Project Guidelines
 
+## Commits & PRs
+
+Never mention Claude, Claude Code, or any AI assistant in commit messages, PR titles, PR descriptions, or PR comments. No `Co-Authored-By: Claude …` trailers, no "🤖 Generated with Claude Code" footers, no references to AI tooling anywhere in version control history. Write commits and PRs as if a human wrote them.
+
 ## Icons
 
 Always use **HugeIcons** for all icons. Never use `lucide-react`, inline SVGs, or any other icon library.

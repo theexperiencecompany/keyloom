@@ -125,6 +125,9 @@ import TweetCardMDX, {
 import TwitterFollowMDX, {
   meta as twitterFollowMeta,
 } from "@/content/docs/twitter-follow.mdx";
+import TypingComposerMDX, {
+  meta as typingComposerMeta,
+} from "@/content/docs/typing-composer.mdx";
 import TypingSearchMDX, {
   meta as typingSearchMeta,
 } from "@/content/docs/typing-search.mdx";
@@ -327,6 +330,12 @@ export const docs: Doc[] = [
     href: "/docs/TypingSearch",
     meta: typingSearchMeta,
     Content: TypingSearchMDX,
+  },
+  {
+    slug: "TypingComposer",
+    href: "/docs/TypingComposer",
+    meta: typingComposerMeta,
+    Content: TypingComposerMDX,
   },
   {
     slug: "StatCounter",

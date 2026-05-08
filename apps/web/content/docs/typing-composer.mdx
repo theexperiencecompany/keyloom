@@ -1,0 +1,31 @@
+export const meta = {
+  title: "Typing Composer",
+  description:
+    "A GAIA-style chat composer that types out a prompt character-by-character, then a mouse cursor flies in and clicks the send button.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="TypingComposer" />
+
+<EditorLink id="TypingComposer" />
+
+## Usage
+
+A demo slate that recreates the GAIA chat composer — a dark `bg-zinc-800` rounded-3xl input with attach (`PlusSignIcon`) and tools (`ToolsIcon`) buttons on the left and a circular send button (`ArrowUp02Icon`) on the right. The bar springs in, the prompt types out character-by-character with a blinking caret, the send button switches from the muted default to `accentColor` (default `#00bbff`) once text is present, then a mouse cursor enters from off-screen and clicks send. A pulse ring confirms the click.
+
+Useful for product walkthroughs, onboarding videos, and "ask me anything" hero loops. Keep `query` short and concrete (≤ 70 characters reads cleanly without too much wrapping). `accentColor` controls the active send button color and the click pulse — pick a brand-aligned color.
+
+## Props
+
+<PropsTable id="TypingComposer" />
+
+## Composition
+
+<CompositionStats id="TypingComposer" />

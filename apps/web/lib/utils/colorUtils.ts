@@ -56,9 +56,9 @@ export function hexToRgb(
       );
       if (rgbMatch) {
         return {
-          r: parseInt(rgbMatch[1], 10),
-          g: parseInt(rgbMatch[2], 10),
-          b: parseInt(rgbMatch[3], 10),
+          r: parseInt(rgbMatch[1]!, 10),
+          g: parseInt(rgbMatch[2]!, 10),
+          b: parseInt(rgbMatch[3]!, 10),
         };
       }
     } catch (e) {
@@ -107,9 +107,9 @@ export function parseColor(
       );
       if (rgbMatch) {
         return {
-          r: parseInt(rgbMatch[1], 10),
-          g: parseInt(rgbMatch[2], 10),
-          b: parseInt(rgbMatch[3], 10),
+          r: parseInt(rgbMatch[1]!, 10),
+          g: parseInt(rgbMatch[2]!, 10),
+          b: parseInt(rgbMatch[3]!, 10),
         };
       }
     } else {
@@ -130,9 +130,9 @@ export function parseColor(
     );
     if (rgbDirectMatch) {
       return {
-        r: parseInt(rgbDirectMatch[1], 10),
-        g: parseInt(rgbDirectMatch[2], 10),
-        b: parseInt(rgbDirectMatch[3], 10),
+        r: parseInt(rgbDirectMatch[1]!, 10),
+        g: parseInt(rgbDirectMatch[2]!, 10),
+        b: parseInt(rgbDirectMatch[3]!, 10),
       };
     }
 
@@ -140,9 +140,9 @@ export function parseColor(
       /hsla?\((\d+),\s*(\d+)%,\s*(\d+)%(?:,\s*[\d.]+)?\)/,
     );
     if (hslMatch) {
-      const h = parseInt(hslMatch[1], 10) / 360;
-      const s = parseInt(hslMatch[2], 10) / 100;
-      const l = parseInt(hslMatch[3], 10) / 100;
+      const h = parseInt(hslMatch[1]!, 10) / 360;
+      const s = parseInt(hslMatch[2]!, 10) / 100;
+      const l = parseInt(hslMatch[3]!, 10) / 100;
 
       return hslToRgb(h, s, l);
     }

@@ -6,6 +6,7 @@ import { titleTypeInfo } from "./compositions/TitleType/meta";
 import { titlePopupInfo } from "./compositions/TitlePopup/meta";
 import { titleFadeInfo } from "./compositions/TitleFade/meta";
 import { typingSearchInfo } from "./compositions/TypingSearch/meta";
+import { typingComposerInfo } from "./compositions/TypingComposer/meta";
 import { statCounterInfo } from "./compositions/StatCounter/meta";
 import { tweetCardInfo } from "./compositions/TweetCard/meta";
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
@@ -49,6 +50,7 @@ export const compositions: AnyCompositionInfo[] = [
   titlePopupInfo,
   titleFadeInfo,
   typingSearchInfo,
+  typingComposerInfo,
   cursorWalkthroughInfo,
   browserWindowInfo,
   captionTrackInfo,

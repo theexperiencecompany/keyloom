@@ -1,6 +1,11 @@
 "use client";
 
-import { Cancel01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  MultiplicationSignIcon,
+  PlusSignIcon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Player } from "@remotion/player";
 import { componentsById } from "@workspace/compositions/components";
@@ -13,6 +18,7 @@ import {
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import {
   Tooltip,
   TooltipContent,
@@ -27,12 +33,24 @@ type Props = {
 };
 
 export function LibraryPanel({ onAdd, onClose }: Props) {
+  const [query, setQuery] = useState("");
+
+  const normalizedQuery = query.trim().toLowerCase();
+
   const textAnimations = compositions.filter(
     (c) => c.id.startsWith("Title") || c.id.startsWith("Text"),
   );
   const others = compositions.filter(
     (c) => !c.id.startsWith("Title") && !c.id.startsWith("Text"),
   );
+
+  const searchResults = normalizedQuery
+    ? compositions.filter(
+        (c) =>
+          c.title.toLowerCase().includes(normalizedQuery) ||
+          c.description.toLowerCase().includes(normalizedQuery),
+      )
+    : null;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -54,24 +72,71 @@ export function LibraryPanel({ onAdd, onClose }: Props) {
           </Button>
         </div>
 
-        <Accordion
-          type="multiple"
-          defaultValue={["text", "templates"]}
-          className="rounded-none border-none px-3"
-        >
-          <AccordionSection
-            value="text"
-            title="Text"
-            items={textAnimations}
-            onAdd={onAdd}
-          />
-          <AccordionSection
-            value="templates"
-            title="Templates"
-            items={others}
-            onAdd={onAdd}
-          />
-        </Accordion>
+        <div className="px-3 py-2">
+          <div className="relative">
+            <HugeiconsIcon
+              icon={Search01Icon}
+              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search components..."
+              className="h-8 rounded-md pl-8 text-xs"
+              style={{ paddingRight: query ? "2rem" : undefined }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none"
+                aria-label="Clear search"
+              >
+                <HugeiconsIcon
+                  icon={MultiplicationSignIcon}
+                  className="size-3"
+                />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {searchResults !== null ? (
+          <div className="px-3 pb-3">
+            {searchResults.length === 0 ? (
+              <p className="px-1 py-4 text-center text-xs text-muted-foreground">
+                No components match &ldquo;{query.trim()}&rdquo;
+              </p>
+            ) : (
+              <ul className="space-y-px">
+                {searchResults.map((c) => (
+                  <li key={c.id}>
+                    <PreviewTooltipItem info={c} onAdd={onAdd} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <Accordion
+            type="multiple"
+            defaultValue={["text", "templates"]}
+            className="rounded-none border-none px-3"
+          >
+            <AccordionSection
+              value="text"
+              title="Text"
+              items={textAnimations}
+              onAdd={onAdd}
+            />
+            <AccordionSection
+              value="templates"
+              title="Templates"
+              items={others}
+              onAdd={onAdd}
+            />
+          </Accordion>
+        )}
       </aside>
     </TooltipProvider>
   );
