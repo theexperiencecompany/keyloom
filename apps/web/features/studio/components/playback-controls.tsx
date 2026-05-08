@@ -7,7 +7,7 @@ import {
   PlayIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 
 type Props = {
   currentFrame: number;
@@ -77,19 +77,15 @@ function ControlButton({
   icon: typeof PlayIcon;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className={cn(
-        "flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors",
-        "hover:bg-muted hover:text-foreground",
-        "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground",
-      )}
     >
       <HugeiconsIcon icon={icon} size={16} strokeWidth={2} />
-    </button>
+    </Button>
   );
 }
 

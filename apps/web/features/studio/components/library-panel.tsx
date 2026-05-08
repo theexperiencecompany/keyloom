@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
   TooltipContent,
@@ -43,13 +44,14 @@ export function LibraryPanel({ onAdd, onClose }: Props) {
               Click to add a scene
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            className="flex size-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="size-6"
           >
             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-          </button>
+          </Button>
         </div>
 
         <Accordion
@@ -121,10 +123,10 @@ function PreviewTooltipItem({
   return (
     <Tooltip open={open} onOpenChange={setOpen}>
       <TooltipTrigger asChild>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={() => onAdd(info.id)}
-          className="group flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60"
+          className="group h-auto w-full justify-start gap-2 rounded-lg px-2.5 py-1.5 text-left"
         >
           <span className="min-w-0 flex-1 truncate text-[13px] text-foreground/80 group-hover:text-foreground">
             {info.title}
@@ -132,7 +134,7 @@ function PreviewTooltipItem({
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-all group-hover:bg-accent group-hover:text-foreground group-hover:opacity-100">
             <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
           </span>
-        </button>
+        </Button>
       </TooltipTrigger>
       {open && Component && (
         <TooltipContent

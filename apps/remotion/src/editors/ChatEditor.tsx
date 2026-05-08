@@ -7,6 +7,8 @@ import {
   Delete02Icon,
   Sent02Icon,
 } from "@hugeicons/core-free-icons";
+import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import type { EditorProps } from "../schema";
 import type { ChatMessage } from "./types";
 
@@ -244,13 +246,15 @@ function BubbleBody({
 function DeleteAction({ onDelete }: { onDelete: () => void }) {
   return (
     <div className="flex shrink-0 items-center opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-      <button
+      <Button
+        variant="outline"
+        size="icon"
         onClick={onDelete}
         title="Delete"
-        className="flex size-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500"
+        className="size-8 rounded-full shadow-sm hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-500"
       >
         <HugeiconsIcon icon={Delete02Icon} size={15} />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -282,20 +286,21 @@ function Composer({
           placeholder={`Message as ${nextSide === "right" ? "you" : "them"}…`}
           className="flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30"
         />
-        <button
+        <Button
           onClick={onSend}
           disabled={!canSend}
           aria-label="Send message"
-          className={`flex size-10 shrink-0 items-center justify-center rounded-full text-white shadow-sm transition-all ${
+          className={cn(
+            "size-10 shrink-0 rounded-full text-white shadow-sm",
             canSend
               ? nextSide === "right"
                 ? "bg-[#007AFF] hover:bg-[#0070E8] active:scale-95"
                 : "bg-zinc-500 hover:bg-zinc-600 active:scale-95"
-              : "cursor-not-allowed bg-muted text-muted-foreground"
-          }`}
+              : "cursor-not-allowed bg-muted text-muted-foreground",
+          )}
         >
           <HugeiconsIcon icon={Sent02Icon} size={18} />
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { Textarea } from "@workspace/ui/components/textarea";
 import { Label } from "@workspace/ui/components/label";
+import { Textarea } from "@workspace/ui/components/textarea";
 import {
   Select,
   SelectContent,
@@ -174,13 +175,9 @@ function ImageControl({
           />
         </label>
         {hasImage ? (
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="h-9 rounded-md border border-border bg-muted/40 px-3 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
+          <Button variant="outline" size="sm" onClick={() => onChange("")}>
             Clear
-          </button>
+          </Button>
         ) : null}
       </div>
       <Input

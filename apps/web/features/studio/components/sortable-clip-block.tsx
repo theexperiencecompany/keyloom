@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Clip } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
+import { Button } from "@workspace/ui/components/button";
 import type React from "react";
 import { useRef, useState } from "react";
 import { colorForCompositionId, PX_PER_SECOND } from "../lib/clip-colors";
@@ -130,18 +131,19 @@ export function SortableClipBlock({
         onPointerDown={(e) => startResize("right", e)}
       />
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={(e) => {
           e.stopPropagation();
           onDelete();
         }}
         onPointerDown={(e) => e.stopPropagation()}
         title="Delete"
-        className="absolute right-2 top-1 flex size-5 items-center justify-center rounded-full bg-black/30 text-[12px] leading-none text-white/80 opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/50 hover:text-white group-hover:opacity-100"
+        className="absolute right-2 top-1 size-5 rounded-full bg-black/30 text-[12px] leading-none text-white/80 opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/50 hover:text-white group-hover:opacity-100"
       >
         ×
-      </button>
+      </Button>
     </div>
   );
 }
