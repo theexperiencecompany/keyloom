@@ -1,6 +1,6 @@
 import type { CompositionInfo } from "../../schema";
 import type { SplitSceneProps } from "./SplitScene";
-import { LAYOUT_SLOT_COUNTS } from "./SplitScene";
+import { LAYOUT_SLOT_COUNTS } from "./layout";
 
 export const SPLIT_SCENE_DURATION = 600;
 export const SPLIT_SCENE_FPS = 60;

@@ -1,22 +1,16 @@
 "use client";
 import { AbsoluteFill } from "remotion";
-import { componentsById } from "../../components";
+import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { compositionsById } from "../../registry";
+import type { SplitLayout } from "./layout";
 
-export type SplitLayout = "stacked" | "side-by-side" | "pip" | "grid-2x2";
+export type { SplitLayout } from "./layout";
 
 export type SplitSceneProps = {
   layout: SplitLayout;
   slots: string[];
   backgroundColor: string;
   gap: number;
-};
-
-export const LAYOUT_SLOT_COUNTS: Record<SplitLayout, number> = {
-  stacked: 2,
-  "side-by-side": 2,
-  pip: 2,
-  "grid-2x2": 4,
 };
 
 const CANVAS_W = 1920;
