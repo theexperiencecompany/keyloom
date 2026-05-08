@@ -24,7 +24,8 @@ export type StudioAction =
     }
   | { type: "UPDATE_CLIP_DURATION"; clipId: string; durationInFrames: number }
   | { type: "SELECT_CLIP"; clipId: string | null }
-  | { type: "TOGGLE_PANEL"; panel: StudioPanel };
+  | { type: "TOGGLE_PANEL"; panel: StudioPanel }
+  | { type: "LOAD_PROJECT"; project: Project };
 
 export const initialStudioState: StudioState = {
   project: DEFAULT_PROJECT,
@@ -88,6 +89,12 @@ export function studioReducer(
       return {
         ...state,
         openPanel: state.openPanel === action.panel ? null : action.panel,
+      };
+    case "LOAD_PROJECT":
+      return {
+        ...state,
+        project: action.project,
+        selectedClipId: null,
       };
   }
 }

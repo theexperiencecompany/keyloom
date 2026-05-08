@@ -9,11 +9,11 @@ import {
 export type TextSpringScaleInProps = TitleProps;
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
-const SPRING_EASE = Easing.bezier(0.34, 1.56, 0.64, 1);
+const SCALE_EASE = Easing.bezier(0.22, 1, 0.36, 1);
 
 const HEADLINE_START = 8;
 const WORD_STAGGER = 5.7;
-const WORD_DURATION = 22;
+const WORD_DURATION = 28;
 
 export const TextSpringScaleIn: React.FC<TextSpringScaleInProps> = ({
   headline,
@@ -73,11 +73,16 @@ export const TextSpringScaleIn: React.FC<TextSpringScaleInProps> = ({
             [0, 1],
             { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
           );
-          const scale = interpolate(frame, [start, start + WORD_DURATION], [0.7, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: SPRING_EASE,
-          });
+          const scale = interpolate(
+            frame,
+            [start, start + WORD_DURATION],
+            [0.88, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: SCALE_EASE,
+            },
+          );
           return (
             <span
               key={i}

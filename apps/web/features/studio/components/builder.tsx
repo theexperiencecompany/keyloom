@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { useExportRender } from "../hooks/use-export-render";
+import { downloadProject, parseProjectJson } from "../lib/project-io";
 import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
 import { AgentPanel } from "./agent-panel";
@@ -104,6 +105,24 @@ export function Builder() {
     playerRef.current?.seekTo(Math.max(0, totalDuration - 1));
   }, [totalDuration]);
 
+  const handleSaveProject = useCallback(() => {
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    downloadProject(state.project, `project-${stamp}.json`);
+  }, [state.project]);
+
+  const handleLoadProjectFile = useCallback(async (file: File) => {
+    const text = await file.text();
+    const result = parseProjectJson(text);
+    if (!result.ok) {
+      window.alert(`Couldn't load project:\n${result.error}`);
+      return;
+    }
+    if (result.warnings.length > 0) {
+      window.alert(`Loaded with warnings:\n\n${result.warnings.join("\n")}`);
+    }
+    dispatch({ type: "LOAD_PROJECT", project: result.project });
+  }, []);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== " " || !hasClips) return;
@@ -132,7 +151,10 @@ export function Builder() {
           totalSeconds={totalSeconds}
           exporting={isExporting}
           canExport={hasClips}
+          canSave={hasClips}
           onExport={() => startExport(state.project)}
+          onSaveProject={handleSaveProject}
+          onLoadProjectFile={handleLoadProjectFile}
         />
 
         <div className="relative flex min-h-0 flex-1">
