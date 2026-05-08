@@ -13,7 +13,7 @@ const defaultProps: TextBlurOutUpProps = {
 
 export const textBlurOutUpInfo: CompositionInfo<TextBlurOutUpProps> = {
   id: "TextBlurOutUp",
-  title: "Blur Out Up",
+  title: "Blur Rise",
   description:
     "Words arrive clean and depart upward with increasing blur for airy exits.",
   durationInFrames: TEXT_BLUR_OUT_UP_DURATION,

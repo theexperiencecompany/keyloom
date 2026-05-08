@@ -14,7 +14,7 @@ const defaultProps: TextDepthParallaxWordsProps = {
 export const textDepthParallaxWordsInfo: CompositionInfo<TextDepthParallaxWordsProps> =
   {
     id: "TextDepthParallaxWords",
-    title: "Depth Parallax Words",
+    title: "Word Parallax",
     description:
       "Per-word depth motion with scale and vertical drift for layered readability.",
     durationInFrames: TEXT_DEPTH_PARALLAX_WORDS_DURATION,

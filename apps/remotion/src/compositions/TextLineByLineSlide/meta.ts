@@ -4,7 +4,7 @@ import type { TextLineByLineSlideProps } from "./TextLineByLineSlide";
 
 export const textLineByLineSlideInfo: CompositionInfo<TextLineByLineSlideProps> = {
   id: "TextLineByLineSlide",
-  title: "Line By Line Slide",
+  title: "Line Slide In",
   description: "Each line enters from the left with a staggered slide and exits to the right for a flowing paragraph reveal.",
   durationInFrames: 220,
   fps: 60,

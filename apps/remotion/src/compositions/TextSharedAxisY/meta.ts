@@ -13,7 +13,7 @@ const defaultProps: TextSharedAxisYProps = {
 
 export const textSharedAxisYInfo: CompositionInfo<TextSharedAxisYProps> = {
   id: "TextSharedAxisY",
-  title: "Word Cut Staircase",
+  title: "Word Staircase",
   description:
     "Per-word hard-cut transition with staircase timing for sharp editorial swaps.",
   durationInFrames: TEXT_SHARED_AXIS_Y_DURATION,

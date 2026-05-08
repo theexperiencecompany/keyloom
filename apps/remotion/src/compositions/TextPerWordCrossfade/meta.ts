@@ -13,7 +13,7 @@ const defaultProps: TextPerWordCrossfadeProps = {
 
 export const textPerWordCrossfadeInfo: CompositionInfo<TextPerWordCrossfadeProps> = {
   id: "TextPerWordCrossfade",
-  title: "Per-Word Crossfade",
+  title: "Word Crossfade",
   description:
     "Words gently fade into place one after another, with a short vertical drift for a calm keynote rhythm.",
   durationInFrames: TEXT_PER_WORD_CROSSFADE_DURATION,

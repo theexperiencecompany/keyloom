@@ -16,7 +16,7 @@ export const textPerCharacterRiseDefaultProps: TextPerCharacterRiseProps = {
 
 export const textPerCharacterRiseInfo: CompositionInfo<TextPerCharacterRiseProps> = {
   id: "TextPerCharacterRise",
-  title: "Per Character Rise",
+  title: "Character Rise",
   description:
     "Letters slide up from below with no blur — crisp, deliberate, kinetic. Apple's clean tvOS-style reveal.",
   durationInFrames: TEXT_PER_CHARACTER_RISE_DURATION,

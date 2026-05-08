@@ -14,15 +14,18 @@ import {
 import { compositions } from "@workspace/compositions/registry"
 import { componentsById } from "@workspace/compositions/components"
 import type { AnyCompositionInfo } from "@workspace/compositions/schema"
-import { colorForCompositionId } from "../lib/clip-colors"
 
 type Props = {
   onAdd: (compositionId: string) => void
 }
 
 export function LibraryPanel({ onAdd }: Props) {
-  const titleAnimations = compositions.filter((c) => c.id.startsWith("Title"))
-  const others = compositions.filter((c) => !c.id.startsWith("Title"))
+  const textAnimations = compositions.filter(
+    (c) => c.id.startsWith("Title") || c.id.startsWith("Text"),
+  )
+  const others = compositions.filter(
+    (c) => !c.id.startsWith("Title") && !c.id.startsWith("Text"),
+  )
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -33,7 +36,7 @@ export function LibraryPanel({ onAdd }: Props) {
           </p>
           <p className="mt-1 text-xs text-muted-foreground">Click to add a scene</p>
         </div>
-        <Section title="Text Animations" items={titleAnimations} onAdd={onAdd} />
+        <Section title="Text" items={textAnimations} onAdd={onAdd} />
         <Section title="Templates" items={others} onAdd={onAdd} />
       </aside>
     </TooltipProvider>
@@ -56,14 +59,11 @@ function Section({
         {title}
       </p>
       <ul className="space-y-px">
-        {items.map((c) => {
-          const colorClass = colorForCompositionId(c.id)
-          return (
-            <li key={c.id}>
-              <PreviewTooltipItem info={c} onAdd={onAdd} colorClass={colorClass} />
-            </li>
-          )
-        })}
+        {items.map((c) => (
+          <li key={c.id}>
+            <PreviewTooltipItem info={c} onAdd={onAdd} />
+          </li>
+        ))}
       </ul>
     </div>
   )
@@ -72,11 +72,9 @@ function Section({
 function PreviewTooltipItem({
   info,
   onAdd,
-  colorClass,
 }: {
   info: AnyCompositionInfo
   onAdd: (id: string) => void
-  colorClass: string
 }) {
   const [open, setOpen] = useState(false)
   const Component = componentsById[info.id]
@@ -94,13 +92,8 @@ function PreviewTooltipItem({
               onAdd(info.id)
             }
           }}
-          className="group flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent/60"
+          className="group flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-accent/60"
         >
-          <span
-            className={`bg-gradient-to-br ${colorClass} flex size-8 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold tracking-tight text-white shadow-sm`}
-          >
-            {info.title.slice(0, 2).toUpperCase()}
-          </span>
           <span className="min-w-0 flex-1 truncate text-[13px] text-foreground/80 group-hover:text-foreground">
             {info.title}
           </span>

@@ -13,7 +13,7 @@ const defaultProps: TextSpringScaleInProps = {
 
 export const textSpringScaleInInfo: CompositionInfo<TextSpringScaleInProps> = {
   id: "TextSpringScaleIn",
-  title: "Spring Scale In",
+  title: "Spring Pop",
   description:
     "Words pop in with a soft overshoot scale, like a physical spring settling into place.",
   durationInFrames: TEXT_SPRING_SCALE_IN_DURATION,

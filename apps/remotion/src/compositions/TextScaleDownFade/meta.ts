@@ -4,7 +4,7 @@ import type { TextScaleDownFadeProps } from "./TextScaleDownFade";
 
 export const textScaleDownFadeInfo: CompositionInfo<TextScaleDownFadeProps> = {
   id: "TextScaleDownFade",
-  title: "Scale Down Fade",
+  title: "Settle In",
   description: "Subtle premium settle-in with a restrained scale-down fade on exit.",
   durationInFrames: 220,
   fps: 60,
