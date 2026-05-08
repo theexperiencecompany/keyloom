@@ -1,5 +1,7 @@
 "use client";
 
+import { FolderLibraryIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import type { StudioPanel } from "../state/reducer";
 
@@ -16,20 +18,7 @@ export function ToolRail({ openPanel, onToggle }: Props) {
         onClick={() => onToggle("library")}
         label="Library"
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="size-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <title>Library</title>
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
+        <HugeiconsIcon icon={FolderLibraryIcon} className="size-5" />
       </ToolButton>
     </aside>
   );

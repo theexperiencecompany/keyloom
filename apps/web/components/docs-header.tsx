@@ -4,7 +4,7 @@ import {
   Moon02Icon,
   NewTwitterIcon,
   Search01Icon,
-  Star01Icon,
+  StarIcon,
   Sun03Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -60,16 +60,13 @@ function GitHubButton() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <GitHubMark className="size-4" />
         {stars !== null && (
           <>
-            <HugeiconsIcon
-              icon={Star01Icon}
-              className="size-3 text-yellow-400"
-            />
+            <HugeiconsIcon icon={StarIcon} className="size-4 text-yellow-400" />
             <span className="text-xs tabular-nums">{formatStars(stars)}</span>
           </>
         )}
+        <GitHubMark className="size-4" />
       </Link>
     </Button>
   );

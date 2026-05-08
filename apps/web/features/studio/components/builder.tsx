@@ -158,6 +158,7 @@ export function Builder() {
         {state.openPanel === "library" && (
           <LibraryPanel
             onAdd={(id) => dispatch({ type: "ADD_CLIP", compositionId: id })}
+            onClose={() => dispatch({ type: "TOGGLE_PANEL", panel: "library" })}
           />
         )}
 
