@@ -3,8 +3,14 @@
 import {
   ArrowDown01Icon,
   ArrowUp01Icon,
+  Brain02Icon,
+  BubbleChatIcon,
+  ClockIcon,
   Delete02Icon,
-  PlusSignIcon,
+  Loading03Icon,
+  PauseIcon,
+  ToolsIcon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -90,15 +96,17 @@ export function ScenarioEditor({ value, onChange }: EditorProps<string>) {
               <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
                 <span className="flex flex-1 items-center justify-between gap-2 pr-2">
                   <span className="flex items-center gap-2">
-                    <span className="rounded bg-foreground/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider">
-                      {i + 1}
+                    <span className="text-[10px] text-muted-foreground/70 tabular-nums">
+                      {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span>{state.type}</span>
-                    <span className="text-muted-foreground/80 truncate max-w-[120px]">
-                      {previewText(state)}
-                    </span>
+                    <HugeiconsIcon
+                      icon={stateMeta(state.type).icon}
+                      size={14}
+                      className={stateMeta(state.type).iconClass}
+                    />
+                    <span>{stateMeta(state.type).label}</span>
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-0.5">
                     <IconButton
                       title="Move up"
                       icon={ArrowUp01Icon}
@@ -170,25 +178,82 @@ function IconButton({
 
 function AddStateMenu({ onAdd }: { onAdd: (type: ScenarioStateType) => void }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2 rounded-md border border-dashed border-border/60 bg-muted/10 p-3">
       <Label className="text-[12px]">Add state</Label>
-      <Select onValueChange={(v) => onAdd(v as ScenarioStateType)}>
-        <SelectTrigger>
-          <span className="flex items-center gap-2">
-            <HugeiconsIcon icon={PlusSignIcon} size={14} />
-            <SelectValue placeholder="Pick a state type…" />
-          </span>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="user_message">User message</SelectItem>
-          <SelectItem value="bot_message">Bot message</SelectItem>
-          <SelectItem value="loading">Loading</SelectItem>
-          <SelectItem value="tool_calls">Tool calls</SelectItem>
-          <SelectItem value="thinking">Thinking</SelectItem>
-          <SelectItem value="pause">Pause</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-3 gap-1.5">
+        {STATE_TYPE_META.map((meta) => (
+          <button
+            type="button"
+            key={meta.type}
+            onClick={() => onAdd(meta.type)}
+            className="flex flex-col items-center gap-1 rounded-md border border-border/40 bg-background px-2 py-2 text-[11px] font-medium text-foreground transition-colors hover:border-foreground/30 hover:bg-foreground/5"
+            title={meta.label}
+          >
+            <HugeiconsIcon
+              icon={meta.icon}
+              size={16}
+              className={meta.iconClass}
+            />
+            <span>{meta.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
+  );
+}
+
+const STATE_TYPE_META: {
+  type: ScenarioStateType;
+  label: string;
+  icon: typeof UserIcon;
+  iconClass: string;
+}[] = [
+  {
+    type: "user_message",
+    label: "User",
+    icon: UserIcon,
+    iconClass: "text-sky-500",
+  },
+  {
+    type: "bot_message",
+    label: "Bot",
+    icon: BubbleChatIcon,
+    iconClass: "text-violet-500",
+  },
+  {
+    type: "loading",
+    label: "Loading",
+    icon: Loading03Icon,
+    iconClass: "text-amber-500",
+  },
+  {
+    type: "tool_calls",
+    label: "Tool calls",
+    icon: ToolsIcon,
+    iconClass: "text-emerald-500",
+  },
+  {
+    type: "thinking",
+    label: "Thinking",
+    icon: Brain02Icon,
+    iconClass: "text-pink-500",
+  },
+  {
+    type: "pause",
+    label: "Pause",
+    icon: PauseIcon,
+    iconClass: "text-zinc-400",
+  },
+];
+
+function stateMeta(type: ScenarioStateType) {
+  return (
+    STATE_TYPE_META.find((m) => m.type === type) ?? {
+      type,
+      label: type,
+      icon: ClockIcon,
+      iconClass: "text-zinc-400",
+    }
   );
 }
 
@@ -547,24 +612,5 @@ function defaultState(type: ScenarioStateType): ScenarioState {
       };
     case "image":
       return { type, image_data: { url: "" } };
-  }
-}
-
-function previewText(state: ScenarioState): string {
-  switch (state.type) {
-    case "user_message":
-    case "bot_message":
-      return state.text.slice(0, 40);
-    case "loading":
-      return state.text;
-    case "thinking":
-      return state.content.slice(0, 40);
-    case "tool_calls":
-      return `${state.entries.length} entries`;
-    case "pause":
-      return `${state.duration}ms`;
-    case "todo_data":
-    case "image":
-      return "";
   }
 }

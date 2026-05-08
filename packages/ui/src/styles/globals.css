@@ -184,64 +184,62 @@ html:root.dark {
   --sidebar-primary: #00bbff;
 }
 
-/* iMessage-style chat bubbles (mirrors GAIA implementation) */
+/* iMessage-style chat bubbles (mirrors GAIA onboarding-revamp). The tail is
+   a single ::before with a clip-path silhouette, so it composites correctly
+   over any background (no matching background-color hack needed). */
 .imessage-bubble {
   position: relative;
-  border-radius: 20px;
   word-wrap: break-word;
+  line-height: 24px;
+  padding: 8px 20px;
+  max-width: 60vw;
+  border-radius: 20px;
 }
 
-.imessage-bubble::before,
-.imessage-bubble::after {
+.imessage-bubble::before {
   content: "";
   position: absolute;
   bottom: 0;
+  width: 20px;
   height: 18px;
 }
 
+.imessage-grouped-first,
+.imessage-grouped-last,
+.imessage-grouped-middle {
+  border-radius: 20px;
+}
+
 .imessage-from-them {
-  background: #e9e9eb;
-  color: #0f1014;
+  background: #27272a;
+  color: #ffffff;
+  align-self: flex-start;
 }
 
 .imessage-from-them::before {
   left: -7px;
-  width: 20px;
-  background-color: #e9e9eb;
-  border-bottom-right-radius: 16px;
-}
-
-.imessage-from-them::after {
-  left: -26px;
-  width: 26px;
-  background-color: var(--imessage-bg);
-  border-bottom-right-radius: 10px;
-}
-
-.dark .imessage-from-them {
-  background: #3a3a3c;
-  color: #ffffff;
-}
-
-.dark .imessage-from-them::before {
-  background-color: #3a3a3c;
+  background-color: #27272a;
+  clip-path: path(
+    "M 20 0 L 20 2 A 16 16 0 0 1 4 18 L 0 18 L 0 17.54 A 10 10 0 0 0 7 8 L 7 0 Z"
+  );
 }
 
 .imessage-from-me {
-  background: #007aff;
-  color: #ffffff;
+  background: #00bbff;
+  color: #000000;
+  align-self: flex-end;
 }
 
 .imessage-from-me::before {
   right: -7px;
-  width: 20px;
-  background-color: #007aff;
-  border-bottom-left-radius: 16px 14px;
+  background-color: #00bbff;
+  clip-path: path(
+    "M 0 0 L 0 2 A 16 16 0 0 0 16 18 L 20 18 L 20 17.54 A 10 10 0 0 1 13 8 L 13 0 Z"
+  );
 }
 
-.imessage-from-me::after {
-  right: -26px;
-  width: 26px;
-  background-color: var(--imessage-bg);
-  border-bottom-left-radius: 10px;
+/* Hide tails for grouped messages except the last one. */
+.imessage-grouped-first::before,
+.imessage-grouped-middle::before {
+  display: none;
 }
