@@ -15,7 +15,7 @@ jobs:
 
       - uses: biomejs/setup-biome@v2
         with:
-          version: latest
+          version: 2.4.14
 
       - run: biome ci .
 
