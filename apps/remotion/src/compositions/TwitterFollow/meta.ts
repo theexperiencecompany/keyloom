@@ -7,9 +7,9 @@ export const TWITTER_FOLLOW_WIDTH = 1920;
 export const TWITTER_FOLLOW_HEIGHT = 1080;
 
 export const twitterFollowDefaultProps: TwitterFollowProps = {
-  handle: "@t3dotgg",
-  displayName: "Theo",
-  avatarUrl: "https://github.com/t3dotgg.png?size=400",
+  handle: "@sankalpa_02",
+  displayName: "Sankalpa",
+  avatarUrl: "https://github.com/sankalpaacharya.png?size=400",
   bio: "CEO @ping_gg, ex-Twitch. I make videos and break things.",
   followers: 482103,
   following: 2014,

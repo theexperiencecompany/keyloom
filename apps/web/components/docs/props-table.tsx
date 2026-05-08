@@ -44,11 +44,17 @@ function describeType(field: Field): string {
   switch (field.kind) {
     case "chat":
       return "ChatMessage[]"
+    case "composition":
+      return "string (composition id)"
+    case "slots":
+      return "Record<string, string[]>"
     case "text":
     case "textarea":
       return "string"
     case "color":
       return "string (hex)"
+    case "image":
+      return "string (url)"
     case "number":
       return "number"
     case "select":

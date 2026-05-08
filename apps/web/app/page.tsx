@@ -28,8 +28,7 @@ const features = [
   {
     icon: PaintBrush02Icon,
     title: "Themeable",
-    description:
-      "Tailwind-friendly tokens with light & dark modes baked in.",
+    description: "Tailwind-friendly tokens with light & dark modes baked in.",
   },
   {
     icon: FilmRoll02Icon,
@@ -59,65 +58,31 @@ export default function LandingPage() {
               "radial-gradient(circle at 50% 30%, black 0%, transparent 70%)",
           }}
         />
-        <div className="relative px-8 pt-24 pb-28 sm:pt-32 sm:pb-36">
-          <div className="mx-auto max-w-3xl text-center">
-            <Button variant="outline" size="xs" asChild>
-              <Link href="/docs/changelog">
-                <span className="rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background">
-                  v1.0
-                </span>
-                <span>Initial release is out</span>
-                <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
-              </Link>
-            </Button>
+        <div className="relative px-8 pt-28 pb-28 sm:pt-36 sm:pb-36">
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <ExperienceMark className="size-20 text-foreground sm:size-24" />
 
-            <h1 className="mt-6 text-balance text-5xl font-semibold tracking-tight sm:text-6xl">
-              Beautifully designed motion components.
+            <h1 className="mt-8 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
+              Motion Studio
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
-              A collection of Remotion components and templates you can drop
-              into your video pipeline. Copy, paste, render.
+            <p className="mt-4 text-sm uppercase tracking-[0.24em] text-muted-foreground sm:text-[13px]">
+              by TheExperienceCompany
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild>
                 <Link href="/docs">
                   Get started
-                  <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    data-icon="inline-end"
+                  />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/studio">Open Studio</Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-b border-dashed border-border px-8 py-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Everything you need to ship video.
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Stop reinventing transitions. These components are built for
-              Remotion and tuned for production rendering.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-dashed border-border bg-border/50 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <div key={f.title} className="bg-background p-6">
-                <div className="mb-3 flex size-8 items-center justify-center rounded-md border border-dashed border-border bg-muted/30 text-foreground">
-                  <HugeiconsIcon icon={f.icon} className="size-4" />
-                </div>
-                <h3 className="text-sm font-medium">{f.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {f.description}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -134,7 +99,12 @@ export default function LandingPage() {
                 A growing library of titles, overlays, and templates.
               </p>
             </div>
-            <Button variant="ghost" size="sm" asChild className="hidden shrink-0 sm:inline-flex">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="hidden shrink-0 sm:inline-flex"
+            >
               <Link href="/docs">
                 View all
                 <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
@@ -149,7 +119,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="px-8 py-24">
         <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border bg-muted/20 px-8 py-14 text-center">
-          <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Start shipping motion in minutes.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
@@ -190,5 +160,20 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  )
+}
+
+function ExperienceMark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 2917 2596.22"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      className={className}
+      aria-hidden
+    >
+      <path d="M1622.44,1140.82c-171.36,116.77-214.77,139.74-250.51,191.19-88.78,127.78-96.18,271.9-92.01,359.66,1.39,278.81-4.67,550.16-3.28,828.96,345.66-144.48,775.49-397.08,1117.5-839.93,68.11-88.19,764.29-974.32,434.76-1414.14C2695.02,87.86,2472.17,9.71,2254.13,1.54,1326.79-33.2,487.77,525.47,151.95,1112.23c-.64,1.11-1.56,2.73-2.75,4.82-56.35,99.39-220.72,389.36-113.89,545.22,53.95,78.7,156.78,93.64,176.29,96.47,112.38,16.33,205.45-35.61,318.43-100.97,148.27-85.77,222.63-128.25,223.66-128.93,110.8-73.03,292.45-136.35,469.59-269.7.29-.22-5.45,3.27-16.33,9.79-16.76,10.04-308.69,116.63-392.68,175.06-138.48,96.34-510.4,167.8-574.85,49.34-69.83-128.33,179.85-456.19,258.84-560.82.81-1.07,7.67-10.05,14.47-18.85,308.02-397.84,704.35-550.68,775.83-577.2,384.82-142.79,938.81-197.12,1020.11-21.19,74.44,161.1-142.59,420.43-321.91,558.68" />
+      <path d="M725.26,1612.72c-105.2,54.94-195.14,88.06-247.42,105.65-176.06,59.25-231.77,31.96-238.14,11.15-8.55-27.91,185.41-97.96,209.92-107.51,74.32-28.93,99.49-36.77,163.57-65.08,45.32-20.02,142.4-66.15,243.52-144.05,10.95-8.43,20.07-15.38,32.22-25.92,40.11-34.77,90.72-81.39,132.73-158.34,37.83-69.29,49.93-165.83,54.05-252.52,4.09-.99,2.62,7.42,2.96,11.44,7.26,87.49,14.84,238.56,97.57,245.68,61.62,5.31,113.16-27.69,168.54-53.77,2.21-1.04,7.6-4.59,7.32,1.47-72.08,48.01-120.37,94.81-149.47,126.46-39.38,42.82-57.73,73.26-69.02,95.19-5.99,11.64-16.39,32.1-24.82,60.37-25.32,84.98-29.12,228.42-29.1,234.91,0,0,0,.16-.04.17-1.56.29-23.79-224.6-83.94-243.73-12.28-3.91-27.85-.72-31.49.75-14.21,5.71-110.82,90.76-238.97,157.68Z" />
+    </svg>
   )
 }

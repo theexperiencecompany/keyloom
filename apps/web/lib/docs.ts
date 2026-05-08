@@ -186,6 +186,12 @@ export const docs: Doc[] = [
     Content: PhoneFrameMDX,
   },
   {
+    slug: "LaptopFrame",
+    href: "/docs/LaptopFrame",
+    meta: laptopFrameMeta,
+    Content: LaptopFrameMDX,
+  },
+  {
     slug: "SplitScene",
     href: "/docs/SplitScene",
     meta: splitSceneMeta,
