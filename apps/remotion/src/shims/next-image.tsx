@@ -28,7 +28,18 @@ export default function Image({
   style,
   ...rest
 }: NextImageProps) {
-  const resolvedSrc = typeof src === "string" ? src : src?.src;
+  const rawSrc = typeof src === "string" ? src : src?.src;
+  // Allow GaiaScenario (or any composition) to override avatar/logo paths
+  // baked into chat-ui's bundled JSX without forking the package.
+  const overrides =
+    (typeof window !== "undefined" &&
+      (
+        window as unknown as {
+          __remotionImageOverrides?: Record<string, string>;
+        }
+      ).__remotionImageOverrides) ||
+    {};
+  const resolvedSrc = (rawSrc && overrides[rawSrc]) || rawSrc;
   const fillStyle = fill
     ? {
         position: "absolute" as const,

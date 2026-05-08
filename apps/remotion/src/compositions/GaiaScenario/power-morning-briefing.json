@@ -1,0 +1,311 @@
+{
+  "id": "power-morning-briefing",
+  "title": "Power Morning Briefing — Full Overview",
+  "viewport": { "width": 390, "height": 844 },
+  "settings": { "theme": "dark" },
+  "states": [
+    {
+      "type": "user_message",
+      "text": "Good morning. What do I need to know today?",
+      "typingSpeed": 50,
+      "pauseAfter": 600
+    },
+    {
+      "type": "loading",
+      "text": "Preparing your briefing...",
+      "toolInfo": {
+        "toolCategory": "general",
+        "showCategory": false
+      },
+      "duration": 1000,
+      "pauseAfter": 100
+    },
+    {
+      "type": "loading",
+      "text": "Checking today's schedule...",
+      "toolInfo": {
+        "toolCategory": "google_calendar",
+        "showCategory": true
+      },
+      "duration": 1200,
+      "pauseAfter": 150
+    },
+    {
+      "type": "tool_calls",
+      "entries": [
+        {
+          "tool_name": "tool_calls_data",
+          "tool_category": "google_calendar",
+          "data": [
+            {
+              "tool_name": "google_calendar_today",
+              "tool_category": "google_calendar",
+              "message": "Retrieved 4 events for Thursday March 13",
+              "inputs": {
+                "date": "2026-03-13",
+                "calendars": ["primary", "work"]
+              },
+              "output": "4 events today: 9:30am Team standup (30 min), 11:00am Client call with Acme Corp (45 min, Google Meet), 2:00pm Design review (1 hr, Conf Room B), 4:00pm 1:1 with Sarah (30 min). 2 hours of focus time available: 12pm-2pm."
+            }
+          ],
+          "timestamp": null
+        }
+      ],
+      "pauseAfter": 300
+    },
+    {
+      "type": "loading",
+      "text": "Reviewing your tasks...",
+      "toolInfo": {
+        "toolCategory": "todoist",
+        "showCategory": true
+      },
+      "duration": 1100,
+      "pauseAfter": 150
+    },
+    {
+      "type": "tool_calls",
+      "entries": [
+        {
+          "tool_name": "tool_calls_data",
+          "tool_category": "todoist",
+          "data": [
+            {
+              "tool_name": "todoist_today",
+              "tool_category": "todoist",
+              "message": "Found 5 tasks due today, 1 overdue from yesterday",
+              "inputs": {
+                "filter": "today | overdue",
+                "include_priority": true
+              },
+              "output": "5 tasks due today: Finalize pricing proposal (high), review Alex's PR (high), update roadmap doc (medium), send weekly metrics (medium), order team lunch for Friday (low). 1 overdue from yesterday: respond to investor email."
+            }
+          ],
+          "timestamp": null
+        }
+      ],
+      "pauseAfter": 300
+    },
+    {
+      "type": "loading",
+      "text": "Scanning your inbox...",
+      "toolInfo": {
+        "toolCategory": "gmail",
+        "showCategory": true
+      },
+      "duration": 1200,
+      "pauseAfter": 150
+    },
+    {
+      "type": "tool_calls",
+      "entries": [
+        {
+          "tool_name": "tool_calls_data",
+          "tool_category": "gmail",
+          "data": [
+            {
+              "tool_name": "gmail_inbox_scan",
+              "tool_category": "gmail",
+              "message": "Scanned 12 new emails, flagged 2 as urgent",
+              "inputs": {
+                "filter": "is:unread newer_than:12h",
+                "categorize": true
+              },
+              "output": "12 new emails since last night. Urgent: 1) CFO Rachel Kim needs Q1 budget approval by noon today — sent at 7:15am. 2) Board member David Park requesting investor update deck by Friday. Also: 3 PR review notifications, 2 newsletters, 4 automated alerts, 1 team thread."
+            }
+          ],
+          "timestamp": null
+        }
+      ],
+      "pauseAfter": 300
+    },
+    {
+      "type": "loading",
+      "text": "Getting relevant news...",
+      "toolInfo": {
+        "toolCategory": "search",
+        "showCategory": true
+      },
+      "duration": 1000,
+      "pauseAfter": 100
+    },
+    {
+      "type": "tool_calls",
+      "entries": [
+        {
+          "tool_name": "tool_calls_data",
+          "tool_category": "search",
+          "data": [
+            {
+              "tool_name": "web_search",
+              "tool_category": "search",
+              "message": "Found 2 relevant industry news items",
+              "inputs": {
+                "query": "AI assistant startup funding news March 2026",
+                "recency": "24h"
+              },
+              "output": "1) Competitor Nexus AI raised $50M Series B led by Sequoia — announced this morning. Valued at $400M. 2) Gartner published 2026 AI Assistant Magic Quadrant — your category growing 34% YoY."
+            }
+          ],
+          "timestamp": null
+        }
+      ],
+      "pauseAfter": 1500
+    },
+    {
+      "type": "bot_message",
+      "text": "Good morning! Here's your **Thursday briefing**.\n\n**Weather**: 62°F, partly cloudy. Rain expected after 5pm — grab an umbrella.\n\n**Today's schedule** — 4 meetings:\n- **9:30am** Team standup\n- **11:00am** Client call with Acme Corp\n- **2:00pm** Design review\n- **4:00pm** 1:1 with Sarah\n\n**Priority tasks** (5 due today):\nFinalize pricing proposal (high), review Alex's PR (high), update roadmap doc (medium), send weekly metrics (medium), order team lunch for Friday (low).\n\n**Inbox highlights:**\n12 new emails. **Urgent**: CFO Rachel needs budget approval by noon. Board member David Park requesting investor update by Friday.\n\n**Relevant news:**\nYour competitor Nexus AI just raised $50M Series B — worth discussing in the design review.\n\nBiggest priority: **Get that budget approval to Rachel before your 11am call.**",
+      "streamingSpeed": 5,
+      "tool_data": [
+        {
+          "tool_name": "calendar_options",
+          "tool_category": "google_calendar",
+          "data": [
+            {
+              "summary": "Team Standup",
+              "start": "2026-03-13T09:30:00",
+              "end": "2026-03-13T10:00:00",
+              "description": "Daily team standup. Share blockers and priorities for the day.",
+              "attendees": ["team@company.com"]
+            },
+            {
+              "summary": "Client Call — Acme Corp",
+              "start": "2026-03-13T11:00:00",
+              "end": "2026-03-13T11:45:00",
+              "description": "Quarterly check-in with Sarah Chen and Mike Torres. Review contract renewal and expansion opportunity.",
+              "attendees": [
+                "sarah.chen@acmecorp.com",
+                "mike.torres@acmecorp.com"
+              ]
+            },
+            {
+              "summary": "Design Review — v2.0 Features",
+              "start": "2026-03-13T14:00:00",
+              "end": "2026-03-13T15:00:00",
+              "description": "Review design mocks for v2.0 dashboard, mobile app onboarding, and notification preferences.",
+              "attendees": ["design@company.com", "product@company.com"]
+            },
+            {
+              "summary": "1:1 with Sarah",
+              "start": "2026-03-13T16:00:00",
+              "end": "2026-03-13T16:30:00",
+              "description": "Weekly sync with Sarah. Topics: Q2 hiring plan, project Phoenix timeline, team feedback.",
+              "attendees": ["sarah@company.com"]
+            }
+          ],
+          "timestamp": null
+        },
+        {
+          "tool_name": "todo_data",
+          "tool_category": "todoist",
+          "data": {
+            "action": "list",
+            "todos": [
+              {
+                "id": "mb1",
+                "title": "Finalize pricing proposal for enterprise tier",
+                "completed": false,
+                "priority": "high",
+                "due_date": "2026-03-13",
+                "labels": ["sales", "urgent"],
+                "subtasks": [],
+                "created_at": "2026-03-10T09:00:00Z",
+                "updated_at": "2026-03-12T16:00:00Z"
+              },
+              {
+                "id": "mb2",
+                "title": "Review Alex's PR #247 — auth middleware refactor",
+                "completed": false,
+                "priority": "high",
+                "due_date": "2026-03-13",
+                "labels": ["engineering", "review"],
+                "subtasks": [],
+                "created_at": "2026-03-12T11:00:00Z",
+                "updated_at": "2026-03-12T11:00:00Z"
+              },
+              {
+                "id": "mb3",
+                "title": "Update Q2 product roadmap doc",
+                "completed": false,
+                "priority": "medium",
+                "due_date": "2026-03-13",
+                "labels": ["product", "planning"],
+                "subtasks": [],
+                "created_at": "2026-03-09T14:00:00Z",
+                "updated_at": "2026-03-11T10:00:00Z"
+              },
+              {
+                "id": "mb4",
+                "title": "Send weekly metrics dashboard to leadership",
+                "completed": false,
+                "priority": "medium",
+                "due_date": "2026-03-13",
+                "labels": ["reporting"],
+                "subtasks": [],
+                "created_at": "2026-03-06T09:00:00Z",
+                "updated_at": "2026-03-06T09:00:00Z"
+              },
+              {
+                "id": "mb5",
+                "title": "Order team lunch for Friday all-hands",
+                "completed": false,
+                "priority": "low",
+                "due_date": "2026-03-13",
+                "labels": ["team", "admin"],
+                "subtasks": [],
+                "created_at": "2026-03-11T15:00:00Z",
+                "updated_at": "2026-03-11T15:00:00Z"
+              },
+              {
+                "id": "mb6",
+                "title": "Respond to investor email from David Park",
+                "completed": false,
+                "priority": "high",
+                "due_date": "2026-03-12",
+                "labels": ["investors", "overdue"],
+                "subtasks": [],
+                "created_at": "2026-03-11T08:00:00Z",
+                "updated_at": "2026-03-11T08:00:00Z"
+              }
+            ],
+            "stats": {
+              "total": 6,
+              "completed": 0,
+              "pending": 6,
+              "overdue": 1,
+              "today": 5,
+              "upcoming": 0
+            }
+          },
+          "timestamp": null
+        },
+        {
+          "tool_name": "search_results",
+          "tool_category": "search",
+          "data": {
+            "results": [
+              {
+                "title": "Nexus AI Raises $50M Series B Led by Sequoia Capital",
+                "url": "https://techcrunch.com/2026/03/13/nexus-ai-series-b",
+                "snippet": "AI assistant startup Nexus AI announced a $50M Series B at a $400M valuation. The round was led by Sequoia Capital with participation from a16z. The company plans to expand into enterprise market with new agent capabilities."
+              },
+              {
+                "title": "Gartner 2026 AI Assistant Magic Quadrant Published",
+                "url": "https://gartner.com/reviews/market/ai-assistants-2026",
+                "snippet": "The AI personal assistant market is projected to grow 34% YoY to $12.8B by end of 2026. Key trends: proactive intelligence, multi-modal interaction, and deep enterprise integrations driving adoption."
+              }
+            ]
+          },
+          "timestamp": null
+        }
+      ],
+      "follow_up_actions": [
+        "Block prep time for Acme call",
+        "Handle budget approval now",
+        "Show full inbox",
+        "Deep dive on competitor news"
+      ],
+      "pauseAfter": 5000
+    }
+  ]
+}

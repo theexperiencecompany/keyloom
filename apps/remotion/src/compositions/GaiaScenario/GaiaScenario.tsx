@@ -7,7 +7,7 @@ import {
   ToolCallsSection,
 } from "@heygaia/chat-ui";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import "@heygaia/chat-ui/styles.css";
 import { computeWindows, contentProgress, type StateWindow } from "./timing";
@@ -38,6 +38,16 @@ export type GaiaScenarioProps = {
    * Default 2.5.
    */
   scale?: number;
+  /** Override the user avatar shown on right-side bubbles. */
+  userAvatarUrl?: string;
+  /** Override the bot/GAIA logo shown on left-side bubbles. */
+  botAvatarUrl?: string;
+  /**
+   * Whether tool_calls accordion sections render expanded by default.
+   * chat-ui's ToolCallsSection collapses by default; for video where there's
+   * no user interaction, expanded is the better default.
+   */
+  toolCallsExpanded?: boolean;
 };
 
 const queryClient = new QueryClient();
@@ -93,9 +103,33 @@ export const GaiaScenario: React.FC<GaiaScenarioProps> = ({
   padding = 32,
   borderRadius = 0,
   scale = 2.5,
+  userAvatarUrl,
+  botAvatarUrl,
+  toolCallsExpanded: toolCallsExpandedProp = true,
 }) => {
+  // Select fields serialize booleans as strings — coerce.
+  const toolCallsExpanded =
+    typeof toolCallsExpandedProp === "string"
+      ? toolCallsExpandedProp === "true"
+      : toolCallsExpandedProp;
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+
+  // Wire avatar overrides into our next/image shim so the chat-ui bundle's
+  // hardcoded image paths get swapped at render time. No need to fork
+  // @heygaia/chat-ui to expose avatar props.
+  useEffect(() => {
+    const w = window as unknown as {
+      __remotionImageOverrides?: Record<string, string>;
+    };
+    const next: Record<string, string> = {};
+    if (botAvatarUrl) next["/images/logos/logo.webp"] = botAvatarUrl;
+    if (userAvatarUrl) next["/images/avatars/default.webp"] = userAvatarUrl;
+    w.__remotionImageOverrides = next;
+    return () => {
+      w.__remotionImageOverrides = {};
+    };
+  }, [userAvatarUrl, botAvatarUrl]);
 
   const scenario = useMemo(
     () => safeParseScenario(scenarioJson),
@@ -129,6 +163,25 @@ export const GaiaScenario: React.FC<GaiaScenarioProps> = ({
 
   return (
     <QueryClientProvider client={queryClient}>
+      {toolCallsExpanded && (
+        <style>
+          {/* Force chat-ui's ToolCallsSection accordion (HeroUI/Radix) open
+              in video output where there's no interaction. */}
+          {`
+            .chatbubblebot_parent [role="region"][data-state="closed"],
+            .chatbubblebot_parent [data-slot="content"][data-open="false"] {
+              animation: none !important;
+              height: auto !important;
+              visibility: visible !important;
+              overflow: visible !important;
+              display: block !important;
+            }
+            .chatbubblebot_parent [data-state="closed"] > [data-slot="indicator"] {
+              transform: rotate(180deg);
+            }
+          `}
+        </style>
+      )}
       <AbsoluteFill
         style={{
           background: bg,
