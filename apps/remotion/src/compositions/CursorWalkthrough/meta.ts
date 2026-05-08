@@ -35,7 +35,7 @@ export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
       key: "backgroundImageUrl",
       label: "Background image URL",
     },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
     { kind: "number", key: "firstClickX", label: "First click X", min: 0 },
     { kind: "number", key: "firstClickY", label: "First click Y", min: 0 },
     { kind: "text", key: "firstClickLabel", label: "First click label" },
@@ -43,6 +43,6 @@ export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
     { kind: "number", key: "secondClickX", label: "Second click X", min: 0 },
     { kind: "number", key: "secondClickY", label: "Second click Y", min: 0 },
     { kind: "text", key: "secondClickLabel", label: "Second click label" },
-    { kind: "text", key: "accentColor", label: "Accent color" },
+    { kind: "color", key: "accentColor", label: "Accent color" },
   ],
 };

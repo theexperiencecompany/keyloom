@@ -1,0 +1,31 @@
+export const meta = {
+  title: "WhatsApp Messages",
+  description:
+    "An animated WhatsApp-style chat conversation with green bubbles, read receipts, and stacking spring physics.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="WhatsAppMessages" />
+
+<EditorLink id="WhatsAppMessages" />
+
+## Usage
+
+WhatsApp variant of the messages template. `side: "right"` is the green sent bubble (with double blue check marks), `side: "left"` is the white received bubble. The header shows the contact name with an `online` indicator.
+
+Same `ChatMessage` shape as the iMessage component — `text`, `side`, `typingFrames`, `delay`. Bubbles spring in, the typing dots show until `typingFrames` elapses, then the bubble pops in. Older messages slide upward when newer ones arrive.
+
+## Props
+
+<PropsTable id="WhatsAppMessages" />
+
+## Composition
+
+<CompositionStats id="WhatsAppMessages" />

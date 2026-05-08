@@ -25,8 +25,8 @@ export const captionTrackInfo: CompositionInfo<CaptionTrackProps> = {
   defaultProps: captionTrackDefaultProps,
   fields: [
     { kind: "textarea", key: "text", label: "Caption text", rows: 3 },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
-    { kind: "text", key: "textColor", label: "Text color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "textColor", label: "Text color" },
     {
       kind: "number",
       key: "wordsPerSecond",

@@ -30,7 +30,7 @@ export const statCounterInfo: CompositionInfo<StatCounterProps> = {
     { kind: "text", key: "label", label: "Label" },
     { kind: "text", key: "prefix", label: "Prefix (e.g. $)" },
     { kind: "text", key: "suffix", label: "Suffix (e.g. +, %)" },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
-    { kind: "text", key: "textColor", label: "Text color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "textColor", label: "Text color" },
   ],
 };

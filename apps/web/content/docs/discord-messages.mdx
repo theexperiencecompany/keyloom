@@ -1,0 +1,31 @@
+export const meta = {
+  title: "Discord Messages",
+  description:
+    "An animated Discord-style channel conversation in the dark theme with colored usernames and typing indicator.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="DiscordMessages" />
+
+<EditorLink id="DiscordMessages" />
+
+## Usage
+
+Discord-channel layout in the standard dark theme. Round avatars, colored usernames per side (blurple for `left`, red for `right`), Discord-style "Today at HH:MM" timestamp, and a typing line at the bottom while a message is being typed.
+
+`contactName` becomes the `#channel-name` in the header. Per-message `side` controls who the message is from — `left` uses the channel/contact name, `right` uses `you`.
+
+## Props
+
+<PropsTable id="DiscordMessages" />
+
+## Composition
+
+<CompositionStats id="DiscordMessages" />

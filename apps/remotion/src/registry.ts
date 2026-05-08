@@ -12,6 +12,9 @@ import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
 import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 import { twitterFollowInfo } from "./compositions/TwitterFollow/meta";
+import { whatsappMessagesInfo } from "./compositions/WhatsAppMessages/meta";
+import { slackMessagesInfo } from "./compositions/SlackMessages/meta";
+import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 
 export const compositions: AnyCompositionInfo[] = [
   titleSlideUpInfo,
@@ -27,6 +30,9 @@ export const compositions: AnyCompositionInfo[] = [
   twitterFollowInfo,
   messagePopupInfo,
   messageBubblesInfo,
+  whatsappMessagesInfo,
+  slackMessagesInfo,
+  discordMessagesInfo,
 ];
 
 export const compositionsById: Record<string, AnyCompositionInfo> =

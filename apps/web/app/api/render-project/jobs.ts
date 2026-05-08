@@ -17,7 +17,7 @@ export type RenderJob = {
 
 const globalAny = globalThis as unknown as {
   __studioJobs?: Map<string, RenderJob>
-  __studioBundle?: Promise<string>
+  __studioBundle?: { promise: Promise<string>; signature: string }
 }
 
 // Persist across HMR reloads in dev.
@@ -56,18 +56,42 @@ function makeJobId(): string {
   return Math.random().toString(36).slice(2)
 }
 
-function getBundle(): Promise<string> {
-  if (!globalAny.__studioBundle) {
-    const entryPoint = path.resolve(
-      process.cwd(),
-      "../remotion/src/index.ts",
-    )
-    globalAny.__studioBundle = bundle({
-      entryPoint,
-      webpackOverride: (config) => config,
-    })
+async function computeSourceSignature(): Promise<string> {
+  const root = path.resolve(process.cwd(), "../remotion/src")
+  let latest = 0
+  async function walk(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.name.startsWith(".") || entry.name === "node_modules") continue
+      const full = path.join(dir, entry.name)
+      if (entry.isDirectory()) {
+        await walk(full)
+      } else if (
+        entry.isFile() &&
+        /\.(ts|tsx|css|js|jsx|json)$/.test(entry.name)
+      ) {
+        const stat = await fs.stat(full)
+        if (stat.mtimeMs > latest) latest = stat.mtimeMs
+      }
+    }
   }
-  return globalAny.__studioBundle
+  await walk(root)
+  return String(latest)
+}
+
+async function getBundle(): Promise<string> {
+  const signature = await computeSourceSignature()
+  const cached = globalAny.__studioBundle
+  if (cached && cached.signature === signature) {
+    return cached.promise
+  }
+  const entryPoint = path.resolve(process.cwd(), "../remotion/src/index.ts")
+  const promise = bundle({
+    entryPoint,
+    webpackOverride: (config) => config,
+  })
+  globalAny.__studioBundle = { promise, signature }
+  return promise
 }
 
 export async function runRender(

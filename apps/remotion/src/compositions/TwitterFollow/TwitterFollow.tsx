@@ -220,7 +220,13 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
                   willChange: "transform",
                 }}
               >
-                <strong style={{ color: palette.text, fontWeight: 700 }}>
+                <strong
+                  style={{
+                    color: palette.text,
+                    fontWeight: 700,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
                   {displayedFollowers.toLocaleString()}
                 </strong>{" "}
                 Followers

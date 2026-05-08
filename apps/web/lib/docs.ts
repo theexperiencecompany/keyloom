@@ -9,6 +9,15 @@ import MessagePopupMDX, {
 import MessageBubblesMDX, {
   meta as messageBubblesMeta,
 } from "@/content/docs/message-bubbles.mdx"
+import WhatsAppMessagesMDX, {
+  meta as whatsappMessagesMeta,
+} from "@/content/docs/whatsapp-messages.mdx"
+import SlackMessagesMDX, {
+  meta as slackMessagesMeta,
+} from "@/content/docs/slack-messages.mdx"
+import DiscordMessagesMDX, {
+  meta as discordMessagesMeta,
+} from "@/content/docs/discord-messages.mdx"
 import TitleSlideUpMDX, {
   meta as titleSlideUpMeta,
 } from "@/content/docs/title-slide-up.mdx"
@@ -142,6 +151,24 @@ export const docs: Doc[] = [
     href: "/docs/MessageBubbles",
     meta: messageBubblesMeta,
     Content: MessageBubblesMDX,
+  },
+  {
+    slug: "WhatsAppMessages",
+    href: "/docs/WhatsAppMessages",
+    meta: whatsappMessagesMeta,
+    Content: WhatsAppMessagesMDX,
+  },
+  {
+    slug: "SlackMessages",
+    href: "/docs/SlackMessages",
+    meta: slackMessagesMeta,
+    Content: SlackMessagesMDX,
+  },
+  {
+    slug: "DiscordMessages",
+    href: "/docs/DiscordMessages",
+    meta: discordMessagesMeta,
+    Content: DiscordMessagesMDX,
   },
 ]
 

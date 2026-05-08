@@ -35,6 +35,6 @@ export const TITLE_FIELDS = [
     label: "Subtitle (optional)",
     rows: 2,
   },
-  { kind: "text" as const, key: "backgroundColor", label: "Background color" },
-  { kind: "text" as const, key: "textColor", label: "Text color" },
+  { kind: "color" as const, key: "backgroundColor", label: "Background color" },
+  { kind: "color" as const, key: "textColor", label: "Text color" },
 ];

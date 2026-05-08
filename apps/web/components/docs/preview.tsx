@@ -15,23 +15,25 @@ export function Preview({ id }: { id: string }) {
     )
   }
   return (
-    <div
-      className="overflow-hidden rounded-lg border border-border bg-background not-prose my-6"
-      style={{ aspectRatio: `${info.width} / ${info.height}` }}
-    >
-      <Player
-        component={Component}
-        inputProps={info.defaultProps}
-        durationInFrames={info.durationInFrames}
-        fps={info.fps}
-        compositionWidth={info.width}
-        compositionHeight={info.height}
-        style={{ width: "100%", height: "100%" }}
-        loop
-        controls
-        autoPlay
-        acknowledgeRemotionLicense
-      />
+    <div className="not-prose my-6 lg:-mx-16 xl:-mx-24">
+      <div
+        className="overflow-hidden rounded-lg border border-border bg-background"
+        style={{ aspectRatio: `${info.width} / ${info.height}` }}
+      >
+        <Player
+          component={Component}
+          inputProps={info.defaultProps}
+          durationInFrames={info.durationInFrames}
+          fps={info.fps}
+          compositionWidth={info.width}
+          compositionHeight={info.height}
+          style={{ width: "100%", height: "100%" }}
+          loop
+          controls
+          autoPlay
+          acknowledgeRemotionLicense
+        />
+      </div>
     </div>
   )
 }

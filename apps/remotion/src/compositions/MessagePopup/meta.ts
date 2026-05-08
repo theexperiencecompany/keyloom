@@ -10,6 +10,7 @@ export const messagePopupDefaultProps: MessagePopupProps = {
   sender: "her 💕",
   time: "now",
   body: "babe what is this claude code?",
+  theme: "light",
 };
 
 export const messagePopupInfo: CompositionInfo<MessagePopupProps> = {
@@ -26,5 +27,14 @@ export const messagePopupInfo: CompositionInfo<MessagePopupProps> = {
     { kind: "text", key: "sender", label: "Sender" },
     { kind: "text", key: "time", label: "Time" },
     { kind: "textarea", key: "body", label: "Body", rows: 2 },
+    {
+      kind: "select",
+      key: "theme",
+      label: "Theme",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+      ],
+    },
   ],
 };

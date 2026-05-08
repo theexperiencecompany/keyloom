@@ -20,6 +20,7 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
       delay: 560,
     },
   ],
+  theme: "light",
 };
 
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
@@ -35,5 +36,14 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },
     { kind: "chat", key: "messages", label: "Messages" },
+    {
+      kind: "select",
+      key: "theme",
+      label: "Theme",
+      options: [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+      ],
+    },
   ],
 };

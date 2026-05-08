@@ -14,7 +14,40 @@ export type MessagePopupProps = {
   sender: string;
   time: string;
   body: string;
+  theme: "light" | "dark";
 };
+
+type Palette = {
+  bg: string;
+  cardBg: string;
+  cardBorder: string;
+  cardShadow: string;
+  text: string;
+  timeText: string;
+};
+
+function getPalette(theme: "light" | "dark"): Palette {
+  if (theme === "dark") {
+    return {
+      bg: "#000000",
+      cardBg: "#1c1c1e",
+      cardBorder: "rgba(255,255,255,0.06)",
+      cardShadow:
+        "0 30px 80px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.4)",
+      text: "#ffffff",
+      timeText: "rgba(255,255,255,0.45)",
+    };
+  }
+  return {
+    bg: "#ffffff",
+    cardBg: "#ffffff",
+    cardBorder: "rgba(15,16,20,0.05)",
+    cardShadow:
+      "0 30px 80px rgba(15,16,20,0.10), 0 4px 10px rgba(15,16,20,0.05)",
+    text: "#0f1014",
+    timeText: "rgba(15,16,20,0.45)",
+  };
+}
 
 const D_CARD = 0;
 const D_SENDER = 14;
@@ -30,17 +63,19 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
   sender,
   time,
   body,
+  theme,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const palette = getPalette(theme);
 
   return (
     <AbsoluteFill
       style={{
-        background: "#ffffff",
+        background: palette.bg,
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
-        color: "#0f1014",
+        color: palette.text,
         overflow: "hidden",
       }}
     >
@@ -59,6 +94,7 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
           sender={sender}
           time={time}
           body={body}
+          palette={palette}
         />
       </div>
     </AbsoluteFill>
@@ -71,12 +107,14 @@ function NotificationBanner({
   sender,
   time,
   body,
+  palette,
 }: {
   frame: number;
   fps: number;
   sender: string;
   time: string;
   body: string;
+  palette: Palette;
 }) {
   const bodyWords = body.split(" ");
 
@@ -94,10 +132,9 @@ function NotificationBanner({
       style={{
         width: NOTIF_WIDTH,
         borderRadius: 32,
-        background: "#ffffff",
-        border: "1px solid rgba(15,16,20,0.05)",
-        boxShadow:
-          "0 30px 80px rgba(15,16,20,0.10), 0 4px 10px rgba(15,16,20,0.05)",
+        background: palette.cardBg,
+        border: `1px solid ${palette.cardBorder}`,
+        boxShadow: palette.cardShadow,
         padding: NOTIF_PADDING,
         display: "flex",
         gap: 22,
@@ -133,7 +170,7 @@ function NotificationBanner({
               style={{
                 fontSize: 36,
                 fontWeight: 700,
-                color: "#0f1014",
+                color: palette.text,
                 letterSpacing: "-0.01em",
               }}
             >
@@ -144,7 +181,7 @@ function NotificationBanner({
             <span
               style={{
                 fontSize: 24,
-                color: "rgba(15,16,20,0.45)",
+                color: palette.timeText,
                 fontWeight: 500,
               }}
             >
@@ -156,7 +193,7 @@ function NotificationBanner({
         <div
           style={{
             fontSize: 30,
-            color: "#0f1014",
+            color: palette.text,
             fontWeight: 400,
             lineHeight: 1.3,
             letterSpacing: "-0.005em",

@@ -31,6 +31,6 @@ export const browserWindowInfo: CompositionInfo<BrowserWindowProps> = {
       key: "pageBackgroundColor",
       label: "Page background color",
     },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

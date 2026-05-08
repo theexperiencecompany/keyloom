@@ -13,6 +13,9 @@ import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkth
 import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
 import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 import { TwitterFollow } from "./compositions/TwitterFollow/TwitterFollow";
+import { WhatsAppMessages } from "./compositions/WhatsAppMessages/WhatsAppMessages";
+import { SlackMessages } from "./compositions/SlackMessages/SlackMessages";
+import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentsById: Record<string, ComponentType<any>> = {
@@ -29,4 +32,7 @@ export const componentsById: Record<string, ComponentType<any>> = {
   BrowserWindow,
   CaptionTrack,
   TwitterFollow,
+  WhatsAppMessages,
+  SlackMessages,
+  DiscordMessages,
 };

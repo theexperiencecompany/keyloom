@@ -47,6 +47,8 @@ function describeType(field: Field): string {
     case "text":
     case "textarea":
       return "string"
+    case "color":
+      return "string (hex)"
     case "number":
       return "number"
     case "select":

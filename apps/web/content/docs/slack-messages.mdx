@@ -1,0 +1,31 @@
+export const meta = {
+  title: "Slack Messages",
+  description:
+    "An animated Slack-style channel conversation with avatars, sender names, and a typing indicator.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="SlackMessages" />
+
+<EditorLink id="SlackMessages" />
+
+## Usage
+
+A flat Slack-channel feel — no chat bubbles, just a rounded-square avatar, bold sender name, timestamp, and message text per row. `contactName` becomes the channel name in the header (slugified to `#kebab-case`) and the displayed sender for `side: "left"`. `side: "right"` is shown as `you`.
+
+A "*X is typing*" indicator pulses at the bottom while the latest message is in its `typingFrames` window.
+
+## Props
+
+<PropsTable id="SlackMessages" />
+
+## Composition
+
+<CompositionStats id="SlackMessages" />

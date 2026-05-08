@@ -26,7 +26,7 @@ export const typingSearchInfo: CompositionInfo<TypingSearchProps> = {
   fields: [
     { kind: "text", key: "query", label: "Query" },
     { kind: "text", key: "placeholder", label: "Placeholder" },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
-    { kind: "text", key: "accentColor", label: "Accent color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "accentColor", label: "Accent color" },
   ],
 };

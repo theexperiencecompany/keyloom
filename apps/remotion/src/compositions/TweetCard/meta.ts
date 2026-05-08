@@ -59,6 +59,6 @@ export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

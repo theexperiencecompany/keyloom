@@ -53,6 +53,6 @@ export const twitterFollowInfo: CompositionInfo<TwitterFollowProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "text", key: "backgroundColor", label: "Background color" },
+    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };
