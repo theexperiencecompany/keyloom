@@ -7,8 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

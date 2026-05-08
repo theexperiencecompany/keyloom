@@ -33,7 +33,8 @@
     "dev": "remotionb studio",
     "build": "remotionb bundle",
     "upgrade": "remotionb upgrade",
-    "lint": "eslint src && tsc"
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": [
     "*.css"

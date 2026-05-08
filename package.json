@@ -7,9 +7,12 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "check": "biome check .",
+    "check:write": "biome check --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.7",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "prettier": "^3.8.1",
