@@ -13,9 +13,11 @@ import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkth
 import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
 import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 import { TwitterFollow } from "./compositions/TwitterFollow/TwitterFollow";
+import { GaiaScenario } from "./compositions/GaiaScenario/GaiaScenario";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentsById: Record<string, ComponentType<any>> = {
+  GaiaScenario,
   MessagePopup,
   MessageBubbles,
   TitleSlideUp,

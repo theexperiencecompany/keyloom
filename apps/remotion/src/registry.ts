@@ -12,8 +12,10 @@ import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
 import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 import { twitterFollowInfo } from "./compositions/TwitterFollow/meta";
+import { gaiaScenarioInfo } from "./compositions/GaiaScenario/meta";
 
 export const compositions: AnyCompositionInfo[] = [
+  gaiaScenarioInfo,
   titleSlideUpInfo,
   titleTypeInfo,
   titlePopupInfo,
