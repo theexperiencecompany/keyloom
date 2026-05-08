@@ -1,0 +1,2 @@
+bun run check:write
+git add -A

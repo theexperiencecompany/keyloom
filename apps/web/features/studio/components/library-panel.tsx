@@ -88,7 +88,10 @@ function AccordionSection({
 }) {
   if (items.length === 0) return null;
   return (
-    <AccordionItem value={value} className="border-border/60 data-open:bg-transparent">
+    <AccordionItem
+      value={value}
+      className="border-border/60 data-open:bg-transparent"
+    >
       <AccordionTrigger className="px-1 py-2 text-xs hover:no-underline">
         {title}
       </AccordionTrigger>
