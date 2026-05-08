@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { useExportRender } from "../hooks/use-export-render";
+import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
 import { ExportProgressOverlay } from "./export-progress-overlay";
 import { Inspector } from "./inspector";
@@ -45,31 +46,14 @@ export function Builder() {
     exportState.phase === "starting" || exportState.phase === "rendering";
 
   const playerRef = useRef<PlayerRef>(null);
-  const [currentFrame, setCurrentFrame] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const wasPlayingBeforeScrubRef = useRef(false);
 
+  // Bumps every time the Player mounts. Lets per-frame consumer hooks
+  // (usePlayerFrame, useIsPlaying) re-attach to the fresh ref without
+  // forcing Builder itself to re-render at 60fps.
+  const [playerVersion, setPlayerVersion] = useState(0);
   useEffect(() => {
-    if (!hasClips) {
-      setCurrentFrame(0);
-      setIsPlaying(false);
-      return;
-    }
-    const player = playerRef.current;
-    if (!player) return;
-    const onFrame: Parameters<PlayerRef["addEventListener"]>[1] = (e) => {
-      setCurrentFrame((e as { detail: { frame: number } }).detail.frame);
-    };
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    player.addEventListener("frameupdate", onFrame);
-    player.addEventListener("play", onPlay);
-    player.addEventListener("pause", onPause);
-    return () => {
-      player.removeEventListener("frameupdate", onFrame);
-      player.removeEventListener("play", onPlay);
-      player.removeEventListener("pause", onPause);
-    };
+    if (hasClips) setPlayerVersion((v) => v + 1);
   }, [hasClips]);
 
   useEffect(() => {
@@ -140,91 +124,92 @@ export function Builder() {
   }, [hasClips, handlePlayPause]);
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <TopBar
-        clipCount={state.project.clips.length}
-        totalSeconds={totalSeconds}
-        exporting={isExporting}
-        canExport={hasClips}
-        onExport={() => startExport(state.project)}
-      />
-
-      <div className="relative flex min-h-0 flex-1">
-        <ToolRail
-          openPanel={state.openPanel}
-          onToggle={(p) => dispatch({ type: "TOGGLE_PANEL", panel: p })}
+    <PlayerProvider playerRef={playerRef} version={playerVersion}>
+      <div className="flex h-screen flex-col bg-background text-foreground">
+        <TopBar
+          clipCount={state.project.clips.length}
+          totalSeconds={totalSeconds}
+          exporting={isExporting}
+          canExport={hasClips}
+          onExport={() => startExport(state.project)}
         />
 
-        {state.openPanel === "library" && (
-          <LibraryPanel
-            onAdd={(id) => dispatch({ type: "ADD_CLIP", compositionId: id })}
-            onClose={() => dispatch({ type: "TOGGLE_PANEL", panel: "library" })}
-          />
-        )}
-
-        <main className="flex min-w-0 flex-1 flex-col">
-          <PreviewStage
-            project={state.project}
-            playerInputProps={playerInputProps}
-            totalDuration={totalDuration}
-            hasClips={hasClips}
-            onOpenLibrary={() =>
-              dispatch({ type: "TOGGLE_PANEL", panel: "library" })
-            }
-            playerRef={playerRef}
+        <div className="relative flex min-h-0 flex-1">
+          <ToolRail
+            openPanel={state.openPanel}
+            onToggle={(p) => dispatch({ type: "TOGGLE_PANEL", panel: p })}
           />
 
-          <PlaybackControls
-            currentFrame={currentFrame}
-            totalDuration={totalDuration}
-            fps={state.project.fps}
-            isPlaying={isPlaying}
-            disabled={!hasClips}
-            onPlayPause={handlePlayPause}
-            onSkipToStart={handleSkipToStart}
-            onSkipToEnd={handleSkipToEnd}
-          />
+          {state.openPanel === "library" && (
+            <LibraryPanel
+              onAdd={(id) => dispatch({ type: "ADD_CLIP", compositionId: id })}
+              onClose={() =>
+                dispatch({ type: "TOGGLE_PANEL", panel: "library" })
+              }
+            />
+          )}
 
-          <Timeline
-            project={state.project}
-            selectedClipId={state.selectedClipId}
-            currentFrame={currentFrame}
-            onSelect={(id) => dispatch({ type: "SELECT_CLIP", clipId: id })}
-            onReorder={(clipIds) =>
-              dispatch({ type: "REORDER_CLIPS", clipIds })
-            }
-            onDelete={(id) => dispatch({ type: "DELETE_CLIP", clipId: id })}
-            onDurationChange={(id, durationInFrames) =>
-              dispatch({
-                type: "UPDATE_CLIP_DURATION",
-                clipId: id,
-                durationInFrames,
-              })
-            }
-            onSeek={handleSeek}
-            onScrubStart={handleScrubStart}
-            onScrubEnd={handleScrubEnd}
-          />
-        </main>
+          <main className="flex min-w-0 flex-1 flex-col">
+            <PreviewStage
+              project={state.project}
+              playerInputProps={playerInputProps}
+              totalDuration={totalDuration}
+              hasClips={hasClips}
+              onOpenLibrary={() =>
+                dispatch({ type: "TOGGLE_PANEL", panel: "library" })
+              }
+              playerRef={playerRef}
+            />
 
-        {selectedClip && selectedInfo && (
-          <Inspector
-            clip={selectedClip}
-            info={selectedInfo}
-            onChange={(next) =>
-              dispatch({
-                type: "UPDATE_CLIP_PROPS",
-                clipId: selectedClip.id,
-                props: next,
-              })
-            }
-            onClose={() => dispatch({ type: "SELECT_CLIP", clipId: null })}
-          />
-        )}
+            <PlaybackControls
+              totalDuration={totalDuration}
+              fps={state.project.fps}
+              disabled={!hasClips}
+              onPlayPause={handlePlayPause}
+              onSkipToStart={handleSkipToStart}
+              onSkipToEnd={handleSkipToEnd}
+            />
+
+            <Timeline
+              project={state.project}
+              selectedClipId={state.selectedClipId}
+              onSelect={(id) => dispatch({ type: "SELECT_CLIP", clipId: id })}
+              onReorder={(clipIds) =>
+                dispatch({ type: "REORDER_CLIPS", clipIds })
+              }
+              onDelete={(id) => dispatch({ type: "DELETE_CLIP", clipId: id })}
+              onDurationChange={(id, durationInFrames) =>
+                dispatch({
+                  type: "UPDATE_CLIP_DURATION",
+                  clipId: id,
+                  durationInFrames,
+                })
+              }
+              onSeek={handleSeek}
+              onScrubStart={handleScrubStart}
+              onScrubEnd={handleScrubEnd}
+            />
+          </main>
+
+          {selectedClip && selectedInfo && (
+            <Inspector
+              clip={selectedClip}
+              info={selectedInfo}
+              onChange={(next) =>
+                dispatch({
+                  type: "UPDATE_CLIP_PROPS",
+                  clipId: selectedClip.id,
+                  props: next,
+                })
+              }
+              onClose={() => dispatch({ type: "SELECT_CLIP", clipId: null })}
+            />
+          )}
+        </div>
+
+        <ExportProgressOverlay state={exportState} onClose={resetExport} />
       </div>
-
-      <ExportProgressOverlay state={exportState} onClose={resetExport} />
-    </div>
+    </PlayerProvider>
   );
 }
 

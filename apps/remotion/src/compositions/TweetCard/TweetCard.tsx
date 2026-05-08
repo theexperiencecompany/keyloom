@@ -1,8 +1,10 @@
 "use client";
 import {
   AbsoluteFill,
+  Audio,
   Img,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
@@ -93,6 +95,7 @@ export const TweetCard: React.FC<TweetCardProps> = ({
         padding: 60,
       }}
     >
+      <Audio src={staticFile("sounds/message_bubble/message.mp3")} volume={0.85} />
       <div
         style={{
           width: 1560,

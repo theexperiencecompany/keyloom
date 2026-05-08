@@ -8,12 +8,11 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
+import { useIsPlaying, usePlayerFrame } from "../state/player-context";
 
 type Props = {
-  currentFrame: number;
   totalDuration: number;
   fps: number;
-  isPlaying: boolean;
   disabled: boolean;
   onPlayPause: () => void;
   onSkipToStart: () => void;
@@ -21,18 +20,13 @@ type Props = {
 };
 
 export function PlaybackControls({
-  currentFrame,
   totalDuration,
   fps,
-  isPlaying,
   disabled,
   onPlayPause,
   onSkipToStart,
   onSkipToEnd,
 }: Props) {
-  const currentSeconds = currentFrame / fps;
-  const totalSeconds = totalDuration / fps;
-
   return (
     <div className="flex shrink-0 items-center justify-center gap-3 bg-background px-4 py-2">
       <div className="flex items-center gap-1">
@@ -42,12 +36,7 @@ export function PlaybackControls({
           title="Skip to start"
           icon={BackwardIcon}
         />
-        <ControlButton
-          onClick={onPlayPause}
-          disabled={disabled}
-          title={isPlaying ? "Pause" : "Play"}
-          icon={isPlaying ? PauseIcon : PlayIcon}
-        />
+        <PlayPauseButton onClick={onPlayPause} disabled={disabled} />
         <ControlButton
           onClick={onSkipToEnd}
           disabled={disabled}
@@ -56,12 +45,45 @@ export function PlaybackControls({
         />
       </div>
 
-      <p className="text-[11px] tabular-nums text-muted-foreground">
-        <span className="text-foreground">{formatClock(currentSeconds)}</span>
-        <span className="mx-1 opacity-50">/</span>
-        <span>{formatClock(totalSeconds)}</span>
-      </p>
+      <TimeReadout fps={fps} totalDuration={totalDuration} />
     </div>
+  );
+}
+
+function PlayPauseButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+}) {
+  const isPlaying = useIsPlaying();
+  return (
+    <ControlButton
+      onClick={onClick}
+      disabled={disabled}
+      title={isPlaying ? "Pause" : "Play"}
+      icon={isPlaying ? PauseIcon : PlayIcon}
+    />
+  );
+}
+
+function TimeReadout({
+  fps,
+  totalDuration,
+}: {
+  fps: number;
+  totalDuration: number;
+}) {
+  const currentFrame = usePlayerFrame();
+  const currentSeconds = currentFrame / fps;
+  const totalSeconds = totalDuration / fps;
+  return (
+    <p className="text-[11px] tabular-nums text-muted-foreground">
+      <span className="text-foreground">{formatClock(currentSeconds)}</span>
+      <span className="mx-1 opacity-50">/</span>
+      <span>{formatClock(totalSeconds)}</span>
+    </p>
   );
 }
 

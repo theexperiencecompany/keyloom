@@ -12,6 +12,13 @@ import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
 
+const FEATURED_IDS = [
+  "TweetCard",
+  "TitleSlideUp",
+  "MessageBubbles",
+  "BrowserWindow",
+];
+
 const _features = [
   {
     icon: Copy01Icon,
@@ -39,7 +46,9 @@ const _features = [
 ];
 
 export default function LandingPage() {
-  const featured = compositions.slice(0, 6);
+  const featured = FEATURED_IDS.map((id) =>
+    compositions.find((c) => c.id === id),
+  ).filter((c): c is (typeof compositions)[number] => Boolean(c));
 
   return (
     <div className="mx-auto min-h-screen max-w-[1600px] border-x border-dashed border-border">
@@ -65,8 +74,8 @@ export default function LandingPage() {
             <h1 className="mt-8 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
               Motion Studio
             </h1>
-            <p className="mt-4 text-sm text-muted-foreground sm:text-[13px]">
-              by theexperiencecompany
+            <p className="mt-4 text-sm tracking-[0.24em] text-muted-foreground uppercase sm:text-[13px]">
+              by TheExperienceCompany
             </p>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -87,7 +96,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Featured components */}
+      {/* Featured component */}
       <section className="border-b border-dashed border-border px-8 py-20">
         <div className="mx-auto max-w-5xl">
           <div className="mb-12 flex items-end justify-between gap-6">
@@ -96,7 +105,8 @@ export default function LandingPage() {
                 Browse the components.
               </h2>
               <p className="mt-3 text-muted-foreground">
-                A growing library of titles, overlays, and templates.
+                Premium scenes you can drop straight into a video. Tap the
+                preview for sound.
               </p>
             </div>
             <Button

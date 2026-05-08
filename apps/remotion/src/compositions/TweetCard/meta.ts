@@ -7,7 +7,7 @@ export const TWEET_CARD_WIDTH = 1920;
 export const TWEET_CARD_HEIGHT = 1080;
 
 export const tweetCardDefaultProps: TweetCardProps = {
-  displayName: "Sankalpa",
+  displayName: "sanku",
   handle: "@sankalpa_02",
   avatarUrl: "https://github.com/sankalpaacharya.png?size=200",
   verified: "yes",
