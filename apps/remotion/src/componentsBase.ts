@@ -7,6 +7,7 @@ import { TitleType } from "./compositions/TitleType/TitleType";
 import { TitlePopup } from "./compositions/TitlePopup/TitlePopup";
 import { TitleFade } from "./compositions/TitleFade/TitleFade";
 import { TypingSearch } from "./compositions/TypingSearch/TypingSearch";
+import { TypingComposer } from "./compositions/TypingComposer/TypingComposer";
 import { StatCounter } from "./compositions/StatCounter/StatCounter";
 import { TweetCard } from "./compositions/TweetCard/TweetCard";
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
@@ -53,6 +54,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   TitlePopup,
   TitleFade,
   TypingSearch,
+  TypingComposer,
   StatCounter,
   TweetCard,
   CursorWalkthrough,
