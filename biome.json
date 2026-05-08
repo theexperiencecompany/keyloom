@@ -21,7 +21,6 @@
       "!!**/.vercel",
       "!!**/.turbo",
       "!!**/coverage",
-      "!!apps/remotion",
       "!**/*.lock",
       "!**/.env*",
       "!**/*.d.ts",
@@ -106,6 +105,34 @@
           },
           "suspicious": {
             "noDocumentCookie": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/remotion/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useAltText": "off",
+            "useButtonType": "off",
+            "noLabelWithoutControl": "off",
+            "useKeyWithClickEvents": "off",
+            "noStaticElementInteractions": "off",
+            "noSvgWithoutTitle": "off",
+            "useSemanticElements": "off",
+            "noRedundantAlt": "off"
+          },
+          "performance": {
+            "noImgElement": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off",
+            "useTemplate": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noArrayIndexKey": "off"
           }
         }
       }

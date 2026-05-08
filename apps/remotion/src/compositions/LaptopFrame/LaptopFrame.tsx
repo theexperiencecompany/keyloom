@@ -40,19 +40,15 @@ type ChassisColors = {
 function getChassis(chassis: LaptopFrameProps["chassis"]): ChassisColors {
   if (chassis === "space-gray") {
     return {
-      lidEdge:
-        "linear-gradient(180deg, #2a2a2e 0%, #1a1a1d 50%, #242427 100%)",
-      baseLip:
-        "linear-gradient(180deg, #1f1f22 0%, #2c2c30 30%, #1a1a1d 100%)",
+      lidEdge: "linear-gradient(180deg, #2a2a2e 0%, #1a1a1d 50%, #242427 100%)",
+      baseLip: "linear-gradient(180deg, #1f1f22 0%, #2c2c30 30%, #1a1a1d 100%)",
       baseLipShadow: "0 4px 14px rgba(0,0,0,0.45)",
       bottomShadow: "rgba(0,0,0,0.55)",
     };
   }
   return {
-    lidEdge:
-      "linear-gradient(180deg, #d8d8de 0%, #c0c0c8 55%, #d4d4da 100%)",
-    baseLip:
-      "linear-gradient(180deg, #c4c4ca 0%, #d8d8de 30%, #b6b6bc 100%)",
+    lidEdge: "linear-gradient(180deg, #d8d8de 0%, #c0c0c8 55%, #d4d4da 100%)",
+    baseLip: "linear-gradient(180deg, #c4c4ca 0%, #d8d8de 30%, #b6b6bc 100%)",
     baseLipShadow: "0 4px 14px rgba(15,16,20,0.18)",
     bottomShadow: "rgba(15,16,20,0.25)",
   };

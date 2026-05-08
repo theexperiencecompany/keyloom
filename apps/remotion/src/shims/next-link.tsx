@@ -1,7 +1,7 @@
 /**
  * Shim for `next/link`. Renders a plain <a>.
  */
-import { type AnchorHTMLAttributes, type ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 
 type LinkProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
   href: string | { pathname: string };

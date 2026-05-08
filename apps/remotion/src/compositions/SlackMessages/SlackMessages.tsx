@@ -83,12 +83,7 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
         flexDirection: "column",
       }}
     >
-      <Header
-        name={contactName}
-        frame={frame}
-        fps={fps}
-        palette={palette}
-      />
+      <Header name={contactName} frame={frame} fps={fps} palette={palette} />
       <Conversation
         frame={frame}
         fps={fps}

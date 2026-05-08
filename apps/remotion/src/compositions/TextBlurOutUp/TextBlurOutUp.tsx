@@ -1,8 +1,8 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
-  TITLE_FONT_FAMILY,
   getSubtitleColor,
+  TITLE_FONT_FAMILY,
   type TitleProps,
 } from "../title-shared";
 
@@ -67,11 +67,16 @@ export const TextBlurOutUp: React.FC<TextBlurOutUpProps> = ({
       >
         {words.map((word, i) => {
           const start = HEADLINE_START + i * WORD_STAGGER;
-          const progress = interpolate(frame, [start, start + WORD_DURATION], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: EASE,
-          });
+          const progress = interpolate(
+            frame,
+            [start, start + WORD_DURATION],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: EASE,
+            },
+          );
           const y = 10 * (1 - progress);
           const blurPx = 6 * (1 - progress);
           return (

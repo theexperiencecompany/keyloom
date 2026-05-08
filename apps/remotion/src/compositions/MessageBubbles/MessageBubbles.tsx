@@ -318,7 +318,11 @@ function TypingBubble({
           />
         );
       })}
-      <BubbleTail side={side} bubbleColor={palette.receivedBg} bgColor={palette.bg} />
+      <BubbleTail
+        side={side}
+        bubbleColor={palette.receivedBg}
+        bgColor={palette.bg}
+      />
     </div>
   );
 }

@@ -75,20 +75,14 @@ export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
     <AbsoluteFill
       style={{
         background: palette.bg,
-        fontFamily:
-          "'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+        fontFamily: "'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
         color: palette.bodyText,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Header
-        name={contactName}
-        frame={frame}
-        fps={fps}
-        palette={palette}
-      />
+      <Header name={contactName} frame={frame} fps={fps} palette={palette} />
       <Conversation
         frame={frame}
         fps={fps}

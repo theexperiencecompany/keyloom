@@ -1,8 +1,8 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
-  TITLE_FONT_FAMILY,
   getSubtitleColor,
+  TITLE_FONT_FAMILY,
   type TitleProps,
 } from "../title-shared";
 
@@ -24,7 +24,8 @@ export const TextPerCharacterRise: React.FC<TextPerCharacterRiseProps> = ({
   const frame = useCurrentFrame();
   const chars = headline.split("");
 
-  const lastCharEnd = HEADLINE_START + (chars.length - 1) * CHAR_STAGGER + CHAR_DURATION;
+  const lastCharEnd =
+    HEADLINE_START + (chars.length - 1) * CHAR_STAGGER + CHAR_DURATION;
   const subtitleStart = lastCharEnd + 14;
   const subtitleProgress = interpolate(
     frame,

@@ -91,7 +91,6 @@ function getPalette(theme: "light" | "dark"): Palette {
   };
 }
 
-
 const WALLPAPER_URL = staticFile("whatsapp-tile-dark.png");
 
 export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
@@ -232,13 +231,7 @@ function Header({
 
       <HeaderIconButton color={palette.headerIcon}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <circle
-            cx="11"
-            cy="11"
-            r="7"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
           <path
             d="M16.5 16.5 L21 21"
             stroke="currentColor"

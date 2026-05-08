@@ -1,8 +1,8 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
-  TITLE_FONT_FAMILY,
   getSubtitleColor,
+  TITLE_FONT_FAMILY,
   type TitleProps,
 } from "../title-shared";
 

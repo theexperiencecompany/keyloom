@@ -82,19 +82,15 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
 
   const cursorStart = typingEnd + POST_TYPE_PAUSE;
   const cursorEnd = cursorStart + CURSOR_TRAVEL;
-  const cursorProgress = interpolate(
-    frame,
-    [cursorStart, cursorEnd],
-    [0, 1],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: APPLE_EASE,
-    },
-  );
+  const cursorProgress = interpolate(frame, [cursorStart, cursorEnd], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: APPLE_EASE,
+  });
 
   const clickStart = cursorEnd;
-  const clickActive = frame >= clickStart && frame < clickStart + CLICK_FEEDBACK;
+  const clickActive =
+    frame >= clickStart && frame < clickStart + CLICK_FEEDBACK;
   const sendScale = clickActive ? 0.9 : 1;
 
   const ringScale = interpolate(
@@ -126,16 +122,13 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
     renderedLineCount * TEXTAREA_LINE_HEIGHT_PX + TEXTAREA_PAD_Y * 2,
   );
   const toolbarHeight = BTN_SIZE;
-  const barHeight =
-    PAD_1 + textareaHeight + PAD_1 + toolbarHeight + PAD_2;
+  const barHeight = PAD_1 + textareaHeight + PAD_1 + toolbarHeight + PAD_2;
 
   const barLeft = (width - BAR_WIDTH) / 2;
   const barTop = (height - barHeight) / 2;
 
-  const sendCenterX =
-    barLeft + BAR_WIDTH - PAD_1 - PAD_2 - BTN_SIZE / 2;
-  const sendCenterY =
-    barTop + barHeight - PAD_2 - BTN_SIZE / 2;
+  const sendCenterX = barLeft + BAR_WIDTH - PAD_1 - PAD_2 - BTN_SIZE / 2;
+  const sendCenterY = barTop + barHeight - PAD_2 - BTN_SIZE / 2;
 
   const cursorStartX = width + 80;
   const cursorStartY = height + 80;

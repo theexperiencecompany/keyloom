@@ -32,8 +32,7 @@ function getPalette(theme: "light" | "dark"): Palette {
       bg: "#000000",
       cardBg: "#1c1c1e",
       cardBorder: "rgba(255,255,255,0.06)",
-      cardShadow:
-        "0 30px 80px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.4)",
+      cardShadow: "0 30px 80px rgba(0,0,0,0.6), 0 4px 10px rgba(0,0,0,0.4)",
       text: "#ffffff",
       timeText: "rgba(255,255,255,0.45)",
     };

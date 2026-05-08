@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
 import {
   BubbleChatIcon,
   Delete02Icon,
   Sent02Icon,
 } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
+import { useEffect, useRef, useState } from "react";
 import type { EditorProps } from "../schema";
 import type { ChatMessage } from "./types";
 

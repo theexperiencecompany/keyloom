@@ -1,9 +1,6 @@
 "use client";
 
-import type { Field } from "../schema";
-import { compositions } from "../registry";
-import { PrimitiveControl } from "./primitives";
-import { ChatEditor } from "./ChatEditor";
+import { Label } from "@workspace/ui/components/label";
 import {
   Select,
   SelectContent,
@@ -11,7 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Label } from "@workspace/ui/components/label";
+import { compositions } from "../registry";
+import type { Field } from "../schema";
+import { ChatEditor } from "./ChatEditor";
+import { PrimitiveControl } from "./primitives";
 
 type Props = {
   fields: Field[];
@@ -150,10 +150,7 @@ function SlotsControl({
   onChange: (next: string[]) => void;
 }) {
   const slotCount = counts[layoutValue] ?? 2;
-  const current = Array.from(
-    { length: slotCount },
-    (_, i) => value[i] ?? "",
-  );
+  const current = Array.from({ length: slotCount }, (_, i) => value[i] ?? "");
 
   function setSlot(i: number, id: string) {
     const next = current.slice();

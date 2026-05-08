@@ -14,15 +14,16 @@ export const textBottomUpLettersDefaultProps: TextBottomUpLettersProps = {
   textColor: "#ffffff",
 };
 
-export const textBottomUpLettersInfo: CompositionInfo<TextBottomUpLettersProps> = {
-  id: "TextBottomUpLetters",
-  title: "Letters Rise Up",
-  description:
-    "Letters rise from below in a pronounced staircase, one symbol at a time, with zero blur.",
-  durationInFrames: TEXT_BOTTOM_UP_LETTERS_DURATION,
-  fps: TEXT_BOTTOM_UP_LETTERS_FPS,
-  width: TEXT_BOTTOM_UP_LETTERS_WIDTH,
-  height: TEXT_BOTTOM_UP_LETTERS_HEIGHT,
-  defaultProps: textBottomUpLettersDefaultProps,
-  fields: TITLE_FIELDS,
-};
+export const textBottomUpLettersInfo: CompositionInfo<TextBottomUpLettersProps> =
+  {
+    id: "TextBottomUpLetters",
+    title: "Letters Rise Up",
+    description:
+      "Letters rise from below in a pronounced staircase, one symbol at a time, with zero blur.",
+    durationInFrames: TEXT_BOTTOM_UP_LETTERS_DURATION,
+    fps: TEXT_BOTTOM_UP_LETTERS_FPS,
+    width: TEXT_BOTTOM_UP_LETTERS_WIDTH,
+    height: TEXT_BOTTOM_UP_LETTERS_HEIGHT,
+    defaultProps: textBottomUpLettersDefaultProps,
+    fields: TITLE_FIELDS,
+  };

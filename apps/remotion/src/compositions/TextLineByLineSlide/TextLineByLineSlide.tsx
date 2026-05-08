@@ -1,6 +1,10 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
-import { TITLE_FONT_FAMILY, getSubtitleColor, type TitleProps } from "../title-shared";
+import {
+  getSubtitleColor,
+  TITLE_FONT_FAMILY,
+  type TitleProps,
+} from "../title-shared";
 
 export type TextLineByLineSlideProps = TitleProps;
 
@@ -62,7 +66,11 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
             frame,
             [lineStart, lineStart + LINE_DURATION],
             [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: LINE_EASE },
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: LINE_EASE,
+            },
           );
           return (
             <span

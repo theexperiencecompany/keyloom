@@ -2,7 +2,7 @@
  * Shim for `next/image`. Renders a plain <img> with the same prop surface.
  * Used so @heygaia/chat-ui (extracted from a Next.js app) loads inside Remotion.
  */
-import { type ImgHTMLAttributes } from "react";
+import type { ImgHTMLAttributes } from "react";
 
 type NextImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   src: string | { src: string };

@@ -25,9 +25,7 @@ export type FollowerProps = {
 export const calculateFollowerMetadata: CalculateMetadataFunction<
   FollowerProps
 > = async ({ props }) => {
-  const userRes = await fetch(
-    `https://api.github.com/users/${props.username}`,
-  );
+  const userRes = await fetch(`https://api.github.com/users/${props.username}`);
   const user = userRes.ok ? await userRes.json() : null;
 
   const all: Follower[] = [];

@@ -16,7 +16,14 @@ export type SplitSceneProps = {
 const CANVAS_W = 1920;
 const CANVAS_H = 1080;
 
-type Rect = { x: number; y: number; w: number; h: number; radius?: number; shadow?: boolean };
+type Rect = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  radius?: number;
+  shadow?: boolean;
+};
 
 function getSlotRects(layout: SplitLayout, gap: number): Rect[] {
   const g = Math.max(0, gap);
@@ -77,21 +84,13 @@ export const SplitScene: React.FC<SplitSceneProps> = ({
     <AbsoluteFill style={{ background: backgroundColor, overflow: "hidden" }}>
       {rects.map((rect, i) => {
         const compId = slots[i];
-        return (
-          <Slot key={i} rect={rect} compositionId={compId ?? ""} />
-        );
+        return <Slot key={i} rect={rect} compositionId={compId ?? ""} />;
       })}
     </AbsoluteFill>
   );
 };
 
-function Slot({
-  rect,
-  compositionId,
-}: {
-  rect: Rect;
-  compositionId: string;
-}) {
+function Slot({ rect, compositionId }: { rect: Rect; compositionId: string }) {
   const Component = componentsById[compositionId];
   const info = compositionsById[compositionId];
   const radius = rect.radius ?? 0;

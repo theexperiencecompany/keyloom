@@ -14,15 +14,16 @@ export const textTopDownLettersDefaultProps: TextTopDownLettersProps = {
   textColor: "#ffffff",
 };
 
-export const textTopDownLettersInfo: CompositionInfo<TextTopDownLettersProps> = {
-  id: "TextTopDownLetters",
-  title: "Letters Drop Down",
-  description:
-    "Letters descend from above in a pronounced staircase, one symbol at a time, with zero blur.",
-  durationInFrames: TEXT_TOP_DOWN_LETTERS_DURATION,
-  fps: TEXT_TOP_DOWN_LETTERS_FPS,
-  width: TEXT_TOP_DOWN_LETTERS_WIDTH,
-  height: TEXT_TOP_DOWN_LETTERS_HEIGHT,
-  defaultProps: textTopDownLettersDefaultProps,
-  fields: TITLE_FIELDS,
-};
+export const textTopDownLettersInfo: CompositionInfo<TextTopDownLettersProps> =
+  {
+    id: "TextTopDownLetters",
+    title: "Letters Drop Down",
+    description:
+      "Letters descend from above in a pronounced staircase, one symbol at a time, with zero blur.",
+    durationInFrames: TEXT_TOP_DOWN_LETTERS_DURATION,
+    fps: TEXT_TOP_DOWN_LETTERS_FPS,
+    width: TEXT_TOP_DOWN_LETTERS_WIDTH,
+    height: TEXT_TOP_DOWN_LETTERS_HEIGHT,
+    defaultProps: textTopDownLettersDefaultProps,
+    fields: TITLE_FIELDS,
+  };

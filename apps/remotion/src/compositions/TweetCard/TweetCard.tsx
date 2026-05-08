@@ -1,5 +1,14 @@
 "use client";
 import {
+  Analytics01Icon,
+  BubbleChatIcon,
+  FavouriteIcon,
+  MoreHorizontalCircle01Icon,
+  RepeatIcon,
+  Share08Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
   AbsoluteFill,
   Audio,
   Img,
@@ -8,15 +17,6 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Analytics01Icon,
-  BubbleChatIcon,
-  FavouriteIcon,
-  MoreHorizontalCircle01Icon,
-  RepeatIcon,
-  Share08Icon,
-} from "@hugeicons/core-free-icons";
 
 export type TweetCardProps = {
   displayName: string;
@@ -95,7 +95,10 @@ export const TweetCard: React.FC<TweetCardProps> = ({
         padding: 60,
       }}
     >
-      <Audio src={staticFile("sounds/message_bubble/message.mp3")} volume={0.85} />
+      <Audio
+        src={staticFile("sounds/message_bubble/message.mp3")}
+        volume={0.85}
+      />
       <div
         style={{
           width: 1560,
