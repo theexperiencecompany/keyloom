@@ -58,7 +58,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.746 0.156 233.796);
+  --primary: #00bbff;
   --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -78,7 +78,7 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.746 0.156 233.796);
+  --sidebar-primary: #00bbff;
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -93,7 +93,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.746 0.156 233.796);
+  --primary: #00bbff;
   --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
@@ -112,7 +112,7 @@
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.746 0.156 233.796);
+  --sidebar-primary: #00bbff;
   --sidebar-primary-foreground: oklch(0.145 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -174,6 +174,14 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Pin brand primary against third-party CSS that also targets :root
+   (e.g. @heygaia/chat-ui resets --primary to a neutral tone). */
+html:root,
+html:root.dark {
+  --primary: #00bbff;
+  --sidebar-primary: #00bbff;
 }
 
 /* iMessage-style chat bubbles (mirrors GAIA implementation) */

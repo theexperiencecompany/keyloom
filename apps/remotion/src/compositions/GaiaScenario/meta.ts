@@ -55,7 +55,7 @@ const morningEmailTriage: Scenario = {
     },
     {
       type: "bot_message",
-      text: "Good morning! I've gone through your **14 unread emails** and sorted them by priority. Here's the breakdown:\n\n🔴 **Urgent (2)**\n- **Lisa Chen (CEO)** — Needs the updated board deck by **5 PM today**. She's asking for revised Q1 revenue projections and the hiring plan slide.\n- **Marcus Webb (Acme Corp)** — Client escalation about the API outage last night. He's CC'd his VP and is requesting a root cause analysis.\n\n🟡 **Action Required (3)**\n- **David Park (Legal)** — NDA for the Stripe partnership needs your signature by Wednesday\n- **Priya Sharma (Design)** — Wants your feedback on the new dashboard mockups before sprint planning tomorrow\n- **Jordan Liu (Engineering)** — PR review request for the authentication refactor, marked as blocking\n\n🟢 **FYI Only (5)**\n- 3 Slack notification digests, 1 GitHub Actions summary, 1 team standup recap from yesterday\n\n📰 **Newsletters (4)**\n- TechCrunch, Morning Brew, Benedict Evans, Stratechery\n\nI'd recommend tackling **Lisa's board deck first** — that's time-sensitive. Want me to draft a reply to her or help handle the client escalation?",
+      text: "Good morning! I've gone through your **14 unread emails** and sorted them by priority. Here's the breakdown:\n\n🔴 **Urgent (2)**\n- **Lisa Chen (CEO)** — Needs the updated board deck by **5 PM today**.\n- **Marcus Webb (Acme Corp)** — Client escalation about the API outage.\n\n🟡 **Action Required (3)**\n- **David Park (Legal)** — NDA needs your signature by Wednesday\n- **Priya Sharma (Design)** — Wants feedback on dashboard mockups\n- **Jordan Liu (Engineering)** — PR review request, marked blocking",
       streamingSpeed: 5,
       follow_up_actions: [
         "Draft reply to CEO",
@@ -69,19 +69,89 @@ const morningEmailTriage: Scenario = {
 };
 
 export const gaiaScenarioDefaultProps: GaiaScenarioProps = {
+  title: "",
+  theme: "dark",
+  backgroundColor: "",
+  padding: 32,
+  borderRadius: 0,
+  scale: 2.5,
   scenarioJson: JSON.stringify(morningEmailTriage, null, 2),
 };
 
 export const gaiaScenarioInfo: CompositionInfo<GaiaScenarioProps> = {
   id: "GaiaScenario",
   title: "GAIA",
-  description: "Render a GAIA chat scenario from JSON",
+  description:
+    "Render a GAIA chat scenario from JSON. Fills the parent canvas at any size.",
   durationInFrames: GAIA_SCENARIO_DURATION,
   fps: GAIA_SCENARIO_FPS,
   width: GAIA_SCENARIO_WIDTH,
   height: GAIA_SCENARIO_HEIGHT,
   defaultProps: gaiaScenarioDefaultProps,
   fields: [
-    { kind: "textarea", key: "scenarioJson", label: "Scenario JSON", rows: 24 },
+    {
+      kind: "text",
+      key: "title",
+      label: "Header label",
+      placeholder: "Optional small header above the chat",
+    },
+    {
+      kind: "select",
+      key: "theme",
+      label: "Theme",
+      options: [
+        { value: "dark", label: "Dark" },
+        { value: "light", label: "Light" },
+      ],
+    },
+    {
+      kind: "color",
+      key: "backgroundColor",
+      label: "Background color",
+    },
+    {
+      kind: "number",
+      key: "padding",
+      label: "Padding",
+      min: 0,
+      max: 200,
+    },
+    {
+      kind: "number",
+      key: "borderRadius",
+      label: "Border radius",
+      min: 0,
+      max: 200,
+    },
+    {
+      kind: "number",
+      key: "scale",
+      label: "Chat scale",
+      min: 1,
+      max: 5,
+    },
+    {
+      kind: "section",
+      key: "advanced",
+      label: "Advanced options",
+      description:
+        "Raw scenario JSON. Paste any scenario from gaia-demo-videos/scenarios/.",
+      defaultOpen: false,
+      fields: [
+        {
+          kind: "textarea",
+          key: "scenarioJson",
+          label: "Scenario JSON",
+          rows: 24,
+        },
+      ],
+    },
+    // The full per-state editor lives below the section/JSON view —
+    // each state's fields render in their own collapsible row.
+    {
+      kind: "scenario",
+      key: "scenarioJson",
+      label: "States",
+    },
   ],
 };

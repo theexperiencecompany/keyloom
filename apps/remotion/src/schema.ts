@@ -13,6 +13,7 @@ export type PrimitiveField =
 
 export type ShapeField =
   | { kind: "chat"; key: string; label: string }
+  | { kind: "scenario"; key: string; label: string }
   | { kind: "composition"; key: string; label: string; exclude?: string[] }
   | {
       kind: "slots";
@@ -23,7 +24,18 @@ export type ShapeField =
       exclude?: string[];
     };
 
-export type Field = PrimitiveField | ShapeField;
+// A collapsible section that groups primitive fields under a label.
+// Renders as an accordion at the bottom of the inspector.
+export type SectionField = {
+  kind: "section";
+  key: string;
+  label: string;
+  description?: string;
+  defaultOpen?: boolean;
+  fields: PrimitiveField[];
+};
+
+export type Field = PrimitiveField | ShapeField | SectionField;
 
 export type CompositionInfo<P extends Record<string, unknown>> = {
   id: string;

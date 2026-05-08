@@ -6,6 +6,7 @@ import {
   ThinkingBubble,
   ToolCallsSection,
 } from "@heygaia/chat-ui";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import "@heygaia/chat-ui/styles.css";
@@ -22,14 +23,29 @@ import type {
 
 export type GaiaScenarioProps = {
   scenarioJson: string;
+  // Top-level overrides — every individual setting is a primitive field
+  // in the right sidebar. The full state machine lives in scenarioJson
+  // under the "Advanced options" section.
+  title?: string;
+  theme?: "dark" | "light";
+  backgroundColor?: string;
+  padding?: number;
+  borderRadius?: number;
+  /**
+   * Visual scale for the chat content. chat-ui ships at native mobile
+   * pixel sizes (~16px base font); for video output at 1080×1920 we
+   * scale up so messages read at MessageBubbles-equivalent size.
+   * Default 2.5.
+   */
+  scale?: number;
 };
 
-const DEFAULT_VIEWPORT = { width: 390, height: 844 };
+const queryClient = new QueryClient();
 
 const FALLBACK_SCENARIO: Scenario = {
   id: "fallback",
   title: "Invalid scenario JSON",
-  viewport: DEFAULT_VIEWPORT,
+  viewport: { width: 390, height: 844 },
   settings: { theme: "dark" },
   states: [],
 };
@@ -47,7 +63,7 @@ function safeParseScenario(json: string): Scenario {
     return {
       id: parsed.id ?? "untitled",
       title: parsed.title ?? "Untitled",
-      viewport: parsed.viewport ?? DEFAULT_VIEWPORT,
+      viewport: parsed.viewport ?? FALLBACK_SCENARIO.viewport,
       settings: parsed.settings ?? { theme: "dark" },
       states: parsed.states as ScenarioState[],
     };
@@ -69,23 +85,23 @@ function progressiveText(text: string, progress: number): string {
   return text.slice(0, chars);
 }
 
-export const GaiaScenario: React.FC<GaiaScenarioProps> = ({ scenarioJson }) => {
+export const GaiaScenario: React.FC<GaiaScenarioProps> = ({
+  scenarioJson,
+  title,
+  theme,
+  backgroundColor,
+  padding = 32,
+  borderRadius = 0,
+  scale = 2.5,
+}) => {
   const frame = useCurrentFrame();
-  const { fps, width: canvasWidth, height: canvasHeight } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   const scenario = useMemo(
     () => safeParseScenario(scenarioJson),
     [scenarioJson],
   );
   const windows = useMemo(() => computeWindows(scenario, fps), [scenario, fps]);
-
-  const viewport = scenario.viewport ?? DEFAULT_VIEWPORT;
-
-  // Fit the scenario viewport inside the canvas while preserving aspect ratio.
-  const scale = Math.min(
-    canvasWidth / viewport.width,
-    canvasHeight / viewport.height,
-  );
 
   // Visible windows: any state whose startFrame has been reached.
   const visible = windows.filter((w) => frame >= w.startFrame);
@@ -105,57 +121,80 @@ export const GaiaScenario: React.FC<GaiaScenarioProps> = ({ scenarioJson }) => {
     return !next || frame < next.startFrame;
   });
 
-  const isDark = scenario.settings.theme !== "light";
+  const resolvedTheme = theme ?? scenario.settings.theme ?? "dark";
+  const isDark = resolvedTheme !== "light";
+  const bg = backgroundColor || (isDark ? "#0f1014" : "#ffffff");
+  const fg = isDark ? "#f5f5f7" : "#0f1014";
+  const headerLabel = title ?? scenario.title;
 
   return (
-    <AbsoluteFill
-      style={{
-        background: isDark ? "#0a0a0a" : "#f5f5f7",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
+    <QueryClientProvider client={queryClient}>
+      <AbsoluteFill
         style={{
-          width: viewport.width,
-          height: viewport.height,
-          transform: `scale(${scale})`,
-          transformOrigin: "center center",
-          background: isDark ? "#0f1014" : "#ffffff",
-          borderRadius: 48,
+          background: bg,
+          color: fg,
+          borderRadius,
           overflow: "hidden",
-          boxShadow: "0 50px 100px rgba(0,0,0,0.45)",
-          color: isDark ? "#f5f5f7" : "#0f1014",
           display: "flex",
           flexDirection: "column",
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
         }}
       >
+        {headerLabel && (
+          <div
+            style={{
+              padding: `${Math.round(padding * 0.6)}px ${padding}px`,
+              fontSize: 14,
+              fontWeight: 500,
+              opacity: 0.6,
+              letterSpacing: "0.02em",
+              textTransform: "uppercase",
+            }}
+          >
+            {headerLabel}
+          </div>
+        )}
         <div
           style={{
             flex: 1,
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-end",
-            padding: 16,
-            gap: 12,
+            padding,
             overflow: "hidden",
           }}
         >
-          {visible.map((window) => (
-            <StateRenderer
-              key={window.index}
-              window={window}
-              frame={frame}
-              isActiveLoading={activeLoading?.index === window.index}
-              isActiveThinking={activeThinking?.index === window.index}
-            />
-          ))}
+          {/*
+           * chat-ui ships at native mobile pixel sizes. Use a CSS transform to
+           * scale the entire chat surface up to MessageBubbles-equivalent size.
+           * Width is divided by scale so the layout box still fills the parent.
+           */}
+          <div
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "bottom center",
+              width: `${100 / scale}%`,
+              margin: "0 auto",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              gap: 12,
+            }}
+          >
+            {visible.map((window) => (
+              <StateRenderer
+                key={window.index}
+                window={window}
+                frame={frame}
+                isActiveLoading={activeLoading?.index === window.index}
+                isActiveThinking={activeThinking?.index === window.index}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </AbsoluteFill>
+      </AbsoluteFill>
+    </QueryClientProvider>
   );
 };
 

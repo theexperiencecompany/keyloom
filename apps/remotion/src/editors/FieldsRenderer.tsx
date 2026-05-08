@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/accordion";
 import { Label } from "@workspace/ui/components/label";
 import {
   Select,
@@ -9,9 +15,10 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { compositions } from "../registry";
-import type { Field } from "../schema";
+import type { Field, SectionField } from "../schema";
 import { ChatEditor } from "./ChatEditor";
 import { PrimitiveControl } from "./primitives";
+import { ScenarioEditor } from "./ScenarioEditor";
 
 type Props = {
   fields: Field[];
@@ -25,15 +32,24 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
   }
 
   const hasChatField = fields.some((f) => f.kind === "chat");
-  const flatFields = fields.filter((f) => f.kind !== "chat");
+  const hasScenarioField = fields.some((f) => f.kind === "scenario");
+  const sectionFields = fields.filter(
+    (f): f is SectionField => f.kind === "section",
+  );
+  const flatFields = fields.filter(
+    (f) => f.kind !== "chat" && f.kind !== "section" && f.kind !== "scenario",
+  );
   const chatField = fields.find((f) => f.kind === "chat");
+  const scenarioField = fields.find((f) => f.kind === "scenario");
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       {flatFields.length > 0 && (
         <div
           className={`shrink-0 space-y-4 px-5 py-5 ${
-            hasChatField ? "border-b border-border" : ""
+            hasChatField || hasScenarioField || sectionFields.length > 0
+              ? "border-b border-border"
+              : ""
           }`}
         >
           {flatFields.map((field) => {
@@ -74,6 +90,44 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
           })}
         </div>
       )}
+      {sectionFields.length > 0 && (
+        <div className="shrink-0 px-5 py-3">
+          <Accordion
+            type="multiple"
+            defaultValue={sectionFields
+              .filter((s) => s.defaultOpen)
+              .map((s) => s.key)}
+            className="space-y-2"
+          >
+            {sectionFields.map((section) => (
+              <AccordionItem
+                key={section.key}
+                value={section.key}
+                className="rounded-md border border-border/60 bg-muted/20"
+              >
+                <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+                  {section.label}
+                </AccordionTrigger>
+                <AccordionContent className="space-y-3 px-3 pb-3">
+                  {section.description && (
+                    <p className="text-[11px] text-muted-foreground">
+                      {section.description}
+                    </p>
+                  )}
+                  {section.fields.map((subField) => (
+                    <PrimitiveControl
+                      key={subField.key}
+                      field={subField}
+                      value={value[subField.key]}
+                      onChange={(v) => set(subField.key, v)}
+                    />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      )}
       {chatField && chatField.kind === "chat" && (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0 px-5 py-3">
@@ -87,6 +141,23 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
           <ChatEditor
             value={(value[chatField.key] ?? []) as never}
             onChange={(v) => set(chatField.key, v)}
+          />
+        </div>
+      )}
+      {scenarioField && scenarioField.kind === "scenario" && (
+        <div className="flex flex-col">
+          <div className="px-5 py-3">
+            <p className="text-xs font-semibold text-foreground">
+              {scenarioField.label}
+            </p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Each state plays back in order. Add, reorder, or edit per-state
+              fields below.
+            </p>
+          </div>
+          <ScenarioEditor
+            value={(value[scenarioField.key] ?? "") as string}
+            onChange={(v) => set(scenarioField.key, v)}
           />
         </div>
       )}
