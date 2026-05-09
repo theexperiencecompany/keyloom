@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { MessageBubblesProps } from "./MessageBubbles";
 
-export const MESSAGE_BUBBLES_DURATION = 780;
+export const MESSAGE_BUBBLES_DURATION = 660;
 export const MESSAGE_BUBBLES_FPS = 60;
 export const MESSAGE_BUBBLES_WIDTH = 1280;
 export const MESSAGE_BUBBLES_HEIGHT = 720;

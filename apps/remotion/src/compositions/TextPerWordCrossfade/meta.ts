@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextPerWordCrossfadeProps } from "./TextPerWordCrossfade";
 
-export const TEXT_PER_WORD_CROSSFADE_DURATION = 220;
+export const TEXT_PER_WORD_CROSSFADE_DURATION = 100;
 
 const defaultProps: TextPerWordCrossfadeProps = {
   headline: "Move the world forward",

@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextShortSlideRightProps } from "./TextShortSlideRight";
 
-export const TEXT_SHORT_SLIDE_RIGHT_DURATION = 220;
+export const TEXT_SHORT_SLIDE_RIGHT_DURATION = 100;
 
 const defaultProps: TextShortSlideRightProps = {
   headline: "Words slide into place",

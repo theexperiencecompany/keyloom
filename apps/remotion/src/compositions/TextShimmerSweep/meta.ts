@@ -6,7 +6,7 @@ export const textShimmerSweepInfo: CompositionInfo<TextShimmerSweepProps> = {
   id: "TextShimmerSweep",
   title: "Shimmer Sweep",
   description: "A subtle sweep across a clean headline, blending in while gliding from left to center.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,

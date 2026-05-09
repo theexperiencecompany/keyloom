@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TestimonialCardProps } from "./TestimonialCard";
 
-export const TESTIMONIAL_CARD_DURATION = 240;
+export const TESTIMONIAL_CARD_DURATION = 110;
 export const TESTIMONIAL_CARD_FPS = 60;
 export const TESTIMONIAL_CARD_WIDTH = 1280;
 export const TESTIMONIAL_CARD_HEIGHT = 720;

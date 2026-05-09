@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { CaptionTrackProps } from "./CaptionTrack";
 
-export const CAPTION_TRACK_DURATION = 240;
+export const CAPTION_TRACK_DURATION = 160;
 export const CAPTION_TRACK_FPS = 60;
 export const CAPTION_TRACK_WIDTH = 1920;
 export const CAPTION_TRACK_HEIGHT = 1080;

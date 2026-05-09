@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { LogoCloudProps } from "./LogoCloud";
 
-export const LOGO_CLOUD_DURATION = 240;
+export const LOGO_CLOUD_DURATION = 100;
 export const LOGO_CLOUD_FPS = 60;
 export const LOGO_CLOUD_WIDTH = 1280;
 export const LOGO_CLOUD_HEIGHT = 720;

@@ -6,7 +6,7 @@ export const textMicroScaleFadeInfo: CompositionInfo<TextMicroScaleFadeProps> = 
   id: "TextMicroScaleFade",
   title: "Scale Fade",
   description: "A calm, tiny scale pop used as subtle premium polish for labels and headings.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,

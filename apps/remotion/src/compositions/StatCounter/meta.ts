@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { StatCounterProps } from "./StatCounter";
 
-export const STAT_COUNTER_DURATION = 240;
+export const STAT_COUNTER_DURATION = 170;
 export const STAT_COUNTER_FPS = 60;
 export const STAT_COUNTER_WIDTH = 1920;
 export const STAT_COUNTER_HEIGHT = 1080;

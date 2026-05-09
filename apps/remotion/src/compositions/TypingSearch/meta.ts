@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TypingSearchProps } from "./TypingSearch";
 
-export const TYPING_SEARCH_DURATION = 300;
+export const TYPING_SEARCH_DURATION = 200;
 export const TYPING_SEARCH_FPS = 60;
 export const TYPING_SEARCH_WIDTH = 1920;
 export const TYPING_SEARCH_HEIGHT = 1080;

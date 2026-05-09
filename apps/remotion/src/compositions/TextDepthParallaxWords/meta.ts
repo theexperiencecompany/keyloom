@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextDepthParallaxWordsProps } from "./TextDepthParallaxWords";
 
-export const TEXT_DEPTH_PARALLAX_WORDS_DURATION = 220;
+export const TEXT_DEPTH_PARALLAX_WORDS_DURATION = 100;
 
 const defaultProps: TextDepthParallaxWordsProps = {
   headline: "Depth of meaning",

@@ -6,7 +6,7 @@ export const textSharedAxisXInfo: CompositionInfo<TextSharedAxisXProps> = {
   id: "TextSharedAxisX",
   title: "Slide In",
   description: "Horizontal shared-axis transition for sibling destinations with continuity.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,

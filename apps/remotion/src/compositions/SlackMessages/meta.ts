@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { SlackMessagesProps } from "./SlackMessages";
 
-export const SLACK_MESSAGES_DURATION = 780;
+export const SLACK_MESSAGES_DURATION = 660;
 export const SLACK_MESSAGES_FPS = 60;
 export const SLACK_MESSAGES_WIDTH = 1280;
 export const SLACK_MESSAGES_HEIGHT = 720;

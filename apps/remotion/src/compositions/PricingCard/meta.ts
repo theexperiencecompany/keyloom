@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { PricingCardProps } from "./PricingCard";
 
-export const PRICING_CARD_DURATION = 240;
+export const PRICING_CARD_DURATION = 130;
 export const PRICING_CARD_FPS = 60;
 export const PRICING_CARD_WIDTH = 1280;
 export const PRICING_CARD_HEIGHT = 720;

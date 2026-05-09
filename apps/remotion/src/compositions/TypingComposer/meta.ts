@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TypingComposerProps } from "./TypingComposer";
 
-export const TYPING_COMPOSER_DURATION = 360;
+export const TYPING_COMPOSER_DURATION = 260;
 export const TYPING_COMPOSER_FPS = 60;
 export const TYPING_COMPOSER_WIDTH = 1920;
 export const TYPING_COMPOSER_HEIGHT = 1080;

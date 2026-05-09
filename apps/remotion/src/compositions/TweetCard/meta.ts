@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TweetCardProps } from "./TweetCard";
 
-export const TWEET_CARD_DURATION = 300;
+export const TWEET_CARD_DURATION = 140;
 export const TWEET_CARD_FPS = 60;
 export const TWEET_CARD_WIDTH = 1920;
 export const TWEET_CARD_HEIGHT = 1080;

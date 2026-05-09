@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { FeatureCardProps } from "./FeatureCard";
 
-export const FEATURE_CARD_DURATION = 180;
+export const FEATURE_CARD_DURATION = 100;
 export const FEATURE_CARD_FPS = 60;
 export const FEATURE_CARD_WIDTH = 1280;
 export const FEATURE_CARD_HEIGHT = 720;

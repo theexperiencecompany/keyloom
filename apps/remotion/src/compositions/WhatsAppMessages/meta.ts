@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { WhatsAppMessagesProps } from "./WhatsAppMessages";
 
-export const WHATSAPP_MESSAGES_DURATION = 780;
+export const WHATSAPP_MESSAGES_DURATION = 660;
 export const WHATSAPP_MESSAGES_FPS = 60;
 export const WHATSAPP_MESSAGES_WIDTH = 1280;
 export const WHATSAPP_MESSAGES_HEIGHT = 720;

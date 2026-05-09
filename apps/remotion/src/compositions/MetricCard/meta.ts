@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { MetricCardProps } from "./MetricCard";
 
-export const METRIC_CARD_DURATION = 180;
+export const METRIC_CARD_DURATION = 100;
 export const METRIC_CARD_FPS = 60;
 export const METRIC_CARD_WIDTH = 1280;
 export const METRIC_CARD_HEIGHT = 720;

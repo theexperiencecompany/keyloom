@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TwitterFollowProps } from "./TwitterFollow";
 
-export const TWITTER_FOLLOW_DURATION = 240;
+export const TWITTER_FOLLOW_DURATION = 140;
 export const TWITTER_FOLLOW_FPS = 60;
 export const TWITTER_FOLLOW_WIDTH = 1920;
 export const TWITTER_FOLLOW_HEIGHT = 1080;
