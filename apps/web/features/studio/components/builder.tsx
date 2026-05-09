@@ -261,13 +261,15 @@ function useSeekToClipOnSelect(
 }
 
 /**
- * Spacebar toggles playback while the user isn't typing in an input.
+ * Spacebar toggles playback unless the user is typing or an interactive
+ * element (button, link, select, etc.) is focused — pressing space on a
+ * focused button would otherwise both click the button AND toggle playback.
  */
 function useSpacebarPlayPause(hasClips: boolean, onPlayPause: () => void) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== " " || !hasClips) return;
-      if (isTextInputFocused()) return;
+      if (isInteractiveElementFocused()) return;
       e.preventDefault();
       onPlayPause();
     }
@@ -289,13 +291,33 @@ function clipStartFrame(project: Project, clipId: string): number {
   return 0;
 }
 
-function isTextInputFocused(): boolean {
-  const el = document.activeElement;
-  if (!el) return false;
+function isInteractiveElementFocused(): boolean {
+  const el = document.activeElement as HTMLElement | null;
+  if (!el || el === document.body) return false;
   const tag = el.tagName.toLowerCase();
-  return (
+  if (
     tag === "input" ||
     tag === "textarea" ||
-    (el as HTMLElement).isContentEditable
-  );
+    tag === "select" ||
+    tag === "button" ||
+    tag === "a" ||
+    el.isContentEditable
+  ) {
+    return true;
+  }
+  // Custom interactive controls (radix triggers etc.)
+  const role = el.getAttribute("role");
+  if (
+    role === "button" ||
+    role === "menuitem" ||
+    role === "option" ||
+    role === "tab" ||
+    role === "switch" ||
+    role === "checkbox" ||
+    role === "radio"
+  ) {
+    return true;
+  }
+  if (el.tabIndex >= 0 && el.hasAttribute("tabindex")) return true;
+  return false;
 }
