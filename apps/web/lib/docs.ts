@@ -14,6 +14,9 @@ import DiscordMessagesMDX, {
 import FeatureCardMDX, {
   meta as featureCardMeta,
 } from "@/content/docs/feature-card.mdx";
+import GaiaScenarioMDX, {
+  meta as gaiaScenarioMeta,
+} from "@/content/docs/gaia-scenario.mdx";
 import InstagramMessagesMDX, {
   meta as instagramMessagesMeta,
 } from "@/content/docs/instagram-messages.mdx";
@@ -177,6 +180,12 @@ export const docs: Doc[] = [
     href: "/docs",
     meta: introductionMeta,
     Content: IntroductionMDX,
+  },
+  {
+    slug: "GaiaScenario",
+    href: "/docs/GaiaScenario",
+    meta: gaiaScenarioMeta,
+    Content: GaiaScenarioMDX,
   },
   {
     slug: "TitleSlideUp",

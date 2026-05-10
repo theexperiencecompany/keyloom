@@ -14,11 +14,18 @@ export function Preview({ id }: { id: string }) {
       </div>
     );
   }
+  const isPortrait = info.height > info.width;
+
   return (
-    <div className="not-prose my-6">
+    <div
+      className={`not-prose my-6${isPortrait ? " flex justify-center" : ""}`}
+    >
       <div
-        className="w-full overflow-hidden rounded-lg border border-border bg-background"
-        style={{ aspectRatio: `${info.width} / ${info.height}` }}
+        className="overflow-hidden rounded-lg border border-border bg-background"
+        style={{
+          aspectRatio: `${info.width} / ${info.height}`,
+          ...(isPortrait ? { height: "480px" } : { width: "100%" }),
+        }}
       >
         <Player
           component={Component}
@@ -31,6 +38,7 @@ export function Preview({ id }: { id: string }) {
           loop
           controls
           autoPlay
+          initiallyMuted
           acknowledgeRemotionLicense
         />
       </div>

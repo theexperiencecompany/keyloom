@@ -1,0 +1,48 @@
+export const meta = {
+  title: "GAIA",
+  description:
+    "Render a GAIA chat scenario from JSON. A full state-machine driven chat playback — user messages, thinking, tool calls, and bot replies — that fills the parent canvas at any size.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Scenario format", id: "scenario-format" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="GaiaScenario" />
+
+<EditorLink id="GaiaScenario" />
+
+## Usage
+
+`GaiaScenario` plays back a structured "scenario" — a JSON document describing a chat conversation as a sequence of states (user message, thinking, tool calls, bot reply, loading). The composition reads the scenario, computes per-state windows, and animates the chat bubbles, tool-call sections, and thinking indicators in sync with the playhead.
+
+This is the headline composition for GAIA-flavored product demos. Drop it on a timeline, edit the scenario in the Studio (either via the per-state editor or the raw JSON tab), and the duration auto-fits the content via `calculateMetadata`.
+
+The Style controls (background, text color, font, accent) apply per-clip like any other composition. `theme` toggles the chat-ui's dark/light mode independently of the Brand Kit.
+
+## Scenario format
+
+A scenario is a JSON object with a `states` array. Each state is one of:
+
+- **`user_message`** — a user-side chat bubble.
+- **`thinking`** — the "thinking..." indicator before the bot replies.
+- **`tool_calls`** — a collapsible card listing tool invocations (calendar, search, todos, etc.).
+- **`loading`** — a brief loading dot row.
+- **`bot_message`** — the bot reply, streamed character-by-character.
+
+Each state carries a `durationMs` that controls how long it occupies the timeline. The composition's `durationInFrames` is recomputed from the scenario whenever you edit it, so the timeline card always hugs the actual content length.
+
+The default scenario is `power-morning-briefing` — a multi-tool flow (calendar + todos + search) that exercises every state type in one example.
+
+## Props
+
+<PropsTable id="GaiaScenario" />
+
+## Composition
+
+<CompositionStats id="GaiaScenario" />

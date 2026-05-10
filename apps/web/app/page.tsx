@@ -5,6 +5,200 @@ import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
+import { HeroSticker, type HeroStickerProps } from "@/components/hero-sticker";
+
+// Every sticker extracted from "stickers motion design shit.png".
+// Each one gets a unique position, rotation, size, and bob timing so the
+// scatter feels handmade rather than evenly distributed.
+const HERO_STICKERS: HeroStickerProps[] = [
+  // Left wall — top to bottom
+  {
+    src: "/images/stickers/sticker_03.png",
+    width: 96,
+    rotate: -16,
+    position: { left: "2%", top: "5%" },
+    duration: 3.6,
+    distance: 9,
+    delay: 0,
+  },
+  {
+    src: "/images/stickers/sticker_13.png",
+    width: 84,
+    rotate: 8,
+    position: { left: "12%", top: "16%" },
+    duration: 4.1,
+    distance: 7,
+    delay: 0.4,
+  },
+  {
+    src: "/images/stickers/sticker_05.png",
+    width: 100,
+    rotate: -10,
+    position: { left: "1%", top: "30%" },
+    duration: 3.3,
+    distance: 10,
+    delay: 0.8,
+  },
+  {
+    src: "/images/stickers/sticker_06.png",
+    width: 92,
+    rotate: 14,
+    position: { left: "15%", top: "44%" },
+    duration: 4.4,
+    distance: 6,
+    delay: 1.2,
+  },
+  {
+    src: "/images/stickers/sticker_17.png",
+    width: 86,
+    rotate: -7,
+    position: { left: "3%", top: "58%" },
+    duration: 3.8,
+    distance: 8,
+    delay: 1.6,
+  },
+  {
+    src: "/images/stickers/sticker_11.png",
+    width: 96,
+    rotate: 12,
+    position: { left: "13%", top: "73%" },
+    duration: 3.5,
+    distance: 9,
+    delay: 0.2,
+  },
+  {
+    src: "/images/stickers/sticker_18.png",
+    width: 80,
+    rotate: -22,
+    position: { left: "5%", bottom: "4%" },
+    duration: 4.2,
+    distance: 7,
+    delay: 1.0,
+  },
+
+  // Right wall — top to bottom
+  {
+    src: "/images/stickers/sticker_04.png",
+    width: 102,
+    rotate: 18,
+    position: { right: "2%", top: "6%" },
+    duration: 3.4,
+    distance: 8,
+    delay: 0.3,
+  },
+  {
+    src: "/images/stickers/sticker_15.png",
+    width: 80,
+    rotate: -10,
+    position: { right: "13%", top: "18%" },
+    duration: 4.0,
+    distance: 7,
+    delay: 0.7,
+  },
+  {
+    src: "/images/stickers/sticker_07.png",
+    width: 96,
+    rotate: 9,
+    position: { right: "1%", top: "32%" },
+    duration: 3.7,
+    distance: 10,
+    delay: 1.1,
+  },
+  {
+    src: "/images/stickers/sticker_10.png",
+    width: 88,
+    rotate: -15,
+    position: { right: "16%", top: "45%" },
+    duration: 3.2,
+    distance: 6,
+    delay: 1.5,
+  },
+  {
+    src: "/images/stickers/sticker_08.png",
+    width: 102,
+    rotate: 7,
+    position: { right: "3%", top: "58%" },
+    duration: 4.3,
+    distance: 9,
+    delay: 1.9,
+  },
+  {
+    src: "/images/stickers/sticker_19.png",
+    width: 78,
+    rotate: 20,
+    position: { right: "11%", top: "72%" },
+    duration: 3.6,
+    distance: 7,
+    delay: 0.5,
+  },
+  {
+    src: "/images/stickers/sticker_20.png",
+    width: 86,
+    rotate: -13,
+    position: { right: "4%", bottom: "5%" },
+    duration: 4.5,
+    distance: 8,
+    delay: 1.3,
+  },
+
+  // Top stripe — above the centered content
+  {
+    src: "/images/stickers/sticker_01.png",
+    width: 110,
+    rotate: -6,
+    position: { left: "26%", top: "2%" },
+    duration: 3.9,
+    distance: 9,
+    delay: 0.1,
+  },
+  {
+    src: "/images/stickers/sticker_02.png",
+    width: 96,
+    rotate: 4,
+    position: { right: "27%", top: "3%" },
+    duration: 3.5,
+    distance: 7,
+    delay: 1.4,
+  },
+
+  // Bottom stripe — below the buttons
+  {
+    src: "/images/stickers/sticker_09.png",
+    width: 84,
+    rotate: 11,
+    position: { left: "30%", bottom: "3%" },
+    duration: 4.1,
+    distance: 8,
+    delay: 0.6,
+  },
+  {
+    src: "/images/stickers/sticker_12.png",
+    width: 86,
+    rotate: -14,
+    position: { right: "30%", bottom: "2%" },
+    duration: 3.4,
+    distance: 9,
+    delay: 1.7,
+  },
+  {
+    src: "/images/stickers/sticker_14.png",
+    width: 70,
+    rotate: 17,
+    position: { left: "42%", bottom: "8%" },
+    duration: 3.7,
+    distance: 6,
+    delay: 0.9,
+  },
+  {
+    src: "/images/stickers/sticker_16.png",
+    width: 72,
+    rotate: -19,
+    position: { right: "44%", top: "4%" },
+    duration: 4.2,
+    distance: 7,
+    delay: 2.0,
+  },
+];
 
 export default function LandingPage() {
   const items = compositions.map(({ calculateMetadata: _, ...rest }) => rest);
@@ -14,7 +208,7 @@ export default function LandingPage() {
       <DocsHeader />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-dashed border-border">
+      <section className="relative flex min-h-screen items-center overflow-hidden border-b border-dashed border-border">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.07]"
@@ -26,15 +220,27 @@ export default function LandingPage() {
               "radial-gradient(circle at 50% 30%, black 0%, transparent 70%)",
           }}
         />
-        <div className="relative px-8 pt-28 pb-28 sm:pt-36 sm:pb-36">
-          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-            <ExperienceMark className="size-20 text-foreground sm:size-24" />
 
-            <h1 className="mt-8 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-              Motion Studio
+        {/* Stickers — every sticker from the sheet, draggable + slowly bobbing (xl+) */}
+        {HERO_STICKERS.map((s) => (
+          <HeroSticker key={s.src} {...s} />
+        ))}
+
+        <div className="relative w-full px-8 py-20">
+          <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
+            <h1 className="text-5xl font-semibold tracking-tight text-balance sm:text-6xl md:text-7xl">
+              Ship videos
+              <img
+                src="/images/clapperboard.png"
+                alt=""
+                aria-hidden
+                className="mx-1 inline-block h-[1.05em] w-auto align-[-0.18em]"
+              />
+              that look expensive.
             </h1>
-            <p className="mt-4 text-sm tracking-[0.24em] text-muted-foreground uppercase sm:text-[13px]">
-              by TheExperienceCompany
+            <p className="mt-6 max-w-xl text-base text-muted-foreground text-balance sm:text-lg">
+              A library of cinematic scenes for Remotion. No After Effects, no
+              animation team — drop in, render, ship.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -102,7 +308,9 @@ export default function LandingPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="https://github.com">GitHub</Link>
+              <Link href="https://github.com/theexperiencecompany/motion-studio">
+                GitHub
+              </Link>
             </Button>
           </div>
         </div>
@@ -122,29 +330,15 @@ export default function LandingPage() {
             <Link href="/studio" className="hover:text-foreground">
               Studio
             </Link>
-            <Link href="https://github.com" className="hover:text-foreground">
+            <Link
+              href="https://github.com/theexperiencecompany/motion-studio"
+              className="hover:text-foreground"
+            >
               GitHub
             </Link>
           </div>
         </div>
       </footer>
     </div>
-  );
-}
-
-function ExperienceMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 2917 2596.22"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="currentColor"
-      className={className}
-      role="img"
-      aria-label="Experience mark"
-    >
-      <title>Experience mark</title>
-      <path d="M1622.44,1140.82c-171.36,116.77-214.77,139.74-250.51,191.19-88.78,127.78-96.18,271.9-92.01,359.66,1.39,278.81-4.67,550.16-3.28,828.96,345.66-144.48,775.49-397.08,1117.5-839.93,68.11-88.19,764.29-974.32,434.76-1414.14C2695.02,87.86,2472.17,9.71,2254.13,1.54,1326.79-33.2,487.77,525.47,151.95,1112.23c-.64,1.11-1.56,2.73-2.75,4.82-56.35,99.39-220.72,389.36-113.89,545.22,53.95,78.7,156.78,93.64,176.29,96.47,112.38,16.33,205.45-35.61,318.43-100.97,148.27-85.77,222.63-128.25,223.66-128.93,110.8-73.03,292.45-136.35,469.59-269.7.29-.22-5.45,3.27-16.33,9.79-16.76,10.04-308.69,116.63-392.68,175.06-138.48,96.34-510.4,167.8-574.85,49.34-69.83-128.33,179.85-456.19,258.84-560.82.81-1.07,7.67-10.05,14.47-18.85,308.02-397.84,704.35-550.68,775.83-577.2,384.82-142.79,938.81-197.12,1020.11-21.19,74.44,161.1-142.59,420.43-321.91,558.68" />
-      <path d="M725.26,1612.72c-105.2,54.94-195.14,88.06-247.42,105.65-176.06,59.25-231.77,31.96-238.14,11.15-8.55-27.91,185.41-97.96,209.92-107.51,74.32-28.93,99.49-36.77,163.57-65.08,45.32-20.02,142.4-66.15,243.52-144.05,10.95-8.43,20.07-15.38,32.22-25.92,40.11-34.77,90.72-81.39,132.73-158.34,37.83-69.29,49.93-165.83,54.05-252.52,4.09-.99,2.62,7.42,2.96,11.44,7.26,87.49,14.84,238.56,97.57,245.68,61.62,5.31,113.16-27.69,168.54-53.77,2.21-1.04,7.6-4.59,7.32,1.47-72.08,48.01-120.37,94.81-149.47,126.46-39.38,42.82-57.73,73.26-69.02,95.19-5.99,11.64-16.39,32.1-24.82,60.37-25.32,84.98-29.12,228.42-29.1,234.91,0,0,0,.16-.04.17-1.56.29-23.79-224.6-83.94-243.73-12.28-3.91-27.85-.72-31.49.75-14.21,5.71-110.82,90.76-238.97,157.68Z" />
-    </svg>
   );
 }

@@ -130,7 +130,7 @@ const collapsibleGroups: Array<{
 
 export function AppSidebar() {
   return (
-    <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto py-8 pr-6 pl-8 lg:block">
+    <aside className="sticky top-14 h-[calc(100vh-3.5rem)] w-52 shrink-0 overflow-y-auto border-r border-dashed border-border py-8 pr-4 pl-4 sm:w-56 sm:pl-6 sm:pr-5 lg:w-60 lg:pl-8 lg:pr-6">
       <AppSidebarNav />
     </aside>
   );

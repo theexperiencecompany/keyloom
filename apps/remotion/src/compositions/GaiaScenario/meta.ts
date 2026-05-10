@@ -5,8 +5,8 @@ import { totalDurationFrames } from "./timing";
 import type { Scenario } from "./types";
 
 export const GAIA_SCENARIO_FPS = 60;
-export const GAIA_SCENARIO_WIDTH = 1080;
-export const GAIA_SCENARIO_HEIGHT = 1920;
+export const GAIA_SCENARIO_WIDTH = 1920;
+export const GAIA_SCENARIO_HEIGHT = 1080;
 
 // Default scenario = the gold-standard "power-morning-briefing" demo from
 // gaia-demo-videos. Multi-tool flow (calendar + todos + search) with rich

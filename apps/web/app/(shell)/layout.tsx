@@ -11,9 +11,7 @@ export default function ShellLayout({
       <DocsHeader />
       <div className="flex">
         <AppSidebar />
-        <main className="flex-1 min-w-0 lg:border-l lg:border-dashed lg:border-white/10">
-          {children}
-        </main>
+        <main className="flex-1 min-w-0">{children}</main>
       </div>
     </div>
   );

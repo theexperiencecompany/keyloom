@@ -1,9 +1,9 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
-  ArrowDown01Icon,
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
+  ArrowLeft02Icon,
+  ArrowRight02Icon,
   Books02Icon,
-  Copy01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -18,10 +18,28 @@ import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import type { Doc } from "@/lib/docs";
 import { getAdjacent } from "@/lib/docs";
+import { CopyPageButton } from "./copy-page-button";
+
+function slugToFilename(slug: string): string {
+  return slug.replace(/[A-Z]/g, (ch, offset: number) =>
+    offset === 0 ? ch.toLowerCase() : "-" + ch.toLowerCase(),
+  );
+}
 
 export function DocsShell({ doc }: { doc: Doc }) {
   const { prev, next } = getAdjacent(doc.slug);
   const Content = doc.Content;
+
+  const filename = slugToFilename(doc.slug);
+  let rawContent = "";
+  try {
+    rawContent = readFileSync(
+      join(process.cwd(), "content/docs", `${filename}.mdx`),
+      "utf-8",
+    );
+  } catch {
+    rawContent = "";
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 py-8 sm:px-6 md:py-10 lg:px-8 xl:px-12">
@@ -39,24 +57,12 @@ export function DocsShell({ doc }: { doc: Doc }) {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-start sm:gap-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {doc.meta.title}
             </h1>
             <div className="flex shrink-0 items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden gap-1.5 text-[12px] sm:flex"
-              >
-                <HugeiconsIcon icon={Copy01Icon} size={12} />
-                <span>Copy Page</span>
-                <HugeiconsIcon
-                  icon={ArrowDown01Icon}
-                  size={12}
-                  className="text-muted-foreground"
-                />
-              </Button>
+              <CopyPageButton content={rawContent} />
               <NavButton
                 href={prev?.href}
                 label="Previous page"
@@ -80,7 +86,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
                 href={prev.href}
                 className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+                <HugeiconsIcon icon={ArrowLeft02Icon} size={14} />
                 {prev.label}
               </Link>
             ) : (
@@ -92,7 +98,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
                 className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 {next.label}
-                <HugeiconsIcon icon={ArrowRight01Icon} size={14} />
+                <HugeiconsIcon icon={ArrowRight02Icon} size={14} />
               </Link>
             ) : (
               <span />
@@ -134,7 +140,7 @@ function NavButton({
   label: string;
   direction: "prev" | "next";
 }) {
-  const icon = direction === "prev" ? ArrowLeft01Icon : ArrowRight01Icon;
+  const icon = direction === "prev" ? ArrowLeft02Icon : ArrowRight02Icon;
   if (!href) {
     return (
       <Button variant="outline" size="icon-sm" aria-label={label} disabled>
