@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextShortSlideDownProps } from "./TextShortSlideDown";
 
-export const TEXT_SHORT_SLIDE_DOWN_DURATION = 300;
+export const TEXT_SHORT_SLIDE_DOWN_DURATION = 100;
 export const TEXT_SHORT_SLIDE_DOWN_FPS = 60;
 export const TEXT_SHORT_SLIDE_DOWN_WIDTH = 1920;
 export const TEXT_SHORT_SLIDE_DOWN_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TEXT_SHORT_SLIDE_DOWN_HEIGHT = 1080;
 export const textShortSlideDownDefaultProps: TextShortSlideDownProps = {
   headline: "Drop it down",
   subtitle: "Top-down kinetic build",
-  backgroundColor: "#0f1014",
-  textColor: "#ffffff",
 };
 
 export const textShortSlideDownInfo: CompositionInfo<TextShortSlideDownProps> =

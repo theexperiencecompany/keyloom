@@ -7,12 +7,12 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type TypingComposerProps = {
   query: string;
   placeholder: string;
-  backgroundColor: string;
-  accentColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const BAR_APPEAR_START = 0;
@@ -55,11 +55,18 @@ const PLACEHOLDER_COLOR = "#a1a1aa";
 export const TypingComposer: React.FC<TypingComposerProps> = ({
   query,
   placeholder,
-  backgroundColor,
-  accentColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#111111",
+    color: "#ffffff",
+    fontFamily:
+      "Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+    accent: "#00bbff",
+  });
+  const accentColor = s.accent;
 
   const barProgress = spring({
     frame: frame - BAR_APPEAR_START,
@@ -150,9 +157,8 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        fontFamily:
-          "Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+        background: s.background,
+        fontFamily: s.fontFamily,
       }}
     >
       {/* searchbar — bg-zinc-800 rounded-3xl px-1 pt-1 pb-2 */}

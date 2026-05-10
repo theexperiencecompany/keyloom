@@ -1,3 +1,4 @@
+import type { ClipStyle } from "@workspace/compositions/clip-style";
 import { effectsById } from "@workspace/compositions/effects/registry";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
 import {
@@ -35,6 +36,8 @@ export type StudioAction =
     }
   | { type: "SELECT_CLIP"; clipId: string | null }
   | { type: "TOGGLE_PANEL"; panel: StudioPanel }
+  | { type: "UPDATE_CLIP_STYLE"; clipId: string; patch: Partial<ClipStyle> }
+  | { type: "RESET_CLIP_STYLE"; clipId: string }
   | { type: "LOAD_PROJECT"; project: Project };
 
 export const initialStudioState: StudioState = {
@@ -133,6 +136,23 @@ export function studioReducer(
               ),
             }
           : c,
+      );
+      return { ...state, project: { ...state.project, clips } };
+    }
+    case "UPDATE_CLIP_STYLE": {
+      const clips = state.project.clips.map((c) =>
+        c.id === action.clipId
+          ? {
+              ...c,
+              style: { ...(c.style ?? {}), ...action.patch },
+            }
+          : c,
+      );
+      return { ...state, project: { ...state.project, clips } };
+    }
+    case "RESET_CLIP_STYLE": {
+      const clips = state.project.clips.map((c) =>
+        c.id === action.clipId ? { ...c, style: undefined } : c,
       );
       return { ...state, project: { ...state.project, clips } };
     }

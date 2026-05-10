@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TitlePopupProps } from "./TitlePopup";
 
-export const TITLE_POPUP_DURATION = 200;
+export const TITLE_POPUP_DURATION = 100;
 export const TITLE_POPUP_FPS = 60;
 export const TITLE_POPUP_WIDTH = 1920;
 export const TITLE_POPUP_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TITLE_POPUP_HEIGHT = 1080;
 export const titlePopupDefaultProps: TitlePopupProps = {
   headline: "Boom.",
   subtitle: "Just like that.",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
 };
 
 export const titlePopupInfo: CompositionInfo<TitlePopupProps> = {

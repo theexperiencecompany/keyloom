@@ -49,6 +49,16 @@ export type CalculatedMetadata = {
   props?: any;
 };
 
+/**
+ * brandMode controls whether a composition inherits the project Brand Kit:
+ *   - "branded" (default): accent / background / font fall back to the brand
+ *     when the per-clip prop is omitted or empty.
+ *   - "locked": the composition impersonates a real product (Twitter,
+ *     WhatsApp, Slack, Discord, iMessage, etc.) and ignores the brand kit
+ *     to keep the look authentic.
+ */
+export type BrandMode = "branded" | "locked";
+
 export type CompositionInfo<P extends Record<string, unknown>> = {
   id: string;
   title: string;
@@ -59,6 +69,7 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
   height: number;
   defaultProps: P;
   fields: Field[];
+  brandMode?: BrandMode;
   // Optional callback Remotion runs at studio load + every prop edit.
   // Use this to recompute durationInFrames (or any metadata) from
   // current props — e.g. GaiaScenario derives its length from the

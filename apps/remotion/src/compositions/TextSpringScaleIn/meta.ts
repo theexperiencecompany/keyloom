@@ -2,13 +2,11 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextSpringScaleInProps } from "./TextSpringScaleIn";
 
-export const TEXT_SPRING_SCALE_IN_DURATION = 220;
+export const TEXT_SPRING_SCALE_IN_DURATION = 100;
 
 const defaultProps: TextSpringScaleInProps = {
   headline: "Bold and alive",
   subtitle: "Spring into action",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
 };
 
 export const textSpringScaleInInfo: CompositionInfo<TextSpringScaleInProps> = {

@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextBottomUpLettersProps } from "./TextBottomUpLetters";
 
-export const TEXT_BOTTOM_UP_LETTERS_DURATION = 220;
+export const TEXT_BOTTOM_UP_LETTERS_DURATION = 100;
 export const TEXT_BOTTOM_UP_LETTERS_FPS = 60;
 export const TEXT_BOTTOM_UP_LETTERS_WIDTH = 1920;
 export const TEXT_BOTTOM_UP_LETTERS_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TEXT_BOTTOM_UP_LETTERS_HEIGHT = 1080;
 export const textBottomUpLettersDefaultProps: TextBottomUpLettersProps = {
   headline: "ASCEND",
   subtitle: "One letter at a time",
-  backgroundColor: "#0f1014",
-  textColor: "#ffffff",
 };
 
 export const textBottomUpLettersInfo: CompositionInfo<TextBottomUpLettersProps> =

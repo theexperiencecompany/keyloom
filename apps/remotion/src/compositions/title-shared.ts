@@ -1,12 +1,33 @@
+import {
+  type ClipStyle,
+  type ClipStyleDefaults,
+  resolveClipStyle,
+} from "../clip-style";
+
+/**
+ * Shared prop shape used by every Title* and Text* composition. The
+ * universal Style controls (background / text color / font / accent) live
+ * on `clipStyle`; per-clip text content lives on `headline` and `subtitle`.
+ */
 export type TitleProps = {
   headline: string;
   subtitle: string;
-  backgroundColor: string;
-  textColor: string;
+  clipStyle?: ClipStyle;
 };
 
 export const TITLE_FONT_FAMILY =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+
+export const TITLE_DEFAULTS: ClipStyleDefaults = {
+  background: "#ffffff",
+  color: "#0f1014",
+  fontFamily: TITLE_FONT_FAMILY,
+  accent: "#0f1014",
+};
+
+export function resolveTitleStyle(clipStyle: ClipStyle | undefined) {
+  return resolveClipStyle(clipStyle, TITLE_DEFAULTS);
+}
 
 export function isDarkColor(color: string): boolean {
   const c = color.trim().toLowerCase();
@@ -27,6 +48,11 @@ export function getSubtitleColor(textColor: string): string {
     : "rgba(255,255,255,0.65)";
 }
 
+/**
+ * Field set for every Title* / Text* composition. Note: NO color or font
+ * fields here — those are handled universally via the Studio's Style
+ * section (see `clip-style.ts`).
+ */
 export const TITLE_FIELDS = [
   { kind: "textarea" as const, key: "headline", label: "Headline", rows: 2 },
   {
@@ -35,6 +61,4 @@ export const TITLE_FIELDS = [
     label: "Subtitle (optional)",
     rows: 2,
   },
-  { kind: "color" as const, key: "backgroundColor", label: "Background color" },
-  { kind: "color" as const, key: "textColor", label: "Text color" },
 ];

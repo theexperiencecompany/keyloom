@@ -9,7 +9,6 @@ export const LAPTOP_FRAME_HEIGHT = 1080;
 export const laptopFrameDefaultProps: LaptopFrameProps = {
   chassis: "space-gray",
   innerCompositionId: "BrowserWindow",
-  backgroundColor: "#ffffff",
   screenImage: "",
 };
 
@@ -45,6 +44,5 @@ export const laptopFrameInfo: CompositionInfo<LaptopFrameProps> = {
       label: "Screen content",
       exclude: ["LaptopFrame", "PhoneFrame"],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

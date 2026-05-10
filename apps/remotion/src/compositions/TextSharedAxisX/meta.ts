@@ -7,15 +7,13 @@ export const textSharedAxisXInfo: CompositionInfo<TextSharedAxisXProps> = {
   title: "Slide In",
   description:
     "Horizontal shared-axis transition for sibling destinations with continuity.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,
   defaultProps: {
     headline: "Moving forward",
     subtitle: "Horizontal continuity",
-    backgroundColor: "#ffffff",
-    textColor: "#0f1014",
   },
   fields: TITLE_FIELDS,
 };

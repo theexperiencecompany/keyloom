@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TitleSlideUpProps } from "./TitleSlideUp";
 
-export const TITLE_SLIDE_UP_DURATION = 240;
+export const TITLE_SLIDE_UP_DURATION = 100;
 export const TITLE_SLIDE_UP_FPS = 60;
 export const TITLE_SLIDE_UP_WIDTH = 1920;
 export const TITLE_SLIDE_UP_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TITLE_SLIDE_UP_HEIGHT = 1080;
 export const titleSlideUpDefaultProps: TitleSlideUpProps = {
   headline: "Designed in California",
   subtitle: "Assembled with care",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
 };
 
 export const titleSlideUpInfo: CompositionInfo<TitleSlideUpProps> = {

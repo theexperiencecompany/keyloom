@@ -2,7 +2,7 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
-  TITLE_FONT_FAMILY,
+  resolveTitleStyle,
   type TitleProps,
 } from "../title-shared";
 
@@ -18,10 +18,10 @@ const WORD_DURATION = 42;
 export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
   headline,
   subtitle,
-  backgroundColor,
-  textColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
+  const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const lastWordEnd =
@@ -41,9 +41,9 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        color: textColor,
-        fontFamily: TITLE_FONT_FAMILY,
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -104,7 +104,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
             fontWeight: 400,
             letterSpacing: "-0.012em",
             margin: "32px 0 0",
-            color: getSubtitleColor(textColor),
+            color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
             transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
             willChange: "transform, opacity",

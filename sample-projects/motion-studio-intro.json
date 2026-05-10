@@ -1,0 +1,179 @@
+{
+  "fps": 60,
+  "width": 1920,
+  "height": 1080,
+  "clips": [
+    {
+      "id": "c1-hook",
+      "compositionId": "TextSoftBlurIn",
+      "props": {
+        "headline": "Wait.",
+        "subtitle": ""
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c2-question",
+      "compositionId": "TextLineByLineSlide",
+      "props": {
+        "headline": "What if your launch video\nmade itself?",
+        "subtitle": ""
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c3-brand-reveal",
+      "compositionId": "TitleSlideUp",
+      "props": {
+        "headline": "Motion Studio",
+        "subtitle": "Designed motion. Shipped in minutes."
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c4-stat-speed",
+      "compositionId": "MetricCard",
+      "props": {
+        "value": 10,
+        "prefix": "",
+        "suffix": "×",
+        "label": "faster than your design tool",
+        "sublabel": "Average launch-video time vs. After Effects",
+        "theme": "dark"
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c5-feature",
+      "compositionId": "FeatureCard",
+      "props": {
+        "icon": "⚡",
+        "title": "Drop, drag, render.",
+        "body": "Pick a scene. Tweak the words. Hit export. That's the whole loop.",
+        "theme": "dark"
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c6-shimmer",
+      "compositionId": "TextShimmerSweep",
+      "props": {
+        "headline": "Trusted by builders who ship fast.",
+        "subtitle": ""
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c7-tweet",
+      "compositionId": "TweetCard",
+      "props": {
+        "displayName": "Theo",
+        "handle": "@t3dotgg",
+        "avatarUrl": "https://github.com/t3dotgg.png?size=200",
+        "verified": "yes",
+        "text": "ok this is actually unreal 🤯 made my whole launch video in 4 minutes",
+        "timestamp": "11:42 PM · today",
+        "replies": 124,
+        "retweets": 1842,
+        "likes": 15203,
+        "views": 312000,
+        "theme": "dark",
+        "backgroundColor": "#0a0a0c"
+      }
+    },
+    {
+      "id": "c8-stat-price",
+      "compositionId": "MetricCard",
+      "props": {
+        "value": 0,
+        "prefix": "$",
+        "suffix": "",
+        "label": "forever free tier",
+        "sublabel": "Pay only when you're shipping at scale.",
+        "theme": "dark"
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c9-testimonial",
+      "compositionId": "TestimonialCard",
+      "props": {
+        "quote": "We replaced three tools and shipped our launch in half the time. The most thoughtful product we've used all year.",
+        "avatarUrl": "https://github.com/t3dotgg.png?size=200",
+        "name": "Theo Browne",
+        "role": "Founder",
+        "company": "Ping",
+        "theme": "dark"
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c10-cta",
+      "compositionId": "TextStaggerFromCenter",
+      "props": {
+        "headline": "Try it free.",
+        "subtitle": ""
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    },
+    {
+      "id": "c11-outro",
+      "compositionId": "TitleFade",
+      "props": {
+        "headline": "motionstudio.app",
+        "subtitle": "ready when you are"
+      },
+      "style": {
+        "backgroundColor": "#0a0a0c",
+        "textColor": "#ffffff",
+        "fontFamily": "\"Geist\", \"Inter\", system-ui, sans-serif",
+        "accentColor": "#6366f1"
+      }
+    }
+  ]
+}

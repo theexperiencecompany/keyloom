@@ -1,0 +1,31 @@
+export const meta = {
+  title: "Instagram Messages",
+  description:
+    "An animated Instagram DM conversation with the gradient sent bubble, typing dots, and stacking spring physics.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="InstagramMessages" />
+
+<EditorLink id="InstagramMessages" />
+
+## Usage
+
+Instagram DM variant of the messages template. `side: "right"` is the gradient sent bubble (Instagram's signature purple → pink → orange), `side: "left"` is the grey received bubble. The header shows the contact name with an `Active now` indicator and the gradient story ring around the avatar.
+
+Same `ChatMessage` shape as the iMessage and WhatsApp components — `text`, `side`, `typingFrames`, `delay`. Bubbles spring in, the typing dots show until `typingFrames` elapses, then the bubble pops in. Older messages slide upward when newer ones arrive.
+
+## Props
+
+<PropsTable id="InstagramMessages" />
+
+## Composition
+
+<CompositionStats id="InstagramMessages" />

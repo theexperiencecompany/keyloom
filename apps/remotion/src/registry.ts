@@ -4,6 +4,8 @@ import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 import { featureCardInfo } from "./compositions/FeatureCard/meta";
 import { gaiaScenarioInfo } from "./compositions/GaiaScenario/meta";
+import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
+import { instagramPostInfo } from "./compositions/InstagramPost/meta";
 import { laptopFrameInfo } from "./compositions/LaptopFrame/meta";
 import { logoCloudInfo } from "./compositions/LogoCloud/meta";
 import { messageBubblesInfo } from "./compositions/MessageBubbles/meta";
@@ -64,9 +66,11 @@ export const compositions: AnyCompositionInfo[] = [
   statCounterInfo,
   tweetCardInfo,
   twitterFollowInfo,
+  instagramPostInfo,
   messagePopupInfo,
   messageBubblesInfo,
   whatsappMessagesInfo,
+  instagramMessagesInfo,
   slackMessagesInfo,
   discordMessagesInfo,
   phoneFrameInfo,

@@ -6,14 +6,15 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { compositionsById } from "../../registry";
 
 export type LaptopFrameProps = {
   chassis: "silver" | "space-gray";
   innerCompositionId: string;
-  backgroundColor: string;
   screenImage: string;
+  clipStyle?: ClipStyle;
 };
 
 const LID_W = 1440;
@@ -57,11 +58,18 @@ function getChassis(chassis: LaptopFrameProps["chassis"]): ChassisColors {
 export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   chassis,
   innerCompositionId,
-  backgroundColor,
   screenImage,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+    accent: "#0a84ff",
+  });
 
   const drop = spring({
     frame,
@@ -78,7 +86,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
+        background: s.background,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

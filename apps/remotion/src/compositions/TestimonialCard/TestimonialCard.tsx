@@ -6,6 +6,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type TestimonialCardProps = {
   quote: string;
@@ -14,8 +15,7 @@ export type TestimonialCardProps = {
   role: string;
   company: string;
   theme: "light" | "dark";
-  accentColor: string;
-  backgroundColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const D_CARD = 0;
@@ -30,12 +30,21 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   role,
   company,
   theme,
-  accentColor,
-  backgroundColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
+  const s = resolveClipStyle(clipStyle, {
+    background: "#f7f7f9",
+    color: isDark ? "#ffffff" : "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#6366f1",
+  });
+  const accent = s.accent;
+  const bg = s.background;
+  const fontFamily = s.fontFamily;
 
   const cardBg = isDark ? "#15161A" : "#ffffff";
   const text = isDark ? "#ffffff" : "#0f1014";
@@ -57,12 +66,11 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
+        background: bg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        fontFamily,
       }}
     >
       <div
@@ -87,7 +95,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
             left: 36,
             fontSize: 180,
             lineHeight: 1,
-            color: accentColor,
+            color: accent,
             fontFamily: "Georgia, serif",
             fontWeight: 800,
             opacity: markPop * 0.18,
@@ -160,7 +168,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
               >
                 {role}
                 {company ? (
-                  <span style={{ color: accentColor }}> · {company}</span>
+                  <span style={{ color: accent }}> · {company}</span>
                 ) : null}
               </div>
             </div>

@@ -129,6 +129,18 @@ const collapsibleGroups: Array<{
 ];
 
 export function AppSidebar() {
+  return (
+    <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto py-8 pr-6 pl-8 lg:block">
+      <AppSidebarNav />
+    </aside>
+  );
+}
+
+export function AppSidebarNav({
+  onNavigate,
+}: {
+  onNavigate?: () => void;
+} = {}) {
   const pathname = usePathname();
 
   const navLink = (item: NavItem) => {
@@ -137,6 +149,7 @@ export function AppSidebar() {
       <li key={item.href}>
         <Link
           href={item.href}
+          onClick={onNavigate}
           className={`group relative flex h-8 items-center gap-2.5 rounded-md px-3 text-[13px] transition-all duration-150 ease-out ${
             active
               ? "bg-accent font-medium text-foreground"
@@ -167,36 +180,34 @@ export function AppSidebar() {
   const defaultOpen = populatedGroups.map((g) => g.value);
 
   return (
-    <aside className="sticky top-14 h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto py-8 pr-6 pl-8">
-      <nav className="space-y-7">
-        <div>
-          <p className="mb-1 px-3 text-[11px] font-semibold text-muted-foreground/70">
-            Getting Started
-          </p>
-          <ul className="space-y-px">{gettingStarted.map(navLink)}</ul>
-        </div>
+    <nav className="space-y-7">
+      <div>
+        <p className="mb-1 px-3 text-[11px] font-semibold text-muted-foreground/70">
+          Getting Started
+        </p>
+        <ul className="space-y-px">{gettingStarted.map(navLink)}</ul>
+      </div>
 
-        <Accordion
-          type="multiple"
-          defaultValue={defaultOpen}
-          className="space-y-5"
-        >
-          {populatedGroups.map((group) => (
-            <AccordionItem
-              key={group.value}
-              value={group.value}
-              className="border-none"
-            >
-              <AccordionTrigger className="mb-1 px-3 py-0 text-[11px] font-semibold text-muted-foreground/70 hover:no-underline [&>svg]:size-3">
-                {group.section}
-              </AccordionTrigger>
-              <AccordionContent className="pt-0 pb-0">
-                <ul className="space-y-px">{group.items.map(navLink)}</ul>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </nav>
-    </aside>
+      <Accordion
+        type="multiple"
+        defaultValue={defaultOpen}
+        className="space-y-5"
+      >
+        {populatedGroups.map((group) => (
+          <AccordionItem
+            key={group.value}
+            value={group.value}
+            className="border-none"
+          >
+            <AccordionTrigger className="mb-1 px-3 py-0 text-[11px] font-semibold text-muted-foreground/70 hover:no-underline [&>svg]:size-3">
+              {group.section}
+            </AccordionTrigger>
+            <AccordionContent className="pt-0 pb-0">
+              <ul className="space-y-px">{group.items.map(navLink)}</ul>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </nav>
   );
 }

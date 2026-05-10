@@ -7,15 +7,13 @@ export const textScaleDownFadeInfo: CompositionInfo<TextScaleDownFadeProps> = {
   title: "Settle In",
   description:
     "Subtle premium settle-in with a restrained scale-down fade on exit.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,
   defaultProps: {
     headline: "Premium settle",
     subtitle: "Restrained and precise",
-    backgroundColor: "#ffffff",
-    textColor: "#0f1014",
   },
   fields: TITLE_FIELDS,
 };

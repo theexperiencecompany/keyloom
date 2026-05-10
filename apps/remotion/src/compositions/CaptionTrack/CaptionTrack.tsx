@@ -5,22 +5,28 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type CaptionTrackProps = {
   text: string;
-  backgroundColor: string;
-  textColor: string;
   wordsPerSecond: number;
+  clipStyle?: ClipStyle;
 };
 
 export const CaptionTrack: React.FC<CaptionTrackProps> = ({
   text,
-  backgroundColor,
-  textColor,
   wordsPerSecond,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#0a84ff",
+  });
 
   const words = text.trim().split(/\s+/).filter(Boolean);
   const framesPerWord = Math.max(
@@ -47,13 +53,12 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
+        background: s.background,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "0 80px",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        fontFamily: s.fontFamily,
       }}
     >
       {word && (
@@ -63,7 +68,7 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
             fontWeight: 700,
             letterSpacing: "-0.045em",
             lineHeight: 1.05,
-            color: textColor,
+            color: s.color,
             textAlign: "center",
             transform: `scale(${0.7 + wordPop * 0.3})`,
             opacity: wordPop,

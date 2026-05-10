@@ -6,6 +6,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type LogoItem = {
   name: string;
@@ -16,7 +17,7 @@ export type LogoCloudProps = {
   headline: string;
   logos: LogoItem[];
   theme: "light" | "dark";
-  backgroundColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const D_HEADLINE = 0;
@@ -27,11 +28,20 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
   headline,
   logos,
   theme,
-  backgroundColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
+  const s = resolveClipStyle(clipStyle, {
+    background: "#f7f7f9",
+    color: isDark ? "#ffffff" : "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#6366f1",
+  });
+  const bg = s.background;
+  const fontFamily = s.fontFamily;
 
   const text = isDark ? "#ffffff" : "#0f1014";
   const muted = isDark ? "rgba(255,255,255,0.55)" : "rgba(15,16,20,0.55)";
@@ -45,14 +55,13 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
+        background: bg,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         padding: "0 80px",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        fontFamily,
       }}
     >
       <div

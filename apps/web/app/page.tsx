@@ -8,9 +8,9 @@ import { FeaturedComponents } from "@/components/featured-components";
 
 const FEATURED_IDS = [
   "TweetCard",
-  "TitleSlideUp",
+  "TypingSearch",
   "MessageBubbles",
-  "BrowserWindow",
+  "InstagramMessages",
 ];
 
 export default function LandingPage() {

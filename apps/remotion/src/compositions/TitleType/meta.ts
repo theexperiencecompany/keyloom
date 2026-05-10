@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TitleTypeProps } from "./TitleType";
 
-export const TITLE_TYPE_DURATION = 240;
+export const TITLE_TYPE_DURATION = 100;
 export const TITLE_TYPE_FPS = 60;
 export const TITLE_TYPE_WIDTH = 1920;
 export const TITLE_TYPE_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TITLE_TYPE_HEIGHT = 1080;
 export const titleTypeDefaultProps: TitleTypeProps = {
   headline: "hello, world.",
   subtitle: "now typing live",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
 };
 
 export const titleTypeInfo: CompositionInfo<TitleTypeProps> = {

@@ -14,6 +14,12 @@ import DiscordMessagesMDX, {
 import FeatureCardMDX, {
   meta as featureCardMeta,
 } from "@/content/docs/feature-card.mdx";
+import InstagramMessagesMDX, {
+  meta as instagramMessagesMeta,
+} from "@/content/docs/instagram-messages.mdx";
+import InstagramPostMDX, {
+  meta as instagramPostMeta,
+} from "@/content/docs/instagram-post.mdx";
 import IntroductionMDX, {
   meta as introductionMeta,
 } from "@/content/docs/introduction.mdx";
@@ -371,6 +377,12 @@ export const docs: Doc[] = [
     Content: TwitterFollowMDX,
   },
   {
+    slug: "InstagramPost",
+    href: "/docs/InstagramPost",
+    meta: instagramPostMeta,
+    Content: InstagramPostMDX,
+  },
+  {
     slug: "CursorWalkthrough",
     href: "/docs/CursorWalkthrough",
     meta: cursorWalkthroughMeta,
@@ -405,6 +417,12 @@ export const docs: Doc[] = [
     href: "/docs/WhatsAppMessages",
     meta: whatsappMessagesMeta,
     Content: WhatsAppMessagesMDX,
+  },
+  {
+    slug: "InstagramMessages",
+    href: "/docs/InstagramMessages",
+    meta: instagramMessagesMeta,
+    Content: InstagramMessagesMDX,
   },
   {
     slug: "SlackMessages",

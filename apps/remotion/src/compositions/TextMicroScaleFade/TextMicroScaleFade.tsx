@@ -2,7 +2,7 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
-  TITLE_FONT_FAMILY,
+  resolveTitleStyle,
   type TitleProps,
 } from "../title-shared";
 
@@ -17,10 +17,10 @@ const HEADLINE_DURATION = 36;
 export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
   headline,
   subtitle,
-  backgroundColor,
-  textColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
+  const s = resolveTitleStyle(clipStyle);
 
   const headlineProgress = interpolate(
     frame,
@@ -42,9 +42,9 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        color: textColor,
-        fontFamily: TITLE_FONT_FAMILY,
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -75,7 +75,7 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
             fontWeight: 400,
             letterSpacing: "-0.012em",
             margin: "32px 0 0",
-            color: getSubtitleColor(textColor),
+            color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
             transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
             willChange: "transform, opacity",

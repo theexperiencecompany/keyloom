@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TweetCardProps } from "./TweetCard";
 
-export const TWEET_CARD_DURATION = 300;
+export const TWEET_CARD_DURATION = 140;
 export const TWEET_CARD_FPS = 60;
 export const TWEET_CARD_WIDTH = 1920;
 export const TWEET_CARD_HEIGHT = 1080;
@@ -31,6 +31,7 @@ export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
   width: TWEET_CARD_WIDTH,
   height: TWEET_CARD_HEIGHT,
   defaultProps: tweetCardDefaultProps,
+  brandMode: "locked",
   fields: [
     { kind: "text", key: "displayName", label: "Display name" },
     { kind: "text", key: "handle", label: "Handle" },

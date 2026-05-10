@@ -2,7 +2,7 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextKineticCenterBuildProps } from "./TextKineticCenterBuild";
 
-export const TEXT_KINETIC_CENTER_BUILD_DURATION = 300;
+export const TEXT_KINETIC_CENTER_BUILD_DURATION = 100;
 export const TEXT_KINETIC_CENTER_BUILD_FPS = 60;
 export const TEXT_KINETIC_CENTER_BUILD_WIDTH = 1920;
 export const TEXT_KINETIC_CENTER_BUILD_HEIGHT = 1080;
@@ -10,8 +10,6 @@ export const TEXT_KINETIC_CENTER_BUILD_HEIGHT = 1080;
 export const textKineticCenterBuildDefaultProps: TextKineticCenterBuildProps = {
   headline: "Words push left",
   subtitle: "Kinetic center build",
-  backgroundColor: "#0f1014",
-  textColor: "#ffffff",
 };
 
 export const textKineticCenterBuildInfo: CompositionInfo<TextKineticCenterBuildProps> =

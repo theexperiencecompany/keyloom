@@ -8,7 +8,6 @@ export const CURSOR_WALKTHROUGH_HEIGHT = 1080;
 
 export const cursorWalkthroughDefaultProps: CursorWalkthroughProps = {
   backgroundImageUrl: "",
-  backgroundColor: "#ffffff",
   firstClickX: 720,
   firstClickY: 480,
   firstClickLabel: "Open the search",
@@ -16,7 +15,6 @@ export const cursorWalkthroughDefaultProps: CursorWalkthroughProps = {
   secondClickX: 1280,
   secondClickY: 720,
   secondClickLabel: "Hit search",
-  accentColor: "#0a84ff",
 };
 
 export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
@@ -35,7 +33,6 @@ export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
       key: "backgroundImageUrl",
       label: "Background image URL",
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
     { kind: "number", key: "firstClickX", label: "First click X", min: 0 },
     { kind: "number", key: "firstClickY", label: "First click Y", min: 0 },
     { kind: "text", key: "firstClickLabel", label: "First click label" },
@@ -43,6 +40,5 @@ export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
     { kind: "number", key: "secondClickX", label: "Second click X", min: 0 },
     { kind: "number", key: "secondClickY", label: "Second click Y", min: 0 },
     { kind: "text", key: "secondClickLabel", label: "Second click label" },
-    { kind: "color", key: "accentColor", label: "Accent color" },
   ],
 };

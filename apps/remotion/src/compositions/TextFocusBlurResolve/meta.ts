@@ -8,15 +8,13 @@ export const textFocusBlurResolveInfo: CompositionInfo<TextFocusBlurResolveProps
     title: "Focus Pull",
     description:
       "A premium focus pull from heavy blur to crisp text, then a soft blur-out exit.",
-    durationInFrames: 220,
+    durationInFrames: 100,
     fps: 60,
     width: 1920,
     height: 1080,
     defaultProps: {
       headline: "Sharp resolve",
       subtitle: "From blur to clarity",
-      backgroundColor: "#0a0a0a",
-      textColor: "#ffffff",
     },
     fields: TITLE_FIELDS,
   };

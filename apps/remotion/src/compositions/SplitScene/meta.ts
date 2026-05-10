@@ -10,7 +10,6 @@ export const SPLIT_SCENE_HEIGHT = 1080;
 export const splitSceneDefaultProps: SplitSceneProps = {
   layout: "side-by-side",
   slots: ["TweetCard", "StatCounter"],
-  backgroundColor: "#0f1014",
   gap: 16,
 };
 
@@ -44,7 +43,6 @@ export const splitSceneInfo: CompositionInfo<SplitSceneProps> = {
       counts: LAYOUT_SLOT_COUNTS,
       exclude: ["SplitScene"],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
     { kind: "number", key: "gap", label: "Gap (px)", min: 0, max: 80 },
   ],
 };

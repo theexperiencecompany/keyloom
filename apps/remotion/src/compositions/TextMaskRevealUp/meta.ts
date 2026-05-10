@@ -7,15 +7,13 @@ export const textMaskRevealUpInfo: CompositionInfo<TextMaskRevealUpProps> = {
   title: "Line Reveal",
   description:
     "Lines reveal upward with a soft masked feel and compact stagger.",
-  durationInFrames: 220,
+  durationInFrames: 100,
   fps: 60,
   width: 1920,
   height: 1080,
   defaultProps: {
     headline: "Line one\nLine two\nLine three",
     subtitle: "Lines rise together",
-    backgroundColor: "#ffffff",
-    textColor: "#0f1014",
   },
   fields: TITLE_FIELDS,
 };

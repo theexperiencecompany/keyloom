@@ -1,6 +1,6 @@
 "use client";
 
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import { useClipDurationInFrames } from "./clip-context";
 import type { EffectInfo } from "./schema";
 
@@ -22,18 +22,20 @@ export function KenBurns({
   const frame = useCurrentFrame();
   const duration = Math.max(1, useClipDurationInFrames());
 
-  const scale = interpolate(frame, [0, duration - 1], [fromScale, toScale], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const tx = interpolate(frame, [0, duration - 1], [0, panX], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-  const ty = interpolate(frame, [0, duration - 1], [0, panY], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
+  // Smooth ease-in-out so the camera drift starts and ends gently.
+  const easeOpts = {
+    extrapolateLeft: "clamp" as const,
+    extrapolateRight: "clamp" as const,
+    easing: Easing.bezier(0.4, 0, 0.2, 1),
+  };
+  const scale = interpolate(
+    frame,
+    [0, duration - 1],
+    [fromScale, toScale],
+    easeOpts,
+  );
+  const tx = interpolate(frame, [0, duration - 1], [0, panX], easeOpts);
+  const ty = interpolate(frame, [0, duration - 1], [0, panY], easeOpts);
 
   return (
     <AbsoluteFill

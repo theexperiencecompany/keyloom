@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { MetricCardProps } from "./MetricCard";
 
-export const METRIC_CARD_DURATION = 180;
+export const METRIC_CARD_DURATION = 100;
 export const METRIC_CARD_FPS = 60;
 export const METRIC_CARD_WIDTH = 1280;
 export const METRIC_CARD_HEIGHT = 720;
@@ -13,8 +13,6 @@ export const metricCardDefaultProps: MetricCardProps = {
   label: "faster than ever",
   sublabel: "Average response time vs. last quarter",
   theme: "light",
-  accentColor: "#6366f1",
-  backgroundColor: "#f7f7f9",
 };
 
 export const metricCardInfo: CompositionInfo<MetricCardProps> = {
@@ -42,7 +40,5 @@ export const metricCardInfo: CompositionInfo<MetricCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "accentColor", label: "Accent color" },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

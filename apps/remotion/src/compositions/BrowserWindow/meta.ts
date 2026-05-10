@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { BrowserWindowProps } from "./BrowserWindow";
 
-export const BROWSER_WINDOW_DURATION = 280;
+export const BROWSER_WINDOW_DURATION = 130;
 export const BROWSER_WINDOW_FPS = 60;
 export const BROWSER_WINDOW_WIDTH = 1920;
 export const BROWSER_WINDOW_HEIGHT = 1080;
@@ -10,7 +10,6 @@ export const browserWindowDefaultProps: BrowserWindowProps = {
   url: "https://aesthetic.dev",
   pageImageUrl: "",
   pageBackgroundColor: "#fafafa",
-  backgroundColor: "#ffffff",
 };
 
 export const browserWindowInfo: CompositionInfo<BrowserWindowProps> = {
@@ -31,6 +30,5 @@ export const browserWindowInfo: CompositionInfo<BrowserWindowProps> = {
       key: "pageBackgroundColor",
       label: "Page background color",
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

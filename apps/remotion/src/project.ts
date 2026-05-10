@@ -1,3 +1,4 @@
+import type { ClipStyle } from "./clip-style";
 import type { ClipEffect } from "./effects/schema";
 
 export type Clip = {
@@ -6,6 +7,8 @@ export type Clip = {
   props: Record<string, unknown>;
   durationInFrames: number;
   effects?: ClipEffect[];
+  /** Universal visual overrides — see `clip-style.ts`. */
+  style?: ClipStyle;
 };
 
 export type Project = {

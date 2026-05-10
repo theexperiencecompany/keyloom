@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { LogoCloudProps } from "./LogoCloud";
 
-export const LOGO_CLOUD_DURATION = 240;
+export const LOGO_CLOUD_DURATION = 100;
 export const LOGO_CLOUD_FPS = 60;
 export const LOGO_CLOUD_WIDTH = 1280;
 export const LOGO_CLOUD_HEIGHT = 720;
@@ -16,7 +16,6 @@ export const logoCloudDefaultProps: LogoCloudProps = {
     { name: "Figma", url: "" },
   ],
   theme: "light",
-  backgroundColor: "#f7f7f9",
 };
 
 export const logoCloudInfo: CompositionInfo<LogoCloudProps> = {
@@ -40,6 +39,5 @@ export const logoCloudInfo: CompositionInfo<LogoCloudProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

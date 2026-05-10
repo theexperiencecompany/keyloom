@@ -2,7 +2,7 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
-  TITLE_FONT_FAMILY,
+  resolveTitleStyle,
   type TitleProps,
 } from "../title-shared";
 
@@ -18,10 +18,10 @@ const LINE_DURATION = 54;
 export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
   headline,
   subtitle,
-  backgroundColor,
-  textColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
+  const s = resolveTitleStyle(clipStyle);
 
   const lines = headline.split("\n").filter((l) => l.trim());
 
@@ -37,9 +37,9 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        color: textColor,
-        fontFamily: TITLE_FONT_FAMILY,
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -94,7 +94,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
             fontWeight: 400,
             letterSpacing: "-0.012em",
             margin: "32px 0 0",
-            color: getSubtitleColor(textColor),
+            color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
             transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
             willChange: "transform, opacity",

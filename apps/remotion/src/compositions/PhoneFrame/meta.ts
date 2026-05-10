@@ -9,7 +9,6 @@ export const PHONE_FRAME_HEIGHT = 1080;
 export const phoneFrameDefaultProps: PhoneFrameProps = {
   device: "dynamic-island",
   innerCompositionId: "MessageBubbles",
-  backgroundColor: "#ffffff",
   screenImage: "",
 };
 
@@ -45,6 +44,5 @@ export const phoneFrameInfo: CompositionInfo<PhoneFrameProps> = {
       label: "Screen content",
       exclude: ["PhoneFrame"],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

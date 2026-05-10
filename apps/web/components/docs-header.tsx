@@ -14,6 +14,7 @@ import { useTheme } from "next-themes";
 import * as React from "react";
 import { BrandLink } from "@/components/brand-link";
 import { DocsSearch } from "@/components/docs-search";
+import { MobileNav } from "@/components/mobile-nav";
 
 function GitHubMark({ className }: { className?: string }) {
   return (
@@ -110,12 +111,11 @@ export function DocsHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-dashed border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="flex h-14 items-center gap-6 px-8">
-          {/* Logo */}
+        <div className="flex h-14 items-center gap-3 px-4 sm:gap-4 md:px-6 lg:gap-6 lg:px-8">
+          <MobileNav />
           <BrandLink />
 
-          {/* Nav links */}
-          <nav className="flex items-center gap-1">
+          <nav className="hidden items-center gap-1 sm:flex">
             {navLinks.map((l) => (
               <Link
                 key={l.href}
@@ -127,13 +127,20 @@ export function DocsHeader() {
             ))}
           </nav>
 
-          {/* Right side */}
-          <div className="ml-auto flex items-center gap-3">
-            {/* Search */}
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className="md:hidden"
+              aria-label="Search docs"
+              onClick={() => setSearchOpen(true)}
+            >
+              <HugeiconsIcon icon={Search01Icon} size={14} />
+            </Button>
             <Button
               variant="outline"
               size="sm"
-              className="w-48 justify-start gap-2 text-muted-foreground"
+              className="hidden w-40 justify-start gap-2 text-muted-foreground md:flex lg:w-48"
               onClick={() => setSearchOpen(true)}
             >
               <HugeiconsIcon icon={Search01Icon} size={13} />
@@ -147,12 +154,13 @@ export function DocsHeader() {
 
             <div className="flex items-center gap-0.5">
               <ThemeToggle />
-
-              {/* GitHub */}
               <GitHubButton />
-
-              {/* Twitter/X */}
-              <Button variant="ghost" size="icon-sm" asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="hidden sm:inline-flex"
+                asChild
+              >
                 <Link href="https://x.com/madebyexp" title="X (Twitter)">
                   <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
                 </Link>

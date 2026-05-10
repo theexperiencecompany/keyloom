@@ -2,6 +2,7 @@
 
 import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import type { ClipStyle } from "@workspace/compositions/clip-style";
 import {
   FieldsRenderer,
   PrimitiveControl,
@@ -13,12 +14,16 @@ import type { compositionsById } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import type { ComponentProps } from "react";
 
+import { ClipStyleSection } from "./clip-style-section";
+
 type Info = NonNullable<(typeof compositionsById)[string]>;
 
 type Props = {
   clip: Clip;
   info: Info;
   onChange: ComponentProps<typeof FieldsRenderer>["onChange"];
+  onUpdateStyle: (patch: Partial<ClipStyle>) => void;
+  onResetStyle: () => void;
   onUpdateEffect: (
     effectInstanceId: string,
     props: Record<string, unknown>,
@@ -31,11 +36,17 @@ export function Inspector({
   clip,
   info,
   onChange,
+  onUpdateStyle,
+  onResetStyle,
   onUpdateEffect,
   onRemoveEffect,
   onClose,
 }: Props) {
   const clipEffects = clip.effects ?? [];
+  // Locked compositions (Twitter, WhatsApp, Slack, Discord, iMessage)
+  // intentionally ignore the universal ClipStyle — hide the Style section
+  // for them.
+  const supportsStyle = info.brandMode !== "locked";
 
   return (
     <aside className="flex w-80 shrink-0 flex-col border-l border-border bg-background">
@@ -51,6 +62,15 @@ export function Inspector({
         </Button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
+        {supportsStyle && (
+          <div className="border-b border-border">
+            <ClipStyleSection
+              style={clip.style}
+              onPatch={onUpdateStyle}
+              onReset={onResetStyle}
+            />
+          </div>
+        )}
         <FieldsRenderer
           fields={info.fields}
           value={clip.props}

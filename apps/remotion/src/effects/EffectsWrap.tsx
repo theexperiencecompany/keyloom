@@ -11,7 +11,7 @@ type Props = {
   children: ReactNode;
 };
 
-const TRIGGER_ORDER: EffectTrigger[] = ["enter", "range", "loop"];
+const TRIGGER_ORDER: EffectTrigger[] = ["enter", "exit", "range", "loop"];
 
 export function EffectsWrap({
   effects,

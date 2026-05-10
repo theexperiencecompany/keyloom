@@ -3,6 +3,7 @@ import { AbsoluteFill, Sequence } from "remotion";
 import { componentsById } from "../../components";
 import { EffectsWrap } from "../../effects/EffectsWrap";
 import type { Project } from "../../project";
+import { compositionsById } from "../../registry";
 
 export const ProjectComposition: React.FC<Project> = ({ clips }) => {
   let cursor = 0;
@@ -10,10 +11,18 @@ export const ProjectComposition: React.FC<Project> = ({ clips }) => {
     <AbsoluteFill style={{ background: "#000" }}>
       {clips.map((clip) => {
         const Component = componentsById[clip.compositionId];
+        const info = compositionsById[clip.compositionId];
         const from = cursor;
         cursor += clip.durationInFrames;
+
+        // Locked compositions impersonate real apps and ignore universal
+        // ClipStyle. Everything else receives the user's per-clip overrides
+        // via the `clipStyle` prop.
+        const isLocked = info?.brandMode === "locked";
+        const styleProps = isLocked ? {} : { clipStyle: clip.style };
+
         const inner = Component ? (
-          <Component {...clip.props} />
+          <Component {...clip.props} {...styleProps} />
         ) : (
           <MissingClip compositionId={clip.compositionId} />
         );

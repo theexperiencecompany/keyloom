@@ -1,5 +1,6 @@
 "use client";
 import { AbsoluteFill } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { compositionsById } from "../../registry";
 import type { SplitLayout } from "./layout";
@@ -9,8 +10,8 @@ export type { SplitLayout } from "./layout";
 export type SplitSceneProps = {
   layout: SplitLayout;
   slots: string[];
-  backgroundColor: string;
   gap: number;
+  clipStyle?: ClipStyle;
 };
 
 const CANVAS_W = 1920;
@@ -75,13 +76,20 @@ function getSlotRects(layout: SplitLayout, gap: number): Rect[] {
 export const SplitScene: React.FC<SplitSceneProps> = ({
   layout,
   slots,
-  backgroundColor,
   gap,
+  clipStyle,
 }) => {
+  const s = resolveClipStyle(clipStyle, {
+    background: "#0f1014",
+    color: "#ffffff",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+    accent: "#6366f1",
+  });
   const rects = getSlotRects(layout, gap);
 
   return (
-    <AbsoluteFill style={{ background: backgroundColor, overflow: "hidden" }}>
+    <AbsoluteFill style={{ background: s.background, overflow: "hidden" }}>
       {rects.map((rect, i) => {
         const compId = slots[i];
         return <Slot key={i} rect={rect} compositionId={compId ?? ""} />;

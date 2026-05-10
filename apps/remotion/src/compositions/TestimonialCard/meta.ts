@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { TestimonialCardProps } from "./TestimonialCard";
 
-export const TESTIMONIAL_CARD_DURATION = 240;
+export const TESTIMONIAL_CARD_DURATION = 110;
 export const TESTIMONIAL_CARD_FPS = 60;
 export const TESTIMONIAL_CARD_WIDTH = 1280;
 export const TESTIMONIAL_CARD_HEIGHT = 720;
@@ -14,8 +14,6 @@ export const testimonialCardDefaultProps: TestimonialCardProps = {
   role: "Founder",
   company: "Ping",
   theme: "light",
-  accentColor: "#6366f1",
-  backgroundColor: "#f7f7f9",
 };
 
 export const testimonialCardInfo: CompositionInfo<TestimonialCardProps> = {
@@ -43,7 +41,5 @@ export const testimonialCardInfo: CompositionInfo<TestimonialCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "accentColor", label: "Accent color" },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

@@ -24,7 +24,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
   const Content = doc.Content;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-12 px-8 py-10 xl:px-12">
+    <div className="mx-auto flex w-full max-w-6xl gap-12 px-4 py-8 sm:px-6 md:py-10 lg:px-8 xl:px-12">
       <div className="min-w-0 flex-1">
         <div className="mx-auto w-full max-w-3xl">
           <Breadcrumb className="mb-8">
@@ -39,15 +39,15 @@ export function DocsShell({ doc }: { doc: Doc }) {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <h1 className="text-4xl font-bold tracking-tight">
+          <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-start sm:gap-4">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
               {doc.meta.title}
             </h1>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex shrink-0 items-center gap-1">
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-[12px]"
+                className="hidden gap-1.5 text-[12px] sm:flex"
               >
                 <HugeiconsIcon icon={Copy01Icon} size={12} />
                 <span>Copy Page</span>

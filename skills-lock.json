@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/animate-text/SKILL.md",
       "computedHash": "7724b6f42dc2c33a98d48ca592402aed596830a55d469e83b3c5970d478e25ed"
+    },
+    "remotion-best-practices": {
+      "source": "remotion-dev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/remotion/SKILL.md",
+      "computedHash": "006f8413941b59eff54a7ce64851b8a2fb79e7a3a5f1a895e97a48f01482553d"
     }
   }
 }

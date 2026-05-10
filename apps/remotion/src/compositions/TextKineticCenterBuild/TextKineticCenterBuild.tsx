@@ -2,7 +2,7 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
-  TITLE_FONT_FAMILY,
+  resolveTitleStyle,
   type TitleProps,
 } from "../title-shared";
 
@@ -18,10 +18,10 @@ const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
   headline,
   subtitle,
-  backgroundColor,
-  textColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
+  const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const lastWordStart = HEADLINE_START + (words.length - 1) * PUSH_FRAMES;
@@ -37,9 +37,9 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        color: textColor,
-        fontFamily: TITLE_FONT_FAMILY,
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -102,7 +102,7 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
             fontWeight: 400,
             letterSpacing: "-0.012em",
             margin: "32px 0 0",
-            color: getSubtitleColor(textColor),
+            color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
             transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
             willChange: "transform, opacity",

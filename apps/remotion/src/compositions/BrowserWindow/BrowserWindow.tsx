@@ -15,12 +15,13 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type BrowserWindowProps = {
   url: string;
   pageImageUrl: string;
   pageBackgroundColor: string;
-  backgroundColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
@@ -38,10 +39,17 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
   url,
   pageImageUrl,
   pageBackgroundColor,
-  backgroundColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#0a84ff",
+  });
 
   const windowEnter = spring({
     frame,
@@ -88,9 +96,8 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        background: s.background,
+        fontFamily: s.fontFamily,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

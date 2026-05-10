@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { PricingCardProps } from "./PricingCard";
 
-export const PRICING_CARD_DURATION = 240;
+export const PRICING_CARD_DURATION = 130;
 export const PRICING_CARD_FPS = 60;
 export const PRICING_CARD_WIDTH = 1280;
 export const PRICING_CARD_HEIGHT = 720;
@@ -15,8 +15,6 @@ export const pricingCardDefaultProps: PricingCardProps = {
   cta: "Start free trial",
   highlighted: "yes",
   theme: "light",
-  accentColor: "#6366f1",
-  backgroundColor: "#f7f7f9",
 };
 
 export const pricingCardInfo: CompositionInfo<PricingCardProps> = {
@@ -58,7 +56,5 @@ export const pricingCardInfo: CompositionInfo<PricingCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "accentColor", label: "Accent color" },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

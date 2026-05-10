@@ -1,6 +1,6 @@
 import type { PrimitiveField } from "../schema";
 
-export type EffectTrigger = "enter" | "loop" | "range";
+export type EffectTrigger = "enter" | "exit" | "loop" | "range";
 
 export type EffectInfo<P extends Record<string, unknown>> = {
   id: string;

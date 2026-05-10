@@ -2,13 +2,11 @@ import type { CompositionInfo } from "../../schema";
 import { TITLE_FIELDS } from "../title-shared";
 import type { TextSharedAxisYProps } from "./TextSharedAxisY";
 
-export const TEXT_SHARED_AXIS_Y_DURATION = 220;
+export const TEXT_SHARED_AXIS_Y_DURATION = 100;
 
 const defaultProps: TextSharedAxisYProps = {
   headline: "Sharp and direct",
   subtitle: "Word by word",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
 };
 
 export const textSharedAxisYInfo: CompositionInfo<TextSharedAxisYProps> = {

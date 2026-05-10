@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { FeatureCardProps } from "./FeatureCard";
 
-export const FEATURE_CARD_DURATION = 180;
+export const FEATURE_CARD_DURATION = 100;
 export const FEATURE_CARD_FPS = 60;
 export const FEATURE_CARD_WIDTH = 1280;
 export const FEATURE_CARD_HEIGHT = 720;
@@ -11,8 +11,6 @@ export const featureCardDefaultProps: FeatureCardProps = {
   title: "Lightning fast",
   body: "Built for speed. Every interaction takes under 50ms — your users never wait.",
   theme: "light",
-  accentColor: "#6366f1",
-  backgroundColor: "#f7f7f9",
 };
 
 export const featureCardInfo: CompositionInfo<FeatureCardProps> = {
@@ -38,7 +36,5 @@ export const featureCardInfo: CompositionInfo<FeatureCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "accentColor", label: "Accent color" },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

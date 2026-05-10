@@ -1,15 +1,13 @@
 import type { CompositionInfo } from "../../schema";
 import type { CaptionTrackProps } from "./CaptionTrack";
 
-export const CAPTION_TRACK_DURATION = 240;
+export const CAPTION_TRACK_DURATION = 160;
 export const CAPTION_TRACK_FPS = 60;
 export const CAPTION_TRACK_WIDTH = 1920;
 export const CAPTION_TRACK_HEIGHT = 1080;
 
 export const captionTrackDefaultProps: CaptionTrackProps = {
   text: "this is the future of motion graphics",
-  backgroundColor: "#ffffff",
-  textColor: "#0f1014",
   wordsPerSecond: 3,
 };
 
@@ -25,8 +23,6 @@ export const captionTrackInfo: CompositionInfo<CaptionTrackProps> = {
   defaultProps: captionTrackDefaultProps,
   fields: [
     { kind: "textarea", key: "text", label: "Caption text", rows: 3 },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
-    { kind: "color", key: "textColor", label: "Text color" },
     {
       kind: "number",
       key: "wordsPerSecond",

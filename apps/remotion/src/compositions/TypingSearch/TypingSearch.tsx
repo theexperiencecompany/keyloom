@@ -7,12 +7,12 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type TypingSearchProps = {
   query: string;
   placeholder: string;
-  backgroundColor: string;
-  accentColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const BAR_APPEAR_START = 0;
@@ -31,11 +31,18 @@ const BUTTON_PADDING = 22;
 export const TypingSearch: React.FC<TypingSearchProps> = ({
   query,
   placeholder,
-  backgroundColor,
-  accentColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#0a84ff",
+  });
+  const accentColor = s.accent;
 
   const barProgress = spring({
     frame: frame - BAR_APPEAR_START,
@@ -106,9 +113,8 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        background: s.background,
+        fontFamily: s.fontFamily,
       }}
     >
       <div

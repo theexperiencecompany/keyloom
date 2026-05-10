@@ -7,10 +7,10 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type CursorWalkthroughProps = {
   backgroundImageUrl: string;
-  backgroundColor: string;
   firstClickX: number;
   firstClickY: number;
   firstClickLabel: string;
@@ -18,7 +18,7 @@ export type CursorWalkthroughProps = {
   secondClickX: number;
   secondClickY: number;
   secondClickLabel: string;
-  accentColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
@@ -35,7 +35,6 @@ const RING_LIFETIME = 26;
 
 export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
   backgroundImageUrl,
-  backgroundColor,
   firstClickX,
   firstClickY,
   firstClickLabel,
@@ -43,10 +42,18 @@ export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
   secondClickX,
   secondClickY,
   secondClickLabel,
-  accentColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#0a84ff",
+  });
+  const accentColor = s.accent;
 
   const stage1End = TRAVEL_1;
   const stage2End = stage1End + CLICK_1;
@@ -109,7 +116,7 @@ export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
   const showSecondLabel = frame >= stage4End;
 
   return (
-    <AbsoluteFill style={{ background: backgroundColor }}>
+    <AbsoluteFill style={{ background: s.background }}>
       {backgroundImageUrl.trim() && (
         <Img
           src={backgroundImageUrl}

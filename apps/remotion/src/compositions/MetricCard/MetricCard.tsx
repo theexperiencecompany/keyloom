@@ -7,6 +7,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type MetricCardProps = {
   value: number;
@@ -15,8 +16,7 @@ export type MetricCardProps = {
   label: string;
   sublabel: string;
   theme: "light" | "dark";
-  accentColor: string;
-  backgroundColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const D_CARD = 0;
@@ -38,12 +38,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   label,
   sublabel,
   theme,
-  accentColor,
-  backgroundColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
+  const s = resolveClipStyle(clipStyle, {
+    background: "#f7f7f9",
+    color: isDark ? "#ffffff" : "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#6366f1",
+  });
+  const accent = s.accent;
+  const bg = s.background;
+  const fontFamily = s.fontFamily;
 
   const cardBg = isDark ? "#15161A" : "#ffffff";
   const text = isDark ? "#ffffff" : "#0f1014";
@@ -77,12 +86,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
+        background: bg,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        fontFamily,
       }}
     >
       <div
@@ -93,7 +101,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           borderRadius: 32,
           padding: "60px 56px",
           textAlign: "center",
-          backgroundImage: `radial-gradient(120% 80% at 50% 0%, ${accentColor}22, transparent 70%)`,
+          backgroundImage: `radial-gradient(120% 80% at 50% 0%, ${accent}22, transparent 70%)`,
           boxShadow: isDark
             ? "0 30px 80px rgba(0,0,0,0.45)"
             : "0 30px 80px rgba(15,16,20,0.08)",
@@ -107,7 +115,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             alignItems: "baseline",
             justifyContent: "center",
             gap: 4,
-            color: accentColor,
+            color: accent,
             fontSize: 132,
             fontWeight: 800,
             letterSpacing: "-0.04em",

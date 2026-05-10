@@ -7,14 +7,14 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type StatCounterProps = {
   target: number;
   label: string;
   prefix: string;
   suffix: string;
-  backgroundColor: string;
-  textColor: string;
+  clipStyle?: ClipStyle;
 };
 
 const COUNTER_START = 10;
@@ -28,11 +28,17 @@ export const StatCounter: React.FC<StatCounterProps> = ({
   label,
   prefix,
   suffix,
-  backgroundColor,
-  textColor,
+  clipStyle,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#ffffff",
+    color: "#0f1014",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#0f1014",
+  });
 
   const numberProgress = interpolate(
     frame,
@@ -66,17 +72,16 @@ export const StatCounter: React.FC<StatCounterProps> = ({
     },
   );
 
-  const labelColor = isLightColor(backgroundColor)
+  const labelColor = isLightColor(s.background)
     ? "rgba(15,16,20,0.55)"
     : "rgba(255,255,255,0.65)";
 
   return (
     <AbsoluteFill
       style={{
-        background: backgroundColor,
-        color: textColor,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { MessagePopupProps } from "./MessagePopup";
 
-export const MESSAGE_POPUP_DURATION = 240;
+export const MESSAGE_POPUP_DURATION = 100;
 export const MESSAGE_POPUP_FPS = 60;
 export const MESSAGE_POPUP_WIDTH = 1280;
 export const MESSAGE_POPUP_HEIGHT = 720;
@@ -23,6 +23,7 @@ export const messagePopupInfo: CompositionInfo<MessagePopupProps> = {
   width: MESSAGE_POPUP_WIDTH,
   height: MESSAGE_POPUP_HEIGHT,
   defaultProps: messagePopupDefaultProps,
+  brandMode: "locked",
   fields: [
     { kind: "text", key: "sender", label: "Sender" },
     { kind: "text", key: "time", label: "Time" },
