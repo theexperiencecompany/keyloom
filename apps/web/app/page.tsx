@@ -1,7 +1,8 @@
-import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
+import { RaisedButton } from "@workspace/ui/components/raised-button";
 import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
@@ -47,15 +48,15 @@ export default function LandingPage() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <Button asChild>
+              <RaisedButton asChild color="#3b82f6">
                 <Link href="/docs">
                   Get started
                   <HugeiconsIcon
-                    icon={ArrowRight02Icon}
+                    icon={ArrowRight01Icon}
                     data-icon="inline-end"
                   />
                 </Link>
-              </Button>
+              </RaisedButton>
               <Button variant="outline" asChild>
                 <Link href="/studio">Open Studio</Link>
               </Button>
@@ -85,7 +86,7 @@ export default function LandingPage() {
             >
               <Link href="/docs">
                 View all
-                <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
+                <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
               </Link>
             </Button>
           </div>
@@ -104,12 +105,12 @@ export default function LandingPage() {
             Read the docs, copy a component, render your first scene.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild>
+            <RaisedButton asChild color="#3b82f6">
               <Link href="/docs">
                 Read the docs
-                <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
+                <HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
               </Link>
-            </Button>
+            </RaisedButton>
             <Button variant="outline" asChild>
               <Link href="https://github.com">GitHub</Link>
             </Button>
