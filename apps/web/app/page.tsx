@@ -7,6 +7,8 @@ import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
 
 export default function LandingPage() {
+  const items = compositions.map(({ calculateMetadata: _, ...rest }) => rest);
+
   return (
     <div className="mx-auto min-h-screen max-w-[1600px] border-x border-dashed border-border">
       <DocsHeader />
@@ -79,7 +81,7 @@ export default function LandingPage() {
             </Button>
           </div>
 
-          <FeaturedComponents items={compositions} />
+          <FeaturedComponents items={items} />
         </div>
       </section>
 

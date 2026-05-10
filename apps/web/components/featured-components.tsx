@@ -12,7 +12,7 @@ import { useState } from "react";
 const PAGE_SIZE = 8;
 
 type Props = {
-  items: AnyCompositionInfo[];
+  items: Omit<AnyCompositionInfo, "calculateMetadata">[];
 };
 
 export function FeaturedComponents({ items }: Props) {
