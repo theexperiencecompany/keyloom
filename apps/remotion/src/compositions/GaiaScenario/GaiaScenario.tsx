@@ -665,14 +665,21 @@ function ToolCallsView({
   return (
     // The trigger.click() above synthesizes a click. If this composition is
     // rendered inside a Remotion Player wrapped by a Next.js <Link> (e.g. the
-    // landing page's component grid), that click bubbles up through React's
-    // synthetic event system and triggers Link navigation a few seconds in.
-    // Halt the bubble here — React Aria's button handler fires before the
-    // event reaches us, so the accordion still expands.
+    // landing page's component grid), that click bubbles up to the anchor
+    // and the browser performs its default navigation a few seconds in.
+    //
+    // Cancel the default for synthetic (untrusted) clicks only. Real user
+    // clicks (isTrusted=true) pass through unchanged so the wrapping card
+    // stays clickable. preventDefault both kills the browser's native anchor
+    // navigation AND makes Next.js Link bail out (it checks defaultPrevented
+    // before doing router.push), so neither full-page nor client-side
+    // navigation can fire from our synthetic accordion click.
     <div
       ref={containerRef}
       style={{ marginLeft: 36 }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        if (!e.isTrusted) e.preventDefault();
+      }}
     >
       <ToolCallsSection tool_calls_data={normalised as never} />
     </div>
