@@ -46,22 +46,26 @@ export function DebugNavProbe() {
           el.getAttribute("href")?.includes(target) === true,
       );
       if (anchor) {
-        // Walk the path top-to-bottom (target first → document last) and
-        // log every element so we can see the full DOM chain the click
-        // travels through. This tells us whether the ToolCallsView
-        // wrapper's onClick guard is even in the DOM.
+        const phase =
+          e.eventPhase === 1
+            ? "capturing"
+            : e.eventPhase === 2
+              ? "target"
+              : "bubbling";
+        // KEY DIAGNOSTIC: defaultPrevented tells us whether anyone upstream
+        // (e.g. the GaiaScenario wrapper's onClick) successfully called
+        // e.preventDefault before the click reached this document listener.
+        // If we see phase="bubbling" defaultPrevented=true, the upstream
+        // fix worked and the browser will skip default navigation.
         console.warn(
           `${tag} click bubbled to <a href="${anchor.getAttribute("href")}">`,
           {
             isTrusted: e.isTrusted,
             detail: e.detail,
+            defaultPrevented: e.defaultPrevented,
+            phase,
             target: e.target,
-            phase:
-              e.eventPhase === 1
-                ? "capturing"
-                : e.eventPhase === 2
-                  ? "target"
-                  : "bubbling",
+            currentTarget: e.currentTarget,
           },
         );
         console.log(`${tag} composedPath (target → document):`);

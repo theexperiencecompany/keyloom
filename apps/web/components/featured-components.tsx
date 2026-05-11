@@ -29,6 +29,22 @@ export function FeaturedComponents({ items }: Props) {
             <Link
               key={c.id}
               href={`/docs/${c.id}`}
+              // Last line of defense: descendant compositions (e.g.
+              // GaiaScenario) can synthesize clicks for their own UI
+              // (auto-expanding accordions). Those bubble up here and
+              // would otherwise trigger navigation. Real user clicks have
+              // isTrusted=true; programmatic clicks have isTrusted=false.
+              // preventDefault tells Link to skip router.push and tells
+              // the browser to skip the native anchor navigation.
+              onClick={(e) => {
+                if (!e.isTrusted) {
+                  e.preventDefault();
+                  console.warn(
+                    "[FeaturedComponents] cancelled synthetic click on Link",
+                    { href: `/docs/${c.id}` },
+                  );
+                }
+              }}
               className="group relative overflow-hidden rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
             >
               <div

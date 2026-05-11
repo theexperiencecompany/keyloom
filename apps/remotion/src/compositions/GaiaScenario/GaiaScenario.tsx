@@ -87,7 +87,20 @@ export type GaiaScenarioProps = {
   toolCallsExpanded?: boolean | string;
 };
 
-const queryClient = new QueryClient();
+// chat-ui has internal `useQuery` calls (e.g. ["integrations","user"],
+// ["integrations","config"]) that hit our QueryClient with no registered
+// queryFn. React Query's default queryFn returns undefined, which it then
+// rejects with "Query data cannot be undefined". Provide a default queryFn
+// that returns null so those background queries stay quiet.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: async () => null,
+      retry: false,
+      staleTime: Number.POSITIVE_INFINITY,
+    },
+  },
+});
 
 const FALLBACK_SCENARIO: Scenario = {
   id: "fallback",
@@ -662,23 +675,43 @@ function ToolCallsView({
     };
   }, [toolCallsExpanded, normalised]);
 
+  // Native bubble-phase guard. If this composition is rendered inside a
+  // Remotion Player wrapped by a Next.js <Link>, the synthetic trigger.click()
+  // above bubbles to the anchor and the browser performs default navigation.
+  // React's synthetic preventDefault (below) should suffice, but in practice
+  // we've seen the navigation still fire — possibly because the synthetic
+  // dispatch runs after the native event has effectively committed. A native
+  // listener on this element fires during the actual DOM bubble, in order,
+  // and preventDefault here unambiguously cancels the default action.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      if (!e.isTrusted) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.warn(
+          "[GaiaScenario] cancelled synthetic click (native bubble guard)",
+          { defaultPrevented: e.defaultPrevented },
+        );
+      }
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, []);
+
   return (
-    // The trigger.click() above synthesizes a click. If this composition is
-    // rendered inside a Remotion Player wrapped by a Next.js <Link> (e.g. the
-    // landing page's component grid), that click bubbles up to the anchor
-    // and the browser performs its default navigation a few seconds in.
-    //
-    // Cancel the default for synthetic (untrusted) clicks only. Real user
-    // clicks (isTrusted=true) pass through unchanged so the wrapping card
-    // stays clickable. preventDefault both kills the browser's native anchor
-    // navigation AND makes Next.js Link bail out (it checks defaultPrevented
-    // before doing router.push), so neither full-page nor client-side
-    // navigation can fire from our synthetic accordion click.
     <div
       ref={containerRef}
       style={{ marginLeft: 36 }}
       onClick={(e) => {
-        if (!e.isTrusted) e.preventDefault();
+        if (!e.isTrusted) {
+          e.preventDefault();
+          console.warn(
+            "[GaiaScenario] cancelled synthetic click (React onClick guard)",
+            { defaultPrevented: e.defaultPrevented },
+          );
+        }
       }}
     >
       <ToolCallsSection tool_calls_data={normalised as never} />
