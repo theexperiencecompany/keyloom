@@ -226,7 +226,7 @@ export default function LandingPage() {
           <HeroSticker key={s.src} {...s} />
         ))}
 
-        <div className="relative w-full px-8 py-20">
+        <div className="relative z-10 w-full px-8 py-20">
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
             <h1 className="text-5xl font-semibold tracking-tight text-balance sm:text-6xl md:text-7xl">
               Ship videos
@@ -234,7 +234,7 @@ export default function LandingPage() {
                 src="/images/clapperboard.png"
                 alt=""
                 aria-hidden
-                className="mx-1 inline-block h-[1.05em] w-auto align-[-0.18em]"
+                className="mx-1 inline-block h-[1.3em] w-auto align-[-0.22em]"
               />
               that look expensive.
             </h1>
@@ -245,13 +245,7 @@ export default function LandingPage() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Button asChild>
-                <Link href="/docs">
-                  Get started
-                  <HugeiconsIcon
-                    icon={ArrowRight02Icon}
-                    data-icon="inline-end"
-                  />
-                </Link>
+                <Link href="/docs">Get started</Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/studio">Open Studio</Link>
