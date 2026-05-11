@@ -3,7 +3,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
-import { DebugNavProbe } from "@/components/debug-nav-probe";
 import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
 import { HeroSticker, type HeroStickerProps } from "@/components/hero-sticker";
@@ -206,7 +205,6 @@ export default function LandingPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-[1600px] border-x border-dashed border-border">
-      <DebugNavProbe />
       <DocsHeader />
 
       {/* Hero */}
