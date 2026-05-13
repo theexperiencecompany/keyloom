@@ -4,6 +4,7 @@ export type PrimitiveField =
   | { kind: "number"; key: string; label: string; min?: number; max?: number }
   | { kind: "color"; key: string; label: string }
   | { kind: "image"; key: string; label: string; placeholder?: string }
+  | { kind: "switch"; key: string; label: string }
   | {
       kind: "select";
       key: string;

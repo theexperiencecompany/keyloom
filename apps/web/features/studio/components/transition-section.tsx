@@ -191,14 +191,13 @@ export function TransitionSection({
                   min={1}
                   max={maxDuration}
                   value={effective.durationInFrames}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!Number.isFinite(val)) return;
                     patch({
-                      durationInFrames: Math.max(
-                        1,
-                        Math.min(maxDuration, Number(e.target.value)),
-                      ),
-                    })
-                  }
+                      durationInFrames: Math.max(1, Math.min(maxDuration, val)),
+                    });
+                  }}
                 />
               </div>
             </>

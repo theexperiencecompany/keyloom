@@ -26,7 +26,6 @@ export const telegramMessagesDefaultProps: TelegramMessagesProps = {
       delay: 530,
     },
   ],
-  theme: "light",
 };
 
 export const telegramMessagesInfo: CompositionInfo<TelegramMessagesProps> = {
@@ -44,14 +43,5 @@ export const telegramMessagesInfo: CompositionInfo<TelegramMessagesProps> = {
     { kind: "text", key: "contactName", label: "Contact name" },
     { kind: "text", key: "contactAvatar", label: "Avatar URL" },
     { kind: "chat", key: "messages", label: "Messages" },
-    {
-      kind: "select",
-      key: "theme",
-      label: "Theme",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-      ],
-    },
   ],
 };

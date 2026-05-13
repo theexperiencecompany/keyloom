@@ -26,5 +26,8 @@ export const lineChartInfo: CompositionInfo<LineChartProps> = {
     { kind: "text", key: "caption", label: "Caption" },
     { kind: "text", key: "labels", label: "Labels (comma-separated)" },
     { kind: "text", key: "values", label: "Values (comma-separated)" },
+    { kind: "switch", key: "showAxes", label: "Show axes" },
+    { kind: "switch", key: "showGrid", label: "Show grid" },
+    { kind: "switch", key: "showDots", label: "Show dots" },
   ],
 };

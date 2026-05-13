@@ -1,4 +1,3 @@
-"use client";
 import { useCurrentFrame } from "remotion";
 import type { ChatMessage } from "../../editors/types";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -7,7 +6,6 @@ import { ChatFill } from "../_chat-demo/ChatFill";
 export type DiscordMessagesProps = {
   contactName: string;
   messages: ChatMessage[];
-  theme: "light" | "dark";
 };
 
 const LEFT_AVATAR = "https://github.com/aryanranderiya.png";
@@ -39,7 +37,6 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
 export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
   contactName,
   messages,
-  theme: _theme,
 }) => {
   const frame = useCurrentFrame();
   const items = buildItems(messages, frame);

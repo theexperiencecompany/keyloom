@@ -31,6 +31,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@remotion/player": "4.0.459",
     "streamdown": "^2.5.0"
   }
 }

@@ -58,8 +58,12 @@ export const AreaChart: React.FC<AreaChartProps> = ({
 
   const headerProgress = chartReveal(frame, 0, 18);
   const linePath = smoothPath(points);
-  const lastPoint = points[points.length - 1]!;
-  const areaPath = `${linePath} L ${lastPoint.x} ${padTop + innerH} L ${points[0]!.x} ${padTop + innerH} Z`;
+  const lastPoint = points[points.length - 1];
+  const firstPoint = points[0];
+  const areaPath =
+    lastPoint && firstPoint
+      ? `${linePath} L ${lastPoint.x} ${padTop + innerH} L ${firstPoint.x} ${padTop + innerH} Z`
+      : "";
 
   const muted = "rgba(255,255,255,0.55)";
   const gridColor = "rgba(255,255,255,0.08)";

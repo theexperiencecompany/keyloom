@@ -203,14 +203,13 @@ export function ProjectTransitionControl({ transition, fps, onChange }: Props) {
                 min={1}
                 max={120}
                 value={effective.durationInFrames}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (!Number.isFinite(val)) return;
                   patch({
-                    durationInFrames: Math.max(
-                      1,
-                      Math.min(120, Number(e.target.value)),
-                    ),
-                  })
-                }
+                    durationInFrames: Math.max(1, Math.min(120, val)),
+                  });
+                }}
               />
             </div>
           </>

@@ -68,7 +68,7 @@ export function ContributorsGrid() {
               rel="noopener noreferrer"
               className="group flex aspect-square min-w-0 cursor-pointer flex-col items-center gap-3 rounded-xl p-4 transition-colors hover:bg-accent"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* biome-ignore lint/performance/noImgElement: external GitHub avatars served from many origins */}
               <img
                 src={c.avatar_url}
                 alt={c.login}

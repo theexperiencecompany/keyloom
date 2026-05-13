@@ -40,7 +40,6 @@ export const discordMessagesDefaultProps: DiscordMessagesProps = {
       delay: 560,
     },
   ],
-  theme: "dark",
 };
 
 export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
@@ -57,14 +56,5 @@ export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
   fields: [
     { kind: "text", key: "contactName", label: "Channel name" },
     { kind: "chat", key: "messages", label: "Messages" },
-    {
-      kind: "select",
-      key: "theme",
-      label: "Theme",
-      options: [
-        { value: "light", label: "Light" },
-        { value: "dark", label: "Dark" },
-      ],
-    },
   ],
 };

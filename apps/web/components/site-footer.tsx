@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function SiteFooter() {
@@ -6,11 +7,12 @@ export function SiteFooter() {
     <footer className="border-t border-dashed border-border bg-background/80">
       <div className="mx-auto flex flex-col items-center justify-between gap-4 px-4 py-8 text-sm sm:flex-row sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/images/clapperboard.png"
             alt=""
             aria-hidden
+            width={20}
+            height={20}
             className="size-5"
           />
           <span className="font-semibold text-foreground">Motion Studio</span>
@@ -55,11 +57,12 @@ export function SiteFooter() {
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 transition-colors hover:text-foreground"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/gaia_logo.png"
               alt=""
               aria-hidden
+              width={16}
+              height={16}
               className="size-4 rounded-sm"
             />
             GAIA

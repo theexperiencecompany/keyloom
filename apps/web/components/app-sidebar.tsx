@@ -4,20 +4,15 @@ import {
   AnalyticsUpIcon,
   Book01Icon,
   BrowserIcon,
-  BubbleChatIcon,
-  CommandLineIcon,
-  ComputerVideoIcon,
-  Cursor02Icon,
-  Download01Icon,
-  Github01Icon,
-  Grid02Icon,
+  CursorMagicSelection02Icon,
+  CursorTextIcon,
+  DashedLineCircleIcon,
+  DownloadCircleIcon,
+  MessageMultiple02Icon,
   PlayIcon,
-  SparklesIcon,
   StarIcon,
-  TextFontIcon,
-  TwitterIcon,
-  UserGroup02Icon,
-  VideoAiIcon,
+  UserGroupIcon,
+  UserLove02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
@@ -27,14 +22,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
+import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+type IconRef = Parameters<typeof HugeiconsIcon>[0]["icon"];
 
 type NavItem = {
   title: string;
   href: string;
-  icon: Parameters<typeof HugeiconsIcon>[0]["icon"];
-  badge?: string;
+  /** Optional — only Getting Started items render an icon now. */
+  icon?: IconRef;
 };
 
 const TEXT_PREFIXES = ["Title", "Text"];
@@ -79,86 +77,85 @@ const sceneComponents = compositions.filter(
 
 const gettingStarted: NavItem[] = [
   { title: "Introduction", href: "/docs", icon: Book01Icon },
-  { title: "Installation", href: "/docs/installation", icon: Download01Icon },
+  {
+    title: "Installation",
+    href: "/docs/installation",
+    icon: DownloadCircleIcon,
+  },
   { title: "Using the studio", href: "/docs/using-the-studio", icon: PlayIcon },
-  { title: "Components", href: "/docs/components", icon: Grid02Icon },
-  { title: "Contributors", href: "/docs/contributors", icon: UserGroup02Icon },
+  { title: "Components", href: "/docs/components", icon: DashedLineCircleIcon },
+  { title: "Contributors", href: "/docs/contributors", icon: UserLove02Icon },
 ];
 
-const collapsibleGroups: Array<{
+type Group = {
   value: string;
   section: string;
+  icon: IconRef;
   items: NavItem[];
-}> = [
+};
+
+const collapsibleGroups: Group[] = [
   {
     value: "scenes",
     section: "Scenes & Effects",
-    items: sceneComponents.map((c) => {
-      const icon =
-        c.id === "CursorWalkthrough"
-          ? Cursor02Icon
-          : c.id === "CaptionTrack"
-            ? VideoAiIcon
-            : c.id === "Terminal"
-              ? CommandLineIcon
-              : c.id === "Toast"
-                ? SparklesIcon
-                : ComputerVideoIcon;
-      return { title: c.title, href: `/docs/${c.id}`, icon };
-    }),
+    icon: CursorMagicSelection02Icon,
+    items: sceneComponents.map((c) => ({
+      title: c.title,
+      href: `/docs/${c.id}`,
+    })),
   },
   {
     value: "charts",
     section: "Charts",
+    icon: AnalyticsUpIcon,
     items: chartComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: AnalyticsUpIcon,
     })),
   },
   {
     value: "chat",
     section: "Chat & Messaging",
+    icon: MessageMultiple02Icon,
     items: chatComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: BubbleChatIcon,
     })),
   },
   {
     value: "social",
     section: "Social",
+    icon: UserGroupIcon,
     items: socialComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: c.id === "GitHubStarButton" ? Github01Icon : TwitterIcon,
     })),
   },
   {
     value: "frames",
     section: "Frames & Mockups",
+    icon: BrowserIcon,
     items: frameComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: BrowserIcon,
     })),
   },
   {
     value: "gaia",
     section: "GAIA",
+    icon: StarIcon,
     items: gaiaComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: StarIcon,
     })),
   },
   {
     value: "text-animations",
     section: "Text Animations",
+    icon: CursorTextIcon,
     items: textAnimations.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: TextFontIcon,
     })),
   },
 ];
@@ -182,31 +179,36 @@ export function AppSidebarNav({
     const active = pathname === item.href;
     return (
       <li key={item.href}>
-        <Link
-          href={item.href}
-          onClick={onNavigate}
-          className={`group relative flex h-8 items-center gap-2.5 rounded-md px-3 text-[13px] transition-all duration-150 ease-out ${
-            active
-              ? "bg-accent font-medium text-foreground"
-              : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+        <Button
+          asChild
+          variant="ghost"
+          className={`group h-auto w-full justify-start gap-2 rounded-lg px-2.5 py-1.5 text-left ${
+            active ? "bg-accent" : ""
           }`}
         >
-          <HugeiconsIcon
-            icon={item.icon}
-            size={14}
-            className={`shrink-0 transition-colors duration-150 ${
-              active
-                ? "text-foreground"
-                : "text-muted-foreground group-hover:text-foreground"
-            }`}
-          />
-          <span className="flex-1 truncate">{item.title}</span>
-          {item.badge && (
-            <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
-              {item.badge}
+          <Link href={item.href} onClick={onNavigate}>
+            {item.icon && (
+              <HugeiconsIcon
+                icon={item.icon}
+                size={14}
+                className={`shrink-0 ${
+                  active
+                    ? "text-foreground"
+                    : "text-muted-foreground group-hover:text-foreground"
+                }`}
+              />
+            )}
+            <span
+              className={`min-w-0 flex-1 truncate text-[13px] ${
+                active
+                  ? "font-medium text-foreground"
+                  : "text-foreground/80 group-hover:text-foreground"
+              }`}
+            >
+              {item.title}
             </span>
-          )}
-        </Link>
+          </Link>
+        </Button>
       </li>
     );
   };
@@ -235,7 +237,14 @@ export function AppSidebarNav({
             className="border-none"
           >
             <AccordionTrigger className="mb-1 px-3 py-0 text-[11px] font-semibold text-muted-foreground/70 hover:no-underline [&>svg]:size-3">
-              {group.section}
+              <span className="flex items-center gap-2">
+                <HugeiconsIcon
+                  icon={group.icon}
+                  size={13}
+                  className="shrink-0 text-muted-foreground/70"
+                />
+                {group.section}
+              </span>
             </AccordionTrigger>
             <AccordionContent className="pt-0 pb-0">
               <ul className="space-y-px">{group.items.map(navLink)}</ul>

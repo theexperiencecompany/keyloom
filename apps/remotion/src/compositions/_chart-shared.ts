@@ -24,7 +24,9 @@ export function chartReveal(frame: number, start: number, duration: number) {
 export function parseSeriesString(input: string): number[] {
   return input
     .split(/[\s,]+/)
-    .map((t) => Number(t.trim()))
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0)
+    .map((t) => Number(t))
     .filter((n) => Number.isFinite(n));
 }
 

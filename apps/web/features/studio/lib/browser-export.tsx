@@ -1,20 +1,16 @@
 "use client";
 
 /**
- * Fully in-browser MP4 exporter for the Motion Studio.
+ * In-browser MP4 exporter. Slow but works offline.
  *
- * Pipeline:
- *   1. Mount a hidden React tree containing Remotion's <Thumbnail> sized to
- *      the composition's native resolution.
- *   2. For each frame i in [0, durationInFrames), remount the Thumbnail
- *      with `frameToDisplay={i}`, wait for paint, then snapshot the DOM to
- *      a canvas with `html-to-image`.
- *   3. Feed each canvas as a `VideoFrame` into WebCodecs' `VideoEncoder`,
- *      which produces H.264 chunks that we feed into `mp4-muxer`.
- *   4. Finalize the muxer to get an MP4 ArrayBuffer and trigger a download.
+ * Per-frame:
+ *   1. Render Remotion's <Thumbnail> at the project's NATIVE resolution
+ *      into a persistent React root (no re-create per frame).
+ *   2. html2canvas rasterizes the host DOM at the requested output scale.
+ *   3. The resulting canvas (already at output size) becomes a VideoFrame
+ *      that we feed to WebCodecs VideoEncoder.
  *
- * No server, no ffmpeg.wasm. Requires browser WebCodecs (Chrome, Edge,
- * Safari 17+, Firefox 130+).
+ * Requires WebCodecs: Chrome/Edge 94+, Safari 17+, Firefox 130+.
  */
 
 import { Thumbnail } from "@remotion/player";
@@ -26,14 +22,19 @@ import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 import type { ComponentType } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
+import { DEFAULT_EXPORT_OPTIONS, type ExportOptions } from "./export-options";
+
+const IS_DEV = process.env.NODE_ENV !== "production";
+const dlog = (...args: unknown[]) => {
+  if (IS_DEV) console.info(...args);
+};
+
 export type ExportProgressCallback = (progress: number) => void;
 
 type BaseExportOptions = {
   onProgress?: ExportProgressCallback;
-  /** Override H.264 bitrate. Defaults to 8 Mbps. */
-  bitrate?: number;
-  /** Cancel the render mid-way. Checked between frames. */
   signal?: AbortSignal;
+  options?: Partial<ExportOptions>;
 };
 
 export type RenderComponentOptions<P extends Record<string, unknown>> =
@@ -50,39 +51,24 @@ export type RenderProjectOptions = BaseExportOptions & {
   project: Project;
 };
 
-const DEFAULT_BITRATE = 8_000_000;
-
-/**
- * True when WebCodecs `VideoEncoder` and `VideoFrame` are available.
- * We can't statically guarantee AVC support without a runtime probe, but
- * `VideoEncoder.isConfigSupported` is async — use `checkAvcSupport()` for
- * the strict check.
- */
 export function isBrowserExportSupported(): boolean {
   if (typeof window === "undefined") return false;
-  if (
-    typeof (window as unknown as { VideoEncoder?: unknown }).VideoEncoder ===
-    "undefined"
-  ) {
-    return false;
-  }
-  if (
-    typeof (window as unknown as { VideoFrame?: unknown }).VideoFrame ===
-    "undefined"
-  ) {
-    return false;
-  }
-  return true;
+  const w = window as unknown as {
+    VideoEncoder?: unknown;
+    VideoFrame?: unknown;
+  };
+  return (
+    typeof w.VideoEncoder !== "undefined" && typeof w.VideoFrame !== "undefined"
+  );
 }
 
-/**
- * Render any Remotion-compatible component in the browser and return a
- * Blob containing the resulting MP4 file. Throws on unsupported browsers
- * or encoder errors.
- */
+function resolveOptions(input?: Partial<ExportOptions>): ExportOptions {
+  return { ...DEFAULT_EXPORT_OPTIONS, ...input };
+}
+
 export async function renderComponentInBrowser<
   P extends Record<string, unknown>,
->(options: RenderComponentOptions<P>): Promise<Blob> {
+>(opts: RenderComponentOptions<P>): Promise<Blob> {
   const {
     component,
     inputProps,
@@ -91,16 +77,29 @@ export async function renderComponentInBrowser<
     width,
     height,
     onProgress,
-    bitrate = DEFAULT_BITRATE,
     signal,
-  } = options;
+  } = opts;
+  const options = resolveOptions(opts.options);
 
-  console.info("[export] start", {
-    width,
-    height,
+  // Composition stays at native size; html2canvas downscales while rasterizing.
+  const scale = Math.min(1, Math.max(0.25, options.scale));
+  const encodeWidth = clampEven(Math.round(width * scale));
+  const encodeHeight = clampEven(Math.round(height * scale));
+  const bitrate = options.bitrate;
+  const keyframeInterval =
+    options.keyframeIntervalFrames === "auto"
+      ? Math.max(1, Math.round(fps))
+      : Math.max(1, options.keyframeIntervalFrames);
+
+  dlog("[export-browser] start", {
+    nativeWidth: width,
+    nativeHeight: height,
+    encodeWidth,
+    encodeHeight,
     fps,
     durationInFrames,
     bitrate,
+    scale,
   });
 
   if (!isBrowserExportSupported()) {
@@ -109,37 +108,13 @@ export async function renderComponentInBrowser<
     );
   }
 
-  // Probe codec support so we fail with a clear message instead of a
-  // cryptic "Failed to execute 'configure' on 'VideoEncoder'".
-  let avcSupported = false;
-  try {
-    const probe = await VideoEncoder.isConfigSupported({
-      codec: "avc1.640033",
-      width,
-      height,
-      bitrate,
-      framerate: fps,
-    });
-    avcSupported = probe.supported === true;
-    console.info("[export] codec probe", probe);
-  } catch (probeErr) {
-    console.warn("[export] codec probe threw", probeErr);
-  }
-  if (!avcSupported) {
+  const codec = await pickSupportedAvc(encodeWidth, encodeHeight, bitrate, fps);
+  if (!codec) {
     throw new Error(
-      `H.264 (avc1.640033) at ${width}x${height}@${fps}fps is not supported by this browser's VideoEncoder. Try Chrome/Edge with hardware acceleration enabled.`,
+      `No supported H.264 profile for ${encodeWidth}x${encodeHeight}@${fps}fps. Try a lower resolution or enable hardware acceleration.`,
     );
   }
 
-  // ---------------------------------------------------------------------
-  // 1. Set up the offscreen mount point.
-  //
-  // html-to-image serializes the node's inline styles into an SVG <foreignObject>
-  // and rasterizes that. If we set `opacity: 0` on the host, the captured SVG
-  // is transparent — every frame renders as a black VideoFrame. Instead we
-  // shove the host fully off the viewport with `left: -100000px` so it's
-  // still painted at full opacity and the rasterizer reads real pixels.
-  // ---------------------------------------------------------------------
   const host = document.createElement("div");
   host.setAttribute("data-motion-studio-export", "true");
   host.style.cssText = [
@@ -156,15 +131,12 @@ export async function renderComponentInBrowser<
   document.body.appendChild(host);
   const root: Root = createRoot(host);
 
-  // ---------------------------------------------------------------------
-  // 2. Configure the MP4 muxer + WebCodecs encoder.
-  // ---------------------------------------------------------------------
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
     video: {
       codec: "avc",
-      width,
-      height,
+      width: encodeWidth,
+      height: encodeHeight,
       frameRate: fps,
     },
     fastStart: "in-memory",
@@ -175,25 +147,32 @@ export async function renderComponentInBrowser<
     output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
     error: (e) => {
       encoderError = e instanceof Error ? e : new Error(String(e));
-      console.error("[export] VideoEncoder error", encoderError);
+      console.error("[export-browser] VideoEncoder error", encoderError);
     },
   });
 
   try {
-    // H.264 High profile, level 5.1 — supports 1080p60 and beyond. Browsers
-    // will negotiate down if the exact level isn't supported.
     encoder.configure({
-      codec: "avc1.640033",
-      width,
-      height,
+      codec,
+      width: encodeWidth,
+      height: encodeHeight,
       bitrate,
       framerate: fps,
       bitrateMode: "variable",
       latencyMode: "quality",
     });
-    console.info("[export] encoder configured");
   } catch (configErr) {
-    console.error("[export] encoder.configure threw", configErr);
+    try {
+      root.unmount();
+    } catch {
+      /* ignore */
+    }
+    host.remove();
+    try {
+      encoder.close();
+    } catch {
+      /* ignore */
+    }
     throw new Error(
       `VideoEncoder.configure failed: ${
         configErr instanceof Error ? configErr.message : String(configErr)
@@ -201,11 +180,6 @@ export async function renderComponentInBrowser<
     );
   }
 
-  // ---------------------------------------------------------------------
-  // 3. Frame loop. Remotion's <Thumbnail> renders a single static frame
-  //    based on its `frameToDisplay` prop, so we just remount it for each
-  //    frame index.
-  // ---------------------------------------------------------------------
   const microsPerFrame = Math.round(1_000_000 / fps);
 
   try {
@@ -215,32 +189,20 @@ export async function renderComponentInBrowser<
         throw new DOMException("Render cancelled by user", "AbortError");
       }
 
-      try {
-        await renderFrame(root, {
-          component,
-          inputProps,
-          durationInFrames,
-          fps,
-          width,
-          height,
-          frame,
-        });
-      } catch (renderErr) {
-        console.error("[export] renderFrame failed at frame", frame, renderErr);
-        throw new Error(
-          `Failed to render frame ${frame}/${durationInFrames}: ${
-            renderErr instanceof Error ? renderErr.message : String(renderErr)
-          }`,
-        );
-      }
+      await renderFrame(root, {
+        component,
+        inputProps,
+        durationInFrames,
+        fps,
+        width,
+        height,
+        frame,
+        extraPaintWait: options.extraPaintWait,
+        firstFrame: frame === 0,
+      });
 
       let canvas: HTMLCanvasElement;
       try {
-        // html2canvas-pro walks the DOM and paints each node onto a
-        // canvas2d surface directly. Unlike html-to-image's SVG +
-        // <foreignObject> approach, it doesn't depend on browsers
-        // accepting drawImage of a tainted SVG, which is silently
-        // refused in modern Chrome — producing all-black frames.
         canvas = await html2canvas(host, {
           width,
           height,
@@ -250,10 +212,9 @@ export async function renderComponentInBrowser<
           useCORS: true,
           allowTaint: true,
           logging: false,
-          scale: 1,
+          scale,
         });
       } catch (rasterErr) {
-        console.error("[export] toCanvas failed at frame", frame, rasterErr);
         throw new Error(
           `Snapshot to canvas failed at frame ${frame}: ${
             rasterErr instanceof Error ? rasterErr.message : String(rasterErr)
@@ -261,37 +222,16 @@ export async function renderComponentInBrowser<
         );
       }
 
-      if (frame === 0 || frame === Math.floor(durationInFrames / 2)) {
-        try {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            const cx = Math.floor(canvas.width / 2);
-            const cy = Math.floor(canvas.height / 2);
-            const px = ctx.getImageData(cx, cy, 1, 1).data;
-            const hostRect = host.getBoundingClientRect();
-            const firstChild = host.firstElementChild as HTMLElement | null;
-            console.info(
-              `[export] frame ${frame} center pixel rgba(${px[0]},${px[1]},${px[2]},${px[3]}) | host size=${hostRect.width}x${hostRect.height} pos=${hostRect.left},${hostRect.top} children=${host.children.length} firstChild=<${firstChild?.tagName ?? "none"}> innerSize=${firstChild?.offsetWidth ?? 0}x${firstChild?.offsetHeight ?? 0} html=${host.innerHTML.length}b`,
-            );
-          }
-        } catch (sampleErr) {
-          console.warn("[export] pixel sample failed", sampleErr);
-        }
-      }
-
       try {
         const videoFrame = new VideoFrame(canvas, {
           timestamp: frame * microsPerFrame,
           duration: microsPerFrame,
         });
-
-        // Force a keyframe once per second so the resulting MP4 has
-        // reasonable seek points.
-        const keyFrame = frame % fps === 0;
-        encoder.encode(videoFrame, { keyFrame });
+        encoder.encode(videoFrame, {
+          keyFrame: frame % keyframeInterval === 0,
+        });
         videoFrame.close();
       } catch (encErr) {
-        console.error("[export] encoder.encode failed at frame", frame, encErr);
         throw new Error(
           `Encoding frame ${frame} failed: ${
             encErr instanceof Error ? encErr.message : String(encErr)
@@ -299,53 +239,35 @@ export async function renderComponentInBrowser<
         );
       }
 
-      // Crude back-pressure so we don't pile up frames in the encoder
-      // queue on a slower machine.
-      if (encoder.encodeQueueSize > 30) {
-        await waitForQueue(encoder, 10);
+      while (encoder.encodeQueueSize > 30) {
+        await new Promise<void>((r) => setTimeout(r, 0));
       }
 
       onProgress?.((frame + 1) / durationInFrames);
-
-      if (frame === 0 || frame % Math.max(1, Math.floor(fps)) === 0) {
-        console.debug(
-          "[export] frame",
-          frame + 1,
-          "/",
-          durationInFrames,
-          "queueSize=",
-          encoder.encodeQueueSize,
-        );
-      }
     }
 
-    console.info("[export] flushing encoder");
     await encoder.flush();
     if (encoderError) throw encoderError;
     encoder.close();
 
     muxer.finalize();
     const { buffer } = muxer.target;
-    console.info("[export] complete — mp4 bytes:", buffer.byteLength);
+    dlog("[export-browser] complete — mp4 bytes:", buffer.byteLength);
     return new Blob([buffer], { type: "video/mp4" });
   } finally {
     try {
       root.unmount();
     } catch {
-      // ignore
+      /* ignore */
     }
     host.remove();
   }
 }
 
-/**
- * Convenience wrapper that renders the Motion Studio's Project composition
- * with the supplied project state.
- */
 export function renderProjectInBrowser(
-  options: RenderProjectOptions,
+  opts: RenderProjectOptions,
 ): Promise<Blob> {
-  const { project, onProgress, bitrate, signal } = options;
+  const { project, onProgress, signal, options } = opts;
   return renderComponentInBrowser({
     component: ProjectComposition as ComponentType<Record<string, unknown>>,
     inputProps: project as unknown as Record<string, unknown>,
@@ -355,13 +277,10 @@ export function renderProjectInBrowser(
     height: project.height,
     signal,
     onProgress,
-    bitrate,
+    options,
   });
 }
 
-/**
- * Trigger a browser download for an MP4 Blob.
- */
 export function downloadMp4Blob(blob: Blob, filename = "project.mp4"): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -377,7 +296,7 @@ export function downloadMp4Blob(blob: Blob, filename = "project.mp4"): void {
 // Internals
 // ---------------------------------------------------------------------------
 
-type FrameMountArgs<P extends Record<string, unknown>> = {
+type FrameArgs<P extends Record<string, unknown>> = {
   component: ComponentType<P>;
   inputProps: P;
   durationInFrames: number;
@@ -385,41 +304,86 @@ type FrameMountArgs<P extends Record<string, unknown>> = {
   width: number;
   height: number;
   frame: number;
+  extraPaintWait: boolean;
+  firstFrame: boolean;
 };
 
 function renderFrame<P extends Record<string, unknown>>(
   root: Root,
-  args: FrameMountArgs<P>,
+  args: FrameArgs<P>,
 ): Promise<void> {
-  const { component, inputProps, durationInFrames, fps, width, height, frame } =
-    args;
-  return new Promise<void>((resolve) => {
-    root.render(
-      <Thumbnail
-        component={component}
-        inputProps={inputProps}
-        compositionWidth={width}
-        compositionHeight={height}
-        durationInFrames={durationInFrames}
-        fps={fps}
-        frameToDisplay={frame}
-        style={{ width, height }}
-        acknowledgeRemotionLicense
-      />,
-    );
+  const {
+    component,
+    inputProps,
+    durationInFrames,
+    fps,
+    width,
+    height,
+    frame,
+    extraPaintWait,
+    firstFrame,
+  } = args;
 
-    // Wait for two rAFs — first commits React, second commits paint.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => resolve());
+  root.render(
+    <Thumbnail
+      component={component}
+      inputProps={inputProps}
+      compositionWidth={width}
+      compositionHeight={height}
+      durationInFrames={durationInFrames}
+      fps={fps}
+      frameToDisplay={frame}
+      style={{ width, height }}
+      acknowledgeRemotionLicense
+    />,
+  );
+
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(async () => {
+      if (firstFrame) {
+        const fonts = (document as { fonts?: { ready: Promise<unknown> } })
+          .fonts;
+        if (fonts?.ready) {
+          try {
+            await fonts.ready;
+          } catch {
+            /* ignore */
+          }
+        }
+      }
+      if (extraPaintWait) {
+        requestAnimationFrame(() => resolve());
+      } else {
+        resolve();
+      }
     });
   });
 }
 
-async function waitForQueue(
-  encoder: VideoEncoder,
-  threshold: number,
-): Promise<void> {
-  while (encoder.encodeQueueSize > threshold) {
-    await new Promise<void>((r) => setTimeout(r, 0));
+async function pickSupportedAvc(
+  width: number,
+  height: number,
+  bitrate: number,
+  fps: number,
+): Promise<string | null> {
+  const candidates = ["avc1.640028", "avc1.640033", "avc1.4d0028"];
+  for (const codec of candidates) {
+    try {
+      const probe = await VideoEncoder.isConfigSupported({
+        codec,
+        width,
+        height,
+        bitrate,
+        framerate: fps,
+      });
+      if (probe.supported) return codec;
+    } catch {
+      /* try next */
+    }
   }
+  return null;
+}
+
+function clampEven(n: number): number {
+  return n % 2 === 0 ? n : n + 1;
 }

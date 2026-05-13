@@ -9,11 +9,12 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useExportRender } from "../hooks/use-export-render";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { useProjectIO } from "../hooks/use-project-io";
+import type { ExportOptions } from "../lib/export-options";
 import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
-
 import { AgentPanel } from "./agent-panel";
 import { ExportProgressOverlay } from "./export-progress-overlay";
+import { ExportSettingsModal } from "./export-settings-modal";
 import { Inspector, type InspectorTab } from "./inspector";
 import { LibraryPanel } from "./library-panel";
 import { PlaybackControls } from "./playback-controls";
@@ -53,6 +54,20 @@ export function Builder() {
   } = useExportRender();
   const isExporting =
     exportState.phase === "starting" || exportState.phase === "rendering";
+  const [exportSettingsOpen, setExportSettingsOpen] = useState(false);
+  const lastExportOptionsRef = useRef<ExportOptions | null>(null);
+
+  const handleStartExport = (options: ExportOptions) => {
+    lastExportOptionsRef.current = options;
+    startExport(project, options);
+  };
+  const handleRetryExport = () => {
+    if (lastExportOptionsRef.current) {
+      startExport(project, lastExportOptionsRef.current);
+    } else {
+      setExportSettingsOpen(true);
+    }
+  };
 
   // ----------------------------------------------------------------------
   // Player ref + version
@@ -103,7 +118,7 @@ export function Builder() {
           onUpdateProjectTransition={(transition) =>
             dispatch({ type: "UPDATE_PROJECT_TRANSITION", transition })
           }
-          onExport={() => startExport(project)}
+          onExport={() => setExportSettingsOpen(true)}
           onSaveProject={handleSaveProject}
           onLoadProjectFile={handleLoadProjectFile}
         />
@@ -252,7 +267,17 @@ export function Builder() {
           onClose={resetExport}
           onCancel={cancelExport}
           onDownload={downloadExport}
-          onRetry={() => startExport(project)}
+          onRetry={handleRetryExport}
+        />
+
+        <ExportSettingsModal
+          open={exportSettingsOpen}
+          onOpenChange={setExportSettingsOpen}
+          onStart={handleStartExport}
+          projectWidth={project.width}
+          projectHeight={project.height}
+          durationInFrames={totalDuration}
+          fps={project.fps}
         />
       </div>
     </PlayerProvider>

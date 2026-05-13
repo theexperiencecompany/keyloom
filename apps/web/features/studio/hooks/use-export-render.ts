@@ -7,6 +7,11 @@ import {
   isBrowserExportSupported,
   renderProjectInBrowser,
 } from "../lib/browser-export";
+import {
+  DEFAULT_EXPORT_OPTIONS,
+  type ExportOptions,
+} from "../lib/export-options";
+import { renderProjectOnServer } from "../lib/server-export";
 
 export type ExportPhase = "idle" | "starting" | "rendering" | "done" | "error";
 
@@ -71,109 +76,143 @@ export function useExportRender() {
     controllerRef.current?.abort();
   }, []);
 
-  const start = useCallback(async (project: Project) => {
-    const myGeneration = ++generationRef.current;
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = null;
-    }
-    const controller = new AbortController();
-    controllerRef.current = controller;
+  const lastOptionsRef = useRef<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
 
-    console.info("[export-hook] start", {
-      width: project.width,
-      height: project.height,
-      fps: project.fps,
-      clips: project.clips?.length,
-    });
+  const start = useCallback(
+    async (project: Project, options?: ExportOptions) => {
+      const resolved = options ?? DEFAULT_EXPORT_OPTIONS;
+      lastOptionsRef.current = resolved;
+      const myGeneration = ++generationRef.current;
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+      const controller = new AbortController();
+      controllerRef.current = controller;
 
-    if (!isBrowserExportSupported()) {
-      console.warn("[export-hook] WebCodecs unavailable");
-      setState({
-        ...INITIAL_STATE,
-        phase: "error",
-        error:
-          "Your browser does not support in-browser MP4 export (WebCodecs unavailable). Try the latest Chrome or Edge.",
-        errorStack: null,
-      });
-      return;
-    }
-
-    setState({
-      ...INITIAL_STATE,
-      phase: "starting",
-      errorStack: null,
-    });
-
-    // Give React one tick to paint the "Preparing render…" UI before the
-    // encoder hogs the main thread.
-    await new Promise<void>((r) => setTimeout(r, 0));
-    if (generationRef.current !== myGeneration) return;
-
-    setState({
-      ...INITIAL_STATE,
-      phase: "rendering",
-      errorStack: null,
-    });
-
-    try {
-      const blob = await renderProjectInBrowser({
-        project,
-        signal: controller.signal,
-        onProgress: (progress) => {
-          if (generationRef.current !== myGeneration) return;
-          setState((prev) => ({
-            ...prev,
-            phase: "rendering",
-            progress,
-            error: null,
-            errorStack: null,
-          }));
-        },
+      console.info("[export-hook] start", {
+        renderer: resolved.renderer,
+        width: project.width,
+        height: project.height,
+        fps: project.fps,
+        clips: project.clips?.length,
       });
 
-      if (generationRef.current !== myGeneration) return;
-
-      const filename = `motion-studio-${new Date()
-        .toISOString()
-        .replace(/[:.]/g, "-")
-        .slice(0, 19)}.mp4`;
-      const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
-
-      console.info("[export-hook] done", blob.size, "bytes");
-      setState({
-        phase: "done",
-        progress: 1,
-        error: null,
-        errorStack: null,
-        blobUrl: url,
-        filename,
-      });
-    } catch (e) {
-      if (generationRef.current !== myGeneration) return;
-      const err = e instanceof Error ? e : new Error(String(e));
-      if (err.name === "AbortError") {
-        console.info("[export-hook] cancelled");
-        setState(INITIAL_STATE);
+      if (resolved.renderer === "browser" && !isBrowserExportSupported()) {
+        console.warn("[export-hook] WebCodecs unavailable");
+        setState({
+          ...INITIAL_STATE,
+          phase: "error",
+          error:
+            "Your browser does not support in-browser MP4 export (WebCodecs unavailable). Switch to the Server renderer, or try the latest Chrome/Edge.",
+          errorStack: null,
+        });
         return;
       }
-      console.error("[export-hook] failed", e);
+
       setState({
         ...INITIAL_STATE,
-        phase: "error",
-        error: err.message || "Render failed",
-        errorStack: err.stack ?? null,
+        phase: "starting",
+        errorStack: null,
       });
-    } finally {
-      if (controllerRef.current === controller) {
-        controllerRef.current = null;
-      }
-    }
-  }, []);
 
-  // Revoke any held blob URL when the consumer unmounts.
-  useEffect(() => () => revokeBlobUrl(), [revokeBlobUrl]);
+      // Give React one tick to paint the "Preparing render…" UI before the
+      // encoder hogs the main thread.
+      await new Promise<void>((r) => setTimeout(r, 0));
+      if (generationRef.current !== myGeneration) return;
+
+      setState({
+        ...INITIAL_STATE,
+        phase: "rendering",
+        errorStack: null,
+      });
+
+      const handleProgress = (progress: number) => {
+        if (generationRef.current !== myGeneration) return;
+        setState((prev) => ({
+          ...prev,
+          phase: "rendering",
+          progress,
+          error: null,
+          errorStack: null,
+        }));
+      };
+
+      try {
+        let blob: Blob;
+        let suggestedFilename: string | null = null;
+        if (resolved.renderer === "server") {
+          const result = await renderProjectOnServer({
+            project,
+            options: resolved,
+            signal: controller.signal,
+            onProgress: handleProgress,
+          });
+          blob = result.blob;
+          suggestedFilename = result.filename;
+        } else {
+          blob = await renderProjectInBrowser({
+            project,
+            options: resolved,
+            signal: controller.signal,
+            onProgress: handleProgress,
+          });
+        }
+
+        if (generationRef.current !== myGeneration) return;
+
+        const filename =
+          suggestedFilename ??
+          `motion-studio-${new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")
+            .slice(0, 19)}.mp4`;
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+
+        console.info("[export-hook] done", blob.size, "bytes");
+        setState({
+          phase: "done",
+          progress: 1,
+          error: null,
+          errorStack: null,
+          blobUrl: url,
+          filename,
+        });
+      } catch (e) {
+        if (generationRef.current !== myGeneration) return;
+        const err = e instanceof Error ? e : new Error(String(e));
+        if (err.name === "AbortError") {
+          console.info("[export-hook] cancelled");
+          setState(INITIAL_STATE);
+          return;
+        }
+        console.error("[export-hook] failed", e);
+        setState({
+          ...INITIAL_STATE,
+          phase: "error",
+          error: err.message || "Render failed",
+          errorStack: err.stack ?? null,
+        });
+      } finally {
+        if (controllerRef.current === controller) {
+          controllerRef.current = null;
+        }
+      }
+    },
+    [],
+  );
+
+  // Abort any in-flight render and revoke any held blob URL when the
+  // consumer unmounts, so leaving the export modal doesn't strand work.
+  useEffect(
+    () => () => {
+      controllerRef.current?.abort();
+      controllerRef.current = null;
+      revokeBlobUrl();
+    },
+    [revokeBlobUrl],
+  );
 
   const download = useCallback(() => {
     // Fetch the URL and re-trigger a download via anchor — keeps a single

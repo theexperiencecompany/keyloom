@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import type { PrimitiveField } from "../schema";
 
@@ -78,6 +79,17 @@ export function PrimitiveControl({ field, value, onChange }: Props) {
             value={(value as string) ?? ""}
             placeholder={field.placeholder}
             onChange={onChange}
+          />
+        </Wrapper>
+      );
+
+    case "switch":
+      return (
+        <Wrapper htmlFor={field.key} label={field.label}>
+          <Switch
+            id={field.key}
+            checked={Boolean(value)}
+            onCheckedChange={(v) => onChange(v)}
           />
         </Wrapper>
       );

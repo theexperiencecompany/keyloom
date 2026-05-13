@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb";
 import { Button } from "@workspace/ui/components/button";
+import Image from "next/image";
 import Link from "next/link";
 import type { Doc } from "@/lib/docs";
 import { getAdjacent } from "@/lib/docs";
@@ -162,11 +163,10 @@ export function DocsShell({ doc }: { doc: Doc }) {
             href="https://heygaia.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="group block rounded-lg bg-muted/30 p-4 transition-colors hover:bg-muted/50"
+            className="group block rounded-2xl bg-muted/60 p-4 transition-colors hover:bg-muted/80 dark:bg-muted/15 dark:hover:bg-muted/25"
           >
             <div className="mb-2 flex items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/gaia_logo.png"
                 alt="GAIA"
                 width={24}

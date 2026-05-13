@@ -58,12 +58,17 @@ export function projectDuration(project: Project): number {
     if (!clip) continue;
     total += clip.durationInFrames;
     if (i > 0) {
+      const prev = project.clips[i - 1];
       const t = resolveTransition({
         clipTransition: clip.transition,
         projectDefault: project.defaultTransition,
         index: i,
       });
-      total -= t.durationInFrames;
+      const maxOverlap = Math.min(
+        prev?.durationInFrames ?? t.durationInFrames,
+        clip.durationInFrames,
+      );
+      total -= Math.min(t.durationInFrames, maxOverlap);
     }
   }
   return Math.max(1, total);

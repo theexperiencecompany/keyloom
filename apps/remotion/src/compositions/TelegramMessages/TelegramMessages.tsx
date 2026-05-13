@@ -1,4 +1,3 @@
-"use client";
 import { useCurrentFrame } from "remotion";
 import type { ChatMessage } from "../../editors/types";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -8,7 +7,6 @@ export type TelegramMessagesProps = {
   contactName: string;
   contactAvatar?: string;
   messages: ChatMessage[];
-  theme: "light" | "dark";
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -33,7 +31,6 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
   contactName,
   contactAvatar = "https://github.com/aryanranderiya.png",
   messages,
-  theme: _theme,
 }) => {
   const frame = useCurrentFrame();
   const items = buildItems(messages, frame);

@@ -49,9 +49,14 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
   const baseItems = parsed.length > 0 ? parsed : ["Motion Studio"];
 
   // Estimate width per item so we can build a seamless loop without DOM measurement.
-  const gapPx = fontSize * 1.2;
-  const widths = baseItems.map((t) => t.length * fontSize * 0.58 + gapPx);
-  const cycleWidth = widths.reduce((a, b) => a + b, 0);
+  const gapPx = Math.max(1, fontSize * 1.2);
+  const widths = baseItems.map(
+    (t) => Math.max(1, t.length * fontSize * 0.58) + gapPx,
+  );
+  const cycleWidth = Math.max(
+    1,
+    widths.reduce((a, b) => a + b, 0),
+  );
 
   // Repeat the full word list (not each word) to fill the screen and allow wrap.
   const copies = 4;

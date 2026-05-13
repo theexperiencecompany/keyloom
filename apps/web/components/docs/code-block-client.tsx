@@ -35,13 +35,19 @@ export function CodeBlockClient({ tabs, downloadBaseName }: Props) {
   const [copied, setCopied] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
 
+  if (tabs.length === 0) return null;
   const current = tabs.find((t) => t.label === active) ?? tabs[0]!;
 
   function handleCopy() {
-    navigator.clipboard.writeText(current.source).then(() => {
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
-    });
+    navigator.clipboard
+      .writeText(current.source)
+      .then(() => {
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1800);
+      })
+      .catch((err) => {
+        console.error("Failed to copy to clipboard", err);
+      });
   }
 
   function handleDownload() {

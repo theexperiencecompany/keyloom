@@ -144,12 +144,13 @@ export function resolveTransition({
   index: number;
 }): SceneTransition {
   if (index === 0) {
-    return clipTransition ?? { kind: "none", durationInFrames: 0 };
+    return { kind: "none", durationInFrames: 0 };
   }
   const t =
     normalizeSceneTransition(clipTransition) ??
     normalizeSceneTransition(projectDefault) ??
     DEFAULT_SCENE_TRANSITION;
+  if (t.kind === "none") return { kind: "none", durationInFrames: 0 };
   return t;
 }
 
@@ -176,7 +177,10 @@ export function toTiming(t: SceneTransition): TransitionTiming {
 
 export type AnyTransitionPresentation = TransitionPresentation<any>;
 
-export function toPresentation(t: SceneTransition): AnyTransitionPresentation {
+export function toPresentation(
+  t: SceneTransition,
+  dimensions: { width: number; height: number },
+): AnyTransitionPresentation {
   switch (t.kind) {
     case "fade":
       return fade();
@@ -187,9 +191,9 @@ export function toPresentation(t: SceneTransition): AnyTransitionPresentation {
     case "flip":
       return flip({ direction: t.direction ?? "from-right" });
     case "clock-wipe":
-      return clockWipe({ width: 1920, height: 1080 });
+      return clockWipe({ width: dimensions.width, height: dimensions.height });
     case "iris":
-      return iris({ width: 1920, height: 1080 });
+      return iris({ width: dimensions.width, height: dimensions.height });
     case "zoom":
       return zoomPresentation(t.zoomMode ?? "in");
     default:

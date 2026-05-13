@@ -1,6 +1,6 @@
 "use client";
 import { TransitionSeries } from "@remotion/transitions";
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, useVideoConfig } from "remotion";
 import { componentsById } from "../../components";
 import { EffectsWrap } from "../../effects/EffectsWrap";
 import type { Project } from "../../project";
@@ -11,6 +11,7 @@ export const ProjectComposition: React.FC<Project> = ({
   clips,
   defaultTransition,
 }) => {
+  const { width, height } = useVideoConfig();
   return (
     <AbsoluteFill style={{ background: "#000" }}>
       <TransitionSeries>
@@ -64,7 +65,7 @@ export const ProjectComposition: React.FC<Project> = ({
             <TransitionSeries.Transition
               key={`tx-${clip.id}`}
               timing={toTiming(t)}
-              presentation={toPresentation(t)}
+              presentation={toPresentation(t, { width, height })}
             />,
             sequence,
           ];

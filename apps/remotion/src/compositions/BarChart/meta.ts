@@ -26,5 +26,8 @@ export const barChartInfo: CompositionInfo<BarChartProps> = {
     { kind: "text", key: "caption", label: "Caption" },
     { kind: "text", key: "labels", label: "Labels (comma-separated)" },
     { kind: "text", key: "values", label: "Values (comma-separated numbers)" },
+    { kind: "switch", key: "showAxes", label: "Show axes" },
+    { kind: "switch", key: "showGrid", label: "Show grid" },
+    { kind: "switch", key: "showValues", label: "Show values" },
   ],
 };

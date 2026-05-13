@@ -25,5 +25,7 @@ export const areaChartInfo: CompositionInfo<AreaChartProps> = {
     { kind: "text", key: "caption", label: "Caption" },
     { kind: "text", key: "labels", label: "Labels" },
     { kind: "text", key: "values", label: "Values" },
+    { kind: "switch", key: "showAxes", label: "Show axes" },
+    { kind: "switch", key: "showGrid", label: "Show grid" },
   ],
 };

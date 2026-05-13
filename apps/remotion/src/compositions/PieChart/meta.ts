@@ -25,5 +25,7 @@ export const pieChartInfo: CompositionInfo<PieChartProps> = {
     { kind: "text", key: "caption", label: "Caption" },
     { kind: "text", key: "labels", label: "Labels" },
     { kind: "text", key: "values", label: "Values" },
+    { kind: "switch", key: "donut", label: "Donut" },
+    { kind: "switch", key: "showLegend", label: "Show legend" },
   ],
 };

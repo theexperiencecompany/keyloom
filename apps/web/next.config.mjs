@@ -7,6 +7,11 @@ const nextConfig = {
   serverExternalPackages: [
     "@remotion/bundler",
     "@remotion/renderer",
+    "@remotion/tailwind-v4",
+    "@tailwindcss/webpack",
+    "@tailwindcss/node",
+    "@tailwindcss/oxide",
+    "lightningcss",
     "@remotion/compositor-linux-x64-gnu",
     "@remotion/compositor-linux-x64-musl",
     "@remotion/compositor-linux-arm64-gnu",

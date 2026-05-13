@@ -7,6 +7,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
+import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 import { BrandLink } from "@/components/brand-link";
@@ -84,8 +85,7 @@ function GaiaButton() {
         rel="noopener noreferrer"
         title="GAIA — the personal AI assistant Motion Studio is built for"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/gaia_logo.png"
           alt="GAIA"
           width={20}
