@@ -11,8 +11,8 @@ export function PropsTable({ id }: { id: string }) {
     );
   }
   return (
-    <div className="overflow-hidden rounded-lg border border-border my-6 not-prose">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto rounded-lg border border-border my-6 not-prose">
+      <table className="w-full min-w-[420px] text-sm">
         <thead className="bg-muted/30">
           <tr className="text-left text-[12px] font-medium text-muted-foreground">
             <th className="px-4 py-2">Name</th>
