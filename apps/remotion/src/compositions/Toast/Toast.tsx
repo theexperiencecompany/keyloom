@@ -32,7 +32,7 @@ export type ToastProps = {
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 const VARIANT_ACCENT: Record<ToastVariant, string> = {
-  info: "#6366f1",
+  info: "#00bbff",
   success: "#10b981",
   warning: "#f59e0b",
   error: "#ef4444",
@@ -89,7 +89,7 @@ export const Toast: React.FC<ToastProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: "linear-gradient(135deg, #181820 0%, #0b0b10 100%)",
+        background: "#ffffff",
         padding: 64,
         fontFamily: s.fontFamily,
         display: "flex",
@@ -101,19 +101,19 @@ export const Toast: React.FC<ToastProps> = ({
       <div
         style={{
           opacity: presence,
-          transform: `translateY(${offset}px) scale(${0.96 + presence * 0.04})`,
-          minWidth: 380,
-          maxWidth: 480,
+          transform: `translateY(${offset * 2}px) scale(${0.96 + presence * 0.04})`,
+          minWidth: 760,
+          maxWidth: 920,
           background: s.background,
           color: s.color,
-          borderRadius: 14,
-          padding: "18px 22px",
+          borderRadius: 24,
+          padding: "32px 38px",
           display: "flex",
-          gap: 14,
+          gap: 24,
           alignItems: "flex-start",
           boxShadow:
-            "0 18px 48px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset",
-          border: `1px solid ${border}`,
+            "0 36px 96px rgba(0,0,0,0.45), 0 2px 0 rgba(255,255,255,0.06) inset",
+          border: `2px solid ${border}`,
         }}
       >
         {showIcon !== false && (
@@ -122,27 +122,28 @@ export const Toast: React.FC<ToastProps> = ({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 18,
+              fontSize: 36,
               fontWeight: 600,
-              letterSpacing: "-0.012em",
-              marginBottom: description ? 4 : 0,
+              letterSpacing: "-0.018em",
+              marginBottom: description ? 8 : 0,
+              lineHeight: 1.15,
             }}
           >
             {title}
           </div>
           {description && (
-            <div style={{ fontSize: 15, color: muted, lineHeight: 1.45 }}>
+            <div style={{ fontSize: 26, color: muted, lineHeight: 1.4 }}>
               {description}
             </div>
           )}
         </div>
         <div
           style={{
-            fontSize: 14,
+            fontSize: 26,
             color: muted,
             cursor: "pointer",
-            padding: 4,
-            margin: -4,
+            padding: 8,
+            margin: -8,
             lineHeight: 1,
           }}
         >
@@ -183,8 +184,8 @@ function ToastIcon({
     <div
       style={{
         flexShrink: 0,
-        width: 32,
-        height: 32,
+        width: 64,
+        height: 64,
         borderRadius: 999,
         background: wrap[variant],
         display: "flex",
@@ -192,7 +193,7 @@ function ToastIcon({
         justifyContent: "center",
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
         <path
           d={path[variant]}
           stroke={stroke[variant]}

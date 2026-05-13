@@ -16,25 +16,30 @@ export type TerminalLine = {
   kind: TerminalLineKind;
 };
 
+export type TerminalChromeStyle = "mac" | "linux" | "windows" | "none";
+export type TerminalCursorStyle = "block" | "underline" | "bar";
+
 export type TerminalProps = {
   title: string;
   prompt: string;
   lines: TerminalLine[];
   charactersPerSecond: number;
   lineGap: number;
+  chromeStyle: TerminalChromeStyle;
+  cursorStyle: TerminalCursorStyle;
+  fontSize: number;
+  paddingX: number;
+  paddingY: number;
+  cornerRadius: number;
+  successColor: string;
+  outputOpacity: number;
+  commentOpacity: number;
+  showShadow: boolean;
+  maxWidth: number;
   clipStyle?: ClipStyle;
 };
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
-
-const KIND_COLORS: Record<TerminalLineKind, string> = {
-  command: "#f5f5f7",
-  output: "rgba(245, 245, 247, 0.62)",
-  comment: "rgba(245, 245, 247, 0.38)",
-  success: "#34d399",
-};
-
-const PROMPT_COLOR = "#a78bfa";
 
 export const Terminal: React.FC<TerminalProps> = ({
   title,
@@ -42,6 +47,17 @@ export const Terminal: React.FC<TerminalProps> = ({
   lines,
   charactersPerSecond,
   lineGap,
+  chromeStyle,
+  cursorStyle,
+  fontSize,
+  paddingX,
+  paddingY,
+  cornerRadius,
+  successColor,
+  outputOpacity,
+  commentOpacity,
+  showShadow,
+  maxWidth,
   clipStyle,
 }) => {
   const frame = useCurrentFrame();
@@ -51,11 +67,18 @@ export const Terminal: React.FC<TerminalProps> = ({
     color: "#f5f5f7",
     fontFamily:
       "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-    accent: PROMPT_COLOR,
+    accent: "#9ca3af",
   });
 
+  const kindColors: Record<TerminalLineKind, string> = {
+    command: s.color,
+    output: applyAlpha(s.color, outputOpacity),
+    comment: applyAlpha(s.color, commentOpacity),
+    success: successColor,
+  };
+
   const framesPerChar = Math.max(1, Math.round(fps / charactersPerSecond));
-  let cursorFrame = 12; // small breath after the window animates in
+  let cursorFrame = 12;
 
   const lineStarts: number[] = [];
   for (const line of lines) {
@@ -74,7 +97,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: "linear-gradient(180deg, #1c1c22 0%, #0a0a0e 100%)",
+        background: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -85,22 +108,23 @@ export const Terminal: React.FC<TerminalProps> = ({
       <div
         style={{
           width: "100%",
-          maxWidth: 1280,
-          borderRadius: 16,
+          maxWidth,
+          borderRadius: cornerRadius,
           background: s.background,
-          boxShadow:
-            "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset",
+          boxShadow: showShadow
+            ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
+            : "none",
           border: "1px solid rgba(255,255,255,0.08)",
           overflow: "hidden",
           opacity: windowReveal,
           transform: `translateY(${(1 - windowReveal) * 24}px) scale(${0.97 + windowReveal * 0.03})`,
         }}
       >
-        <TerminalChrome title={title} />
+        <TerminalChrome style={chromeStyle} title={title} />
         <div
           style={{
-            padding: "28px 32px 36px",
-            fontSize: 26,
+            padding: `${paddingY}px ${paddingX}px`,
+            fontSize,
             lineHeight: 1.55,
             color: s.color,
             minHeight: 320,
@@ -116,6 +140,8 @@ export const Terminal: React.FC<TerminalProps> = ({
               framesPerChar={framesPerChar}
               accent={s.accent}
               gap={lineGap}
+              color={kindColors[line.kind]}
+              cursorStyle={cursorStyle}
             />
           ))}
         </div>
@@ -124,7 +150,14 @@ export const Terminal: React.FC<TerminalProps> = ({
   );
 };
 
-function TerminalChrome({ title }: { title: string }) {
+function TerminalChrome({
+  style,
+  title,
+}: {
+  style: TerminalChromeStyle;
+  title: string;
+}) {
+  if (style === "none") return null;
   return (
     <div
       style={{
@@ -138,11 +171,7 @@ function TerminalChrome({ title }: { title: string }) {
         position: "relative",
       }}
     >
-      <div style={{ display: "flex", gap: 8 }}>
-        <Dot color="#ff5f57" />
-        <Dot color="#febc2e" />
-        <Dot color="#28c840" />
-      </div>
+      <ChromeButtons style={style} />
       <div
         style={{
           position: "absolute",
@@ -161,6 +190,44 @@ function TerminalChrome({ title }: { title: string }) {
       >
         {title}
       </div>
+    </div>
+  );
+}
+
+function ChromeButtons({ style }: { style: TerminalChromeStyle }) {
+  if (style === "mac") {
+    return (
+      <div style={{ display: "flex", gap: 8 }}>
+        <Dot color="#ff5f57" />
+        <Dot color="#febc2e" />
+        <Dot color="#28c840" />
+      </div>
+    );
+  }
+  if (style === "linux") {
+    return (
+      <div style={{ display: "flex", gap: 8 }}>
+        <Dot color="#888" />
+        <Dot color="#aaa" />
+        <Dot color="#ccc" />
+      </div>
+    );
+  }
+  // windows — three SVG glyphs on the right rendered as small text
+  return (
+    <div
+      style={{
+        marginLeft: "auto",
+        display: "flex",
+        gap: 12,
+        color: "rgba(245,245,247,0.55)",
+        fontFamily: "Segoe UI, sans-serif",
+        fontSize: 14,
+      }}
+    >
+      <span>—</span>
+      <span>▢</span>
+      <span>✕</span>
     </div>
   );
 }
@@ -187,6 +254,8 @@ function TerminalRow({
   framesPerChar,
   accent,
   gap,
+  color,
+  cursorStyle,
 }: {
   line: TerminalLine;
   prompt: string;
@@ -195,6 +264,8 @@ function TerminalRow({
   framesPerChar: number;
   accent: string;
   gap: number;
+  color: string;
+  cursorStyle: TerminalCursorStyle;
 }) {
   const elapsed = Math.max(0, frame - startFrame);
   const charsVisible =
@@ -211,8 +282,6 @@ function TerminalRow({
     easing: APPLE_EASE,
   });
   if (frame < startFrame) return null;
-
-  const color = KIND_COLORS[line.kind];
 
   return (
     <div
@@ -235,26 +304,44 @@ function TerminalRow({
       ) : null}
       <span style={{ color, whiteSpace: "pre-wrap" }}>
         {visible}
-        {showCursor && <Cursor />}
+        {showCursor && <Cursor kind={cursorStyle} />}
       </span>
     </div>
   );
 }
 
-function Cursor() {
+function Cursor({ kind }: { kind: TerminalCursorStyle }) {
   const frame = useCurrentFrame();
   const blink = Math.floor(frame / 16) % 2 === 0;
+  const dims =
+    kind === "underline"
+      ? { width: "0.55em", height: "0.12em", translateY: "0.95em" }
+      : kind === "bar"
+        ? { width: "0.12em", height: "1.05em", translateY: "0.2em" }
+        : { width: "0.55em", height: "1.05em", translateY: "0.2em" };
   return (
     <span
       style={{
         display: "inline-block",
-        width: "0.55em",
-        height: "1.05em",
+        width: dims.width,
+        height: dims.height,
         background: "currentColor",
         marginLeft: 2,
-        transform: "translateY(0.2em)",
+        transform: `translateY(${dims.translateY})`,
         opacity: blink ? 1 : 0,
       }}
     />
   );
+}
+
+function applyAlpha(color: string, alpha: number): string {
+  const a = Math.max(0, Math.min(1, alpha));
+  const c = color.trim().toLowerCase();
+  if (c.startsWith("#") && c.length === 7) {
+    const r = parseInt(c.slice(1, 3), 16);
+    const g = parseInt(c.slice(3, 5), 16);
+    const b = parseInt(c.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  return color;
 }

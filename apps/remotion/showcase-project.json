@@ -1,0 +1,375 @@
+{
+  "fps": 60,
+  "width": 1920,
+  "height": 1080,
+  "clips": [
+    {
+      "id": "clip-1",
+      "compositionId": "TitleSlideUp",
+      "props": {
+        "headline": "Motion Studio",
+        "subtitle": "Cinematic Remotion scenes"
+      },
+      "durationInFrames": 138,
+      "transition": {
+        "kind": "none",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-2",
+      "compositionId": "PerspectiveMarquee",
+      "props": {
+        "items": "Motion Studio, Remotion, GAIA, React, Cinematic, Open Source",
+        "speedPxPerFrame": 2.5,
+        "perspective": 1200,
+        "rotateY": -28,
+        "rotateX": 8,
+        "fontSize": 168,
+        "fontWeight": 700,
+        "textTransform": "uppercase"
+      },
+      "durationInFrames": 180,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-3",
+      "compositionId": "TitlePopup",
+      "props": {
+        "headline": "Drop in. Render. Ship.",
+        "subtitle": ""
+      },
+      "durationInFrames": 108,
+      "transition": {
+        "kind": "swipe-up",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-4",
+      "compositionId": "Terminal",
+      "props": {
+        "title": "~/projects/launch-reel",
+        "prompt": "❯",
+        "lines": [
+          {
+            "kind": "comment",
+            "text": "# 1 — install"
+          },
+          {
+            "kind": "command",
+            "text": "npm install remotion"
+          },
+          {
+            "kind": "success",
+            "text": "ready"
+          },
+          {
+            "kind": "comment",
+            "text": ""
+          },
+          {
+            "kind": "comment",
+            "text": "# 2 — render"
+          },
+          {
+            "kind": "command",
+            "text": "npx remotion render Showcase out.mp4"
+          },
+          {
+            "kind": "output",
+            "text": "encoding frames @ 60fps..."
+          },
+          {
+            "kind": "success",
+            "text": "shipped"
+          }
+        ],
+        "charactersPerSecond": 32,
+        "lineGap": 6,
+        "chromeStyle": "mac",
+        "cursorStyle": "block",
+        "fontSize": 26,
+        "paddingX": 32,
+        "paddingY": 28,
+        "cornerRadius": 16,
+        "successColor": "#34d399",
+        "outputOpacity": 0.62,
+        "commentOpacity": 0.38,
+        "showShadow": true,
+        "maxWidth": 1280
+      },
+      "durationInFrames": 360,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-5",
+      "compositionId": "TitlePopup",
+      "props": {
+        "headline": "Built for product reels.",
+        "subtitle": ""
+      },
+      "durationInFrames": 96,
+      "transition": {
+        "kind": "swipe-left",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-6",
+      "compositionId": "BarChart",
+      "props": {
+        "title": "Monthly active users",
+        "caption": "Past 6 months · in thousands",
+        "labels": "Jan, Feb, Mar, Apr, May, Jun",
+        "values": "42, 58, 49, 73, 84, 96",
+        "showAxes": true,
+        "showGrid": true,
+        "showValues": true
+      },
+      "durationInFrames": 180,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-7",
+      "compositionId": "StatCounter",
+      "props": {
+        "target": 12847,
+        "label": "developers shipping",
+        "prefix": "",
+        "suffix": "+"
+      },
+      "durationInFrames": 138,
+      "transition": {
+        "kind": "zoom-in",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-8",
+      "compositionId": "RadialChart",
+      "props": {
+        "title": "Conversion lift",
+        "caption": "Q4 target reached",
+        "label": "of monthly goal",
+        "value": 84,
+        "max": 100,
+        "unit": "%"
+      },
+      "durationInFrames": 150,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-9",
+      "compositionId": "AreaChart",
+      "props": {
+        "title": "Signups",
+        "caption": "Last 8 weeks",
+        "labels": "W1, W2, W3, W4, W5, W6, W7, W8",
+        "values": "120, 145, 132, 168, 195, 224, 270, 312",
+        "showAxes": true,
+        "showGrid": true
+      },
+      "durationInFrames": 156,
+      "transition": {
+        "kind": "swipe-right",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-10",
+      "compositionId": "TitleFade",
+      "props": {
+        "headline": "Brand-faithful UI.",
+        "subtitle": ""
+      },
+      "durationInFrames": 96,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-11",
+      "compositionId": "GitHubStarButton",
+      "props": {
+        "owner": "theexperiencecompany",
+        "repo": "motion-studio",
+        "startCount": 1240,
+        "endCount": 1289,
+        "theme": "light"
+      },
+      "durationInFrames": 180,
+      "transition": {
+        "kind": "zoom-out",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-12",
+      "compositionId": "TweetCard",
+      "props": {
+        "displayName": "Motion Studio",
+        "handle": "@motionstudio",
+        "avatarUrl": "https://github.com/theexperiencecompany.png?size=200",
+        "verified": "yes",
+        "text": "Just shipped — 60+ Remotion scenes, in-browser MP4 export, open source.",
+        "timestamp": "10:30 PM · Today",
+        "replies": 28,
+        "retweets": 73,
+        "likes": 482,
+        "views": 21400,
+        "theme": "light",
+        "backgroundColor": "#ffffff"
+      },
+      "durationInFrames": 180,
+      "transition": {
+        "kind": "swipe-down",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-13",
+      "compositionId": "MessageBubbles",
+      "props": {
+        "contactName": "shipped",
+        "contactAvatar": "https://github.com/theexperiencecompany.png",
+        "messages": [
+          {
+            "text": "you see motion studio yet?",
+            "side": "left",
+            "typingFrames": 40,
+            "delay": 24
+          },
+          {
+            "text": "yeah just exported a demo in browser 😳",
+            "side": "right",
+            "typingFrames": 50,
+            "delay": 110
+          },
+          {
+            "text": "no way it's open source?",
+            "side": "left",
+            "typingFrames": 42,
+            "delay": 220
+          },
+          {
+            "text": "MIT license. zero servers.",
+            "side": "right",
+            "typingFrames": 44,
+            "delay": 320
+          }
+        ],
+        "theme": "light"
+      },
+      "durationInFrames": 360,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-14",
+      "compositionId": "Toast",
+      "props": {
+        "title": "Render complete",
+        "description": "Your 30-second video is ready to download.",
+        "position": "bottom-right",
+        "variant": "success",
+        "showIcon": true,
+        "durationVisibleSec": 2.4
+      },
+      "durationInFrames": 180,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-15",
+      "compositionId": "TitleType",
+      "props": {
+        "headline": "Trusted by builders.",
+        "subtitle": ""
+      },
+      "durationInFrames": 132,
+      "transition": {
+        "kind": "swipe-up",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-16",
+      "compositionId": "LogoCloud",
+      "props": {
+        "headline": "Trusted by teams at",
+        "logos": [
+          {
+            "name": "Vercel",
+            "url": ""
+          },
+          {
+            "name": "Linear",
+            "url": ""
+          },
+          {
+            "name": "Stripe",
+            "url": ""
+          },
+          {
+            "name": "Notion",
+            "url": ""
+          },
+          {
+            "name": "Figma",
+            "url": ""
+          }
+        ],
+        "theme": "light"
+      },
+      "durationInFrames": 144,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-17",
+      "compositionId": "TextMaskRevealUp",
+      "props": {
+        "headline": "Open source.\nForever.",
+        "subtitle": "MIT licensed"
+      },
+      "durationInFrames": 144,
+      "transition": {
+        "kind": "fade",
+        "durationInFrames": 18
+      }
+    },
+    {
+      "id": "clip-18",
+      "compositionId": "TitleSlideUp",
+      "props": {
+        "headline": "Ship the reel.",
+        "subtitle": "motion-studio.heygaia.io"
+      },
+      "durationInFrames": 144,
+      "transition": {
+        "kind": "zoom-in",
+        "durationInFrames": 18
+      }
+    }
+  ]
+}

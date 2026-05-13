@@ -3,12 +3,12 @@ import { Easing, interpolate } from "remotion";
 export const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 export const CHART_PALETTE = [
-  "#6366f1",
+  "#00bbff",
   "#10b981",
   "#f59e0b",
   "#ef4444",
   "#06b6d4",
-  "#a855f7",
+  "#3b82f6",
   "#ec4899",
   "#84cc16",
 ];

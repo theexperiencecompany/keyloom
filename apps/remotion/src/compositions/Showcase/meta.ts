@@ -2,13 +2,19 @@ import type { CompositionInfo } from "../../schema";
 import type { ShowcaseProps } from "./Showcase";
 
 export const showcaseDefaultProps: ShowcaseProps = {
-  eyebrow: "Live preview",
+  eyebrow: "Featured component",
   title: "Built for shipping reels.",
-  caption: "Drop any scene inside the frame to feature it.",
+  caption: "Wrap any scene inside a configurable showcase frame.",
   childCompositionId: "BarChart",
-  backdrop: "gradient",
-  cornerRadius: 18,
-  innerScale: 0.78,
+  frameStyle: "video",
+  backdrop: "dotted",
+  backdropImage: "",
+  backdropColorA: "#f6f8fa",
+  backdropColorB: "#e9ecef",
+  innerScale: 0.74,
+  cornerRadius: 20,
+  shadowIntensity: 0.6,
+  borderColor: "#e5e7eb",
 };
 
 const COMPOSITION_EXCLUDES = [
@@ -22,7 +28,7 @@ export const showcaseInfo: CompositionInfo<ShowcaseProps> = {
   id: "Showcase",
   title: "Showcase Frame",
   description:
-    "A presentation frame with eyebrow, title, caption, and a styled backdrop — wraps any other composition for hero-style component showcases.",
+    "A presentation frame with eyebrow, title, caption, and a configurable backdrop — wraps any other scene inside a video / browser / minimal / floating frame.",
   durationInFrames: 240,
   fps: 60,
   width: 1920,
@@ -40,15 +46,36 @@ export const showcaseInfo: CompositionInfo<ShowcaseProps> = {
     },
     {
       kind: "select",
+      key: "frameStyle",
+      label: "Frame style",
+      options: [
+        { value: "video", label: "Video player" },
+        { value: "browser", label: "Browser window" },
+        { value: "minimal", label: "Minimal (just rounded)" },
+        { value: "floating", label: "Floating (no border)" },
+      ],
+    },
+    {
+      kind: "select",
       key: "backdrop",
       label: "Backdrop",
       options: [
+        { value: "dotted", label: "Dotted pattern" },
+        { value: "grid", label: "Grid pattern" },
         { value: "gradient", label: "Gradient" },
-        { value: "radial", label: "Radial glow" },
-        { value: "grid", label: "Dotted grid" },
-        { value: "solid", label: "Solid" },
+        { value: "image", label: "Image" },
+        { value: "solid", label: "Solid (no pattern)" },
       ],
     },
+    {
+      kind: "image",
+      key: "backdropImage",
+      label: "Backdrop image",
+      placeholder: "Used when Backdrop = Image",
+    },
+    { kind: "color", key: "backdropColorA", label: "Backdrop color A" },
+    { kind: "color", key: "backdropColorB", label: "Backdrop color B" },
+    { kind: "color", key: "borderColor", label: "Frame border" },
     {
       kind: "number",
       key: "cornerRadius",
@@ -61,6 +88,13 @@ export const showcaseInfo: CompositionInfo<ShowcaseProps> = {
       key: "innerScale",
       label: "Frame size (0–1)",
       min: 0.3,
+      max: 1,
+    },
+    {
+      kind: "number",
+      key: "shadowIntensity",
+      label: "Shadow intensity (0–1)",
+      min: 0,
       max: 1,
     },
   ],

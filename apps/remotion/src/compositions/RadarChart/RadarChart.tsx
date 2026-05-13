@@ -26,7 +26,7 @@ export const RadarChart: React.FC<RadarChartProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const s = resolveClipStyle(clipStyle, {
-    background: "#0b0b0f",
+    background: "#000000",
     color: "#ffffff",
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",

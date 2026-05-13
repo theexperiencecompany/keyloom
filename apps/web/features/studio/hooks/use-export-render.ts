@@ -2,6 +2,11 @@
 
 import type { Project } from "@workspace/compositions/project";
 import { useCallback, useRef, useState } from "react";
+import {
+  downloadMp4Blob,
+  isBrowserExportSupported,
+  renderProjectInBrowser,
+} from "../lib/browser-export";
 
 export type ExportPhase = "idle" | "starting" | "rendering" | "done" | "error";
 
@@ -11,8 +16,12 @@ export type ExportState = {
   error: string | null;
 };
 
-const POLL_INTERVAL_MS = 400;
-
+/**
+ * Drives the in-browser MP4 export. The actual frame-walking +
+ * encoding lives in `../lib/browser-export.ts` — this hook just owns
+ * the UI state machine and a cancel token so re-clicking Export
+ * mid-flight doesn't run two encoders concurrently.
+ */
 export function useExportRender() {
   const [state, setState] = useState<ExportState>({
     phase: "idle",
@@ -20,93 +29,59 @@ export function useExportRender() {
     error: null,
   });
 
-  const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Generation counter — bumped on reset/start, used to ignore stale
+  // progress callbacks if the user dismisses the overlay mid-render.
+  const generationRef = useRef(0);
 
   const reset = useCallback(() => {
-    if (pollTimer.current) clearTimeout(pollTimer.current);
-    pollTimer.current = null;
+    generationRef.current += 1;
     setState({ phase: "idle", progress: 0, error: null });
   }, []);
 
   const start = useCallback(async (project: Project) => {
-    setState({ phase: "starting", progress: 0, error: null });
+    const myGeneration = ++generationRef.current;
 
-    let jobId: string;
-    try {
-      const startRes = await fetch("/api/render-project", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(project),
-      });
-      if (!startRes.ok)
-        throw new Error(`Failed to start render: ${startRes.status}`);
-      const data = (await startRes.json()) as {
-        jobId?: string;
-        error?: string;
-      };
-      if (!data.jobId) throw new Error(data.error ?? "Missing jobId");
-      jobId = data.jobId;
-    } catch (e) {
+    if (!isBrowserExportSupported()) {
       setState({
         phase: "error",
         progress: 0,
-        error: e instanceof Error ? e.message : "Unknown error",
+        error:
+          "Your browser does not support in-browser MP4 export (WebCodecs unavailable). Try the latest Chrome or Edge.",
       });
       return;
     }
 
+    setState({ phase: "starting", progress: 0, error: null });
+
+    // Give React one tick to paint the "Preparing render…" UI before the
+    // encoder hogs the main thread.
+    await new Promise<void>((r) => setTimeout(r, 0));
+    if (generationRef.current !== myGeneration) return;
+
     setState({ phase: "rendering", progress: 0, error: null });
 
-    function poll() {
-      fetch(`/api/render-project/${jobId}`)
-        .then((r) => r.json())
-        .then(
-          (status: {
-            progress: number;
-            status: "rendering" | "done" | "error";
-            error?: string;
-          }) => {
-            if (status.status === "error") {
-              setState({
-                phase: "error",
-                progress: status.progress ?? 0,
-                error: status.error ?? "Render failed",
-              });
-              return;
-            }
-            if (status.status === "done") {
-              setState({ phase: "done", progress: 1, error: null });
-              triggerDownload(jobId);
-              return;
-            }
-            setState({
-              phase: "rendering",
-              progress: status.progress ?? 0,
-              error: null,
-            });
-            pollTimer.current = setTimeout(poll, POLL_INTERVAL_MS);
-          },
-        )
-        .catch((e: unknown) => {
-          setState({
-            phase: "error",
-            progress: 0,
-            error: e instanceof Error ? e.message : "Polling failed",
-          });
-        });
-    }
+    try {
+      const blob = await renderProjectInBrowser({
+        project,
+        onProgress: (progress) => {
+          if (generationRef.current !== myGeneration) return;
+          setState({ phase: "rendering", progress, error: null });
+        },
+      });
 
-    poll();
+      if (generationRef.current !== myGeneration) return;
+
+      setState({ phase: "done", progress: 1, error: null });
+      downloadMp4Blob(blob, "project.mp4");
+    } catch (e) {
+      if (generationRef.current !== myGeneration) return;
+      setState({
+        phase: "error",
+        progress: 0,
+        error: e instanceof Error ? e.message : "Render failed",
+      });
+    }
   }, []);
 
   return { state, start, reset };
-}
-
-function triggerDownload(jobId: string) {
-  const a = document.createElement("a");
-  a.href = `/api/render-project/${jobId}/download`;
-  a.download = "project.mp4";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
 }

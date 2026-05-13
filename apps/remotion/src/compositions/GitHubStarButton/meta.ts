@@ -11,7 +11,7 @@ export const githubStarButtonDefaultProps: GitHubStarButtonProps = {
   repo: "motion-studio",
   startCount: 1240,
   endCount: 1289,
-  theme: "dark",
+  theme: "light",
 };
 
 export const githubStarButtonInfo: CompositionInfo<GitHubStarButtonProps> = {

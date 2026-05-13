@@ -6,6 +6,10 @@ import { FieldsRenderer } from "@workspace/compositions/editors";
 import type { AnyCompositionInfo } from "@workspace/compositions/schema";
 import { Button } from "@workspace/ui/components/button";
 import { useMemo, useState } from "react";
+import {
+  downloadMp4Blob,
+  renderComponentInBrowser,
+} from "@/features/studio/lib/browser-export";
 
 export function EditorView({
   info,
@@ -17,29 +21,27 @@ export function EditorView({
     () => structuredClone(info.defaultProps) as Record<string, unknown>,
   );
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const playerProps = useMemo(() => props, [props]);
 
   async function handleDownload() {
+    if (!Component) return;
     setLoading(true);
+    setProgress(0);
     setError(null);
     try {
-      const res = await fetch(`/api/render/${info.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(props),
+      const blob = await renderComponentInBrowser({
+        component: Component,
+        inputProps: props,
+        durationInFrames: info.durationInFrames,
+        fps: info.fps,
+        width: info.width,
+        height: info.height,
+        onProgress: setProgress,
       });
-      if (!res.ok) throw new Error(`Render failed: ${res.status}`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${info.id}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      downloadMp4Blob(blob, `${info.id}.mp4`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -71,7 +73,9 @@ export function EditorView({
             onClick={handleDownload}
             disabled={loading}
           >
-            {loading ? "Rendering…" : "Download MP4"}
+            {loading
+              ? `Rendering… ${Math.round(progress * 100)}%`
+              : "Download MP4"}
           </Button>
           {error && <p className="mt-2 text-[12px] text-red-500">{error}</p>}
         </div>

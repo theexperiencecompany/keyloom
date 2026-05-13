@@ -161,12 +161,16 @@ export function DocsShell({ doc }: { doc: Doc }) {
             href="https://heygaia.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="group block rounded-lg border border-border bg-gradient-to-br from-indigo-500/8 via-fuchsia-500/4 to-transparent p-4 transition-colors hover:border-indigo-400/40"
+            className="group block rounded-lg border border-border bg-muted/30 p-4 transition-colors hover:border-foreground/30 hover:bg-muted/50"
           >
-            <div className="mb-1 flex items-center gap-2">
-              <span
-                aria-hidden
-                className="size-4 rounded-[5px] bg-gradient-to-br from-indigo-500 to-fuchsia-500"
+            <div className="mb-2 flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/gaia_logo.png"
+                alt="GAIA"
+                width={20}
+                height={20}
+                className="rounded-sm"
               />
               <span className="text-[12px] font-semibold text-foreground">
                 GAIA
@@ -176,7 +180,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
               Motion Studio is the commercial reel kit for GAIA — the personal
               AI assistant.
             </p>
-            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 transition-colors group-hover:text-indigo-200">
+            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-foreground/80 transition-colors group-hover:text-foreground">
               heygaia.io →
             </span>
           </Link>

@@ -1,12 +1,15 @@
 "use client";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
 export type PerspectiveMarqueeProps = {
-  text: string;
-  rows: number;
-  speed: number;
+  /** Comma-separated list of items to scroll. */
+  items: string;
+  /** Pixels advanced per frame. Recommended range 1–4. */
+  speedPxPerFrame: number;
+  /** Outer perspective in pixels. */
   perspective: number;
+  rotateY: number;
   rotateX: number;
   fontSize: number;
   fontWeight: number;
@@ -14,11 +17,16 @@ export type PerspectiveMarqueeProps = {
   clipStyle?: ClipStyle;
 };
 
+/**
+ * A single horizontal row of large display type tilted into 3D space.
+ * Items roll past a vanishing point with per-item depth-of-field blur,
+ * matching the remocn.dev/docs/typography/perspective-marquee reference.
+ */
 export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
-  text,
-  rows,
-  speed,
+  items,
+  speedPxPerFrame,
   perspective,
+  rotateY,
   rotateX,
   fontSize,
   fontWeight,
@@ -27,16 +35,28 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const s = resolveClipStyle(clipStyle, {
-    background: "#0a0a0e",
-    color: "#ffffff",
+    background: "#050505",
+    color: "#fafafa",
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
-    accent: "#6366f1",
+    accent: "#fafafa",
   });
 
-  const safeRows = Math.max(1, Math.min(8, Math.round(rows)));
-  const safeText = text.trim() ? text : "MOTION STUDIO";
-  const repeated = Array.from({ length: 8 }, () => safeText).join(" • ");
+  const parsed = items
+    .split(/[,\n]/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const baseItems = parsed.length > 0 ? parsed : ["Motion Studio"];
+
+  // Repeat the list enough times to fill the row and survive a seamless loop.
+  const cycle = baseItems.flatMap((_, i) =>
+    Array.from({ length: 4 }, (__, k) => ({
+      key: `${i}-${k}`,
+      text: baseItems[i % baseItems.length]!,
+    })),
+  );
+
+  const offset = (frame * speedPxPerFrame) % 1000;
 
   return (
     <AbsoluteFill
@@ -53,55 +73,65 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
     >
       <div
         style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           transformStyle: "preserve-3d",
-          transform: `rotateX(${rotateX}deg)`,
-          width: "240%",
         }}
       >
-        {Array.from({ length: safeRows }).map((_, row) => {
-          const direction = row % 2 === 0 ? 1 : -1;
-          const offset = (frame * speed * direction) % 800;
-          const rowOpacity = interpolate(row, [0, safeRows - 1], [0.35, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          });
-          return (
-            <div
-              key={row}
-              style={{
-                position: "relative",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                marginBottom: 16,
-                opacity: rowOpacity,
-              }}
-            >
-              <div
+        <div
+          style={{
+            transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+            transformStyle: "preserve-3d",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: "1.2em",
+            fontSize,
+            fontWeight,
+            letterSpacing: "-0.025em",
+            textTransform,
+            lineHeight: 1,
+            position: "relative",
+          }}
+        >
+          {cycle.map((item, i) => {
+            // distance-from-center, in items — squared to make the edges
+            // fall off faster than the center for stronger DOF feel.
+            const totalSpan = cycle.length;
+            const itemSlot =
+              ((i + offset / (fontSize * 0.9)) % totalSpan) - totalSpan / 2;
+            const norm = Math.min(1, Math.abs(itemSlot) / (totalSpan / 2));
+            const eased = norm * norm;
+            const blur = eased * 22;
+            const opacity = 1 - eased * 0.92;
+            return (
+              <span
+                key={item.key}
                 style={{
+                  display: "inline-block",
+                  filter: `blur(${blur}px)`,
+                  opacity,
                   transform: `translateX(${-offset}px)`,
-                  display: "flex",
-                  gap: "0.4em",
-                  fontSize,
-                  fontWeight,
-                  textTransform,
-                  letterSpacing: "-0.025em",
-                  lineHeight: 1,
-                  color: row === Math.floor(safeRows / 2) ? s.accent : s.color,
+                  willChange: "transform, opacity, filter",
                 }}
               >
-                <span>{repeated}</span>
-                <span>{repeated}</span>
-              </div>
-            </div>
-          );
-        })}
+                {item.text}
+              </span>
+            );
+          })}
+        </div>
       </div>
+
       <div
+        aria-hidden
         style={{
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background: `radial-gradient(ellipse at center, transparent 35%, ${s.background} 75%)`,
+          background: `linear-gradient(90deg, ${s.background} 0%, ${s.background}cc 12%, transparent 36%, transparent 64%, ${s.background}cc 88%, ${s.background} 100%)`,
         }}
       />
     </AbsoluteFill>

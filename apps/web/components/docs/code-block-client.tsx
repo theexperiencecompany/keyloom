@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ArrowDown01Icon,
+  ArrowUp01Icon,
   CheckmarkCircle02Icon,
   Copy01Icon,
   Download01Icon,
@@ -26,9 +28,12 @@ type Props = {
   downloadBaseName: string;
 };
 
+const COLLAPSED_MAX_HEIGHT = 360;
+
 export function CodeBlockClient({ tabs, downloadBaseName }: Props) {
   const [active, setActive] = React.useState(tabs[0]?.label ?? "");
   const [copied, setCopied] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
 
   const current = tabs.find((t) => t.label === active) ?? tabs[0]!;
 
@@ -91,19 +96,45 @@ export function CodeBlockClient({ tabs, downloadBaseName }: Props) {
         </div>
         {tabs.map((tab) => (
           <TabsContent key={tab.label} value={tab.label} className="m-0">
-            <pre className="m-0 overflow-x-auto bg-transparent p-4 text-[12.5px] leading-relaxed font-mono">
-              <code className="text-foreground">{tab.source}</code>
-            </pre>
+            <div
+              className="relative"
+              style={{
+                maxHeight: expanded ? "none" : COLLAPSED_MAX_HEIGHT,
+                overflow: "hidden",
+              }}
+            >
+              <pre className="m-0 overflow-x-auto bg-transparent p-4 text-[12.5px] leading-relaxed font-mono">
+                <code className="text-foreground">{tab.source}</code>
+              </pre>
+              {!expanded && (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-muted/95 via-muted/70 to-transparent"
+                />
+              )}
+            </div>
           </TabsContent>
         ))}
       </Tabs>
-      <div className="border-t border-border bg-background/40 px-4 py-1.5 text-[10px] font-mono text-muted-foreground">
-        Save as{" "}
-        <span className="text-foreground">
-          {downloadBaseName}/{current.label}
-        </span>{" "}
-        in your project — these files are dependency-free apart from{" "}
-        <span className="text-foreground">remotion</span>.
+      <div className="flex items-center justify-between gap-2 border-t border-border bg-background/40 px-2 py-1.5">
+        <span className="px-2 text-[10px] font-mono text-muted-foreground">
+          Save as{" "}
+          <span className="text-foreground">
+            {downloadBaseName}/{current.label}
+          </span>{" "}
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setExpanded((v) => !v)}
+          className="h-7 gap-1.5 text-[11px] font-medium"
+        >
+          <HugeiconsIcon
+            icon={expanded ? ArrowUp01Icon : ArrowDown01Icon}
+            size={13}
+          />
+          {expanded ? "Hide code" : "View code"}
+        </Button>
       </div>
     </div>
   );

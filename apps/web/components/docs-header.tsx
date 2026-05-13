@@ -83,9 +83,13 @@ function GaiaButton() {
         rel="noopener noreferrer"
         title="GAIA — the personal AI assistant Motion Studio is built for"
       >
-        <span
-          aria-hidden
-          className="size-4 rounded-[5px] bg-gradient-to-br from-indigo-500 to-fuchsia-500"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/gaia_logo.png"
+          alt="GAIA"
+          width={20}
+          height={20}
+          className="rounded-sm"
         />
         <span className="text-xs font-medium">GAIA</span>
       </Link>

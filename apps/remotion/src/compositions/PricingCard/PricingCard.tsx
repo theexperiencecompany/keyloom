@@ -44,7 +44,7 @@ export const PricingCard: React.FC<PricingCardProps> = ({
     color: isDark ? "#ffffff" : "#0f1014",
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
-    accent: "#6366f1",
+    accent: "#00bbff",
   });
   const accent = s.accent;
   const bg = s.background;
