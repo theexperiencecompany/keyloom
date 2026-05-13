@@ -2,6 +2,7 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { Img, spring, staticFile, useVideoConfig } from "remotion";
+import { snap } from "../../snap";
 
 // Remotion's bundle server only serves public/ assets through `staticFile()`
 // — literal "/foo.png" strings fail with 404 inside `remotion render`. This
@@ -10,6 +11,60 @@ function asset(src: string | undefined): string | undefined {
   if (!src) return src;
   if (/^(https?:|data:|blob:)/i.test(src)) return src;
   return staticFile(src.replace(/^\//, ""));
+}
+
+/**
+ * Tile a doodle PNG across an absolute-positioned region. Replaces CSS
+ * `background-image: url(...) repeat` which @remotion/web-renderer's
+ * canvas-walk fallback silently drops in browser exports — we render real
+ * `<Img>` tiles instead so the renderer's `drawImage` path picks them up.
+ */
+function DoodleTiles({
+  src,
+  tileW,
+  tileH,
+  cols,
+  rows,
+}: {
+  src: string;
+  tileW: number;
+  tileH: number;
+  cols: number;
+  rows: number;
+}) {
+  const tiles: React.ReactNode[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      tiles.push(
+        <Img
+          key={`${r}-${c}`}
+          src={src}
+          alt=""
+          style={{
+            position: "absolute",
+            left: c * tileW,
+            top: r * tileH,
+            width: tileW,
+            height: tileH,
+            pointerEvents: "none",
+          }}
+        />,
+      );
+    }
+  }
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
+        pointerEvents: "none",
+        zIndex: 0,
+      }}
+    >
+      {tiles}
+    </div>
+  );
 }
 
 export type ChatPlatform =
@@ -52,7 +107,7 @@ function BubbleEnter({
     durationInFrames: 16,
   });
   const scale = 0.85 + 0.15 * s;
-  const translateY = (1 - s) * 10;
+  const translateY = snap((1 - s) * 10);
   const opacity = Math.min(1, s * 1.6);
   return (
     <div
@@ -587,69 +642,78 @@ function WhatsAppDemo({
 
       {/* Chat area — light gray with the WhatsApp doodle pattern */}
       <div
-        className="flex flex-1 flex-col overflow-y-auto px-3 pb-3"
+        className="relative flex flex-1 flex-col overflow-y-auto px-3 pb-3"
         style={{
           scrollbarWidth: "none",
           gap: 8,
           backgroundColor: bg,
-          backgroundImage: `url("${staticFile("whatsapp-doodle.png")}")`,
-          backgroundRepeat: "repeat",
-          backgroundSize: "404px auto",
           paddingTop: 8,
         }}
       >
-        {grouped.map((group, gi) => {
-          const isMe = group.from === "me";
-          return (
-            <div
-              key={gi}
-              className={cn(
-                "flex flex-col",
-                isMe ? "items-end" : "items-start",
-              )}
-              style={{ gap: 2 }}
-            >
-              {group.items.map((m, i) => {
-                const isLast = i === group.items.length - 1;
-                const showMeta = !m.typing && (m.time || (isMe && m.status));
-                return (
-                  <BubbleEnter
-                    key={m.id ?? `${gi}-${i}`}
-                    enterFrames={m.enterFrames}
-                    from={group.from}
-                  >
-                    <CurvedBubble
+        <DoodleTiles
+          src={staticFile("whatsapp-doodle.png")}
+          tileW={404}
+          tileH={695}
+          cols={4}
+          rows={2}
+        />
+        <div
+          className="relative flex flex-1 flex-col"
+          style={{ gap: 8, zIndex: 1 }}
+        >
+          {grouped.map((group, gi) => {
+            const isMe = group.from === "me";
+            return (
+              <div
+                key={gi}
+                className={cn(
+                  "flex flex-col",
+                  isMe ? "items-end" : "items-start",
+                )}
+                style={{ gap: 2 }}
+              >
+                {group.items.map((m, i) => {
+                  const isLast = i === group.items.length - 1;
+                  const showMeta = !m.typing && (m.time || (isMe && m.status));
+                  return (
+                    <BubbleEnter
+                      key={m.id ?? `${gi}-${i}`}
+                      enterFrames={m.enterFrames}
                       from={group.from}
-                      tail={isLast}
-                      background={isMe ? myBubble : theirBubble}
-                      tailColor={isMe ? myBubble : theirBubble}
-                      color={textColor}
-                      meta={
-                        showMeta ? (
-                          <span
-                            style={{
-                              color: metaColor,
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 3,
-                            }}
-                          >
-                            {m.time ?? ""}
-                            {isMe && m.status && (
-                              <WhatsAppTicks status={m.status} />
-                            )}
-                          </span>
-                        ) : undefined
-                      }
                     >
-                      {m.typing ? <TypingDots color={metaColor} /> : m.text}
-                    </CurvedBubble>
-                  </BubbleEnter>
-                );
-              })}
-            </div>
-          );
-        })}
+                      <CurvedBubble
+                        from={group.from}
+                        tail={isLast}
+                        background={isMe ? myBubble : theirBubble}
+                        tailColor={isMe ? myBubble : theirBubble}
+                        color={textColor}
+                        meta={
+                          showMeta ? (
+                            <span
+                              style={{
+                                color: metaColor,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                            >
+                              {m.time ?? ""}
+                              {isMe && m.status && (
+                                <WhatsAppTicks status={m.status} />
+                              )}
+                            </span>
+                          ) : undefined
+                        }
+                      >
+                        {m.typing ? <TypingDots color={metaColor} /> : m.text}
+                      </CurvedBubble>
+                    </BubbleEnter>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {showComposer && (
@@ -855,73 +919,94 @@ function TelegramDemo({
 
       {/* Chat area: blue overlay + Telegram doodle pattern */}
       <div
-        className="flex flex-1 flex-col overflow-y-auto px-3 pb-3"
+        className="relative flex flex-1 flex-col overflow-y-auto px-3 pb-3"
         style={{
           scrollbarWidth: "none",
           gap: 8,
           backgroundColor: blueOverlay,
-          backgroundImage: `linear-gradient(rgba(43,120,205,0.5), rgba(43,120,205,0.5)), url("${staticFile("telegram-doodle.png")}")`,
-          backgroundSize: "auto, 480px auto",
-          backgroundRepeat: "repeat",
           paddingTop: 8,
         }}
       >
-        {grouped.map((group, gi) => {
-          const isMe = group.from === "me";
-          return (
-            <div
-              key={gi}
-              className={cn(
-                "flex flex-col",
-                isMe ? "items-end" : "items-start",
-              )}
-              style={{ gap: 2 }}
-            >
-              {group.items.map((m, i) => {
-                const isLast = i === group.items.length - 1;
-                const showMeta = !m.typing && (m.time || (isMe && m.status));
-                return (
-                  <BubbleEnter
-                    key={m.id ?? `${gi}-${i}`}
-                    enterFrames={m.enterFrames}
-                    from={group.from}
-                  >
-                    <CurvedBubble
+        <DoodleTiles
+          src={staticFile("telegram-doodle.png")}
+          tileW={480}
+          tileH={752}
+          cols={3}
+          rows={2}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(43,120,205,0.5)",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
+        <div
+          className="relative flex flex-1 flex-col"
+          style={{ gap: 8, zIndex: 2 }}
+        >
+          {grouped.map((group, gi) => {
+            const isMe = group.from === "me";
+            return (
+              <div
+                key={gi}
+                className={cn(
+                  "flex flex-col",
+                  isMe ? "items-end" : "items-start",
+                )}
+                style={{ gap: 2 }}
+              >
+                {group.items.map((m, i) => {
+                  const isLast = i === group.items.length - 1;
+                  const showMeta = !m.typing && (m.time || (isMe && m.status));
+                  return (
+                    <BubbleEnter
+                      key={m.id ?? `${gi}-${i}`}
+                      enterFrames={m.enterFrames}
                       from={group.from}
-                      tail={isLast}
-                      background={isMe ? myBubble : theirBubble}
-                      tailColor={isMe ? myBubble : theirBubble}
-                      color={textColor}
-                      meta={
-                        showMeta ? (
-                          <span
-                            style={{
-                              color: isMe ? myMeta : metaColor,
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 3,
-                            }}
-                          >
-                            {m.time ?? ""}
-                            {isMe && m.status && (
-                              <TelegramTicks status={m.status} color={myMeta} />
-                            )}
-                          </span>
-                        ) : undefined
-                      }
                     >
-                      {m.typing ? (
-                        <TypingDots color={isMe ? myMeta : metaColor} />
-                      ) : (
-                        m.text
-                      )}
-                    </CurvedBubble>
-                  </BubbleEnter>
-                );
-              })}
-            </div>
-          );
-        })}
+                      <CurvedBubble
+                        from={group.from}
+                        tail={isLast}
+                        background={isMe ? myBubble : theirBubble}
+                        tailColor={isMe ? myBubble : theirBubble}
+                        color={textColor}
+                        meta={
+                          showMeta ? (
+                            <span
+                              style={{
+                                color: isMe ? myMeta : metaColor,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 3,
+                              }}
+                            >
+                              {m.time ?? ""}
+                              {isMe && m.status && (
+                                <TelegramTicks
+                                  status={m.status}
+                                  color={myMeta}
+                                />
+                              )}
+                            </span>
+                          ) : undefined
+                        }
+                      >
+                        {m.typing ? (
+                          <TypingDots color={isMe ? myMeta : metaColor} />
+                        ) : (
+                          m.text
+                        )}
+                      </CurvedBubble>
+                    </BubbleEnter>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {showComposer && (

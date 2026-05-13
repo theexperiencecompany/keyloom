@@ -1,7 +1,5 @@
 "use client";
 
-import { PlayIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -62,9 +60,28 @@ export function HeroVideoDialog({
             </video>
           )}
           <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/30" />
-          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <span className="flex size-20 items-center justify-center rounded-full bg-white/95 text-black shadow-2xl ring-1 ring-white/40 transition group-hover:scale-105">
-              <HugeiconsIcon icon={PlayIcon} size={30} className="ml-1.5" />
+          {/* MagicUI's default play affordance — gradient pill nested in a
+              backdrop-blurred halo. Inline SVG (not HugeIcons) because the
+              triangle needs to inherit the gradient pill's white fill and
+              the size/offset is calibrated to MagicUI's published design. */}
+          <span className="pointer-events-none absolute inset-0 flex scale-[0.9] items-center justify-center transition-all duration-200 ease-out group-hover:scale-100">
+            <span className="flex size-28 items-center justify-center rounded-full bg-primary/10 backdrop-blur-md">
+              <span className="relative flex size-20 items-center justify-center rounded-full bg-gradient-to-b from-primary/30 to-primary shadow-md transition-all duration-200 ease-out group-hover:scale-[1.2]">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-8 fill-white text-white"
+                  aria-hidden
+                >
+                  <title>Play</title>
+                  <path d="M6 3L20 12 6 21 6 3Z" />
+                </svg>
+              </span>
             </span>
           </span>
         </Button>

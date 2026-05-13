@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -62,7 +63,7 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateX(${x}px)`,
+          transform: `translateX(${snap(x)}px)`,
           filter: `blur(${blur}px)`,
           willChange: "transform, opacity",
         }}
@@ -79,7 +80,7 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

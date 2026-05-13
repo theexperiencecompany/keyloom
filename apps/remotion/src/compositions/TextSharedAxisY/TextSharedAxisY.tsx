@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -89,7 +90,7 @@ export const TextSharedAxisY: React.FC<TextSharedAxisYProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

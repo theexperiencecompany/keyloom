@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -77,7 +78,7 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
               key={i}
               style={{
                 opacity: progress,
-                transform: `translateY(${30 * (1 - progress)}px)`,
+                transform: `translateY(${snap(30 * (1 - progress))}px)`,
                 filter: `blur(${6 * (1 - progress)}px)`,
                 whiteSpace: "nowrap",
               }}
@@ -97,7 +98,7 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

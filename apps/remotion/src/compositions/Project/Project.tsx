@@ -13,7 +13,21 @@ export const ProjectComposition: React.FC<Project> = ({
 }) => {
   const { width, height } = useVideoConfig();
   return (
-    <AbsoluteFill style={{ background: "#000" }}>
+    <AbsoluteFill
+      style={{
+        background: "#000",
+        // Headless rendering (CLI + @remotion/web-renderer) rasterizes each
+        // frame independently. macOS Chromium's default subpixel-antialiased
+        // font smoothing positions glyphs relative to the LCD subpixel grid,
+        // so any sub-pixel `transform: translateY()` lands the glyph on a
+        // different subpixel each frame → visible wobble in exports.
+        // Forcing grayscale AA + geometricPrecision metrics makes glyph
+        // rasterization independent of sub-pixel position.
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        textRendering: "geometricPrecision",
+      }}
+    >
       <TransitionSeries>
         {clips.flatMap((clip, index) => {
           const Component = componentsById[clip.compositionId];

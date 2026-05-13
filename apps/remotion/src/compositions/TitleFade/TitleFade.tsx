@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -68,7 +69,7 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateY(${(1 - headlineProgress) * 24}px)`,
+          transform: `translateY(${snap((1 - headlineProgress) * 24)}px)`,
           willChange: "transform, opacity",
         }}
       >
@@ -84,7 +85,7 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

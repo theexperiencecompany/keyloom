@@ -2,7 +2,7 @@
 
 import { Button } from "@workspace/ui/components/button";
 import confetti from "canvas-confetti";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ExportState } from "../hooks/use-export-render";
 
 type Props = {
@@ -228,6 +228,7 @@ function ProgressBar({
   phase: ExportState["phase"];
   pct: number;
 }) {
+  const smoothPct = useSmoothPct(pct);
   if (phase === "starting") {
     return (
       <div className="relative h-2 overflow-hidden rounded-full bg-accent">
@@ -241,9 +242,36 @@ function ProgressBar({
   return (
     <div className="h-2 overflow-hidden rounded-full bg-accent">
       <div
-        className="h-full rounded-full bg-blue-500 transition-[width] duration-200"
-        style={{ width: `${Math.max(2, pct)}%` }}
+        className="h-full rounded-full bg-blue-500"
+        style={{ width: `${Math.max(2, smoothPct)}%` }}
       />
     </div>
   );
+}
+
+/**
+ * Lerps a displayed percentage toward the real value every animation frame
+ * so the bar moves continuously instead of jumping whenever the render
+ * emits a progress callback. Closes ~12% of the remaining gap per frame
+ * (≈80ms to half, ≈250ms to ~95%) — fast enough to feel responsive, slow
+ * enough to keep motion visible.
+ */
+function useSmoothPct(target: number): number {
+  const [display, setDisplay] = useState(target);
+  const displayRef = useRef(target);
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      const current = displayRef.current;
+      const next = current + (target - current) * 0.12;
+      const done = Math.abs(target - next) < 0.05;
+      const value = done ? target : next;
+      displayRef.current = value;
+      setDisplay(value);
+      if (!done) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return display;
 }

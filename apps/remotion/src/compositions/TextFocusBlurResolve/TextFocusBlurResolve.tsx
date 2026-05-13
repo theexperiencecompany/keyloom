@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -63,7 +64,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateY(${y}px) scale(${scale})`,
+          transform: `translateY(${snap(y)}px) scale(${scale})`,
           filter: `blur(${blur}px)`,
           willChange: "transform, opacity",
         }}
@@ -80,7 +81,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

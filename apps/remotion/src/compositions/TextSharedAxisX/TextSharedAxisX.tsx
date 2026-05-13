@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -62,7 +63,7 @@ export const TextSharedAxisX: React.FC<TextSharedAxisXProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateX(${x}px) scale(${scale})`,
+          transform: `translateX(${snap(x)}px) scale(${scale})`,
           willChange: "transform, opacity",
         }}
       >
@@ -78,7 +79,7 @@ export const TextSharedAxisX: React.FC<TextSharedAxisXProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

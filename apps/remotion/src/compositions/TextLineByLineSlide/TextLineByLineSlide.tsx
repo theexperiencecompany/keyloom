@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -77,7 +78,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
               key={i}
               style={{
                 opacity: progress,
-                transform: `translateX(${-48 * (1 - progress)}px)`,
+                transform: `translateX(${snap(-48 * (1 - progress))}px)`,
                 whiteSpace: "nowrap",
               }}
             >
@@ -96,7 +97,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -84,7 +85,7 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
               style={{
                 display: "inline-block",
                 opacity,
-                transform: `translateX(${x}px) scale(${scale})`,
+                transform: `translateX(${snap(x)}px) scale(${scale})`,
                 filter: `blur(${blur}px)`,
                 willChange: "transform, opacity",
               }}
@@ -104,7 +105,7 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >

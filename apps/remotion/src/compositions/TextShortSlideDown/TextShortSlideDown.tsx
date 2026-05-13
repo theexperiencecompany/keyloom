@@ -3,6 +3,7 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
 import {
   getSubtitleColor,
   resolveTitleStyle,
+  snap,
   type TitleProps,
 } from "../title-shared";
 
@@ -81,7 +82,7 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
               style={{
                 display: "block",
                 opacity,
-                transform: `translateY(${y}px) scale(${scale})`,
+                transform: `translateY(${snap(y)}px) scale(${scale})`,
                 filter: `blur(${blur}px)`,
                 willChange: "transform, opacity",
               }}
@@ -101,7 +102,7 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${(1 - subtitleProgress) * 14}px)`,
+            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
             willChange: "transform, opacity",
           }}
         >
