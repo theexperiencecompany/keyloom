@@ -2,16 +2,12 @@ import path from "node:path";
 import type { WebpackOverrideFn } from "@remotion/bundler";
 
 /**
- * Bundles the Remotion entry (`apps/remotion/src/index.ts`) once per server
- * process and caches the resulting serveUrl. Subsequent renders reuse the
- * same bundle — bundling is the slowest part of a cold render so this
- * matters a lot.
+ * Server-side Remotion bundle, produced lazily on first request and
+ * cached for the lifetime of the Node process.
  *
- * The webpack override mirrors `apps/remotion/remotion.config.ts` — without
- * it, the bundle fails because `@heygaia/chat-ui` (consumed transitively by
- * `@workspace/compositions`) imports Next-only modules + has un-extensioned
- * ESM specifiers webpack 5 rejects in strict mode. We alias those Next
- * imports to local shims that live in `apps/remotion/src/shims`.
+ * Used by `/api/render-bundle` to ship a pre-built bundle to users who
+ * download the local CLI zip. Avoids forcing every user to run webpack
+ * (10–30s cold) on their own machine.
  */
 
 let cached: Promise<string> | null = null;
@@ -33,10 +29,7 @@ export function getRemotionBundle(): Promise<string> {
           ...current.module,
           rules: [
             ...(current.module?.rules ?? []),
-            {
-              test: /\.m?js$/,
-              resolve: { fullySpecified: false },
-            },
+            { test: /\.m?js$/, resolve: { fullySpecified: false } },
           ],
         },
         resolve: {

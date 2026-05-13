@@ -10,6 +10,7 @@ import { useExportRender } from "../hooks/use-export-render";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { useProjectIO } from "../hooks/use-project-io";
 import type { ExportOptions } from "../lib/export-options";
+import { registerImageProxy } from "../lib/register-image-proxy";
 import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
 import { AgentPanel } from "./agent-panel";
@@ -84,6 +85,13 @@ export function Builder() {
   useEffect(() => {
     if (hasClips) setPlayerVersion((v) => v + 1);
   }, [hasClips]);
+
+  // Register the image-proxy service worker once. It transparently routes
+  // every cross-origin image fetch through `/api/img/<base64>` so the
+  // browser doesn't taint the export canvas on external avatars.
+  useEffect(() => {
+    void registerImageProxy();
+  }, []);
 
   const playerControls = usePlayerControls(playerRef, totalDuration);
 
@@ -274,6 +282,7 @@ export function Builder() {
           open={exportSettingsOpen}
           onOpenChange={setExportSettingsOpen}
           onStart={handleStartExport}
+          project={project}
           projectWidth={project.width}
           projectHeight={project.height}
           durationInFrames={totalDuration}

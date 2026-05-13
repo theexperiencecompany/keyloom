@@ -130,6 +130,7 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
           >
             <Img
               src={avatarUrl}
+              crossOrigin="anonymous"
               alt={displayName}
               width={140}
               height={140}

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Project } from "@workspace/compositions/project";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -15,23 +16,22 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
-import { Switch } from "@workspace/ui/components/switch";
 import { useState } from "react";
-
 import {
   applyPreset,
   DEFAULT_EXPORT_OPTIONS,
   EXPORT_PRESETS,
   type ExportOptions,
   type ExportPreset,
-  type RenderBackend,
 } from "../lib/export-options";
+import { buildExportZip, downloadBlob } from "../lib/export-zip";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStart: (options: ExportOptions) => void;
   initialOptions?: ExportOptions;
+  project: Project;
   projectWidth: number;
   projectHeight: number;
   durationInFrames: number;
@@ -44,7 +44,7 @@ const PRESET_LABELS: Record<
 > = {
   fast: {
     title: "Fast",
-    description: "Half-resolution preview. ~4× faster.",
+    description: "Half resolution, 4 Mbps. Best for quick previews.",
   },
   balanced: {
     title: "Balanced",
@@ -56,25 +56,12 @@ const PRESET_LABELS: Record<
   },
 };
 
-const RENDERER_LABELS: Record<
-  RenderBackend,
-  { title: string; description: string }
-> = {
-  server: {
-    title: "Server (Remotion)",
-    description: "Headless Chrome + ffmpeg. Much faster, recommended.",
-  },
-  browser: {
-    title: "In-browser (WebCodecs)",
-    description: "Runs locally in this tab. Slower; no server needed.",
-  },
-};
-
 export function ExportSettingsModal({
   open,
   onOpenChange,
   onStart,
   initialOptions,
+  project,
   projectWidth,
   projectHeight,
   durationInFrames,
@@ -84,17 +71,30 @@ export function ExportSettingsModal({
     initialOptions ?? DEFAULT_EXPORT_OPTIONS,
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [zipBusy, setZipBusy] = useState(false);
+  const [zipError, setZipError] = useState<string | null>(null);
+
+  async function handleDownloadZip() {
+    setZipBusy(true);
+    setZipError(null);
+    try {
+      const blob = await buildExportZip({ project });
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      downloadBlob(blob, `motion-studio-render-${stamp}.zip`);
+      onOpenChange(false);
+    } catch (err) {
+      setZipError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setZipBusy(false);
+    }
+  }
 
   const encodeWidth = Math.round(projectWidth * options.scale);
   const encodeHeight = Math.round(projectHeight * options.scale);
   const seconds = (durationInFrames / fps).toFixed(1);
 
   function setPreset(preset: ExportPreset) {
-    setOptions(applyPreset(preset, options.renderer));
-  }
-
-  function setRenderer(renderer: RenderBackend) {
-    setOptions((prev) => ({ ...prev, renderer }));
+    setOptions(applyPreset(preset));
   }
 
   function patch<K extends keyof ExportOptions>(
@@ -114,79 +114,37 @@ export function ExportSettingsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2">
-          <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Renderer
-          </Label>
-          <RadioGroup
-            value={options.renderer}
-            onValueChange={(v) => setRenderer(v as RenderBackend)}
-            className="gap-2"
-          >
-            {(Object.keys(RENDERER_LABELS) as RenderBackend[]).map((r) => {
-              const meta = RENDERER_LABELS[r];
-              const checked = options.renderer === r;
-              return (
-                <label
-                  key={r}
-                  htmlFor={`renderer-${r}`}
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${
-                    checked
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-accent/40"
-                  }`}
-                >
-                  <RadioGroupItem id={`renderer-${r}`} value={r} />
-                  <div className="flex-1">
-                    <div className="text-[13px] font-medium leading-tight">
-                      {meta.title}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      {meta.description}
-                    </div>
+        <RadioGroup
+          value={options.preset}
+          onValueChange={(v) => setPreset(v as ExportPreset)}
+          className="gap-2"
+        >
+          {(Object.keys(EXPORT_PRESETS) as ExportPreset[]).map((preset) => {
+            const meta = PRESET_LABELS[preset];
+            const checked = options.preset === preset;
+            return (
+              <label
+                key={preset}
+                htmlFor={`preset-${preset}`}
+                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${
+                  checked
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-accent/40"
+                }`}
+              >
+                <RadioGroupItem id={`preset-${preset}`} value={preset} />
+                <div className="flex-1">
+                  <div className="text-[13px] font-medium leading-tight">
+                    {meta.title}
                   </div>
-                </label>
-              );
-            })}
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Quality
-          </Label>
-          <RadioGroup
-            value={options.preset}
-            onValueChange={(v) => setPreset(v as ExportPreset)}
-            className="gap-2"
-          >
-            {(Object.keys(EXPORT_PRESETS) as ExportPreset[]).map((preset) => {
-              const meta = PRESET_LABELS[preset];
-              const checked = options.preset === preset;
-              return (
-                <label
-                  key={preset}
-                  htmlFor={`preset-${preset}`}
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition ${
-                    checked
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-accent/40"
-                  }`}
-                >
-                  <RadioGroupItem id={`preset-${preset}`} value={preset} />
-                  <div className="flex-1">
-                    <div className="text-[13px] font-medium leading-tight">
-                      {meta.title}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground">
-                      {meta.description}
-                    </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {meta.description}
                   </div>
-                </label>
-              );
-            })}
-          </RadioGroup>
-        </div>
+                </div>
+              </label>
+            );
+          })}
+        </RadioGroup>
 
         <div className="space-y-3">
           <button
@@ -236,23 +194,29 @@ export function ExportSettingsModal({
                   }
                 />
               </Field>
-
-              {options.renderer === "browser" && (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-[12px]">Extra paint wait</Label>
-                    <p className="text-[11px] text-muted-foreground">
-                      Slower but safer for heavy compositions.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={options.extraPaintWait}
-                    onCheckedChange={(v) => patch("extraPaintWait", v)}
-                  />
-                </div>
-              )}
             </div>
           )}
+        </div>
+
+        <div className="rounded-lg border border-dashed border-border bg-accent/20 p-3">
+          <p className="text-[12px] font-medium">Want a much faster render?</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Download a self-contained renderer. Runs locally via{" "}
+            <code>node render.mjs</code>, uses all your CPU cores. Typically
+            5–10× faster than the in-browser export.
+          </p>
+          {zipError && (
+            <p className="mt-2 text-[11px] text-red-500">{zipError}</p>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-3 w-full"
+            onClick={handleDownloadZip}
+            disabled={zipBusy}
+          >
+            {zipBusy ? "Packaging…" : "Download fast renderer (zip)"}
+          </Button>
         </div>
 
         <DialogFooter>
@@ -264,8 +228,9 @@ export function ExportSettingsModal({
               onStart(options);
               onOpenChange(false);
             }}
+            disabled={zipBusy}
           >
-            Start render
+            Start render in browser
           </Button>
         </DialogFooter>
       </DialogContent>

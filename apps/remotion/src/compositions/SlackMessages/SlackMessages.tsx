@@ -10,7 +10,7 @@ export type SlackMessagesProps = {
   theme: "light" | "dark";
 };
 
-const LEFT_AVATAR = "https://github.com/aryanranderiya.png";
+const LEFT_AVATAR = "default-avatar.png";
 const RIGHT_AVATAR = "gaia-glow.png";
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {

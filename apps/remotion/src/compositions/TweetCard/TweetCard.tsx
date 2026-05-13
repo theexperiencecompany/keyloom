@@ -8,9 +8,9 @@ import {
   Share08Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
-  Audio,
   Img,
   spring,
   staticFile,
@@ -233,6 +233,7 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
     return (
       <Img
         src={url}
+        crossOrigin="anonymous"
         width={108}
         height={108}
         style={{

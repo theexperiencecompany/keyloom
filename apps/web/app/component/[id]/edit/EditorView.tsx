@@ -1,15 +1,13 @@
 "use client";
 
 import { Player } from "@remotion/player";
+import { renderMediaOnWeb } from "@remotion/web-renderer";
 import { componentsById } from "@workspace/compositions/components";
 import { FieldsRenderer } from "@workspace/compositions/editors";
 import type { AnyCompositionInfo } from "@workspace/compositions/schema";
 import { Button } from "@workspace/ui/components/button";
 import { useMemo, useState } from "react";
-import {
-  downloadMp4Blob,
-  renderComponentInBrowser,
-} from "@/features/studio/lib/browser-export";
+import { downloadMp4Blob } from "@/features/studio/lib/local-export";
 
 export function EditorView({
   info,
@@ -32,15 +30,22 @@ export function EditorView({
     setProgress(0);
     setError(null);
     try {
-      const blob = await renderComponentInBrowser({
-        component: Component,
+      const result = await renderMediaOnWeb({
+        composition: {
+          id: info.id,
+          component: Component as React.ComponentType<Record<string, unknown>>,
+          width: info.width,
+          height: info.height,
+          fps: info.fps,
+          durationInFrames: info.durationInFrames,
+        },
         inputProps: props,
-        durationInFrames: info.durationInFrames,
-        fps: info.fps,
-        width: info.width,
-        height: info.height,
-        onProgress: setProgress,
+        container: "mp4",
+        videoCodec: "h264",
+        hardwareAcceleration: "prefer-hardware",
+        onProgress: ({ progress: p }) => setProgress(p),
       });
+      const blob = await result.getBlob();
       downloadMp4Blob(blob, `${info.id}.mp4`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");

@@ -3,15 +3,14 @@
 import type { Project } from "@workspace/compositions/project";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  downloadMp4Blob,
-  isBrowserExportSupported,
-  renderProjectInBrowser,
-} from "../lib/browser-export";
-import {
   DEFAULT_EXPORT_OPTIONS,
   type ExportOptions,
 } from "../lib/export-options";
-import { renderProjectOnServer } from "../lib/server-export";
+import {
+  downloadMp4Blob,
+  isLocalExportSupported,
+  renderProjectLocally,
+} from "../lib/local-export";
 
 export type ExportPhase = "idle" | "starting" | "rendering" | "done" | "error";
 
@@ -20,13 +19,7 @@ export type ExportState = {
   progress: number;
   error: string | null;
   errorStack?: string | null;
-  /**
-   * Object URL of the rendered MP4 once `phase === "done"`. Kept alive so
-   * the export modal can show a playable preview and a manual download
-   * button; revoked when `reset()` is called.
-   */
   blobUrl: string | null;
-  /** Filename suggested for the download. */
   filename: string | null;
 };
 
@@ -39,23 +32,17 @@ const INITIAL_STATE: ExportState = {
 };
 
 /**
- * Drives the in-browser MP4 export. The actual frame-walking +
- * encoding lives in `../lib/browser-export.ts` — this hook owns the UI
- * state machine, a generation counter to discard stale callbacks, and
- * an AbortController so the modal can offer a Cancel button.
+ * Drives the in-browser MP4 export via `@remotion/web-renderer`. Owns the
+ * UI state machine, a generation counter to discard stale callbacks, and an
+ * AbortController so the modal can offer a Cancel button.
  */
 export function useExportRender() {
   const [state, setState] = useState<ExportState>(INITIAL_STATE);
 
-  // Generation counter — bumped on reset/start, used to ignore stale
-  // progress callbacks if the user dismisses the overlay mid-render.
   const generationRef = useRef(0);
-  // Live abort controller for the in-flight render, so the modal's
-  // Cancel button can stop the frame loop between frames.
   const controllerRef = useRef<AbortController | null>(null);
-  // Keep the latest blob URL on a ref too so reset() can revoke it
-  // without depending on a stale state closure.
   const blobUrlRef = useRef<string | null>(null);
+  const lastOptionsRef = useRef<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
 
   const revokeBlobUrl = useCallback(() => {
     if (blobUrlRef.current) {
@@ -76,8 +63,6 @@ export function useExportRender() {
     controllerRef.current?.abort();
   }, []);
 
-  const lastOptionsRef = useRef<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
-
   const start = useCallback(
     async (project: Project, options?: ExportOptions) => {
       const resolved = options ?? DEFAULT_EXPORT_OPTIONS;
@@ -91,41 +76,33 @@ export function useExportRender() {
       controllerRef.current = controller;
 
       console.info("[export-hook] start", {
-        renderer: resolved.renderer,
         width: project.width,
         height: project.height,
         fps: project.fps,
         clips: project.clips?.length,
+        preset: resolved.preset,
       });
 
-      if (resolved.renderer === "browser" && !isBrowserExportSupported()) {
-        console.warn("[export-hook] WebCodecs unavailable");
+      const supported = await isLocalExportSupported(project);
+      if (generationRef.current !== myGeneration) return;
+      if (!supported.ok) {
         setState({
           ...INITIAL_STATE,
           phase: "error",
           error:
-            "Your browser does not support in-browser MP4 export (WebCodecs unavailable). Switch to the Server renderer, or try the latest Chrome/Edge.",
+            supported.reason ??
+            "Your browser cannot render MP4 locally. Try the latest Chrome or Edge.",
           errorStack: null,
         });
         return;
       }
 
-      setState({
-        ...INITIAL_STATE,
-        phase: "starting",
-        errorStack: null,
-      });
+      setState({ ...INITIAL_STATE, phase: "starting", errorStack: null });
 
-      // Give React one tick to paint the "Preparing render…" UI before the
-      // encoder hogs the main thread.
       await new Promise<void>((r) => setTimeout(r, 0));
       if (generationRef.current !== myGeneration) return;
 
-      setState({
-        ...INITIAL_STATE,
-        phase: "rendering",
-        errorStack: null,
-      });
+      setState({ ...INITIAL_STATE, phase: "rendering", errorStack: null });
 
       const handleProgress = (progress: number) => {
         if (generationRef.current !== myGeneration) return;
@@ -139,34 +116,15 @@ export function useExportRender() {
       };
 
       try {
-        let blob: Blob;
-        let suggestedFilename: string | null = null;
-        if (resolved.renderer === "server") {
-          const result = await renderProjectOnServer({
-            project,
-            options: resolved,
-            signal: controller.signal,
-            onProgress: handleProgress,
-          });
-          blob = result.blob;
-          suggestedFilename = result.filename;
-        } else {
-          blob = await renderProjectInBrowser({
-            project,
-            options: resolved,
-            signal: controller.signal,
-            onProgress: handleProgress,
-          });
-        }
+        const { blob, filename } = await renderProjectLocally({
+          project,
+          options: resolved,
+          signal: controller.signal,
+          onProgress: handleProgress,
+        });
 
         if (generationRef.current !== myGeneration) return;
 
-        const filename =
-          suggestedFilename ??
-          `motion-studio-${new Date()
-            .toISOString()
-            .replace(/[:.]/g, "-")
-            .slice(0, 19)}.mp4`;
         const url = URL.createObjectURL(blob);
         blobUrlRef.current = url;
 
@@ -203,8 +161,6 @@ export function useExportRender() {
     [],
   );
 
-  // Abort any in-flight render and revoke any held blob URL when the
-  // consumer unmounts, so leaving the export modal doesn't strand work.
   useEffect(
     () => () => {
       controllerRef.current?.abort();
@@ -215,8 +171,6 @@ export function useExportRender() {
   );
 
   const download = useCallback(() => {
-    // Fetch the URL and re-trigger a download via anchor — keeps a single
-    // pathway and uses `downloadMp4Blob`'s filename UX.
     const url = blobUrlRef.current;
     const filename = state.filename ?? "project.mp4";
     if (!url) return;
