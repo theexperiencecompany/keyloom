@@ -1,10 +1,22 @@
 import type { ComponentType } from "react";
+import AreaChartMDX, {
+  meta as areaChartMeta,
+} from "@/content/docs/area-chart.mdx";
+import BarChartMDX, {
+  meta as barChartMeta,
+} from "@/content/docs/bar-chart.mdx";
 import BrowserWindowMDX, {
   meta as browserWindowMeta,
 } from "@/content/docs/browser-window.mdx";
 import CaptionTrackMDX, {
   meta as captionTrackMeta,
 } from "@/content/docs/caption-track.mdx";
+import ComponentsMDX, {
+  meta as componentsIndexMeta,
+} from "@/content/docs/components.mdx";
+import ContributorsMDX, {
+  meta as contributorsMeta,
+} from "@/content/docs/contributors.mdx";
 import CursorWalkthroughMDX, {
   meta as cursorWalkthroughMeta,
 } from "@/content/docs/cursor-walkthrough.mdx";
@@ -17,18 +29,27 @@ import FeatureCardMDX, {
 import GaiaScenarioMDX, {
   meta as gaiaScenarioMeta,
 } from "@/content/docs/gaia-scenario.mdx";
+import GitHubStarButtonMDX, {
+  meta as githubStarButtonMeta,
+} from "@/content/docs/github-star-button.mdx";
 import InstagramMessagesMDX, {
   meta as instagramMessagesMeta,
 } from "@/content/docs/instagram-messages.mdx";
 import InstagramPostMDX, {
   meta as instagramPostMeta,
 } from "@/content/docs/instagram-post.mdx";
+import InstallationMDX, {
+  meta as installationMeta,
+} from "@/content/docs/installation.mdx";
 import IntroductionMDX, {
   meta as introductionMeta,
 } from "@/content/docs/introduction.mdx";
 import LaptopFrameMDX, {
   meta as laptopFrameMeta,
 } from "@/content/docs/laptop-frame.mdx";
+import LineChartMDX, {
+  meta as lineChartMeta,
+} from "@/content/docs/line-chart.mdx";
 import LogoCloudMDX, {
   meta as logoCloudMeta,
 } from "@/content/docs/logo-cloud.mdx";
@@ -41,12 +62,25 @@ import MessagePopupMDX, {
 import MetricCardMDX, {
   meta as metricCardMeta,
 } from "@/content/docs/metric-card.mdx";
+import PerspectiveMarqueeMDX, {
+  meta as perspectiveMarqueeMeta,
+} from "@/content/docs/perspective-marquee.mdx";
 import PhoneFrameMDX, {
   meta as phoneFrameMeta,
 } from "@/content/docs/phone-frame.mdx";
+import PieChartMDX, {
+  meta as pieChartMeta,
+} from "@/content/docs/pie-chart.mdx";
 import PricingCardMDX, {
   meta as pricingCardMeta,
 } from "@/content/docs/pricing-card.mdx";
+import RadarChartMDX, {
+  meta as radarChartMeta,
+} from "@/content/docs/radar-chart.mdx";
+import RadialChartMDX, {
+  meta as radialChartMeta,
+} from "@/content/docs/radial-chart.mdx";
+import ShowcaseMDX, { meta as showcaseMeta } from "@/content/docs/showcase.mdx";
 import SlackMessagesMDX, {
   meta as slackMessagesMeta,
 } from "@/content/docs/slack-messages.mdx";
@@ -56,6 +90,7 @@ import SplitSceneMDX, {
 import StatCounterMDX, {
   meta as statCounterMeta,
 } from "@/content/docs/stat-counter.mdx";
+import TerminalMDX, { meta as terminalMeta } from "@/content/docs/terminal.mdx";
 import TestimonialCardMDX, {
   meta as testimonialCardMeta,
 } from "@/content/docs/testimonial-card.mdx";
@@ -143,6 +178,7 @@ import TitleSlideUpMDX, {
 import TitleTypeMDX, {
   meta as titleTypeMeta,
 } from "@/content/docs/title-type.mdx";
+import ToastMDX, { meta as toastMeta } from "@/content/docs/toast.mdx";
 import TweetCardMDX, {
   meta as tweetCardMeta,
 } from "@/content/docs/tweet-card.mdx";
@@ -155,6 +191,9 @@ import TypingComposerMDX, {
 import TypingSearchMDX, {
   meta as typingSearchMeta,
 } from "@/content/docs/typing-search.mdx";
+import UsingTheStudioMDX, {
+  meta as usingTheStudioMeta,
+} from "@/content/docs/using-the-studio.mdx";
 import WhatsAppMessagesMDX, {
   meta as whatsappMessagesMeta,
 } from "@/content/docs/whatsapp-messages.mdx";
@@ -493,10 +532,109 @@ export const docs: Doc[] = [
     meta: pricingCardMeta,
     Content: PricingCardMDX,
   },
+  {
+    slug: "Terminal",
+    href: "/docs/Terminal",
+    meta: terminalMeta,
+    Content: TerminalMDX,
+  },
+  {
+    slug: "GitHubStarButton",
+    href: "/docs/GitHubStarButton",
+    meta: githubStarButtonMeta,
+    Content: GitHubStarButtonMDX,
+  },
+  {
+    slug: "Toast",
+    href: "/docs/Toast",
+    meta: toastMeta,
+    Content: ToastMDX,
+  },
+  {
+    slug: "PerspectiveMarquee",
+    href: "/docs/PerspectiveMarquee",
+    meta: perspectiveMarqueeMeta,
+    Content: PerspectiveMarqueeMDX,
+  },
+  {
+    slug: "BarChart",
+    href: "/docs/BarChart",
+    meta: barChartMeta,
+    Content: BarChartMDX,
+  },
+  {
+    slug: "LineChart",
+    href: "/docs/LineChart",
+    meta: lineChartMeta,
+    Content: LineChartMDX,
+  },
+  {
+    slug: "AreaChart",
+    href: "/docs/AreaChart",
+    meta: areaChartMeta,
+    Content: AreaChartMDX,
+  },
+  {
+    slug: "PieChart",
+    href: "/docs/PieChart",
+    meta: pieChartMeta,
+    Content: PieChartMDX,
+  },
+  {
+    slug: "RadarChart",
+    href: "/docs/RadarChart",
+    meta: radarChartMeta,
+    Content: RadarChartMDX,
+  },
+  {
+    slug: "RadialChart",
+    href: "/docs/RadialChart",
+    meta: radialChartMeta,
+    Content: RadialChartMDX,
+  },
+  {
+    slug: "Showcase",
+    href: "/docs/Showcase",
+    meta: showcaseMeta,
+    Content: ShowcaseMDX,
+  },
 ];
 
+// Static-page docs (no composition behind them) — these are linked from the
+// sidebar / nav but don't appear in the components grid.
+export const staticDocs: Doc[] = [
+  {
+    slug: "installation",
+    href: "/docs/installation",
+    meta: installationMeta,
+    Content: InstallationMDX,
+  },
+  {
+    slug: "using-the-studio",
+    href: "/docs/using-the-studio",
+    meta: usingTheStudioMeta,
+    Content: UsingTheStudioMDX,
+  },
+  {
+    slug: "components",
+    href: "/docs/components",
+    meta: componentsIndexMeta,
+    Content: ComponentsMDX,
+  },
+  {
+    slug: "contributors",
+    href: "/docs/contributors",
+    meta: contributorsMeta,
+    Content: ContributorsMDX,
+  },
+];
+
+// All docs that resolve through getDoc — includes both component pages and
+// the static pages (installation, using-the-studio, components, contributors).
+const allDocs: Doc[] = [...docs, ...staticDocs];
+
 const docsBySlug: Record<string, Doc> = Object.fromEntries(
-  docs.map((d) => [d.slug, d]),
+  allDocs.map((d) => [d.slug, d]),
 );
 
 export function getDoc(slug: string): Doc | undefined {

@@ -1,21 +1,31 @@
+import { areaChartInfo } from "./compositions/AreaChart/meta";
+import { barChartInfo } from "./compositions/BarChart/meta";
 import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
 import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 import { featureCardInfo } from "./compositions/FeatureCard/meta";
 import { gaiaScenarioInfo } from "./compositions/GaiaScenario/meta";
+import { githubStarButtonInfo } from "./compositions/GitHubStarButton/meta";
 import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
 import { instagramPostInfo } from "./compositions/InstagramPost/meta";
 import { laptopFrameInfo } from "./compositions/LaptopFrame/meta";
+import { lineChartInfo } from "./compositions/LineChart/meta";
 import { logoCloudInfo } from "./compositions/LogoCloud/meta";
 import { messageBubblesInfo } from "./compositions/MessageBubbles/meta";
 import { messagePopupInfo } from "./compositions/MessagePopup/meta";
 import { metricCardInfo } from "./compositions/MetricCard/meta";
+import { perspectiveMarqueeInfo } from "./compositions/PerspectiveMarquee/meta";
 import { phoneFrameInfo } from "./compositions/PhoneFrame/meta";
+import { pieChartInfo } from "./compositions/PieChart/meta";
 import { pricingCardInfo } from "./compositions/PricingCard/meta";
+import { radarChartInfo } from "./compositions/RadarChart/meta";
+import { radialChartInfo } from "./compositions/RadialChart/meta";
+import { showcaseInfo } from "./compositions/Showcase/meta";
 import { slackMessagesInfo } from "./compositions/SlackMessages/meta";
 import { splitSceneInfo } from "./compositions/SplitScene/meta";
 import { statCounterInfo } from "./compositions/StatCounter/meta";
+import { terminalInfo } from "./compositions/Terminal/meta";
 import { testimonialCardInfo } from "./compositions/TestimonialCard/meta";
 import { textBlurOutUpInfo } from "./compositions/TextBlurOutUp/meta";
 import { textBottomUpLettersInfo } from "./compositions/TextBottomUpLetters/meta";
@@ -45,6 +55,7 @@ import { titleFadeInfo } from "./compositions/TitleFade/meta";
 import { titlePopupInfo } from "./compositions/TitlePopup/meta";
 import { titleSlideUpInfo } from "./compositions/TitleSlideUp/meta";
 import { titleTypeInfo } from "./compositions/TitleType/meta";
+import { toastInfo } from "./compositions/Toast/meta";
 import { tweetCardInfo } from "./compositions/TweetCard/meta";
 import { twitterFollowInfo } from "./compositions/TwitterFollow/meta";
 import { typingComposerInfo } from "./compositions/TypingComposer/meta";
@@ -105,6 +116,17 @@ export const compositions: AnyCompositionInfo[] = [
   testimonialCardInfo,
   logoCloudInfo,
   pricingCardInfo,
+  terminalInfo,
+  githubStarButtonInfo,
+  toastInfo,
+  perspectiveMarqueeInfo,
+  barChartInfo,
+  lineChartInfo,
+  areaChartInfo,
+  pieChartInfo,
+  radarChartInfo,
+  radialChartInfo,
+  showcaseInfo,
 ];
 
 export const compositionsById: Record<string, AnyCompositionInfo> =

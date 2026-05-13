@@ -6,6 +6,7 @@ import {
   Books02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { compositionsById } from "@workspace/compositions/registry";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +19,7 @@ import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import type { Doc } from "@/lib/docs";
 import { getAdjacent } from "@/lib/docs";
+import { ComponentCode } from "./component-code";
 import { CopyPageButton } from "./copy-page-button";
 
 function slugToFilename(slug: string): string {
@@ -80,6 +82,23 @@ export function DocsShell({ doc }: { doc: Doc }) {
             <Content />
           </article>
 
+          {compositionsById[doc.slug] && (
+            <section id="source" className="mt-12">
+              <h2 className="text-2xl font-semibold tracking-tight scroll-mt-24 mt-12 mb-2">
+                Source
+              </h2>
+              <p className="text-[15px] leading-relaxed text-muted-foreground mb-4">
+                Copy or download the React source — drop it into your own
+                Remotion project. The only runtime dependency is{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[13px] text-foreground">
+                  remotion
+                </code>
+                .
+              </p>
+              <ComponentCode id={doc.slug} />
+            </section>
+          )}
+
           <div className="flex justify-between border-t border-border pt-4 mt-12">
             {prev ? (
               <Link
@@ -108,23 +127,59 @@ export function DocsShell({ doc }: { doc: Doc }) {
       </div>
 
       <aside className="hidden w-52 shrink-0 xl:block">
-        <div className="sticky top-24">
-          <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60">
-            <HugeiconsIcon icon={Books02Icon} size={13} />
-            <span>On This Page</span>
+        <div className="sticky top-24 space-y-6">
+          <div>
+            <div className="mb-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground/60">
+              <HugeiconsIcon icon={Books02Icon} size={13} />
+              <span>On This Page</span>
+            </div>
+            <ul className="space-y-2 border-l border-dashed border-border pl-3">
+              {doc.meta.toc.map((t) => (
+                <li key={t.id}>
+                  <a
+                    href={`#${t.id}`}
+                    className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {t.label}
+                  </a>
+                </li>
+              ))}
+              {compositionsById[doc.slug] && (
+                <li>
+                  <a
+                    href="#source"
+                    className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Source
+                  </a>
+                </li>
+              )}
+            </ul>
           </div>
-          <ul className="space-y-2 border-l border-dashed border-border pl-3">
-            {doc.meta.toc.map((t) => (
-              <li key={t.id}>
-                <a
-                  href={`#${t.id}`}
-                  className="text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {t.label}
-                </a>
-              </li>
-            ))}
-          </ul>
+
+          <Link
+            href="https://heygaia.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block rounded-lg border border-border bg-gradient-to-br from-indigo-500/8 via-fuchsia-500/4 to-transparent p-4 transition-colors hover:border-indigo-400/40"
+          >
+            <div className="mb-1 flex items-center gap-2">
+              <span
+                aria-hidden
+                className="size-4 rounded-[5px] bg-gradient-to-br from-indigo-500 to-fuchsia-500"
+              />
+              <span className="text-[12px] font-semibold text-foreground">
+                GAIA
+              </span>
+            </div>
+            <p className="text-[11px] leading-relaxed text-muted-foreground">
+              Motion Studio is the commercial reel kit for GAIA — the personal
+              AI assistant.
+            </p>
+            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 transition-colors group-hover:text-indigo-200">
+              heygaia.io →
+            </span>
+          </Link>
         </div>
       </aside>
     </div>

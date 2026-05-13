@@ -1,10 +1,13 @@
 import { compositions } from "@workspace/compositions/registry";
 import { notFound } from "next/navigation";
 import { DocsShell } from "@/components/docs/docs-shell";
-import { getDoc } from "@/lib/docs";
+import { getDoc, staticDocs } from "@/lib/docs";
 
 export function generateStaticParams() {
-  return compositions.map((c) => ({ id: c.id }));
+  return [
+    ...compositions.map((c) => ({ id: c.id })),
+    ...staticDocs.map((d) => ({ id: d.slug })),
+  ];
 }
 
 export default async function ComponentDocsPage({

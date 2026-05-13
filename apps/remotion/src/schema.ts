@@ -22,6 +22,13 @@ export type ShapeField =
       layoutKey: string;
       counts: Record<string, number>;
       exclude?: string[];
+    }
+  | {
+      kind: "imageList";
+      key: string;
+      label: string;
+      itemLabel?: string;
+      max?: number;
     };
 
 // A collapsible section that groups primitive fields under a label.

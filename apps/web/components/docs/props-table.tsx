@@ -63,6 +63,8 @@ function describeType(field: Field): string {
       return "(group)";
     case "scenario":
       return "string (Scenario JSON)";
+    case "imageList":
+      return "Array<{ name: string; url: string }>";
   }
 }
 

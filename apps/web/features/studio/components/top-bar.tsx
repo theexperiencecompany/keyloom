@@ -13,7 +13,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
-import { useTheme } from "next-themes";
 import { useRef } from "react";
 import { BrandLink } from "@/components/brand-link";
 
@@ -27,53 +26,6 @@ type Props = {
   onSaveProject: () => void;
   onLoadProjectFile: (file: File) => void;
 };
-
-function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        >
-          {/* Sun icon (shown in dark mode) */}
-          <svg
-            viewBox="0 0 24 24"
-            className="size-4 hidden dark:block"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <title>Sun</title>
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-          </svg>
-          {/* Moon icon (shown in light mode) */}
-          <svg
-            viewBox="0 0 24 24"
-            className="size-4 block dark:hidden"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <title>Moon</title>
-            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          </svg>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Toggle theme</TooltipContent>
-    </Tooltip>
-  );
-}
 
 export function TopBar({
   clipCount,
@@ -138,7 +90,6 @@ export function TopBar({
             </TooltipTrigger>
             <TooltipContent>Save project (.json)</TooltipContent>
           </Tooltip>
-          <ThemeToggle />
           <Button
             size="sm"
             onClick={onExport}

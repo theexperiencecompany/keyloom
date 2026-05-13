@@ -184,11 +184,12 @@ export function Timeline({
                 strategy={horizontalListSortingStrategy}
               >
                 <div className="flex items-stretch gap-0 px-3 py-3">
-                  {project.clips.map((clip) => (
+                  {project.clips.map((clip, index) => (
                     <SortableClipBlock
                       key={clip.id}
                       clip={clip}
                       fps={project.fps}
+                      isFirst={index === 0}
                       selected={clip.id === selectedClipId}
                       onSelect={() => onSelect(clip.id)}
                       onDelete={() => onDelete(clip.id)}

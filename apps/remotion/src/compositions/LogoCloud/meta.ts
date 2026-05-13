@@ -39,5 +39,12 @@ export const logoCloudInfo: CompositionInfo<LogoCloudProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
+    {
+      kind: "imageList",
+      key: "logos",
+      label: "Logos",
+      itemLabel: "Logo",
+      max: 12,
+    },
   ],
 };

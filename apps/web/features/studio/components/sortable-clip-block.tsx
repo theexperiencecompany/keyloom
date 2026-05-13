@@ -5,6 +5,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { effectsById } from "@workspace/compositions/effects/registry";
 import type { Clip } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
+import {
+  DEFAULT_SCENE_TRANSITION,
+  type SceneTransitionKind,
+} from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -15,20 +19,50 @@ const MIN_DURATION_FRAMES = 15;
 type Props = {
   clip: Clip;
   fps: number;
+  /** True for the first clip — affects the default transition badge. */
+  isFirst: boolean;
   selected: boolean;
   onSelect: () => void;
   onDelete: () => void;
   onDurationChange: (durationInFrames: number) => void;
 };
 
+const TRANSITION_GLYPH: Record<SceneTransitionKind, string> = {
+  none: "·",
+  fade: "◐",
+  "swipe-left": "←",
+  "swipe-right": "→",
+  "swipe-up": "↑",
+  "swipe-down": "↓",
+  "zoom-in": "⊕",
+  "zoom-out": "⊖",
+};
+
+const TRANSITION_LABEL: Record<SceneTransitionKind, string> = {
+  none: "Hard cut",
+  fade: "Fade in",
+  "swipe-left": "Swipe in from left",
+  "swipe-right": "Swipe in from right",
+  "swipe-up": "Swipe in from bottom",
+  "swipe-down": "Swipe in from top",
+  "zoom-in": "Zoom in",
+  "zoom-out": "Zoom out",
+};
+
 export function SortableClipBlock({
   clip,
   fps,
+  isFirst,
   selected,
   onSelect,
   onDelete,
   onDurationChange,
 }: Props) {
+  const effectiveTransition =
+    clip.transition ??
+    (isFirst
+      ? { kind: "none" as const, durationInFrames: 0 }
+      : DEFAULT_SCENE_TRANSITION);
   const info = compositionsById[clip.compositionId];
   const [resizing, setResizing] = useState<"left" | "right" | null>(null);
 
@@ -139,6 +173,15 @@ export function SortableClipBlock({
 
       {selected && (
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-blue-500" />
+      )}
+
+      {effectiveTransition.kind !== "none" && (
+        <span
+          title={`Transition: ${TRANSITION_LABEL[effectiveTransition.kind]} · ${(effectiveTransition.durationInFrames / fps).toFixed(2)}s`}
+          className="pointer-events-none absolute left-1 top-1 z-10 flex h-4 min-w-4 items-center justify-center rounded-sm bg-black/30 px-1 text-[10px] font-semibold leading-none text-white/95 backdrop-blur-sm"
+        >
+          {TRANSITION_GLYPH[effectiveTransition.kind]}
+        </span>
       )}
 
       <ResizeHandle

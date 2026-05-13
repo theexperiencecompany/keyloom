@@ -1,0 +1,35 @@
+export const meta = {
+  title: "Contributors",
+  description:
+    "Motion Studio is open source. Contribute a new scene, fix a bug, or propose a category.",
+  toc: [
+    { label: "How to contribute", id: "how-to-contribute" },
+    { label: "Adding a new scene", id: "adding-a-new-scene" },
+    { label: "Maintainers", id: "maintainers" },
+  ],
+}
+
+## How to contribute
+
+The project lives on GitHub at [theexperiencecompany/motion-studio](https://github.com/theexperiencecompany/motion-studio). The fastest paths in:
+
+- **Open an issue** describing the component you want — include a reference image or short loom if you have one.
+- **Send a PR** for a new scene by following the structure of an existing simple scene (`StatCounter` is the easiest reference).
+- **Improve docs** — every page is an MDX file in `apps/web/content/docs/`.
+
+## Adding a new scene
+
+Every scene needs to be wired through six sync points, all in the same change:
+
+1. `apps/remotion/src/compositions/<Name>/<Name>.tsx` — the React component.
+2. `apps/remotion/src/compositions/<Name>/meta.ts` — the `CompositionInfo` (id, dimensions, defaultProps, inspector fields).
+3. `apps/remotion/src/registry.ts` — add the info to the `compositions` array.
+4. `apps/remotion/src/componentsBase.ts` — add the component to the lookup map.
+5. `apps/web/content/docs/<kebab-name>.mdx` — the docs page (mirror an existing one).
+6. `apps/web/lib/docs.ts` — import the MDX and add to the `docs` array.
+
+Each scene should expose the universal `clipStyle` prop (background / text / font / accent) unless it impersonates a real product (Twitter, GitHub, WhatsApp) — in which case mark it `brandMode: "locked"` in `meta.ts`.
+
+## Maintainers
+
+Motion Studio is built and maintained by [The Experience Company](https://github.com/theexperiencecompany). It's part of [GAIA](https://heygaia.io) — the personal AI assistant.

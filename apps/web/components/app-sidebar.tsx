@@ -1,18 +1,22 @@
 "use client";
 
 import {
+  AnalyticsUpIcon,
   Book01Icon,
   BrowserIcon,
   BubbleChatIcon,
-  Clock01Icon,
   CommandLineIcon,
   ComputerVideoIcon,
   Cursor02Icon,
   Download01Icon,
-  Moon02Icon,
-  PaintBrush01Icon,
+  Github01Icon,
+  Grid02Icon,
+  PlayIcon,
+  SparklesIcon,
+  StarIcon,
   TextFontIcon,
   TwitterIcon,
+  UserGroup02Icon,
   VideoAiIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -41,8 +45,17 @@ const CHAT_IDS = new Set([
   "SlackMessages",
   "DiscordMessages",
 ]);
-const SOCIAL_IDS = new Set(["TweetCard", "TwitterFollow"]);
+const SOCIAL_IDS = new Set(["TweetCard", "TwitterFollow", "GitHubStarButton"]);
 const FRAME_IDS = new Set(["BrowserWindow", "LaptopFrame", "PhoneFrame"]);
+const CHART_IDS = new Set([
+  "BarChart",
+  "LineChart",
+  "AreaChart",
+  "PieChart",
+  "RadarChart",
+  "RadialChart",
+]);
+const GAIA_IDS = new Set(["GaiaScenario"]);
 
 const textAnimations = compositions.filter((c) =>
   TEXT_PREFIXES.some((p) => c.id.startsWith(p)),
@@ -50,26 +63,24 @@ const textAnimations = compositions.filter((c) =>
 const chatComponents = compositions.filter((c) => CHAT_IDS.has(c.id));
 const socialComponents = compositions.filter((c) => SOCIAL_IDS.has(c.id));
 const frameComponents = compositions.filter((c) => FRAME_IDS.has(c.id));
+const chartComponents = compositions.filter((c) => CHART_IDS.has(c.id));
+const gaiaComponents = compositions.filter((c) => GAIA_IDS.has(c.id));
 const sceneComponents = compositions.filter(
   (c) =>
     !TEXT_PREFIXES.some((p) => c.id.startsWith(p)) &&
     !CHAT_IDS.has(c.id) &&
     !SOCIAL_IDS.has(c.id) &&
-    !FRAME_IDS.has(c.id),
+    !FRAME_IDS.has(c.id) &&
+    !CHART_IDS.has(c.id) &&
+    !GAIA_IDS.has(c.id),
 );
 
 const gettingStarted: NavItem[] = [
   { title: "Introduction", href: "/docs", icon: Book01Icon },
   { title: "Installation", href: "/docs/installation", icon: Download01Icon },
-  { title: "Theming", href: "/docs/theming", icon: PaintBrush01Icon },
-  { title: "Dark Mode", href: "/docs/dark-mode", icon: Moon02Icon },
-  { title: "CLI", href: "/docs/cli", icon: CommandLineIcon },
-  {
-    title: "Changelog",
-    href: "/docs/changelog",
-    icon: Clock01Icon,
-    badge: "v1.0",
-  },
+  { title: "Using the studio", href: "/docs/using-the-studio", icon: PlayIcon },
+  { title: "Components", href: "/docs/components", icon: Grid02Icon },
+  { title: "Contributors", href: "/docs/contributors", icon: UserGroup02Icon },
 ];
 
 const collapsibleGroups: Array<{
@@ -78,12 +89,29 @@ const collapsibleGroups: Array<{
   items: NavItem[];
 }> = [
   {
-    value: "text-animations",
-    section: "Text Animations",
-    items: textAnimations.map((c) => ({
+    value: "scenes",
+    section: "Scenes & Effects",
+    items: sceneComponents.map((c) => {
+      const icon =
+        c.id === "CursorWalkthrough"
+          ? Cursor02Icon
+          : c.id === "CaptionTrack"
+            ? VideoAiIcon
+            : c.id === "Terminal"
+              ? CommandLineIcon
+              : c.id === "Toast"
+                ? SparklesIcon
+                : ComputerVideoIcon;
+      return { title: c.title, href: `/docs/${c.id}`, icon };
+    }),
+  },
+  {
+    value: "charts",
+    section: "Charts",
+    items: chartComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: TextFontIcon,
+      icon: AnalyticsUpIcon,
     })),
   },
   {
@@ -101,7 +129,7 @@ const collapsibleGroups: Array<{
     items: socialComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
-      icon: TwitterIcon,
+      icon: c.id === "GitHubStarButton" ? Github01Icon : TwitterIcon,
     })),
   },
   {
@@ -114,17 +142,22 @@ const collapsibleGroups: Array<{
     })),
   },
   {
-    value: "scenes",
-    section: "Scenes & Effects",
-    items: sceneComponents.map((c) => {
-      const icon =
-        c.id === "CursorWalkthrough"
-          ? Cursor02Icon
-          : c.id === "CaptionTrack"
-            ? VideoAiIcon
-            : ComputerVideoIcon;
-      return { title: c.title, href: `/docs/${c.id}`, icon };
-    }),
+    value: "gaia",
+    section: "GAIA",
+    items: gaiaComponents.map((c) => ({
+      title: c.title,
+      href: `/docs/${c.id}`,
+      icon: StarIcon,
+    })),
+  },
+  {
+    value: "text-animations",
+    section: "Text Animations",
+    items: textAnimations.map((c) => ({
+      title: c.title,
+      href: `/docs/${c.id}`,
+      icon: TextFontIcon,
+    })),
   },
 ];
 

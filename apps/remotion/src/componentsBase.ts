@@ -1,20 +1,29 @@
 "use client";
 import type { ComponentType } from "react";
+import { AreaChart } from "./compositions/AreaChart/AreaChart";
+import { BarChart } from "./compositions/BarChart/BarChart";
 import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
 import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
 import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages";
 import { FeatureCard } from "./compositions/FeatureCard/FeatureCard";
 import { GaiaScenario } from "./compositions/GaiaScenario/GaiaScenario";
+import { GitHubStarButton } from "./compositions/GitHubStarButton/GitHubStarButton";
 import { InstagramMessages } from "./compositions/InstagramMessages/InstagramMessages";
 import { InstagramPost } from "./compositions/InstagramPost/InstagramPost";
+import { LineChart } from "./compositions/LineChart/LineChart";
 import { LogoCloud } from "./compositions/LogoCloud/LogoCloud";
 import { MessageBubbles } from "./compositions/MessageBubbles/MessageBubbles";
 import { MessagePopup } from "./compositions/MessagePopup/MessagePopup";
 import { MetricCard } from "./compositions/MetricCard/MetricCard";
+import { PerspectiveMarquee } from "./compositions/PerspectiveMarquee/PerspectiveMarquee";
+import { PieChart } from "./compositions/PieChart/PieChart";
 import { PricingCard } from "./compositions/PricingCard/PricingCard";
+import { RadarChart } from "./compositions/RadarChart/RadarChart";
+import { RadialChart } from "./compositions/RadialChart/RadialChart";
 import { SlackMessages } from "./compositions/SlackMessages/SlackMessages";
 import { StatCounter } from "./compositions/StatCounter/StatCounter";
+import { Terminal } from "./compositions/Terminal/Terminal";
 import { TestimonialCard } from "./compositions/TestimonialCard/TestimonialCard";
 import { TextBlurOutUp } from "./compositions/TextBlurOutUp/TextBlurOutUp";
 import { TextBottomUpLetters } from "./compositions/TextBottomUpLetters/TextBottomUpLetters";
@@ -44,6 +53,7 @@ import { TitleFade } from "./compositions/TitleFade/TitleFade";
 import { TitlePopup } from "./compositions/TitlePopup/TitlePopup";
 import { TitleSlideUp } from "./compositions/TitleSlideUp/TitleSlideUp";
 import { TitleType } from "./compositions/TitleType/TitleType";
+import { Toast } from "./compositions/Toast/Toast";
 import { TweetCard } from "./compositions/TweetCard/TweetCard";
 import { TwitterFollow } from "./compositions/TwitterFollow/TwitterFollow";
 import { TypingComposer } from "./compositions/TypingComposer/TypingComposer";
@@ -104,4 +114,14 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   TestimonialCard,
   LogoCloud,
   PricingCard,
+  Terminal,
+  GitHubStarButton,
+  Toast,
+  PerspectiveMarquee,
+  BarChart,
+  LineChart,
+  AreaChart,
+  PieChart,
+  RadarChart,
+  RadialChart,
 };

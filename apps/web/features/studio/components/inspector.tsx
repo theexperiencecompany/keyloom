@@ -11,19 +11,24 @@ import { effectsById } from "@workspace/compositions/effects/registry";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
 import type { Clip } from "@workspace/compositions/project";
 import type { compositionsById } from "@workspace/compositions/registry";
+import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
 import type { ComponentProps } from "react";
 
 import { ClipStyleSection } from "./clip-style-section";
+import { TransitionSection } from "./transition-section";
 
 type Info = NonNullable<(typeof compositionsById)[string]>;
 
 type Props = {
   clip: Clip;
   info: Info;
+  isFirst: boolean;
+  fps: number;
   onChange: ComponentProps<typeof FieldsRenderer>["onChange"];
   onUpdateStyle: (patch: Partial<ClipStyle>) => void;
   onResetStyle: () => void;
+  onUpdateTransition: (transition: SceneTransition | undefined) => void;
   onUpdateEffect: (
     effectInstanceId: string,
     props: Record<string, unknown>,
@@ -35,9 +40,12 @@ type Props = {
 export function Inspector({
   clip,
   info,
+  isFirst,
+  fps,
   onChange,
   onUpdateStyle,
   onResetStyle,
+  onUpdateTransition,
   onUpdateEffect,
   onRemoveEffect,
   onClose,
@@ -71,6 +79,15 @@ export function Inspector({
             />
           </div>
         )}
+        <div className="border-b border-border">
+          <TransitionSection
+            transition={clip.transition}
+            isFirst={isFirst}
+            fps={fps}
+            clipDurationInFrames={clip.durationInFrames}
+            onChange={onUpdateTransition}
+          />
+        </div>
         <FieldsRenderer
           fields={info.fields}
           value={clip.props}

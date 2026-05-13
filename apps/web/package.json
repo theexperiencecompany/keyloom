@@ -4,6 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "predev": "node scripts/generate-sources.mjs",
+    "prebuild": "node scripts/generate-sources.mjs",
+    "sources": "node scripts/generate-sources.mjs",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",

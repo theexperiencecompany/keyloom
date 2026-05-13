@@ -1,0 +1,36 @@
+export const meta = {
+  title: "Terminal",
+  description:
+    "A macOS-style terminal that types out CLI commands line by line, with prompts, output, and success rows.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="Terminal" />
+
+<EditorLink id="Terminal" />
+
+## Usage
+
+For install reels, "how to get started" overlays, or any moment that needs to show a CLI in motion. Each line carries a `kind` that controls how it animates and how it's styled:
+
+- `command` — typed character-by-character behind the prompt, accent color
+- `output` — appears all at once after a small beat, muted color
+- `success` — same as output but prefixed with a `✓` glyph in green
+- `comment` — appears all at once in the dimmest tone, useful for shell comments
+
+Tune `charactersPerSecond` for typing speed and `lineGap` for vertical density. The window chrome uses the real macOS traffic-light colors so it reads as a screenshot at small sizes.
+
+## Props
+
+<PropsTable id="Terminal" />
+
+## Composition
+
+<CompositionStats id="Terminal" />

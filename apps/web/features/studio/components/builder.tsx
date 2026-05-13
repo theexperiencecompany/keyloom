@@ -175,6 +175,8 @@ export function Builder() {
             <Inspector
               clip={selectedClip}
               info={selectedInfo}
+              isFirst={project.clips[0]?.id === selectedClip.id}
+              fps={project.fps}
               onChange={(next) =>
                 dispatch({
                   type: "UPDATE_CLIP_PROPS",
@@ -193,6 +195,13 @@ export function Builder() {
                 dispatch({
                   type: "RESET_CLIP_STYLE",
                   clipId: selectedClip.id,
+                })
+              }
+              onUpdateTransition={(transition) =>
+                dispatch({
+                  type: "UPDATE_CLIP_TRANSITION",
+                  clipId: selectedClip.id,
+                  transition,
                 })
               }
               onUpdateEffect={(effectInstanceId, props) =>

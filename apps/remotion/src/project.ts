@@ -1,5 +1,6 @@
 import type { ClipStyle } from "./clip-style";
 import type { ClipEffect } from "./effects/schema";
+import type { SceneTransition } from "./transitions";
 
 export type Clip = {
   id: string;
@@ -9,6 +10,13 @@ export type Clip = {
   effects?: ClipEffect[];
   /** Universal visual overrides — see `clip-style.ts`. */
   style?: ClipStyle;
+  /**
+   * How this clip enters from the previous one. The first
+   * transition.durationInFrames frames play the transition. See
+   * `transitions.ts`. First clip defaults to no transition; subsequent clips
+   * default to a fade.
+   */
+  transition?: SceneTransition;
 };
 
 export type Project = {

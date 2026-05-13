@@ -4,20 +4,19 @@ import { componentsById } from "../../components";
 import { EffectsWrap } from "../../effects/EffectsWrap";
 import type { Project } from "../../project";
 import { compositionsById } from "../../registry";
+import { DEFAULT_SCENE_TRANSITION } from "../../transitions";
+import { TransitionEnter } from "./TransitionEnter";
 
 export const ProjectComposition: React.FC<Project> = ({ clips }) => {
   let cursor = 0;
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      {clips.map((clip) => {
+      {clips.map((clip, index) => {
         const Component = componentsById[clip.compositionId];
         const info = compositionsById[clip.compositionId];
         const from = cursor;
         cursor += clip.durationInFrames;
 
-        // Locked compositions impersonate real apps and ignore universal
-        // ClipStyle. Everything else receives the user's per-clip overrides
-        // via the `clipStyle` prop.
         const isLocked = info?.brandMode === "locked";
         const styleProps = isLocked ? {} : { clipStyle: clip.style };
 
@@ -26,18 +25,32 @@ export const ProjectComposition: React.FC<Project> = ({ clips }) => {
         ) : (
           <MissingClip compositionId={clip.compositionId} />
         );
+
+        // First clip uses a hard cut by default; non-first clips fall back
+        // to a fade-in if no explicit transition is set.
+        const transition =
+          clip.transition ??
+          (index === 0
+            ? { kind: "none", durationInFrames: 0 }
+            : DEFAULT_SCENE_TRANSITION);
+
         return (
           <Sequence
             key={clip.id}
             from={from}
             durationInFrames={clip.durationInFrames}
           >
-            <EffectsWrap
-              effects={clip.effects}
+            <TransitionEnter
+              transition={transition}
               clipDurationInFrames={clip.durationInFrames}
             >
-              {inner}
-            </EffectsWrap>
+              <EffectsWrap
+                effects={clip.effects}
+                clipDurationInFrames={clip.durationInFrames}
+              >
+                {inner}
+              </EffectsWrap>
+            </TransitionEnter>
           </Sequence>
         );
       })}

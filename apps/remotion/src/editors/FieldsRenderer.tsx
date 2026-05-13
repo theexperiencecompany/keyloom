@@ -23,6 +23,7 @@ import {
 import { compositions } from "../registry";
 import type { Field, SectionField } from "../schema";
 import { ChatEditor } from "./ChatEditor";
+import { ImageListEditor, type ImageListItem } from "./ImageListEditor";
 import { PrimitiveControl } from "./primitives";
 import { ScenarioEditor } from "./ScenarioEditor";
 
@@ -45,6 +46,7 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
   const flatFields = fields.filter(
     (f) => f.kind !== "chat" && f.kind !== "section" && f.kind !== "scenario",
   );
+  // imageList renders inline among flat fields.
   const chatField = fields.find((f) => f.kind === "chat");
   const scenarioField = fields.find((f) => f.kind === "scenario");
 
@@ -67,6 +69,18 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
                   label={field.label}
                   exclude={field.exclude}
                   value={(value[field.key] as string) ?? ""}
+                  onChange={(v) => set(field.key, v)}
+                />
+              );
+            }
+            if (field.kind === "imageList") {
+              return (
+                <ImageListEditor
+                  key={field.key}
+                  label={field.label}
+                  itemLabel={field.itemLabel}
+                  max={field.max}
+                  value={(value[field.key] as ImageListItem[]) ?? []}
                   onChange={(v) => set(field.key, v)}
                 />
               );

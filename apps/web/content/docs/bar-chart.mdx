@@ -1,0 +1,31 @@
+export const meta = {
+  title: "Bar Chart",
+  description:
+    "An animated bar chart with staggered grow-up bars, optional axes, gridlines, and value labels.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="BarChart" />
+
+<EditorLink id="BarChart" />
+
+## Usage
+
+A clean, animated bar chart. Pass `labels` and `values` as comma-separated strings — the chart auto-scales the y-axis to a "nice" rounded max and staggers each bar in with an ease-out curve. Each bar picks up a different color from the palette so categorical comparisons read at a glance.
+
+Toggle `showAxes`, `showGrid`, and `showValues` to dial the chart between a clean editorial look and a precise dashboard look.
+
+## Props
+
+<PropsTable id="BarChart" />
+
+## Composition
+
+<CompositionStats id="BarChart" />

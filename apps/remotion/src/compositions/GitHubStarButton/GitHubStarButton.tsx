@@ -1,0 +1,294 @@
+"use client";
+import {
+  AbsoluteFill,
+  Easing,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
+
+export type GitHubStarButtonProps = {
+  owner: string;
+  repo: string;
+  startCount: number;
+  endCount: number;
+  theme: "light" | "dark";
+};
+
+const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
+const STAR_FILLED = "#e3b341";
+
+const THEME = {
+  light: {
+    bg: "#ffffff",
+    pageBg: "#f6f8fa",
+    border: "#d1d9e0",
+    btnBg: "#f6f8fa",
+    btnBgActive: "#eef0f3",
+    btnBorder: "#d1d9e0",
+    text: "#1f2328",
+    muted: "#59636e",
+    divider: "#d1d9e0",
+    countBg: "#ffffff",
+  },
+  dark: {
+    bg: "#0d1117",
+    pageBg: "#010409",
+    border: "#3d444d",
+    btnBg: "#212830",
+    btnBgActive: "#3d444d",
+    btnBorder: "#3d444d",
+    text: "#f0f6fc",
+    muted: "#9198a1",
+    divider: "#3d444d",
+    countBg: "#15191f",
+  },
+} as const;
+
+const STAR_BURST = 26;
+
+export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
+  owner,
+  repo,
+  startCount,
+  endCount,
+  theme,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const t = THEME[theme];
+
+  const enter = spring({
+    frame,
+    fps,
+    config: { damping: 20, stiffness: 140, mass: 0.6 },
+  });
+
+  const HOVER_AT = 26;
+  const CLICK_AT = 44;
+  const COUNT_START = CLICK_AT + 4;
+  const COUNT_END = COUNT_START + 90;
+
+  const hoverProgress = interpolate(frame, [HOVER_AT, HOVER_AT + 8], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: APPLE_EASE,
+  });
+
+  const clickProgress = spring({
+    frame: frame - CLICK_AT,
+    fps,
+    config: { damping: 9, stiffness: 220, mass: 0.4 },
+    durationInFrames: 26,
+  });
+
+  const starFill = interpolate(frame, [CLICK_AT - 2, CLICK_AT + 6], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const starScale = 1 + clickProgress * 0.18 - clickProgress * 0.1;
+
+  const count = Math.round(
+    interpolate(frame, [COUNT_START, COUNT_END], [startCount, endCount], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: APPLE_EASE,
+    }),
+  );
+
+  const burstAge = frame - CLICK_AT;
+
+  return (
+    <AbsoluteFill
+      style={{
+        background: t.pageBg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif",
+        color: t.text,
+        padding: 80,
+      }}
+    >
+      <div
+        style={{
+          background: t.bg,
+          border: `1px solid ${t.border}`,
+          borderRadius: 14,
+          padding: "26px 28px",
+          minWidth: 720,
+          opacity: enter,
+          transform: `translateY(${(1 - enter) * 14}px)`,
+          boxShadow:
+            theme === "light"
+              ? "0 1px 0 rgba(31,35,40,0.04), 0 8px 24px rgba(140,149,159,0.18)"
+              : "0 8px 32px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 22,
+            fontWeight: 600,
+            marginBottom: 18,
+          }}
+        >
+          <RepoIcon color={t.muted} />
+          <span style={{ color: "#4493f8" }}>{owner}</span>
+          <span style={{ color: t.muted }}>/</span>
+          <span style={{ color: "#4493f8", fontWeight: 700 }}>{repo}</span>
+          <span
+            style={{
+              marginLeft: 8,
+              fontSize: 12,
+              fontWeight: 500,
+              padding: "2px 8px",
+              borderRadius: 999,
+              border: `1px solid ${t.border}`,
+              color: t.muted,
+            }}
+          >
+            Public
+          </span>
+        </div>
+
+        <div style={{ display: "inline-flex", alignItems: "stretch" }}>
+          <button
+            type="button"
+            style={{
+              all: "unset",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 14px",
+              border: `1px solid ${t.btnBorder}`,
+              borderRight: "none",
+              borderRadius: "8px 0 0 8px",
+              fontSize: 16,
+              fontWeight: 500,
+              cursor: "pointer",
+              background: mixHover(t.btnBg, t.btnBgActive, hoverProgress),
+              color: t.text,
+              transform: `scale(${1 - clickProgress * 0.02})`,
+              transition: "none",
+              position: "relative",
+            }}
+          >
+            <StarSvg
+              fillProgress={starFill}
+              scale={starScale}
+              muted={t.muted}
+            />
+            <span>Star</span>
+            <BurstParticles
+              age={burstAge}
+              active={burstAge > 0 && burstAge < STAR_BURST + 14}
+            />
+          </button>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: 64,
+              padding: "8px 16px",
+              border: `1px solid ${t.btnBorder}`,
+              borderRadius: "0 8px 8px 0",
+              fontSize: 16,
+              fontWeight: 600,
+              background: t.countBg,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {count.toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+function RepoIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 16 16" fill={color} aria-hidden>
+      <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z" />
+    </svg>
+  );
+}
+
+function StarSvg({
+  fillProgress,
+  scale,
+  muted,
+}: {
+  fillProgress: number;
+  scale: number;
+  muted: string;
+}) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 16 16"
+      style={{ transform: `scale(${scale})`, transformOrigin: "center" }}
+      aria-hidden
+    >
+      <path
+        d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"
+        fill={fillProgress > 0.5 ? STAR_FILLED : "transparent"}
+        stroke={fillProgress > 0.5 ? STAR_FILLED : muted}
+        strokeWidth={1}
+        style={{ transition: "none" }}
+      />
+    </svg>
+  );
+}
+
+function BurstParticles({ age, active }: { age: number; active: boolean }) {
+  if (!active) return null;
+  const t = Math.min(1, age / STAR_BURST);
+  const ease = 1 - (1 - t) ** 3;
+  return (
+    <span
+      style={{
+        position: "absolute",
+        left: 14,
+        top: "50%",
+        width: 1,
+        height: 1,
+        pointerEvents: "none",
+      }}
+    >
+      {Array.from({ length: 8 }).map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const radius = 18 + ease * 14;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        return (
+          <span
+            key={i}
+            style={{
+              position: "absolute",
+              width: 4,
+              height: 4,
+              borderRadius: "50%",
+              background: STAR_FILLED,
+              transform: `translate(${x}px, ${y}px) scale(${1 - ease})`,
+              opacity: 1 - ease,
+            }}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
+function mixHover(a: string, b: string, t: number): string {
+  if (t <= 0) return a;
+  if (t >= 1) return b;
+  return `color-mix(in srgb, ${a} ${(1 - t) * 100}%, ${b} ${t * 100}%)`;
+}
