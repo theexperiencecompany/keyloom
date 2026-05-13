@@ -1,48 +1,38 @@
 "use client";
-import { AbsoluteFill, Sequence } from "remotion";
+import { TransitionSeries } from "@remotion/transitions";
+import { AbsoluteFill } from "remotion";
 import { componentsById } from "../../components";
 import { EffectsWrap } from "../../effects/EffectsWrap";
 import type { Project } from "../../project";
 import { compositionsById } from "../../registry";
-import { DEFAULT_SCENE_TRANSITION } from "../../transitions";
-import { TransitionEnter } from "./TransitionEnter";
+import { resolveTransition, toPresentation, toTiming } from "../../transitions";
 
-export const ProjectComposition: React.FC<Project> = ({ clips }) => {
-  let cursor = 0;
+export const ProjectComposition: React.FC<Project> = ({
+  clips,
+  defaultTransition,
+}) => {
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      {clips.map((clip, index) => {
-        const Component = componentsById[clip.compositionId];
-        const info = compositionsById[clip.compositionId];
-        const from = cursor;
-        cursor += clip.durationInFrames;
+      <TransitionSeries>
+        {clips.flatMap((clip, index) => {
+          const Component = componentsById[clip.compositionId];
+          const info = compositionsById[clip.compositionId];
+          const isLocked = info?.brandMode === "locked";
+          const styleProps = isLocked ? {} : { clipStyle: clip.style };
 
-        const isLocked = info?.brandMode === "locked";
-        const styleProps = isLocked ? {} : { clipStyle: clip.style };
+          const inner = Component ? (
+            <Component key={`c-${clip.id}`} {...clip.props} {...styleProps} />
+          ) : (
+            <MissingClip
+              key={`c-${clip.id}`}
+              compositionId={clip.compositionId}
+            />
+          );
 
-        const inner = Component ? (
-          <Component {...clip.props} {...styleProps} />
-        ) : (
-          <MissingClip compositionId={clip.compositionId} />
-        );
-
-        // First clip uses a hard cut by default; non-first clips fall back
-        // to a fade-in if no explicit transition is set.
-        const transition =
-          clip.transition ??
-          (index === 0
-            ? { kind: "none", durationInFrames: 0 }
-            : DEFAULT_SCENE_TRANSITION);
-
-        return (
-          <Sequence
-            key={clip.id}
-            from={from}
-            durationInFrames={clip.durationInFrames}
-          >
-            <TransitionEnter
-              transition={transition}
-              clipDurationInFrames={clip.durationInFrames}
+          const sequence = (
+            <TransitionSeries.Sequence
+              key={`seq-${clip.id}`}
+              durationInFrames={clip.durationInFrames}
             >
               <EffectsWrap
                 effects={clip.effects}
@@ -50,10 +40,36 @@ export const ProjectComposition: React.FC<Project> = ({ clips }) => {
               >
                 {inner}
               </EffectsWrap>
-            </TransitionEnter>
-          </Sequence>
-        );
-      })}
+            </TransitionSeries.Sequence>
+          );
+
+          if (index === 0) {
+            return [sequence];
+          }
+
+          const t = resolveTransition({
+            clipTransition: clip.transition,
+            projectDefault: defaultTransition,
+            index,
+          });
+
+          // Skip transition entirely when duration is 0 or kind is "none" —
+          // TransitionSeries handles zero-duration transitions, but emitting
+          // them as a hard cut is cleaner.
+          if (t.kind === "none" || t.durationInFrames <= 0) {
+            return [sequence];
+          }
+
+          return [
+            <TransitionSeries.Transition
+              key={`tx-${clip.id}`}
+              timing={toTiming(t)}
+              presentation={toPresentation(t)}
+            />,
+            sequence,
+          ];
+        })}
+      </TransitionSeries>
     </AbsoluteFill>
   );
 };

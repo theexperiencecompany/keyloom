@@ -48,15 +48,29 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
     .filter(Boolean);
   const baseItems = parsed.length > 0 ? parsed : ["Motion Studio"];
 
-  // Repeat the list enough times to fill the row and survive a seamless loop.
-  const cycle = baseItems.flatMap((_, i) =>
-    Array.from({ length: 4 }, (__, k) => ({
-      key: `${i}-${k}`,
-      text: baseItems[i % baseItems.length]!,
-    })),
+  // Estimate width per item so we can build a seamless loop without DOM measurement.
+  const gapPx = fontSize * 1.2;
+  const widths = baseItems.map((t) => t.length * fontSize * 0.58 + gapPx);
+  const cycleWidth = widths.reduce((a, b) => a + b, 0);
+
+  // Repeat the full word list (not each word) to fill the screen and allow wrap.
+  const copies = 4;
+  const cycle = Array.from({ length: copies }).flatMap((_, c) =>
+    baseItems.map((text, i) => ({ key: `${c}-${i}`, text, idx: i })),
   );
 
-  const offset = (frame * speedPxPerFrame) % 1000;
+  // Pre-compute each item's left position within the long row.
+  const positions: number[] = [];
+  let running = 0;
+  for (let c = 0; c < copies; c++) {
+    for (let i = 0; i < baseItems.length; i++) {
+      positions.push(running);
+      running += widths[i]!;
+    }
+  }
+
+  const offset = (frame * speedPxPerFrame) % cycleWidth;
+  const totalWidth = cycleWidth * copies;
 
   return (
     <AbsoluteFill
@@ -86,36 +100,29 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
             transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
             transformStyle: "preserve-3d",
             whiteSpace: "nowrap",
-            display: "flex",
-            alignItems: "center",
-            gap: "1.2em",
             fontSize,
             fontWeight,
             letterSpacing: "-0.025em",
             textTransform,
             lineHeight: 1,
             position: "relative",
+            width: totalWidth,
+            height: fontSize * 1.4,
           }}
         >
           {cycle.map((item, i) => {
-            // distance-from-center, in items — squared to make the edges
-            // fall off faster than the center for stronger DOF feel.
-            const totalSpan = cycle.length;
-            const itemSlot =
-              ((i + offset / (fontSize * 0.9)) % totalSpan) - totalSpan / 2;
-            const norm = Math.min(1, Math.abs(itemSlot) / (totalSpan / 2));
-            const eased = norm * norm;
-            const blur = eased * 22;
-            const opacity = 1 - eased * 0.92;
+            const rawX = positions[i]! - offset;
+            const wrapped = ((rawX % totalWidth) + totalWidth) % totalWidth;
             return (
               <span
                 key={item.key}
                 style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  transform: `translateX(${wrapped}px)`,
                   display: "inline-block",
-                  filter: `blur(${blur}px)`,
-                  opacity,
-                  transform: `translateX(${-offset}px)`,
-                  willChange: "transform, opacity, filter",
+                  willChange: "transform",
                 }}
               >
                 {item.text}

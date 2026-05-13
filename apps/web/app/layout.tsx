@@ -1,9 +1,19 @@
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "@workspace/ui/globals.css";
 import "streamdown/styles.css";
 import { cn } from "@workspace/ui/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Motion Studio — Cinematic scenes for Remotion",
+    template: "%s — Motion Studio",
+  },
+  description:
+    "A library of cinematic scenes for Remotion. No After Effects, no animation team — drop in, render, ship.",
+};
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 

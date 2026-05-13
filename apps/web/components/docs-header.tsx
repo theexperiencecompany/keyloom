@@ -11,6 +11,7 @@ import Link from "next/link";
 import * as React from "react";
 import { BrandLink } from "@/components/brand-link";
 import { DocsSearch } from "@/components/docs-search";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function GitHubMark({ className }: { className?: string }) {
   return (
@@ -164,6 +165,7 @@ export function DocsHeader() {
                   <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
                 </Link>
               </Button>
+              <ThemeToggle />
             </div>
           </div>
         </div>

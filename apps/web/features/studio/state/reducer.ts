@@ -44,6 +44,10 @@ export type StudioAction =
       clipId: string;
       transition: SceneTransition | undefined;
     }
+  | {
+      type: "UPDATE_PROJECT_TRANSITION";
+      transition: SceneTransition | undefined;
+    }
   | { type: "LOAD_PROJECT"; project: Project };
 
 export const initialStudioState: StudioState = {
@@ -167,6 +171,12 @@ export function studioReducer(
         c.id === action.clipId ? { ...c, transition: action.transition } : c,
       );
       return { ...state, project: { ...state.project, clips } };
+    }
+    case "UPDATE_PROJECT_TRANSITION": {
+      return {
+        ...state,
+        project: { ...state.project, defaultTransition: action.transition },
+      };
     }
     case "SELECT_CLIP":
       return { ...state, selectedClipId: action.clipId };

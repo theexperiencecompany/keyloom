@@ -1,27 +1,54 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
+import confetti from "canvas-confetti";
 import { useEffect } from "react";
 import type { ExportState } from "../hooks/use-export-render";
 
 type Props = {
   state: ExportState;
   onClose: () => void;
+  onCancel: () => void;
+  onDownload: () => void;
   onRetry?: () => void;
 };
 
-export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
+export function ExportProgressOverlay({
+  state,
+  onClose,
+  onCancel,
+  onDownload,
+  onRetry,
+}: Props) {
   const phase = state.phase;
   const dismissable = phase === "done" || phase === "error";
 
-  // Auto-dismiss 1.5s after a successful render completes.
+  // Fire confetti once when a render completes successfully.
   useEffect(() => {
     if (phase !== "done") return;
-    const timer = setTimeout(() => {
-      onClose();
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [phase, onClose]);
+    const colors = ["#3b82f6", "#22d3ee", "#a855f7", "#f59e0b", "#ec4899"];
+    const fire = (opts: confetti.Options) =>
+      confetti({
+        particleCount: 90,
+        spread: 70,
+        startVelocity: 35,
+        ticks: 220,
+        gravity: 1.1,
+        scalar: 0.95,
+        colors,
+        zIndex: 9999,
+        disableForReducedMotion: true,
+        ...opts,
+      });
+    // Two simultaneous bursts from the lower corners — feels celebratory
+    // without dominating the modal preview.
+    fire({ origin: { x: 0.2, y: 0.8 }, angle: 60 });
+    fire({ origin: { x: 0.8, y: 0.8 }, angle: 120 });
+    const followUp = setTimeout(() => {
+      fire({ origin: { x: 0.5, y: 0.4 }, spread: 100, particleCount: 60 });
+    }, 250);
+    return () => clearTimeout(followUp);
+  }, [phase]);
 
   // Escape key closes the modal once render is done or errored.
   useEffect(() => {
@@ -42,6 +69,8 @@ export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
     if (dismissable) onClose();
   };
 
+  const isDone = phase === "done";
+
   return (
     <div
       role="dialog"
@@ -50,7 +79,11 @@ export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
     >
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-2xl">
+      <div
+        className={`w-full ${
+          isDone ? "max-w-xl" : "max-w-md"
+        } rounded-xl border border-border bg-background p-6 shadow-2xl`}
+      >
         <div className="mb-1 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">
             {phase === "starting" && "Preparing render…"}
@@ -70,12 +103,11 @@ export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
           )}
         </div>
 
-        {phase !== "error" && (
+        {phase !== "error" && !isDone && (
           <p className="mb-4 text-[12px] text-muted-foreground">
             {phase === "starting" &&
               "Bundling your composition. First render may take longer."}
             {phase === "rendering" && `Encoding frames — ${pct}% complete`}
-            {phase === "done" && "Your MP4 is downloading now."}
           </p>
         )}
 
@@ -86,13 +118,32 @@ export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
           />
         )}
 
-        <ProgressBar phase={phase} pct={pct} />
+        {isDone && state.blobUrl ? (
+          <div className="mb-4 overflow-hidden rounded-lg border border-border bg-black">
+            {/* biome-ignore lint/a11y/useMediaCaption: user-generated video, no caption track */}
+            <video
+              src={state.blobUrl}
+              controls
+              autoPlay
+              loop
+              playsInline
+              className="block aspect-video w-full bg-black"
+            />
+          </div>
+        ) : (
+          <ProgressBar phase={phase} pct={pct} />
+        )}
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[11px] tabular-nums text-muted-foreground">
-            {phase === "rendering" || phase === "done" ? `${pct}%` : "—"}
+            {phase === "rendering" ? `${pct}%` : isDone ? state.filename : "—"}
           </span>
           <div className="flex items-center gap-2">
+            {(phase === "starting" || phase === "rendering") && (
+              <Button variant="outline" size="xs" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
             {phase === "error" && onRetry && (
               <Button
                 size="xs"
@@ -102,6 +153,11 @@ export function ExportProgressOverlay({ state, onClose, onRetry }: Props) {
                 }}
               >
                 Try again
+              </Button>
+            )}
+            {isDone && (
+              <Button size="xs" onClick={onDownload}>
+                Download MP4
               </Button>
             )}
             {dismissable && (

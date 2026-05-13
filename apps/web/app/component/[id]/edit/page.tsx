@@ -4,12 +4,27 @@ import {
   compositions,
   compositionsById,
 } from "@workspace/compositions/registry";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditorView } from "./EditorView";
 
 export function generateStaticParams() {
   return compositions.map((c) => ({ id: c.id }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const composition = compositionsById[id];
+  if (!composition) return { title: "Not found" };
+  return {
+    title: `Edit ${composition.title}`,
+    description: composition.description,
+  };
 }
 
 export default async function EditorPage({

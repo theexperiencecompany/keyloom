@@ -28,21 +28,18 @@ export function ClipStyleSection({ style, onPatch, onReset }: Props) {
 
   return (
     <div className="space-y-4 px-5 py-5">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
-          Style
-        </p>
-        {isCustomized && (
+      {isCustomized && (
+        <div className="flex items-center justify-end">
           <Button
             variant="ghost"
             size="xs"
             onClick={onReset}
             className="h-6 text-[11px]"
           >
-            Reset
+            Reset to default
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       <ColorRow
         id="clip-style-bg"

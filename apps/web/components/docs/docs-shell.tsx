@@ -167,7 +167,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
             <div className="mb-2 flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/gaiaui_logo.png"
+                src="/gaia_logo.png"
                 alt="GAIA"
                 width={24}
                 height={24}

@@ -21,7 +21,7 @@ import { Thumbnail } from "@remotion/player";
 import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import type { Project } from "@workspace/compositions/project";
 import { projectDuration } from "@workspace/compositions/project";
-import { toCanvas } from "html-to-image";
+import html2canvas from "html2canvas-pro";
 import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 import type { ComponentType } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -32,6 +32,8 @@ type BaseExportOptions = {
   onProgress?: ExportProgressCallback;
   /** Override H.264 bitrate. Defaults to 8 Mbps. */
   bitrate?: number;
+  /** Cancel the render mid-way. Checked between frames. */
+  signal?: AbortSignal;
 };
 
 export type RenderComponentOptions<P extends Record<string, unknown>> =
@@ -90,6 +92,7 @@ export async function renderComponentInBrowser<
     height,
     onProgress,
     bitrate = DEFAULT_BITRATE,
+    signal,
   } = options;
 
   console.info("[export] start", {
@@ -148,7 +151,6 @@ export async function renderComponentInBrowser<
     "pointer-events: none",
     "z-index: -1",
     "overflow: hidden",
-    "contain: strict",
     "background: #000",
   ].join(";");
   document.body.appendChild(host);
@@ -209,6 +211,9 @@ export async function renderComponentInBrowser<
   try {
     for (let frame = 0; frame < durationInFrames; frame++) {
       if (encoderError) throw encoderError;
+      if (signal?.aborted) {
+        throw new DOMException("Render cancelled by user", "AbortError");
+      }
 
       try {
         await renderFrame(root, {
@@ -231,14 +236,21 @@ export async function renderComponentInBrowser<
 
       let canvas: HTMLCanvasElement;
       try {
-        canvas = await toCanvas(host, {
+        // html2canvas-pro walks the DOM and paints each node onto a
+        // canvas2d surface directly. Unlike html-to-image's SVG +
+        // <foreignObject> approach, it doesn't depend on browsers
+        // accepting drawImage of a tainted SVG, which is silently
+        // refused in modern Chrome — producing all-black frames.
+        canvas = await html2canvas(host, {
           width,
           height,
-          canvasWidth: width,
-          canvasHeight: height,
-          pixelRatio: 1,
-          cacheBust: false,
-          skipFonts: false,
+          windowWidth: width,
+          windowHeight: height,
+          backgroundColor: "#000000",
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          scale: 1,
         });
       } catch (rasterErr) {
         console.error("[export] toCanvas failed at frame", frame, rasterErr);
@@ -256,8 +268,10 @@ export async function renderComponentInBrowser<
             const cx = Math.floor(canvas.width / 2);
             const cy = Math.floor(canvas.height / 2);
             const px = ctx.getImageData(cx, cy, 1, 1).data;
+            const hostRect = host.getBoundingClientRect();
+            const firstChild = host.firstElementChild as HTMLElement | null;
             console.info(
-              `[export] frame ${frame} center pixel rgba(${px[0]},${px[1]},${px[2]},${px[3]})`,
+              `[export] frame ${frame} center pixel rgba(${px[0]},${px[1]},${px[2]},${px[3]}) | host size=${hostRect.width}x${hostRect.height} pos=${hostRect.left},${hostRect.top} children=${host.children.length} firstChild=<${firstChild?.tagName ?? "none"}> innerSize=${firstChild?.offsetWidth ?? 0}x${firstChild?.offsetHeight ?? 0} html=${host.innerHTML.length}b`,
             );
           }
         } catch (sampleErr) {
@@ -331,7 +345,7 @@ export async function renderComponentInBrowser<
 export function renderProjectInBrowser(
   options: RenderProjectOptions,
 ): Promise<Blob> {
-  const { project, onProgress, bitrate } = options;
+  const { project, onProgress, bitrate, signal } = options;
   return renderComponentInBrowser({
     component: ProjectComposition as ComponentType<Record<string, unknown>>,
     inputProps: project as unknown as Record<string, unknown>,
@@ -339,6 +353,7 @@ export function renderProjectInBrowser(
     fps: project.fps,
     width: project.width,
     height: project.height,
+    signal,
     onProgress,
     bitrate,
   });

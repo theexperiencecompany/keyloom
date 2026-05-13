@@ -5,69 +5,45 @@ import { CSS } from "@dnd-kit/utilities";
 import { effectsById } from "@workspace/compositions/effects/registry";
 import type { Clip } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
-import {
-  DEFAULT_SCENE_TRANSITION,
-  type SceneTransitionKind,
-} from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
 import type React from "react";
 import { useRef, useState } from "react";
-import { colorForCompositionId, PX_PER_SECOND } from "../lib/clip-colors";
+import { colorForCompositionId } from "../lib/clip-colors";
 
 const MIN_DURATION_FRAMES = 15;
 
 type Props = {
   clip: Clip;
   fps: number;
-  /** True for the first clip — affects the default transition badge. */
-  isFirst: boolean;
+  /**
+   * Visible width in px. Equals the clip's full duration in px minus the
+   * leading and trailing transition-overlap regions, which are rendered as
+   * separate `TransitionStrip` siblings.
+   */
+  bodyWidthPx: number;
+  /** Timeline scale; passed in so the resize math tracks the current zoom. */
+  framesPerPx: number;
   selected: boolean;
   onSelect: () => void;
   onDelete: () => void;
   onDurationChange: (durationInFrames: number) => void;
 };
 
-const TRANSITION_GLYPH: Record<SceneTransitionKind, string> = {
-  none: "·",
-  fade: "◐",
-  "swipe-left": "←",
-  "swipe-right": "→",
-  "swipe-up": "↑",
-  "swipe-down": "↓",
-  "zoom-in": "⊕",
-  "zoom-out": "⊖",
-};
-
-const TRANSITION_LABEL: Record<SceneTransitionKind, string> = {
-  none: "Hard cut",
-  fade: "Fade in",
-  "swipe-left": "Swipe in from left",
-  "swipe-right": "Swipe in from right",
-  "swipe-up": "Swipe in from bottom",
-  "swipe-down": "Swipe in from top",
-  "zoom-in": "Zoom in",
-  "zoom-out": "Zoom out",
-};
-
 export function SortableClipBlock({
   clip,
   fps,
-  isFirst,
+  bodyWidthPx,
+  framesPerPx,
   selected,
   onSelect,
   onDelete,
   onDurationChange,
 }: Props) {
-  const effectiveTransition =
-    clip.transition ??
-    (isFirst
-      ? { kind: "none" as const, durationInFrames: 0 }
-      : DEFAULT_SCENE_TRANSITION);
   const info = compositionsById[clip.compositionId];
   const [resizing, setResizing] = useState<"left" | "right" | null>(null);
 
   const seconds = clip.durationInFrames / fps;
-  const widthPx = seconds * PX_PER_SECOND;
+  const widthPx = Math.max(2, bodyWidthPx);
   const colorClass = colorForCompositionId(clip.compositionId);
 
   const {
@@ -86,8 +62,6 @@ export function SortableClipBlock({
     opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging || resizing ? 10 : 1,
   };
-
-  const framesPerPx = fps / PX_PER_SECOND;
 
   function startResize(side: "left" | "right", startEvent: React.PointerEvent) {
     startEvent.preventDefault();
@@ -173,15 +147,6 @@ export function SortableClipBlock({
 
       {selected && (
         <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-blue-500" />
-      )}
-
-      {effectiveTransition.kind !== "none" && (
-        <span
-          title={`Transition: ${TRANSITION_LABEL[effectiveTransition.kind]} · ${(effectiveTransition.durationInFrames / fps).toFixed(2)}s`}
-          className="pointer-events-none absolute left-1 top-1 z-10 flex h-4 min-w-4 items-center justify-center rounded-sm bg-black/30 px-1 text-[10px] font-semibold leading-none text-white/95 backdrop-blur-sm"
-        >
-          {TRANSITION_GLYPH[effectiveTransition.kind]}
-        </span>
       )}
 
       <ResizeHandle

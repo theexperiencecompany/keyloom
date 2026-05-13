@@ -6,6 +6,7 @@ import {
   SaveIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
 import {
   Tooltip,
@@ -15,6 +16,7 @@ import {
 } from "@workspace/ui/components/tooltip";
 import { useRef } from "react";
 import { BrandLink } from "@/components/brand-link";
+import { ProjectTransitionControl } from "./project-transition-control";
 
 type Props = {
   clipCount: number;
@@ -22,6 +24,9 @@ type Props = {
   exporting: boolean;
   canExport: boolean;
   canSave: boolean;
+  fps: number;
+  projectDefaultTransition: SceneTransition | undefined;
+  onUpdateProjectTransition: (transition: SceneTransition | undefined) => void;
   onExport: () => void;
   onSaveProject: () => void;
   onLoadProjectFile: (file: File) => void;
@@ -33,6 +38,9 @@ export function TopBar({
   exporting,
   canExport,
   canSave,
+  fps,
+  projectDefaultTransition,
+  onUpdateProjectTransition,
   onExport,
   onSaveProject,
   onLoadProjectFile,
@@ -64,6 +72,11 @@ export function TopBar({
             accept="application/json,.json"
             className="hidden"
             onChange={handleFileChange}
+          />
+          <ProjectTransitionControl
+            transition={projectDefaultTransition}
+            fps={fps}
+            onChange={onUpdateProjectTransition}
           />
           <Tooltip>
             <TooltipTrigger asChild>
