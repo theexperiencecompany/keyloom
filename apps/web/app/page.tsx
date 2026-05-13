@@ -228,9 +228,9 @@ export default function LandingPage() {
           <HeroSticker key={s.src} {...s} />
         ))}
 
-        <div className="relative z-10 w-full px-8 py-20">
+        <div className="relative z-10 w-full px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
-            <h1 className="text-5xl font-semibold tracking-tight text-balance sm:text-6xl md:text-7xl">
+            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl md:text-7xl">
               Ship videos
               <img
                 src="/images/clapperboard.png"
@@ -240,12 +240,12 @@ export default function LandingPage() {
               />
               that look expensive.
             </h1>
-            <p className="mt-6 max-w-xl text-base text-muted-foreground text-balance sm:text-lg">
+            <p className="mt-6 max-w-xl text-sm text-muted-foreground text-balance sm:text-lg">
               A library of cinematic scenes for Remotion. No After Effects, no
               animation team — drop in, render, ship.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
               <Button asChild>
                 <Link href="/docs">Get started</Link>
               </Button>
@@ -270,14 +270,14 @@ export default function LandingPage() {
       </section>
 
       {/* Featured component */}
-      <section className="border-b border-dashed border-border px-8 py-20">
+      <section className="border-b border-dashed border-border px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12 flex items-end justify-between gap-6">
+          <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:mb-12 sm:flex-row sm:items-end sm:gap-6">
             <div>
-              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-4xl">
                 Browse the components.
               </h2>
-              <p className="mt-3 text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground sm:mt-3 sm:text-base">
                 Premium scenes you can drop straight into a video. Tap the
                 preview for sound.
               </p>
@@ -300,15 +300,15 @@ export default function LandingPage() {
       </section>
 
       {/* CTA */}
-      <section className="px-8 py-24">
-        <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border bg-muted/20 px-8 py-14 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+      <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border bg-muted/20 px-5 py-10 text-center sm:px-8 sm:py-14">
+          <h2 className="text-2xl font-semibold tracking-tight text-balance sm:text-4xl">
             Start shipping motion in minutes.
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
             Read the docs, copy a component, render your first scene.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:mt-8">
             <Button asChild>
               <Link href="/docs">
                 Read the docs
