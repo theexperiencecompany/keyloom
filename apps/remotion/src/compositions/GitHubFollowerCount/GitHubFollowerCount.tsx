@@ -254,7 +254,7 @@ function FollowerCascade({
   usernames: string[];
   visibleCount: number;
   frame: number;
-  t: (typeof THEME)[keyof typeof THEME];
+  t: (typeof THEME)["light"];
 }) {
   const avatarSize = px(28);
   const overlap = px(10);

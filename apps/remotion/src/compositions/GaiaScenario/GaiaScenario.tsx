@@ -6,11 +6,7 @@ import {
   ThinkingBubble,
   ToolCallsSection,
 } from "@heygaia/chat-ui";
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { domAnimation, LazyMotion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
@@ -92,28 +88,11 @@ export type GaiaScenarioProps = {
 };
 
 // chat-ui has internal `useQuery` calls (e.g. ["integrations","user"],
-// ["integrations","config"]) whose queryFn calls a stubbed `apiService.get`
-// that resolves to undefined. React Query rejects undefined with
-// "Query data cannot be undefined". The defaultOptions.queryFn fallback
-// doesn't help — chat-ui passes its own explicit queryFn that wins over
-// the default. Wrap every queryFn at cache-add time so an undefined
-// resolution is coerced to null before React Query inspects it.
-const queryCache = new QueryCache();
-queryCache.subscribe((event) => {
-  if (event.type !== "added") return;
-  const orig = event.query.options.queryFn;
-  if (typeof orig !== "function") return;
-  if ((orig as { __wrapped?: boolean }).__wrapped) return;
-  const wrapped = async (ctx: Parameters<typeof orig>[0]) => {
-    const result = await orig(ctx);
-    return result === undefined ? null : result;
-  };
-  (wrapped as { __wrapped?: boolean }).__wrapped = true;
-  event.query.options.queryFn = wrapped as typeof orig;
-});
-
+// ["integrations","config"]) that hit our QueryClient with no registered
+// queryFn. React Query's default queryFn returns undefined, which it then
+// rejects with "Query data cannot be undefined". Provide a default queryFn
+// that returns null so those background queries stay quiet.
 const queryClient = new QueryClient({
-  queryCache,
   defaultOptions: {
     queries: {
       queryFn: async () => null,
