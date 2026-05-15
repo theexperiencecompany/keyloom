@@ -1,11 +1,11 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useDesignFrame } from "../../use-design-frame";
+import { BlurCrossfade } from "../blur-crossfade";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -76,17 +76,17 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
             },
           );
           return (
-            <span
+            <BlurCrossfade
               key={i}
-              style={{
-                opacity: progress,
-                transform: `translate3d(0, ${snap(30 * (1 - progress))}px, 0)`,
-                filter: `blur(${snapZero(6 * (1 - progress))}px)`,
-                whiteSpace: "nowrap",
-              }}
+              progress={progress}
+              blurPx={6}
+              curve="bell"
+              display="block"
+              transform={`translate3d(0, ${snap(30 * (1 - progress))}px, 0)`}
+              whiteSpace="nowrap"
             >
               {line}
-            </span>
+            </BlurCrossfade>
           );
         })}
       </h1>

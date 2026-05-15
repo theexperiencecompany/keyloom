@@ -6,7 +6,6 @@ import {
   resolveTitleStyle,
   snap,
   snapNear,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -35,7 +34,6 @@ export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
 
   const scale = snapNear(0.99 + headlineProgress * 0.01, 1);
   const y = 6 * (1 - headlineProgress);
-  const blur = 2 * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -59,20 +57,41 @@ export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
         textAlign: "center",
       }}
     >
-      <h1
+      <div
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
-          opacity: headlineProgress,
+          position: "relative",
           transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
-          filter: `blur(${snapZero(blur)}px)`,
         }}
       >
-        {headline}
-      </h1>
+        <h1
+          style={{
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            opacity: headlineProgress,
+          }}
+        >
+          {headline}
+        </h1>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            opacity: 1 - headlineProgress,
+            filter: "blur(2px)",
+            pointerEvents: "none",
+          }}
+        >
+          {headline}
+        </div>
+      </div>
 
       {subtitle.trim() && (
         <p

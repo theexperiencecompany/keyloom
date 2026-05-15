@@ -1,11 +1,11 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useDesignFrame } from "../../use-design-frame";
+import { BlurCrossfade } from "../blur-crossfade";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -82,22 +82,18 @@ export const TextStaggerFromEdges: React.FC<TextStaggerFromEdgesProps> = ({
               easing: CHAR_EASE,
             },
           );
-          const opacity = progress;
           const y = (1 - progress) * 12;
-          const blur = (1 - progress) * 3;
           return (
-            <span
+            <BlurCrossfade
               key={i}
-              style={{
-                display: "inline-block",
-                opacity,
-                transform: `translate3d(0, ${snap(y)}px, 0)`,
-                filter: `blur(${snapZero(blur)}px)`,
-                whiteSpace: "pre",
-              }}
+              progress={progress}
+              blurPx={3}
+              curve="bell"
+              transform={`translate3d(0, ${snap(y)}px, 0)`}
+              whiteSpace="pre"
             >
               {char === " " ? " " : char}
-            </span>
+            </BlurCrossfade>
           );
         })}
       </h1>

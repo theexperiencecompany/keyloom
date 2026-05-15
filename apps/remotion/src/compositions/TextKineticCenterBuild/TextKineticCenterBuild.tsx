@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useDesignFrame } from "../../use-design-frame";
+import { BlurCrossfade } from "../blur-crossfade";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -79,21 +80,17 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
           );
           const restRemainder = snapZero(1 - progress);
           const x = ENTRY_OFFSET * restRemainder;
-          const blur = 3.5 * restRemainder;
-          const opacity = progress;
           const scale = 1 - 0.008 * restRemainder;
           return (
-            <span
+            <BlurCrossfade
               key={i}
-              style={{
-                display: "inline-block",
-                opacity,
-                transform: `translate3d(${snap(x)}px, 0, 0) scale(${scale})`,
-                filter: `blur(${snapZero(blur)}px)`,
-              }}
+              progress={progress}
+              blurPx={3.5}
+              curve="bell"
+              transform={`translate3d(${snap(x)}px, 0, 0) scale(${scale})`}
             >
               {word}
-            </span>
+            </BlurCrossfade>
           );
         })}
       </h1>

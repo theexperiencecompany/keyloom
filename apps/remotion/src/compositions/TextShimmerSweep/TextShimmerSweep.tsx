@@ -5,7 +5,6 @@ import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -33,7 +32,6 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
   );
 
   const x = -22 * (1 - headlineProgress);
-  const blur = 8 * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -57,20 +55,41 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
         textAlign: "center",
       }}
     >
-      <h1
+      <div
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
-          opacity: headlineProgress,
+          position: "relative",
           transform: `translate3d(${snap(x)}px, 0, 0)`,
-          filter: `blur(${snapZero(blur)}px)`,
         }}
       >
-        {headline}
-      </h1>
+        <h1
+          style={{
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            opacity: headlineProgress,
+          }}
+        >
+          {headline}
+        </h1>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            opacity: 1 - headlineProgress,
+            filter: "blur(8px)",
+            pointerEvents: "none",
+          }}
+        >
+          {headline}
+        </div>
+      </div>
 
       {subtitle.trim() && (
         <p

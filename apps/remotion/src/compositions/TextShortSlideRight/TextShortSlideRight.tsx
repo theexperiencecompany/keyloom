@@ -5,7 +5,6 @@ import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -18,6 +17,18 @@ const HEADLINE_START = 8;
 const PHRASE_DURATION = 31;
 const WORD_OPACITY_DURATION = 13;
 const WORD_STAGGER = 5.5;
+
+const HEADLINE_STYLE = {
+  fontSize: 132,
+  fontWeight: 700,
+  letterSpacing: "-0.045em",
+  lineHeight: 1.05,
+  margin: 0,
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  gap: "0 0.28em",
+} as const;
 
 export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
   headline,
@@ -39,7 +50,6 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
     },
   );
   const phraseX = -24 * (1 - phraseProgress);
-  const phraseBlur = 1.2 * (1 - phraseProgress);
 
   const lastWordEnd =
     HEADLINE_START + (words.length - 1) * WORD_STAGGER + WORD_OPACITY_DURATION;
@@ -55,6 +65,23 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
     },
   );
 
+  const wordSpans = words.map((word, i) => {
+    const wordOpacity = interpolate(
+      frame,
+      [
+        HEADLINE_START + i * WORD_STAGGER,
+        HEADLINE_START + i * WORD_STAGGER + WORD_OPACITY_DURATION,
+      ],
+      [0, 1],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    );
+    return (
+      <span key={i} style={{ display: "inline-block", opacity: wordOpacity }}>
+        {word}
+      </span>
+    );
+  });
+
   return (
     <AbsoluteFill
       style={{
@@ -69,44 +96,27 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
         textAlign: "center",
       }}
     >
-      <h1
+      <div
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          gap: "0 0.28em",
+          position: "relative",
           transform: `translate3d(${snap(phraseX)}px, 0, 0)`,
-          filter: `blur(${snapZero(phraseBlur)}px)`,
         }}
       >
-        {words.map((word, i) => {
-          const wordOpacity = interpolate(
-            frame,
-            [
-              HEADLINE_START + i * WORD_STAGGER,
-              HEADLINE_START + i * WORD_STAGGER + WORD_OPACITY_DURATION,
-            ],
-            [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-          );
-          return (
-            <span
-              key={i}
-              style={{
-                display: "inline-block",
-                opacity: wordOpacity,
-              }}
-            >
-              {word}
-            </span>
-          );
-        })}
-      </h1>
+        <h1 style={HEADLINE_STYLE}>{wordSpans}</h1>
+        <div
+          aria-hidden
+          style={{
+            ...HEADLINE_STYLE,
+            position: "absolute",
+            inset: 0,
+            opacity: 1 - phraseProgress,
+            filter: "blur(2px)",
+            pointerEvents: "none",
+          }}
+        >
+          {wordSpans}
+        </div>
+      </div>
 
       {subtitle.trim() && (
         <p

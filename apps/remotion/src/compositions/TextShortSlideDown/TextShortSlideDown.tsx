@@ -1,12 +1,12 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useDesignFrame } from "../../use-design-frame";
+import { BlurCrossfade } from "../blur-crossfade";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
   snapNear,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -76,21 +76,18 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
             },
           );
           const y = -28 * (1 - progress);
-          const blur = 2.4 * (1 - progress);
           const scale = snapNear(0.992 + 0.008 * progress, 1);
-          const opacity = progress;
           return (
-            <span
+            <BlurCrossfade
               key={i}
-              style={{
-                display: "block",
-                opacity,
-                transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
-                filter: `blur(${snapZero(blur)}px)`,
-              }}
+              progress={progress}
+              blurPx={2.4}
+              curve="bell"
+              display="block"
+              transform={`translate3d(0, ${snap(y)}px, 0) scale(${scale})`}
             >
               {word}
-            </span>
+            </BlurCrossfade>
           );
         })}
       </h1>

@@ -6,7 +6,6 @@ import {
   resolveTitleStyle,
   snap,
   snapNear,
-  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -34,7 +33,6 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
   );
 
   const scale = snapNear(0.9 + headlineProgress * 0.1, 1);
-  const blur = 2 * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -58,20 +56,36 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
         textAlign: "center",
       }}
     >
-      <h1
-        style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
-          opacity: headlineProgress,
-          transform: `scale(${scale})`,
-          filter: `blur(${snapZero(blur)}px)`,
-        }}
-      >
-        {headline}
-      </h1>
+      <div style={{ position: "relative", transform: `scale(${scale})` }}>
+        <h1
+          style={{
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            opacity: headlineProgress,
+          }}
+        >
+          {headline}
+        </h1>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            opacity: 1 - headlineProgress,
+            filter: "blur(2px)",
+            pointerEvents: "none",
+          }}
+        >
+          {headline}
+        </div>
+      </div>
 
       {subtitle.trim() && (
         <p
