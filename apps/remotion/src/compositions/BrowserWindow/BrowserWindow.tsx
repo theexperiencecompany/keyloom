@@ -12,10 +12,11 @@ import {
   Img,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type BrowserWindowProps = {
   url: string;
@@ -41,7 +42,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
   pageBackgroundColor,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -115,8 +116,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
             "0 40px 100px rgba(15,16,20,0.18), 0 8px 24px rgba(15,16,20,0.08)",
           border: "1px solid rgba(15,16,20,0.06)",
           opacity: windowEnter,
-          transform: `translateY(${(1 - windowEnter) * 28}px) scale(${0.97 + windowEnter * 0.03})`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap((1 - windowEnter) * 28)}px, 0) scale(${0.97 + windowEnter * 0.03})`,
           display: "flex",
           flexDirection: "column",
         }}
@@ -139,8 +139,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
               position: "absolute",
               inset: 0,
               opacity: pageOpacity,
-              transform: `translateY(${pageLift}px)`,
-              willChange: "transform, opacity",
+              transform: `translate3d(0, ${snap(pageLift)}px, 0)`,
             }}
           >
             {pageImageUrl.trim() ? (

@@ -1,9 +1,11 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -21,7 +23,7 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const lines = headline.split("\n").filter((l) => l.trim());
@@ -78,8 +80,8 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
               key={i}
               style={{
                 opacity: progress,
-                transform: `translateY(${snap(30 * (1 - progress))}px)`,
-                filter: `blur(${6 * (1 - progress)}px)`,
+                transform: `translate3d(0, ${snap(30 * (1 - progress))}px, 0)`,
+                filter: `blur(${snapZero(6 * (1 - progress))}px)`,
                 whiteSpace: "nowrap",
               }}
             >
@@ -98,8 +100,7 @@ export const TextMaskRevealUp: React.FC<TextMaskRevealUpProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

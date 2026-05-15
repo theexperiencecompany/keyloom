@@ -1,5 +1,6 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -22,7 +23,7 @@ export const TitleType: React.FC<TitleTypeProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const elapsed = Math.max(0, frame - HEADLINE_START);
   const visibleChars = Math.min(
@@ -96,8 +97,7 @@ export const TitleType: React.FC<TitleTypeProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

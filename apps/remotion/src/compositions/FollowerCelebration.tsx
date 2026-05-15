@@ -4,9 +4,9 @@ import {
   Easing,
   Img,
   interpolate,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { useDesignFrame } from "../use-design-frame";
 
 export const FOLLOWER_DURATION = 240; // 4s @ 60fps
 export const FOLLOWER_FPS = 60;
@@ -116,7 +116,7 @@ function Header({
 }
 
 function FollowersRow({ followers }: { followers: Follower[] }) {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps, width } = useVideoConfig();
   if (!followers.length) return null;
 
@@ -160,7 +160,6 @@ function FollowersRow({ followers }: { followers: Follower[] }) {
               alignItems: "center",
               opacity,
               transform: `scale(${scale})`,
-              willChange: "transform, opacity",
             }}
           >
             <Img
@@ -188,7 +187,7 @@ function FollowersRow({ followers }: { followers: Follower[] }) {
 }
 
 function Counter({ targetCount }: { targetCount: number }) {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const displayed = Math.round(
     interpolate(frame, [0, ANIM_SECONDS * fps], [0, targetCount], {

@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -20,7 +23,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const headlineProgress = interpolate(
@@ -30,7 +33,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: FOCUS_EASE },
   );
 
-  const scale = 1.01 - headlineProgress * 0.01;
+  const scale = snapNear(1.01 - headlineProgress * 0.01, 1);
   const y = 14 * (1 - headlineProgress);
   const blur = 14 * (1 - headlineProgress);
 
@@ -64,9 +67,8 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateY(${snap(y)}px) scale(${scale})`,
-          filter: `blur(${blur}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
+          filter: `blur(${snapZero(blur)}px)`,
         }}
       >
         {headline}
@@ -81,8 +83,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

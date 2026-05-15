@@ -1,5 +1,6 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -15,13 +16,23 @@ const CHAR_EASE = Easing.bezier(0.22, 1, 0.36, 1);
 const HEADLINE_START = 8;
 const CHAR_DURATION = 54;
 const CHAR_STAGGER = 1.5;
+const BLUR_RADIUS = 8;
 
+// "Soft blur in" without rendering jitter. The traditional approach
+// — animating filter: blur(N) on each character — produces 1-px AA
+// wobble during animation because Chromium's Gaussian filter is
+// unstable when the kernel radius changes sub-pixel each frame. We
+// avoid that by never animating the filter value: a STATIC blurred
+// ghost is overlaid on each sharp character and the two crossfade by
+// opacity. Crossfading opacity does not allocate filter buffers, so
+// adjacent frames produce byte-identical-ish output and the eye sees
+// a smooth focus-pull instead of glyph-edge shimmer.
 export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const chars = headline.split("");
 
@@ -77,22 +88,37 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
               easing: CHAR_EASE,
             },
           );
-          const opacity = progress;
-          const y = (1 - progress) * 16;
-          const blur = (1 - progress) * 12;
+          // Sharp character fades 0 → 1 over its window.
+          const sharpOpacity = progress;
+          // Static-blur ghost rides a bell curve so it appears AND
+          // disappears within the same window: at progress=0 it is
+          // invisible (so unstarted chars aren't pre-rendered) and at
+          // progress=1 it is invisible (only the sharp version remains).
+          const blurOpacity = 4 * progress * (1 - progress);
           return (
             <span
               key={i}
               style={{
                 display: "inline-block",
-                opacity,
-                transform: `translateY(${snap(y)}px)`,
-                filter: `blur(${blur}px)`,
-                willChange: "transform, opacity",
+                position: "relative",
                 whiteSpace: "pre",
               }}
             >
-              {char === " " ? " " : char}
+              <span style={{ opacity: sharpOpacity }}>
+                {char === " " ? " " : char}
+              </span>
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  opacity: blurOpacity,
+                  filter: `blur(${BLUR_RADIUS}px)`,
+                  pointerEvents: "none",
+                }}
+              >
+                {char === " " ? " " : char}
+              </span>
             </span>
           );
         })}
@@ -107,8 +133,7 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

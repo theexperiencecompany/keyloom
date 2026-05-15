@@ -5,9 +5,9 @@ import {
   Img,
   interpolate,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { useDesignFrame } from "../use-design-frame";
 
 export const BROWSER_SCROLL_DURATION = 360; // 6s @ 60fps
 export const BROWSER_SCROLL_FPS = 60;
@@ -28,7 +28,7 @@ export const BrowserScroll: React.FC<BrowserScrollProps> = ({
   imageFile,
   pageHeight,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { width, height, durationInFrames } = useVideoConfig();
   const screenshotSrc = staticFile(imageFile);
 
@@ -70,7 +70,6 @@ export const BrowserScroll: React.FC<BrowserScrollProps> = ({
           left: 0,
           width: "100%",
           display: "block",
-          willChange: "transform",
         }}
       />
     </AbsoluteFill>

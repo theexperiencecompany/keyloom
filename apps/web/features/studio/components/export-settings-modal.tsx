@@ -21,6 +21,7 @@ import {
   applyPreset,
   DEFAULT_EXPORT_OPTIONS,
   EXPORT_PRESETS,
+  type ExportFps,
   type ExportOptions,
   type ExportPreset,
 } from "../lib/export-options";
@@ -44,15 +45,16 @@ const PRESET_LABELS: Record<
 > = {
   fast: {
     title: "Fast",
-    description: "Half resolution, 4 Mbps. Best for quick previews.",
+    description: "Half resolution, 6 Mbps. Best for quick previews.",
   },
   balanced: {
     title: "Balanced",
-    description: "Full resolution, 8 Mbps. Recommended.",
+    description: "Full resolution, 16 Mbps, tight keyframes. Recommended.",
   },
   high: {
     title: "High quality",
-    description: "Full resolution, 16 Mbps.",
+    description:
+      "Full resolution, 50 Mbps, all-intra. Eliminates encoder shimmer on static text — best for typography-heavy reels.",
   },
 };
 
@@ -145,6 +147,40 @@ export function ExportSettingsModal({
             );
           })}
         </RadioGroup>
+
+        {/* Frame rate. 120fps doubles temporal sampling — perceptibly
+            smoother on ProMotion (120Hz) displays. 60fps matches most
+            social platforms' upload caps. */}
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <div className="text-[13px] font-medium leading-tight">
+              Frame rate
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {options.fps === 120
+                ? "120fps — smoother motion on ProMotion (120Hz) displays. ~2× render time."
+                : options.fps === 30
+                  ? "30fps — smallest file, fine for platforms that re-encode."
+                  : "60fps — standard, good balance of smoothness and file size."}
+            </p>
+          </div>
+          <div className="flex shrink-0 gap-1 rounded-md bg-muted p-0.5">
+            {([30, 60, 120] as ExportFps[]).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => patch("fps", f)}
+                className={`rounded px-2.5 py-1 text-[12px] font-medium transition ${
+                  options.fps === f
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="space-y-3">
           <button

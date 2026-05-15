@@ -4,9 +4,10 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type GitHubStarButtonProps = {
   owner: string;
@@ -63,7 +64,7 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
   endCount,
   theme,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const t = THEME[theme];
 
@@ -127,7 +128,7 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
           borderRadius: px(14),
           padding: `${px(26)}px ${px(28)}px`,
           opacity: enter,
-          transform: `translateY(${(1 - enter) * 14}px)`,
+          transform: `translate3d(0, ${snap((1 - enter) * 14)}px, 0)`,
           boxShadow: t.cardShadow,
         }}
       >

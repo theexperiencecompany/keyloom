@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -20,7 +23,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const headlineProgress = interpolate(
@@ -30,7 +33,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: AXIS_EASE },
   );
 
-  const scale = 0.9 + headlineProgress * 0.1;
+  const scale = snapNear(0.9 + headlineProgress * 0.1, 1);
   const blur = 2 * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
@@ -64,8 +67,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
           margin: 0,
           opacity: headlineProgress,
           transform: `scale(${scale})`,
-          filter: `blur(${blur}px)`,
-          willChange: "transform, opacity",
+          filter: `blur(${snapZero(blur)}px)`,
         }}
       >
         {headline}
@@ -80,8 +82,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

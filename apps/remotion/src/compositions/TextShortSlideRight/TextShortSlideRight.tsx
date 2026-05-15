@@ -1,9 +1,11 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -22,7 +24,7 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
@@ -78,9 +80,8 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
           flexWrap: "wrap",
           justifyContent: "center",
           gap: "0 0.28em",
-          transform: `translateX(${snap(phraseX)}px)`,
-          filter: `blur(${phraseBlur}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(${snap(phraseX)}px, 0, 0)`,
+          filter: `blur(${snapZero(phraseBlur)}px)`,
         }}
       >
         {words.map((word, i) => {
@@ -116,8 +117,7 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

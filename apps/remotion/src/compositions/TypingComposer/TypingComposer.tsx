@@ -4,10 +4,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TypingComposerProps = {
   query: string;
@@ -57,7 +58,7 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
   placeholder,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps, width, height } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#111111",
@@ -179,7 +180,7 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
           display: "flex",
           flexDirection: "column",
           opacity: barProgress,
-          transform: `translateY(${(1 - barProgress) * 22}px) scale(${0.97 + barProgress * 0.03})`,
+          transform: `translate3d(0, ${snap((1 - barProgress) * 22)}px, 0) scale(${0.97 + barProgress * 0.03})`,
         }}
       >
         {/* HeroUI Textarea (size=lg) — inputWrapper px-3 with extra body padding */}
@@ -300,7 +301,6 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
                 alignItems: "center",
                 justifyContent: "center",
                 transform: `scale(${sendScale})`,
-                willChange: "transform",
               }}
             >
               <ArrowUp02Solid size={SEND_ICON} color={sendIconColor} />

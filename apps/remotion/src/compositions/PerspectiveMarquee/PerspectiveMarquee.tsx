@@ -1,6 +1,8 @@
 "use client";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type PerspectiveMarqueeProps = {
   /** Comma-separated list of items to scroll. */
@@ -33,7 +35,7 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
   textTransform,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveClipStyle(clipStyle, {
     background: "#050505",
     color: "#fafafa",
@@ -125,9 +127,8 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
                   position: "absolute",
                   top: 0,
                   left: 0,
-                  transform: `translateX(${wrapped}px)`,
+                  transform: `translate3d(${snap(wrapped)}px, 0, 0)`,
                   display: "inline-block",
-                  willChange: "transform",
                 }}
               >
                 {item.text}

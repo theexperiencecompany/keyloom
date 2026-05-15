@@ -4,12 +4,13 @@ import {
   Easing,
   Img,
   interpolate,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase } from "../../componentsBase";
 import { compositionsById } from "../../registry";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type ShowcaseFrameStyle = "video" | "browser" | "minimal" | "floating";
 
@@ -55,7 +56,7 @@ export const Showcase: React.FC<ShowcaseProps> = ({
   borderColor,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { durationInFrames } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -132,7 +133,7 @@ export const Showcase: React.FC<ShowcaseProps> = ({
               maxWidth: 1200,
               marginBottom: 36,
               opacity: titleProgress,
-              transform: `translateY(${(1 - titleProgress) * 14}px)`,
+              transform: `translate3d(0, ${snap((1 - titleProgress) * 14)}px, 0)`,
             }}
           >
             {eyebrow.trim() && (
@@ -187,7 +188,7 @@ export const Showcase: React.FC<ShowcaseProps> = ({
             alignItems: "center",
             justifyContent: "center",
             opacity: frameProgress,
-            transform: `translateY(${(1 - frameProgress) * 24}px) scale(${0.96 + frameProgress * 0.04})`,
+            transform: `translate3d(0, ${snap((1 - frameProgress) * 24)}px, 0) scale(${0.96 + frameProgress * 0.04})`,
           }}
         >
           <FrameWrapper

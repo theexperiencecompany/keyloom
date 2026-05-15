@@ -120,10 +120,9 @@ function BubbleEnter({
       <div
         style={{
           maxWidth: "78%",
-          transform: `translateY(${translateY}px) scale(${scale})`,
+          transform: `translate3d(0, ${snap(translateY)}px, 0) scale(${scale})`,
           transformOrigin: "center",
           opacity,
-          willChange: "transform, opacity",
         }}
       >
         {children}

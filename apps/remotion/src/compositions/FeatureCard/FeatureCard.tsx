@@ -1,11 +1,8 @@
 "use client";
-import {
-  AbsoluteFill,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type FeatureCardProps = {
   icon: string;
@@ -27,7 +24,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   theme,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
@@ -73,7 +70,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
             ? "0 30px 80px rgba(0,0,0,0.45)"
             : "0 30px 80px rgba(15,16,20,0.08)",
           opacity: cardPop,
-          transform: `translateY(${(1 - cardPop) * 24}px) scale(${0.94 + cardPop * 0.06})`,
+          transform: `translate3d(0, ${snap((1 - cardPop) * 24)}px, 0) scale(${0.94 + cardPop * 0.06})`,
         }}
       >
         <RevealItem frame={frame - D_ICON} fps={fps}>
@@ -148,7 +145,7 @@ function RevealItem({
     <div
       style={{
         opacity: reveal,
-        transform: `translateY(${(1 - reveal) * 14}px)`,
+        transform: `translate3d(0, ${snap((1 - reveal) * 14)}px, 0)`,
       }}
     >
       {children}

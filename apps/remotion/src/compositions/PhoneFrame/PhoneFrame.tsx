@@ -1,14 +1,10 @@
 "use client";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { compositionsById } from "../../registry";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type PhoneFrameProps = {
   device: "dynamic-island" | "notch";
@@ -34,7 +30,7 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
   screenImage,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -76,8 +72,7 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
           boxShadow:
             "0 60px 140px rgba(0,0,0,0.45), 0 0 0 2px rgba(255,255,255,0.06), inset 0 0 0 2px rgba(255,255,255,0.05)",
           opacity: drop,
-          transform: `translateY(${ty}px) scale(${scale})`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap(ty)}px, 0) scale(${scale})`,
           position: "relative",
         }}
       >

@@ -9,7 +9,8 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { domAnimation, LazyMotion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, useVideoConfig } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import "@heygaia/chat-ui/styles.css";
 import { computeWindows, contentProgress, type StateWindow } from "./timing";
 import { TOOL_CATEGORIES } from "./toolCategories";
@@ -162,7 +163,7 @@ export const GaiaScenario: React.FC<GaiaScenarioProps> = ({
     typeof toolCallsExpandedProp === "string"
       ? toolCallsExpandedProp === "true"
       : toolCallsExpandedProp;
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   // Wire avatar overrides into our next/image shim so the chat-ui bundle's

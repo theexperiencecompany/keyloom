@@ -1,9 +1,11 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -21,7 +23,7 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
@@ -75,19 +77,19 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
               easing: ENTER_EASE,
             },
           );
-          const x = ENTRY_OFFSET * (1 - progress);
-          const blur = 3.5 * (1 - progress);
+          const restRemainder = snapZero(1 - progress);
+          const x = ENTRY_OFFSET * restRemainder;
+          const blur = 3.5 * restRemainder;
           const opacity = progress;
-          const scale = 0.992 + 0.008 * progress;
+          const scale = 1 - 0.008 * restRemainder;
           return (
             <span
               key={i}
               style={{
                 display: "inline-block",
                 opacity,
-                transform: `translateX(${snap(x)}px) scale(${scale})`,
-                filter: `blur(${blur}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(${snap(x)}px, 0, 0) scale(${scale})`,
+                filter: `blur(${snapZero(blur)}px)`,
               }}
             >
               {word}
@@ -105,8 +107,7 @@ export const TextKineticCenterBuild: React.FC<TextKineticCenterBuildProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

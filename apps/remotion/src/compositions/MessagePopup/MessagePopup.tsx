@@ -4,9 +4,10 @@ import {
   Img,
   spring,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 const ICON_SRC = staticFile("message_icon.png");
 
@@ -64,7 +65,7 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
   body,
   theme,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const palette = getPalette(theme);
 
@@ -139,8 +140,7 @@ function NotificationBanner({
         gap: 22,
         alignItems: "center",
         opacity: cardOpacity,
-        transform: `translateY(${cardY}px) scale(${cardScale})`,
-        willChange: "transform, opacity",
+        transform: `translate3d(0, ${snap(cardY)}px, 0) scale(${cardScale})`,
       }}
     >
       <Img
@@ -244,9 +244,8 @@ function PopText({
       style={{
         display: "inline-block",
         opacity,
-        transform: `translateY(${translateY}px) scale(${scale})`,
+        transform: `translate3d(0, ${snap(translateY)}px, 0) scale(${scale})`,
         transformOrigin: "center center",
-        willChange: "transform, opacity",
       }}
     >
       {children}

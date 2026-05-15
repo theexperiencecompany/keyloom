@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -21,7 +24,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
@@ -79,7 +82,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
             },
           );
           const y = 18 * (1 - progress);
-          const scale = 0.92 + 0.08 * progress;
+          const scale = snapNear(0.92 + 0.08 * progress, 1);
           const blurPx = 3 * (1 - progress);
           return (
             <span
@@ -87,9 +90,8 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
               style={{
                 display: "inline-block",
                 opacity: progress,
-                transform: `translateY(${snap(y)}px) scale(${scale})`,
-                filter: `blur(${blurPx}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
+                filter: `blur(${snapZero(blurPx)}px)`,
               }}
             >
               {word}
@@ -107,8 +109,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

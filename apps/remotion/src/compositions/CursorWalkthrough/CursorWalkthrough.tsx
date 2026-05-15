@@ -4,10 +4,10 @@ import {
   Easing,
   Img,
   interpolate,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type CursorWalkthroughProps = {
   backgroundImageUrl: string;
@@ -44,7 +44,7 @@ export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
   secondClickLabel,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { width, height } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",

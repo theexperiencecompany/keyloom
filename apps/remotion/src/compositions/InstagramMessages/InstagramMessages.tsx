@@ -6,10 +6,11 @@ import {
   Sequence,
   spring,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import type { ChatMessage } from "../../editors/types";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type InstagramMessagesProps = {
   contactName: string;
@@ -89,7 +90,7 @@ export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
   messages,
   theme,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const palette = getPalette(theme);
 
@@ -167,7 +168,7 @@ function Header({
         alignItems: "center",
         gap: 14,
         opacity: enter,
-        transform: `translateY(${(1 - enter) * -8}px)`,
+        transform: `translate3d(0, ${snap((1 - enter) * -8)}px, 0)`,
         flexShrink: 0,
       }}
     >
@@ -531,7 +532,6 @@ function MessageRow({
         right: SIDE_PADDING,
         display: "flex",
         justifyContent: msg.side === "right" ? "flex-end" : "flex-start",
-        willChange: "transform",
       }}
     >
       {isTyping ? (
@@ -610,7 +610,7 @@ function TypingBubble({
               height: 12,
               borderRadius: "50%",
               background: isRight ? "rgba(255,255,255,0.85)" : palette.dot,
-              transform: `translateY(${-Math.abs(yBob)}px)`,
+              transform: `translate3d(0, ${snap(-Math.abs(yBob))}px, 0)`,
               opacity: dotOpacity,
             }}
           />

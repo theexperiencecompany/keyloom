@@ -1,5 +1,6 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -21,7 +22,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const lines = headline.split("\n").filter((l) => l.trim());
@@ -78,7 +79,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
               key={i}
               style={{
                 opacity: progress,
-                transform: `translateX(${snap(-48 * (1 - progress))}px)`,
+                transform: `translate3d(${snap(-48 * (1 - progress))}px, 0, 0)`,
                 whiteSpace: "nowrap",
               }}
             >
@@ -97,8 +98,7 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

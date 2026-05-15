@@ -1,5 +1,6 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -21,7 +22,7 @@ export const TextBottomUpLetters: React.FC<TextBottomUpLettersProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const chars = headline.split("");
 
@@ -85,8 +86,7 @@ export const TextBottomUpLetters: React.FC<TextBottomUpLettersProps> = ({
               style={{
                 display: "inline-block",
                 opacity,
-                transform: `translateY(${snap(y)}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0)`,
                 whiteSpace: "pre",
               }}
             >
@@ -105,8 +105,7 @@ export const TextBottomUpLetters: React.FC<TextBottomUpLettersProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

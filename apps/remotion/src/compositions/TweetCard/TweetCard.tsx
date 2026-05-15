@@ -14,9 +14,10 @@ import {
   Img,
   spring,
   staticFile,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TweetCardProps = {
   displayName: string;
@@ -51,7 +52,7 @@ export const TweetCard: React.FC<TweetCardProps> = ({
   theme,
   backgroundColor,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   const enter = spring({
@@ -111,8 +112,7 @@ export const TweetCard: React.FC<TweetCardProps> = ({
             : "0 36px 100px rgba(15,16,20,0.10), 0 6px 16px rgba(15,16,20,0.05)",
           padding: 60,
           opacity: enter,
-          transform: `translateY(${(1 - enter) * 32}px) scale(${0.96 + enter * 0.04})`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap((1 - enter) * 32)}px, 0) scale(${0.96 + enter * 0.04})`,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 22 }}>

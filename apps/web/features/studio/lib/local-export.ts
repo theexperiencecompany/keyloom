@@ -69,15 +69,57 @@ export async function renderProjectLocally({
     onProgress?.(p);
   };
 
+  // Scale the project's frame counts to the export fps. The project is
+  // designed at `project.fps` (typically 60); each clip's
+  // `durationInFrames` represents `durationInFrames / project.fps`
+  // wall-clock seconds. To render the same wall-clock content at a
+  // different fps, multiply every frame count by `exportFps / project.fps`
+  // and tell Remotion the new fps. Compositions use `useDesignFrame()`
+  // internally so their hardcoded timing constants stay tied to
+  // wall-clock time regardless of the actual render fps.
+  const exportFps = options.fps;
+  const fpsScale = exportFps / project.fps;
+  const scaledProject: Project =
+    fpsScale === 1
+      ? project
+      : {
+          ...project,
+          fps: exportFps,
+          clips: project.clips.map((c) => ({
+            ...c,
+            durationInFrames: Math.max(
+              1,
+              Math.round(c.durationInFrames * fpsScale),
+            ),
+            transition: c.transition
+              ? {
+                  ...c.transition,
+                  durationInFrames: Math.max(
+                    0,
+                    Math.round(c.transition.durationInFrames * fpsScale),
+                  ),
+                }
+              : c.transition,
+          })),
+          defaultTransition: project.defaultTransition
+            ? {
+                ...project.defaultTransition,
+                durationInFrames: Math.max(
+                  0,
+                  Math.round(
+                    project.defaultTransition.durationInFrames * fpsScale,
+                  ),
+                ),
+              }
+            : project.defaultTransition,
+        };
+
   const result = await renderMediaOnWeb({
     composition: {
       id: "Project",
       component: ProjectComposition as React.ComponentType<
         Record<string, unknown>
       >,
-      // Mirror the calculateMetadata declared on <Composition id="Project">
-      // in apps/remotion/src/Root.tsx so duration/dimensions are derived from
-      // the live project JSON instead of needing a Remotion bundle.
       calculateMetadata: ({ props }) => {
         const p = props as Project;
         return {
@@ -88,13 +130,29 @@ export async function renderProjectLocally({
         };
       },
     },
-    inputProps: project as unknown as Record<string, unknown>,
+    inputProps: scaledProject as unknown as Record<string, unknown>,
     container: "mp4",
     videoCodec: "h264",
     videoBitrate: options.bitrate,
     scale: Math.min(1, Math.max(0.25, options.scale)),
+    // The Chromium WebCodecs encoder (both hardware and software) silently
+    // caps the bitrate around ~5 Mbps regardless of what we request, so the
+    // shimmer-elimination heavy lift is done by the tight keyframe interval
+    // below — that gives the encoder fewer inter-frame prediction chains to
+    // accumulate per-frame quantisation drift across at-rest text. We keep
+    // hardware acceleration on so renders stay fast; for a truly pristine
+    // export, point the user at the downloadable CLI renderer (which uses
+    // libx264 directly and honors the full bitrate spec).
     hardwareAcceleration: "prefer-hardware",
-    keyframeIntervalInSeconds: 1,
+    // Distance between H.264 keyframes (smaller = more keyframes = less
+    // inter-frame prediction shimmer on at-rest text). The "high" preset
+    // requests all-intra by setting this to the per-frame duration; we
+    // clamp to >= 1/exportFps so it stays all-intra at whatever fps the
+    // user picked (1/60s would only be every-other-frame at 120fps).
+    keyframeIntervalInSeconds: Math.max(
+      options.keyframeIntervalSec,
+      1 / exportFps,
+    ),
     signal: signal ?? null,
     onProgress: progress,
   });

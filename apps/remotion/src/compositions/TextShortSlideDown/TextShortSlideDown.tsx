@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -20,7 +23,7 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
@@ -74,7 +77,7 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
           );
           const y = -28 * (1 - progress);
           const blur = 2.4 * (1 - progress);
-          const scale = 0.992 + 0.008 * progress;
+          const scale = snapNear(0.992 + 0.008 * progress, 1);
           const opacity = progress;
           return (
             <span
@@ -82,9 +85,8 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
               style={{
                 display: "block",
                 opacity,
-                transform: `translateY(${snap(y)}px) scale(${scale})`,
-                filter: `blur(${blur}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
+                filter: `blur(${snapZero(blur)}px)`,
               }}
             >
               {word}
@@ -102,8 +104,7 @@ export const TextShortSlideDown: React.FC<TextShortSlideDownProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

@@ -1,9 +1,5 @@
-import {
-  AbsoluteFill,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, spring, useVideoConfig } from "remotion";
+import { useDesignFrame } from "../use-design-frame";
 
 export const INTRO_TEXT_DURATION = 300; // 5s @ 60fps
 export const INTRO_TEXT_FPS = 60;
@@ -37,7 +33,7 @@ function computeTimings(lines: string[]): LineTiming[] {
 const TIMINGS = computeTimings(LINES);
 
 export const IntroText: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   // Cursor blink: simple on/off based on frame mod

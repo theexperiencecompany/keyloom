@@ -4,10 +4,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type StatCounterProps = {
   target: number;
@@ -30,7 +31,7 @@ export const StatCounter: React.FC<StatCounterProps> = ({
   suffix,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -99,7 +100,6 @@ export const StatCounter: React.FC<StatCounterProps> = ({
           opacity: numberPop,
           transform: `scale(${0.85 + numberPop * 0.15})`,
           fontVariantNumeric: "tabular-nums",
-          willChange: "transform, opacity",
         }}
       >
         {prefix}
@@ -115,8 +115,7 @@ export const StatCounter: React.FC<StatCounterProps> = ({
             letterSpacing: "-0.012em",
             color: labelColor,
             opacity: labelProgress,
-            transform: `translateY(${(1 - labelProgress) * 14}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - labelProgress) * 14)}px, 0)`,
           }}
         >
           {label}

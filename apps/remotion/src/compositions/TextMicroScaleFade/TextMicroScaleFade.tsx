@@ -1,9 +1,11 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
   type TitleProps,
 } from "../title-shared";
 
@@ -20,7 +22,7 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const headlineProgress = interpolate(
@@ -30,7 +32,7 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SCALE_EASE },
   );
 
-  const scale = 0.96 + headlineProgress * 0.04;
+  const scale = snapNear(0.96 + headlineProgress * 0.04, 1);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -63,7 +65,6 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
           margin: 0,
           opacity: headlineProgress,
           transform: `scale(${scale})`,
-          willChange: "transform, opacity",
         }}
       >
         {headline}
@@ -78,8 +79,7 @@ export const TextMicroScaleFade: React.FC<TextMicroScaleFadeProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

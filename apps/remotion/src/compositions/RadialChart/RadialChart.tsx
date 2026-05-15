@@ -1,6 +1,7 @@
 "use client";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { useDesignFrame } from "../../use-design-frame";
 import { CHART_PALETTE, chartReveal } from "../_chart-shared";
 
 export type RadialChartProps = {
@@ -22,7 +23,7 @@ export const RadialChart: React.FC<RadialChartProps> = ({
   unit,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveClipStyle(clipStyle, {
     background: "#000000",
     color: "#ffffff",

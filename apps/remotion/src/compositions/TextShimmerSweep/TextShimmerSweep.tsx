@@ -1,9 +1,11 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapZero,
   type TitleProps,
 } from "../title-shared";
 
@@ -20,7 +22,7 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
 
   const headlineProgress = interpolate(
@@ -63,9 +65,8 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateX(${snap(x)}px)`,
-          filter: `blur(${blur}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(${snap(x)}px, 0, 0)`,
+          filter: `blur(${snapZero(blur)}px)`,
         }}
       >
         {headline}
@@ -80,8 +81,7 @@ export const TextShimmerSweep: React.FC<TextShimmerSweepProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}
