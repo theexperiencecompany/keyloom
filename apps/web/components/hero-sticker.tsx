@@ -39,7 +39,7 @@ export function HeroSticker({
       dragElastic={0.4}
       whileDrag={{ scale: 1.06, zIndex: 50 }}
       whileHover={{ scale: 1.04 }}
-      className="absolute hidden cursor-grab active:cursor-grabbing xl:block"
+      className="absolute z-20 hidden cursor-grab active:cursor-grabbing xl:block"
       style={{ ...position, touchAction: "none" }}
     >
       <motion.img

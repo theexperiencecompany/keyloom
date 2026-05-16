@@ -60,6 +60,12 @@ export function ExportProgressOverlay({
     return () => window.removeEventListener("keydown", handleKey);
   }, [dismissable, onClose]);
 
+  const elapsed = useElapsed(
+    state.startedAt,
+    state.finishedAt,
+    phase === "rendering" || phase === "starting",
+  );
+
   if (phase === "idle") return null;
 
   const pct = Math.round(state.progress * 100);
@@ -107,7 +113,8 @@ export function ExportProgressOverlay({
           <p className="mb-4 text-[12px] text-muted-foreground">
             {phase === "starting" &&
               "Bundling your composition. First render may take longer."}
-            {phase === "rendering" && `Encoding frames — ${pct}% complete`}
+            {phase === "rendering" &&
+              `Encoding frames — ${pct}% complete · ${formatElapsed(elapsed)} elapsed`}
           </p>
         )}
 
@@ -136,7 +143,11 @@ export function ExportProgressOverlay({
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[11px] tabular-nums text-muted-foreground">
-            {phase === "rendering" ? `${pct}%` : isDone ? state.filename : "—"}
+            {phase === "rendering"
+              ? `${pct}% · ${formatElapsed(elapsed)}`
+              : isDone
+                ? `${state.filename} · rendered in ${formatElapsed(elapsed)}`
+                : "—"}
           </span>
           <div className="flex items-center gap-2">
             {(phase === "starting" || phase === "rendering") && (
@@ -247,6 +258,35 @@ function ProgressBar({
       />
     </div>
   );
+}
+
+/**
+ * Live elapsed-time ticker for the modal. While `ticking` is true and we
+ * have a startedAt, re-renders every 100ms and reports the elapsed ms;
+ * once finishedAt is set the value freezes at `finishedAt - startedAt`.
+ */
+function useElapsed(
+  startedAt: number | null,
+  finishedAt: number | null,
+  ticking: boolean,
+): number {
+  const [, force] = useState(0);
+  useEffect(() => {
+    if (!ticking || startedAt == null || finishedAt != null) return;
+    const id = window.setInterval(() => force((n) => n + 1), 100);
+    return () => window.clearInterval(id);
+  }, [ticking, startedAt, finishedAt]);
+  if (startedAt == null) return 0;
+  return (finishedAt ?? Date.now()) - startedAt;
+}
+
+/** Format an ms duration as "0.4s", "12.3s", or "1m 34s". */
+function formatElapsed(ms: number): string {
+  if (ms < 0) return "0.0s";
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  const min = Math.floor(ms / 60_000);
+  const sec = Math.round((ms % 60_000) / 1000);
+  return `${min}m ${sec}s`;
 }
 
 /**

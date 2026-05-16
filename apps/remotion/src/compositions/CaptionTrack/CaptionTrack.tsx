@@ -1,11 +1,7 @@
 "use client";
-import {
-  AbsoluteFill,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type CaptionTrackProps = {
   text: string;
@@ -18,7 +14,7 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
   wordsPerSecond,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -72,7 +68,6 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
             textAlign: "center",
             transform: `scale(${0.7 + wordPop * 0.3})`,
             opacity: wordPop,
-            willChange: "transform, opacity",
             display: "inline-block",
           }}
         >

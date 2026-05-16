@@ -1,5 +1,7 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -22,8 +24,9 @@ export const TitleSlideUp: React.FC<TitleSlideUpProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const lastWordEnd =
@@ -87,8 +90,7 @@ export const TitleSlideUp: React.FC<TitleSlideUpProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}
@@ -132,8 +134,7 @@ function RevealWord({
       <span
         style={{
           display: "inline-block",
-          transform: `translateY(${translateY}%)`,
-          willChange: "transform",
+          transform: `translate3d(0, ${snap(translateY)}%, 0)`,
         }}
       >
         {word}

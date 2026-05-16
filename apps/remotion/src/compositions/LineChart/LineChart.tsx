@@ -1,6 +1,8 @@
 "use client";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   CHART_PALETTE,
   chartReveal,
@@ -30,7 +32,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   showDots,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveClipStyle(clipStyle, {
     background: "#000000",
     color: "#ffffff",
@@ -83,7 +85,7 @@ export const LineChart: React.FC<LineChartProps> = ({
         style={{
           marginBottom: 12,
           opacity: headerProgress,
-          transform: `translateY(${(1 - headerProgress) * 8}px)`,
+          transform: `translate3d(0, ${snap((1 - headerProgress) * 8)}px, 0)`,
         }}
       >
         <div

@@ -4,9 +4,10 @@ import {
   Img,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TwitterFollowProps = {
   handle: string;
@@ -43,7 +44,7 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
   theme,
   backgroundColor,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   const isDark = theme === "dark";
@@ -115,8 +116,7 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
             boxShadow:
               "0 30px 80px rgba(15,16,20,0.10), 0 4px 10px rgba(15,16,20,0.05)",
             opacity: cardOpacity,
-            transform: `translateY(${cardY}px) scale(${cardScale})`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap(cardY)}px, 0) scale(${cardScale})`,
             position: "relative",
           }}
         >
@@ -220,7 +220,6 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
                   gap: 6,
                   transform: `scale(${followerBump})`,
                   transformOrigin: "left center",
-                  willChange: "transform",
                 }}
               >
                 <strong
@@ -276,8 +275,7 @@ function FollowButton({
     <div
       style={{
         opacity: enter,
-        transform: `translateY(${(1 - enter) * 12}px) scale(${scale})`,
-        willChange: "transform, opacity",
+        transform: `translate3d(0, ${snap((1 - enter) * 12)}px, 0) scale(${scale})`,
         padding: "14px 32px",
         borderRadius: 999,
         fontSize: 24,
@@ -371,7 +369,6 @@ function Cursor({
         width: 0,
         height: 0,
         opacity: fadeOut,
-        willChange: "transform, opacity",
       }}
     >
       <div
@@ -385,7 +382,6 @@ function Cursor({
           border: "4px solid #1d9bf0",
           opacity: ringOpacity,
           transform: `scale(${ringScale})`,
-          willChange: "transform, opacity",
         }}
       />
       <svg
@@ -428,8 +424,7 @@ function PopIn({
     <div
       style={{
         opacity: pop,
-        transform: `translateY(${(1 - pop) * 14}px)`,
-        willChange: "transform, opacity",
+        transform: `translate3d(0, ${snap((1 - pop) * 14)}px, 0)`,
       }}
     >
       {children}

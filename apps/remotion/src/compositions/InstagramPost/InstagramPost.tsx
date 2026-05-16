@@ -7,13 +7,9 @@ import {
   SentIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type InstagramPostProps = {
   username: string;
@@ -42,7 +38,7 @@ export const InstagramPost: React.FC<InstagramPostProps> = ({
   theme,
   backgroundColor,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   const enter = spring({
@@ -88,8 +84,7 @@ export const InstagramPost: React.FC<InstagramPostProps> = ({
             ? "0 40px 100px rgba(0,0,0,0.5)"
             : "0 36px 100px rgba(15,16,20,0.10), 0 6px 16px rgba(15,16,20,0.05)",
           opacity: enter,
-          transform: `translateY(${(1 - enter) * 32}px) scale(${0.96 + enter * 0.04})`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap((1 - enter) * 32)}px, 0) scale(${0.96 + enter * 0.04})`,
           overflow: "hidden",
         }}
       >
@@ -145,6 +140,7 @@ export const InstagramPost: React.FC<InstagramPostProps> = ({
           {imageUrl.trim() ? (
             <Img
               src={imageUrl}
+              crossOrigin="anonymous"
               style={{
                 width: "100%",
                 height: "100%",
@@ -286,6 +282,7 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
   const inner = url.trim() ? (
     <Img
       src={url}
+      crossOrigin="anonymous"
       width={72}
       height={72}
       style={{

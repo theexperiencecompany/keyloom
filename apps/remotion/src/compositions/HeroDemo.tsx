@@ -1,10 +1,6 @@
-import {
-  AbsoluteFill,
-  interpolate,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, interpolate, spring, useVideoConfig } from "remotion";
+import { snap } from "../snap";
+import { useDesignFrame } from "../use-design-frame";
 
 export const HERO_DEMO_DURATION = 150; // 5s @ 30fps
 export const HERO_DEMO_FPS = 30;
@@ -12,7 +8,7 @@ export const HERO_DEMO_WIDTH = 1280;
 export const HERO_DEMO_HEIGHT = 720;
 
 export const HeroDemo: React.FC = () => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
 
   const logoScale = spring({
@@ -88,7 +84,7 @@ export const HeroDemo: React.FC = () => {
         <div
           style={{
             opacity: titleOpacity,
-            transform: `translateY(${titleY}px)`,
+            transform: `translate3d(0, ${snap(titleY)}px, 0)`,
             fontSize: 80,
             fontWeight: 700,
             letterSpacing: "-0.04em",
@@ -100,7 +96,7 @@ export const HeroDemo: React.FC = () => {
         <div
           style={{
             opacity: subtitleOpacity,
-            transform: `translateY(${subtitleY}px)`,
+            transform: `translate3d(0, ${snap(subtitleY)}px, 0)`,
             fontSize: 26,
             color: "rgba(255,255,255,0.6)",
             fontWeight: 400,
@@ -125,7 +121,7 @@ export const HeroDemo: React.FC = () => {
                 key={label}
                 style={{
                   opacity,
-                  transform: `translateY(${y}px)`,
+                  transform: `translate3d(0, ${snap(y)}px, 0)`,
                   padding: "10px 18px",
                   borderRadius: 9999,
                   border: "1px solid rgba(255,255,255,0.15)",

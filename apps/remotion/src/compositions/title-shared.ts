@@ -4,7 +4,7 @@ import {
   resolveClipStyle,
 } from "../clip-style";
 
-export { snap } from "../snap";
+export { snap, snapNear, snapZero } from "../snap";
 
 /**
  * Shared prop shape used by every Title* and Text* composition. The

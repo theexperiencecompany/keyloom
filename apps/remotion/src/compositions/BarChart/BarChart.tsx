@@ -1,6 +1,8 @@
 "use client";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 import {
   CHART_PALETTE,
   chartReveal,
@@ -30,7 +32,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   showValues,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveClipStyle(clipStyle, {
     background: "#000000",
     color: "#ffffff",
@@ -78,7 +80,7 @@ export const BarChart: React.FC<BarChartProps> = ({
         style={{
           marginBottom: 12,
           opacity: titleProgress,
-          transform: `translateY(${(1 - titleProgress) * 8}px)`,
+          transform: `translate3d(0, ${snap((1 - titleProgress) * 8)}px, 0)`,
         }}
       >
         <div

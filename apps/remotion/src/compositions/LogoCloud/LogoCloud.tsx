@@ -1,12 +1,8 @@
 "use client";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type LogoItem = {
   name: string;
@@ -30,7 +26,7 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
   theme,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
@@ -73,7 +69,7 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
           textTransform: "uppercase",
           marginBottom: 56,
           opacity: headlinePop,
-          transform: `translateY(${(1 - headlinePop) * 12}px)`,
+          transform: `translate3d(0, ${snap((1 - headlinePop) * 12)}px, 0)`,
         }}
       >
         {headline}
@@ -125,13 +121,14 @@ function LogoItemView({
     return (
       <Img
         src={logo.url}
+        crossOrigin="anonymous"
         alt={logo.name}
         style={{
           maxWidth: 180,
           maxHeight: 60,
           objectFit: "contain",
           opacity: reveal * 0.85,
-          transform: `translateY(${(1 - reveal) * 14}px) scale(${0.94 + reveal * 0.06})`,
+          transform: `translate3d(0, ${snap((1 - reveal) * 14)}px, 0) scale(${0.94 + reveal * 0.06})`,
           filter: "grayscale(40%)",
         }}
       />
@@ -146,7 +143,7 @@ function LogoItemView({
         color,
         letterSpacing: "-0.01em",
         opacity: reveal * 0.85,
-        transform: `translateY(${(1 - reveal) * 14}px)`,
+        transform: `translate3d(0, ${snap((1 - reveal) * 14)}px, 0)`,
       }}
     >
       {logo.name}

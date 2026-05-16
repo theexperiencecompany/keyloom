@@ -1,5 +1,7 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -15,18 +17,32 @@ const EASE = Easing.bezier(0.22, 1, 0.36, 1);
 const HEADLINE_START = 8;
 const WORD_STAGGER = 1.68;
 const WORD_DURATION = 34;
+const MAX_BLUR_PX = 12;
 
 export const TextBlurOutUp: React.FC<TextBlurOutUpProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const lastWordEnd =
     HEADLINE_START + (words.length - 1) * WORD_STAGGER + WORD_DURATION;
+  const headlineProgress = interpolate(
+    frame,
+    [HEADLINE_START, lastWordEnd],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: APPLE_EASE,
+    },
+  );
+  const headlineBlurPx = Math.round((1 - headlineProgress) * MAX_BLUR_PX);
+
   const subtitleStart = lastWordEnd + 14;
   const subtitleProgress = interpolate(
     frame,
@@ -64,6 +80,7 @@ export const TextBlurOutUp: React.FC<TextBlurOutUpProps> = ({
           flexWrap: "wrap",
           justifyContent: "center",
           gap: "0 0.28em",
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
         {words.map((word, i) => {
@@ -79,16 +96,13 @@ export const TextBlurOutUp: React.FC<TextBlurOutUpProps> = ({
             },
           );
           const y = 10 * (1 - progress);
-          const blurPx = 6 * (1 - progress);
           return (
             <span
               key={i}
               style={{
                 display: "inline-block",
                 opacity: progress,
-                transform: `translateY(${snap(y)}px)`,
-                filter: `blur(${blurPx}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0)`,
               }}
             >
               {word}
@@ -106,8 +120,7 @@ export const TextBlurOutUp: React.FC<TextBlurOutUpProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

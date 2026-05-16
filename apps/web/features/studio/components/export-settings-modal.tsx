@@ -16,11 +16,12 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   applyPreset,
   DEFAULT_EXPORT_OPTIONS,
   EXPORT_PRESETS,
+  type ExportFps,
   type ExportOptions,
   type ExportPreset,
 } from "../lib/export-options";
@@ -44,15 +45,16 @@ const PRESET_LABELS: Record<
 > = {
   fast: {
     title: "Fast",
-    description: "Half resolution, 4 Mbps. Best for quick previews.",
+    description: "Half resolution, 6 Mbps. Best for quick previews.",
   },
   balanced: {
     title: "Balanced",
-    description: "Full resolution, 8 Mbps. Recommended.",
+    description: "Full resolution, 16 Mbps, tight keyframes. Recommended.",
   },
   high: {
     title: "High quality",
-    description: "Full resolution, 16 Mbps.",
+    description:
+      "Full resolution, 50 Mbps, all-intra. Eliminates encoder shimmer on static text — best for typography-heavy reels.",
   },
 };
 
@@ -73,17 +75,27 @@ export function ExportSettingsModal({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zipBusy, setZipBusy] = useState(false);
   const [zipError, setZipError] = useState<string | null>(null);
+  const [zipStartedAt, setZipStartedAt] = useState<number | null>(null);
+  const [zipFinishedAt, setZipFinishedAt] = useState<number | null>(null);
+  const zipElapsedMs = useTicker(zipStartedAt, zipFinishedAt, zipBusy);
 
   async function handleDownloadZip() {
-    setZipBusy(true);
     setZipError(null);
+    setZipFinishedAt(null);
+    const startedAt = Date.now();
+    setZipStartedAt(startedAt);
+    setZipBusy(true);
     try {
       const blob = await buildExportZip({ project });
       const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
       downloadBlob(blob, `motion-studio-render-${stamp}.zip`);
-      onOpenChange(false);
+      setZipFinishedAt(Date.now());
+      // Leave the modal open briefly so the user sees the final time before
+      // it disappears. They can close it manually too.
+      window.setTimeout(() => onOpenChange(false), 1500);
     } catch (err) {
       setZipError(err instanceof Error ? err.message : String(err));
+      setZipFinishedAt(Date.now());
     } finally {
       setZipBusy(false);
     }
@@ -145,6 +157,40 @@ export function ExportSettingsModal({
             );
           })}
         </RadioGroup>
+
+        {/* Frame rate. 120fps doubles temporal sampling — perceptibly
+            smoother on ProMotion (120Hz) displays. 60fps matches most
+            social platforms' upload caps. */}
+        <div className="flex items-center justify-between rounded-lg border border-border p-3">
+          <div>
+            <div className="text-[13px] font-medium leading-tight">
+              Frame rate
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {options.fps === 120
+                ? "120fps — smoother motion on ProMotion (120Hz) displays. ~2× render time."
+                : options.fps === 30
+                  ? "30fps — smallest file, fine for platforms that re-encode."
+                  : "60fps — standard, good balance of smoothness and file size."}
+            </p>
+          </div>
+          <div className="flex shrink-0 gap-1 rounded-md bg-muted p-0.5">
+            {([30, 60, 120] as ExportFps[]).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => patch("fps", f)}
+                className={`rounded px-2.5 py-1 text-[12px] font-medium transition ${
+                  options.fps === f
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="space-y-3">
           <button
@@ -215,7 +261,11 @@ export function ExportSettingsModal({
             onClick={handleDownloadZip}
             disabled={zipBusy}
           >
-            {zipBusy ? "Packaging…" : "Download fast renderer (zip)"}
+            {zipBusy
+              ? `Packaging… ${formatElapsed(zipElapsedMs)}`
+              : zipFinishedAt && !zipError
+                ? `Downloaded · packaged in ${formatElapsed(zipElapsedMs)}`
+                : "Download fast renderer (zip)"}
           </Button>
         </div>
 
@@ -236,6 +286,29 @@ export function ExportSettingsModal({
       </DialogContent>
     </Dialog>
   );
+}
+
+function useTicker(
+  startedAt: number | null,
+  finishedAt: number | null,
+  ticking: boolean,
+): number {
+  const [, force] = useState(0);
+  useEffect(() => {
+    if (!ticking || startedAt == null || finishedAt != null) return;
+    const id = window.setInterval(() => force((n) => n + 1), 100);
+    return () => window.clearInterval(id);
+  }, [ticking, startedAt, finishedAt]);
+  if (startedAt == null) return 0;
+  return (finishedAt ?? Date.now()) - startedAt;
+}
+
+function formatElapsed(ms: number): string {
+  if (ms < 0) return "0.0s";
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  const min = Math.floor(ms / 60_000);
+  const sec = Math.round((ms % 60_000) / 1000);
+  return `${min}m ${sec}s`;
 }
 
 function Field({

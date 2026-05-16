@@ -1,5 +1,6 @@
-import { useCurrentFrame } from "remotion";
+import {} from "remotion";
 import type { ChatMessage } from "../../editors/types";
+import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
 import { ChatFill } from "../_chat-demo/ChatFill";
 
@@ -32,7 +33,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   contactAvatar = "https://github.com/aryanranderiya.png",
   messages,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (

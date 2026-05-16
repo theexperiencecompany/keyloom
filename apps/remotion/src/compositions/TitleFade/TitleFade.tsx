@@ -1,5 +1,7 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -21,8 +23,9 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
 
   const headlineProgress = interpolate(
     frame,
@@ -69,8 +72,7 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateY(${snap((1 - headlineProgress) * 24)}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap((1 - headlineProgress) * 24)}px, 0)`,
         }}
       >
         {headline}
@@ -85,8 +87,7 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

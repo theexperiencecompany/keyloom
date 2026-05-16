@@ -3,10 +3,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type ToastPosition =
   | "top-left"
@@ -46,7 +47,7 @@ export const Toast: React.FC<ToastProps> = ({
   durationVisibleSec,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
   const s = resolveClipStyle(clipStyle, {
@@ -100,7 +101,7 @@ export const Toast: React.FC<ToastProps> = ({
       <div
         style={{
           opacity: presence,
-          transform: `translateY(${offset * 2}px) scale(${0.96 + presence * 0.04})`,
+          transform: `translate3d(0, ${snap(offset * 2)}px, 0) scale(${0.96 + presence * 0.04})`,
           minWidth: 760,
           maxWidth: 920,
           background: s.background,

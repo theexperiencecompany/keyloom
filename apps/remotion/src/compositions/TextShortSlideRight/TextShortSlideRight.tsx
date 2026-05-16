@@ -1,5 +1,7 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -16,14 +18,16 @@ const HEADLINE_START = 8;
 const PHRASE_DURATION = 31;
 const WORD_OPACITY_DURATION = 13;
 const WORD_STAGGER = 5.5;
+const MAX_BLUR_PX = 6;
 
 export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const phraseProgress = interpolate(
@@ -37,7 +41,7 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
     },
   );
   const phraseX = -24 * (1 - phraseProgress);
-  const phraseBlur = 1.2 * (1 - phraseProgress);
+  const headlineBlurPx = Math.round((1 - phraseProgress) * MAX_BLUR_PX);
 
   const lastWordEnd =
     HEADLINE_START + (words.length - 1) * WORD_STAGGER + WORD_OPACITY_DURATION;
@@ -78,9 +82,8 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
           flexWrap: "wrap",
           justifyContent: "center",
           gap: "0 0.28em",
-          transform: `translateX(${snap(phraseX)}px)`,
-          filter: `blur(${phraseBlur}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(${snap(phraseX)}px, 0, 0)`,
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
         {words.map((word, i) => {
@@ -96,10 +99,7 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
           return (
             <span
               key={i}
-              style={{
-                display: "inline-block",
-                opacity: wordOpacity,
-              }}
+              style={{ display: "inline-block", opacity: wordOpacity }}
             >
               {word}
             </span>
@@ -116,8 +116,7 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

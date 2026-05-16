@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
   type TitleProps,
 } from "../title-shared";
 
@@ -14,14 +17,16 @@ const FADE_EASE = Easing.bezier(0.2, 0, 0, 1);
 
 const HEADLINE_START = 8;
 const HEADLINE_DURATION = 25;
+const MAX_BLUR_PX = 6;
 
 export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
 
   const headlineProgress = interpolate(
     frame,
@@ -29,10 +34,10 @@ export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
     [0, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: FADE_EASE },
   );
+  const headlineBlurPx = Math.round((1 - headlineProgress) * MAX_BLUR_PX);
 
-  const scale = 0.99 + headlineProgress * 0.01;
+  const scale = snapNear(0.99 + headlineProgress * 0.01, 1);
   const y = 6 * (1 - headlineProgress);
-  const blur = 2 * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -64,9 +69,8 @@ export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
           lineHeight: 1.05,
           margin: 0,
           opacity: headlineProgress,
-          transform: `translateY(${snap(y)}px) scale(${scale})`,
-          filter: `blur(${blur}px)`,
-          willChange: "transform, opacity",
+          transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
         {headline}
@@ -81,8 +85,7 @@ export const TextFadeThrough: React.FC<TextFadeThroughProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

@@ -21,6 +21,10 @@ export type ExportState = {
   errorStack?: string | null;
   blobUrl: string | null;
   filename: string | null;
+  /** epoch-ms timestamp when the "rendering" phase began, or null. */
+  startedAt: number | null;
+  /** epoch-ms timestamp when the render terminated (done or error). */
+  finishedAt: number | null;
 };
 
 const INITIAL_STATE: ExportState = {
@@ -29,6 +33,8 @@ const INITIAL_STATE: ExportState = {
   error: null,
   blobUrl: null,
   filename: null,
+  startedAt: null,
+  finishedAt: null,
 };
 
 /**
@@ -102,7 +108,13 @@ export function useExportRender() {
       await new Promise<void>((r) => setTimeout(r, 0));
       if (generationRef.current !== myGeneration) return;
 
-      setState({ ...INITIAL_STATE, phase: "rendering", errorStack: null });
+      const startedAt = Date.now();
+      setState({
+        ...INITIAL_STATE,
+        phase: "rendering",
+        errorStack: null,
+        startedAt,
+      });
 
       const handleProgress = (progress: number) => {
         if (generationRef.current !== myGeneration) return;
@@ -112,6 +124,7 @@ export function useExportRender() {
           progress,
           error: null,
           errorStack: null,
+          startedAt: prev.startedAt ?? startedAt,
         }));
       };
 
@@ -128,7 +141,14 @@ export function useExportRender() {
         const url = URL.createObjectURL(blob);
         blobUrlRef.current = url;
 
-        console.info("[export-hook] done", blob.size, "bytes");
+        const finishedAt = Date.now();
+        console.info(
+          "[export-hook] done",
+          blob.size,
+          "bytes in",
+          ((finishedAt - startedAt) / 1000).toFixed(2),
+          "s",
+        );
         setState({
           phase: "done",
           progress: 1,
@@ -136,6 +156,8 @@ export function useExportRender() {
           errorStack: null,
           blobUrl: url,
           filename,
+          startedAt,
+          finishedAt,
         });
       } catch (e) {
         if (generationRef.current !== myGeneration) return;
@@ -151,6 +173,8 @@ export function useExportRender() {
           phase: "error",
           error: err.message || "Render failed",
           errorStack: err.stack ?? null,
+          startedAt,
+          finishedAt: Date.now(),
         });
       } finally {
         if (controllerRef.current === controller) {

@@ -4,10 +4,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type MetricCardProps = {
   value: number;
@@ -40,7 +41,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   theme,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
@@ -106,7 +107,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             ? "0 30px 80px rgba(0,0,0,0.45)"
             : "0 30px 80px rgba(15,16,20,0.08)",
           opacity: cardPop,
-          transform: `translateY(${(1 - cardPop) * 24}px) scale(${0.95 + cardPop * 0.05})`,
+          transform: `translate3d(0, ${snap((1 - cardPop) * 24)}px, 0) scale(${0.95 + cardPop * 0.05})`,
         }}
       >
         <div
@@ -184,7 +185,7 @@ function RevealItem({
     <div
       style={{
         opacity: reveal,
-        transform: `translateY(${(1 - reveal) * 12}px)`,
+        transform: `translate3d(0, ${snap((1 - reveal) * 12)}px, 0)`,
       }}
     >
       {children}

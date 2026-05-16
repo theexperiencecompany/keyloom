@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
   type TitleProps,
 } from "../title-shared";
 
@@ -14,14 +17,16 @@ const AXIS_EASE = Easing.bezier(0.2, 0, 0, 1);
 
 const HEADLINE_START = 8;
 const HEADLINE_DURATION = 31;
+const MAX_BLUR_PX = 6;
 
 export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
 
   const headlineProgress = interpolate(
     frame,
@@ -29,9 +34,9 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
     [0, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: AXIS_EASE },
   );
+  const headlineBlurPx = Math.round((1 - headlineProgress) * MAX_BLUR_PX);
 
-  const scale = 0.9 + headlineProgress * 0.1;
-  const blur = 2 * (1 - headlineProgress);
+  const scale = snapNear(0.9 + headlineProgress * 0.1, 1);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -64,8 +69,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
           margin: 0,
           opacity: headlineProgress,
           transform: `scale(${scale})`,
-          filter: `blur(${blur}px)`,
-          willChange: "transform, opacity",
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
         {headline}
@@ -80,8 +84,7 @@ export const TextSharedAxisZ: React.FC<TextSharedAxisZProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

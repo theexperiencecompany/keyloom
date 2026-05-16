@@ -4,10 +4,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TerminalLineKind = "command" | "output" | "comment" | "success";
 
@@ -60,7 +61,7 @@ export const Terminal: React.FC<TerminalProps> = ({
   maxWidth,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#0b0b0f",
@@ -117,7 +118,7 @@ export const Terminal: React.FC<TerminalProps> = ({
           border: "1px solid rgba(255,255,255,0.08)",
           overflow: "hidden",
           opacity: windowReveal,
-          transform: `translateY(${(1 - windowReveal) * 24}px) scale(${0.97 + windowReveal * 0.03})`,
+          transform: `translate3d(0, ${snap((1 - windowReveal) * 24)}px, 0) scale(${0.97 + windowReveal * 0.03})`,
         }}
       >
         <TerminalChrome style={chromeStyle} title={title} />
@@ -291,7 +292,7 @@ function TerminalRow({
         transform:
           line.kind === "command"
             ? "none"
-            : `translateY(${(1 - fadeIn) * 4}px)`,
+            : `translate3d(0, ${snap((1 - fadeIn) * 4)}px, 0)`,
         display: "flex",
         gap: 14,
         alignItems: "baseline",
@@ -311,7 +312,7 @@ function TerminalRow({
 }
 
 function Cursor({ kind }: { kind: TerminalCursorStyle }) {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const blink = Math.floor(frame / 16) % 2 === 0;
   const dims =
     kind === "underline"

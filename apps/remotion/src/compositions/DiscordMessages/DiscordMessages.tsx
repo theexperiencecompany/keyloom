@@ -1,5 +1,6 @@
-import { useCurrentFrame } from "remotion";
+import {} from "remotion";
 import type { ChatMessage } from "../../editors/types";
+import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
 import { ChatFill } from "../_chat-demo/ChatFill";
 
@@ -38,7 +39,7 @@ export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
   contactName,
   messages,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (

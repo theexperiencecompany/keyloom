@@ -1,5 +1,7 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -21,8 +23,9 @@ export const TextPerCharacterRise: React.FC<TextPerCharacterRiseProps> = ({
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const chars = headline.split("");
 
   const lastCharEnd =
@@ -85,8 +88,7 @@ export const TextPerCharacterRise: React.FC<TextPerCharacterRiseProps> = ({
               style={{
                 display: "inline-block",
                 opacity,
-                transform: `translateY(${snap(y)}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0)`,
                 whiteSpace: "pre",
               }}
             >
@@ -105,8 +107,7 @@ export const TextPerCharacterRise: React.FC<TextPerCharacterRiseProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

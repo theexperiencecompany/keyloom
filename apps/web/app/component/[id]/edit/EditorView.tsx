@@ -43,6 +43,12 @@ export function EditorView({
         container: "mp4",
         videoCodec: "h264",
         hardwareAcceleration: "prefer-hardware",
+        // Eliminate h264's at-rest "ever so slight" shimmer on text by
+        // forcing every frame to be a keyframe (no inter-frame prediction
+        // drift) and giving the encoder enough bitrate that text edges
+        // stay deterministic frame-to-frame.
+        videoBitrate: 50_000_000,
+        keyframeIntervalInSeconds: 1 / Math.max(1, info.fps),
         onProgress: ({ progress: p }) => setProgress(p),
       });
       const blob = await result.getBlob();

@@ -1,9 +1,12 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
   snap,
+  snapNear,
   type TitleProps,
 } from "../title-shared";
 
@@ -15,18 +18,32 @@ const EASE = Easing.bezier(0.22, 1, 0.36, 1);
 const HEADLINE_START = 8;
 const WORD_STAGGER = 4.2;
 const WORD_DURATION = 42;
+const MAX_BLUR_PX = 10;
 
 export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
   headline,
   subtitle,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
   const lastWordEnd =
     HEADLINE_START + (words.length - 1) * WORD_STAGGER + WORD_DURATION;
+  const headlineProgress = interpolate(
+    frame,
+    [HEADLINE_START, lastWordEnd],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: APPLE_EASE,
+    },
+  );
+  const headlineBlurPx = Math.round((1 - headlineProgress) * MAX_BLUR_PX);
+
   const subtitleStart = lastWordEnd + 14;
   const subtitleProgress = interpolate(
     frame,
@@ -64,6 +81,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
           flexWrap: "wrap",
           justifyContent: "center",
           gap: "0 0.28em",
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
         {words.map((word, i) => {
@@ -79,17 +97,14 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
             },
           );
           const y = 18 * (1 - progress);
-          const scale = 0.92 + 0.08 * progress;
-          const blurPx = 3 * (1 - progress);
+          const scale = snapNear(0.92 + 0.08 * progress, 1);
           return (
             <span
               key={i}
               style={{
                 display: "inline-block",
                 opacity: progress,
-                transform: `translateY(${snap(y)}px) scale(${scale})`,
-                filter: `blur(${blurPx}px)`,
-                willChange: "transform, opacity",
+                transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
               }}
             >
               {word}
@@ -107,8 +122,7 @@ export const TextDepthParallaxWords: React.FC<TextDepthParallaxWordsProps> = ({
             margin: "32px 0 0",
             color: getSubtitleColor(s.color),
             opacity: subtitleProgress,
-            transform: `translateY(${snap((1 - subtitleProgress) * 14)}px)`,
-            willChange: "transform, opacity",
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
           {subtitle}

@@ -4,10 +4,11 @@ import {
   Easing,
   interpolate,
   spring,
-  useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TypingSearchProps = {
   query: string;
@@ -33,7 +34,7 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
   placeholder,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps, width, height } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
@@ -134,7 +135,7 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
           gap: 28,
           padding: `0 ${BUTTON_PADDING}px 0 56px`,
           opacity: barProgress,
-          transform: `translateY(${(1 - barProgress) * 18}px) scale(${0.96 + barProgress * 0.04})`,
+          transform: `translate3d(0, ${snap((1 - barProgress) * 18)}px, 0) scale(${0.96 + barProgress * 0.04})`,
         }}
       >
         <SearchIcon size={56} />
@@ -196,7 +197,6 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
               justifyContent: "center",
               color: "#ffffff",
               transform: `scale(${buttonScale})`,
-              willChange: "transform",
             }}
           >
             <ArrowIcon size={56} />

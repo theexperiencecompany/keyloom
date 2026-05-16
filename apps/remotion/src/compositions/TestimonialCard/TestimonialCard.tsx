@@ -1,12 +1,8 @@
 "use client";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TestimonialCardProps = {
   quote: string;
@@ -32,7 +28,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   theme,
   clipStyle,
 }) => {
-  const frame = useCurrentFrame();
+  const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
@@ -85,7 +81,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
             ? "0 30px 80px rgba(0,0,0,0.45)"
             : "0 30px 80px rgba(15,16,20,0.08)",
           opacity: cardPop,
-          transform: `translateY(${(1 - cardPop) * 24}px) scale(${0.95 + cardPop * 0.05})`,
+          transform: `translate3d(0, ${snap((1 - cardPop) * 24)}px, 0) scale(${0.95 + cardPop * 0.05})`,
         }}
       >
         <div
@@ -135,6 +131,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
           >
             <Img
               src={avatarUrl}
+              crossOrigin="anonymous"
               alt={name}
               width={68}
               height={68}
@@ -197,7 +194,7 @@ function RevealItem({
     <div
       style={{
         opacity: reveal,
-        transform: `translateY(${(1 - reveal) * 14}px)`,
+        transform: `translate3d(0, ${snap((1 - reveal) * 14)}px, 0)`,
       }}
     >
       {children}
