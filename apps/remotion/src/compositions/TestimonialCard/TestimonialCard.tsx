@@ -131,6 +131,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
           >
             <Img
               src={avatarUrl}
+              crossOrigin="anonymous"
               alt={name}
               width={68}
               height={68}

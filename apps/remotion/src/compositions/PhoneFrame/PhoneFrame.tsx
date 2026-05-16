@@ -94,6 +94,7 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
           {screenImage ? (
             <Img
               src={screenImage}
+              crossOrigin="anonymous"
               style={{
                 width: "100%",
                 height: "100%",

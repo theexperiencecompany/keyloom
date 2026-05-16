@@ -140,6 +140,7 @@ export const InstagramPost: React.FC<InstagramPostProps> = ({
           {imageUrl.trim() ? (
             <Img
               src={imageUrl}
+              crossOrigin="anonymous"
               style={{
                 width: "100%",
                 height: "100%",
@@ -281,6 +282,7 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
   const inner = url.trim() ? (
     <Img
       src={url}
+      crossOrigin="anonymous"
       width={72}
       height={72}
       style={{

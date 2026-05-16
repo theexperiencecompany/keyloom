@@ -399,6 +399,7 @@ function Backdrop({
       <AbsoluteFill>
         <Img
           src={image}
+          crossOrigin="anonymous"
           style={{
             width: "100%",
             height: "100%",

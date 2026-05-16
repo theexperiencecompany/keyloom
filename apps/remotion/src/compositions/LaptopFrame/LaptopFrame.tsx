@@ -139,6 +139,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
             {screenImage ? (
               <Img
                 src={screenImage}
+                crossOrigin="anonymous"
                 style={{
                   width: "100%",
                   height: "100%",

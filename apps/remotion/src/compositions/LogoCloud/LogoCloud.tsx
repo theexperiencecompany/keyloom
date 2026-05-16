@@ -121,6 +121,7 @@ function LogoItemView({
     return (
       <Img
         src={logo.url}
+        crossOrigin="anonymous"
         alt={logo.name}
         style={{
           maxWidth: 180,

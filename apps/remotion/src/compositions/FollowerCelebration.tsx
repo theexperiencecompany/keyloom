@@ -95,6 +95,7 @@ function Header({
       <span>
         <Img
           src={userAvatarUrl}
+          crossOrigin="anonymous"
           alt={username}
           style={{
             display: "inline-block",
@@ -164,6 +165,7 @@ function FollowersRow({ followers }: { followers: Follower[] }) {
           >
             <Img
               src={f.avatar_url}
+              crossOrigin="anonymous"
               alt={f.login}
               width={AVATAR_SIZE}
               height={AVATAR_SIZE}

@@ -197,6 +197,7 @@ function Header({
         >
           <Img
             src={avatar}
+            crossOrigin="anonymous"
             alt={name}
             style={{
               width: "100%",

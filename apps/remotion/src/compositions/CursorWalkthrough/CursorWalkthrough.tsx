@@ -120,6 +120,7 @@ export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
       {backgroundImageUrl.trim() && (
         <Img
           src={backgroundImageUrl}
+          crossOrigin="anonymous"
           style={{
             width: "100%",
             height: "100%",

@@ -145,6 +145,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
             {pageImageUrl.trim() ? (
               <Img
                 src={pageImageUrl}
+                crossOrigin="anonymous"
                 style={{
                   width: "100%",
                   height: "100%",
