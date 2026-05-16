@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useDesignFrame } from "../../use-design-frame";
+import { useFontReady } from "../../use-font-ready";
 import {
   getSubtitleColor,
   resolveTitleStyle,
@@ -34,6 +35,7 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
 }) => {
   const frame = useDesignFrame();
   const s = resolveTitleStyle(clipStyle);
+  useFontReady(s.fontFamily);
   const chars = headline.split("");
 
   const lastCharEnd =
