@@ -12,6 +12,7 @@ import Link from "next/link";
 import * as React from "react";
 import { BrandLink } from "@/components/brand-link";
 import { DocsSearch } from "@/components/docs-search";
+import { MobileNav } from "@/components/mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 function GitHubMark({ className }: { className?: string }) {
@@ -121,10 +122,11 @@ export function DocsHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-dashed border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="flex h-14 items-center gap-3 px-4 sm:gap-4 md:px-6 lg:gap-6 lg:px-8">
+        <div className="flex h-14 items-center gap-2 px-3 sm:gap-4 sm:px-4 md:px-6 lg:gap-6 lg:px-8">
+          <MobileNav />
           <BrandLink />
 
-          <nav className="hidden items-center gap-1 sm:flex">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((l) => (
               <Link
                 key={l.href}
@@ -139,8 +141,17 @@ export function DocsHeader() {
           <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
             <Button
               variant="outline"
+              size="icon-sm"
+              className="sm:hidden"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Search docs"
+            >
+              <HugeiconsIcon icon={Search01Icon} size={14} />
+            </Button>
+            <Button
+              variant="outline"
               size="sm"
-              className="flex w-40 justify-start gap-2 text-muted-foreground lg:w-48"
+              className="hidden w-40 justify-start gap-2 text-muted-foreground sm:flex lg:w-48"
               onClick={() => setSearchOpen(true)}
             >
               <HugeiconsIcon icon={Search01Icon} size={13} />
