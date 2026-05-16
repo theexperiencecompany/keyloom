@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { proxyExternalImg } from "../../proxy-image";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type CursorWalkthroughProps = {
@@ -119,7 +120,7 @@ export const CursorWalkthrough: React.FC<CursorWalkthroughProps> = ({
     <AbsoluteFill style={{ background: s.background }}>
       {backgroundImageUrl.trim() && (
         <Img
-          src={backgroundImageUrl}
+          src={proxyExternalImg(backgroundImageUrl)}
           crossOrigin="anonymous"
           style={{
             width: "100%",

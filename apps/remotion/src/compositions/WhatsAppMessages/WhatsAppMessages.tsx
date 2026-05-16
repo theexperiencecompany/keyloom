@@ -32,7 +32,7 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
 
 export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
   contactName,
-  contactAvatar = "https://github.com/aryanranderiya.png",
+  contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
   theme: _theme,
 }) => {

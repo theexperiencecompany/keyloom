@@ -30,7 +30,7 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
 
 export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   contactName,
-  contactAvatar = "https://github.com/aryanranderiya.png",
+  contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
 }) => {
   const frame = useDesignFrame();

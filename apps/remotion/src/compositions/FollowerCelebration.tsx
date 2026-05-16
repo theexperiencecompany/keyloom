@@ -6,6 +6,7 @@ import {
   interpolate,
   useVideoConfig,
 } from "remotion";
+import { proxyExternalImg } from "../proxy-image";
 import { useDesignFrame } from "../use-design-frame";
 
 export const FOLLOWER_DURATION = 240; // 4s @ 60fps
@@ -45,7 +46,8 @@ export const calculateFollowerMetadata: CalculateMetadataFunction<
     props: {
       ...props,
       userAvatarUrl:
-        user?.avatar_url ?? `https://github.com/${props.username}.png?size=200`,
+        user?.avatar_url ??
+        `https://avatars.githubusercontent.com/${props.username}?s=200`,
       followerCount: user?.followers ?? props.followerCount,
       followers: all.length ? all : props.followers,
     },
@@ -94,7 +96,7 @@ function Header({
     >
       <span>
         <Img
-          src={userAvatarUrl}
+          src={proxyExternalImg(userAvatarUrl)}
           crossOrigin="anonymous"
           alt={username}
           style={{
@@ -164,7 +166,7 @@ function FollowersRow({ followers }: { followers: Follower[] }) {
             }}
           >
             <Img
-              src={f.avatar_url}
+              src={proxyExternalImg(f.avatar_url)}
               crossOrigin="anonymous"
               alt={f.login}
               width={AVATAR_SIZE}

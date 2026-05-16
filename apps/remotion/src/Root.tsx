@@ -80,7 +80,7 @@ export const RemotionRoot: React.FC = () => {
         height={FOLLOWER_HEIGHT}
         defaultProps={{
           username: "t3dotgg",
-          userAvatarUrl: "https://github.com/t3dotgg.png?size=200",
+          userAvatarUrl: "https://avatars.githubusercontent.com/t3dotgg?s=200",
           followerCount: 0,
           followers: [],
         }}

@@ -8,7 +8,7 @@ export const INSTAGRAM_MESSAGES_HEIGHT = 720;
 
 export const instagramMessagesDefaultProps: InstagramMessagesProps = {
   contactName: "sanku",
-  contactAvatar: "https://github.com/aryanranderiya.png",
+  contactAvatar: "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages: [
     { text: "saw your story 👀", side: "left", typingFrames: 50, delay: 30 },
     { text: "haha what about it", side: "right", typingFrames: 55, delay: 150 },

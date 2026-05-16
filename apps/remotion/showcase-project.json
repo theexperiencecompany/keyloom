@@ -271,7 +271,7 @@
       "props": {
         "displayName": "Motion Studio",
         "handle": "@motionstudio",
-        "avatarUrl": "https://github.com/theexperiencecompany.png?size=200",
+        "avatarUrl": "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         "verified": "yes",
         "text": "shipped: 60+ Remotion scenes, in-browser MP4 export, fully typed.\n\nopen source. MIT.",
         "timestamp": "10:30 PM · Today",
@@ -306,7 +306,7 @@
       "compositionId": "MessageBubbles",
       "props": {
         "contactName": "design",
-        "contactAvatar": "https://github.com/theexperiencecompany.png",
+        "contactAvatar": "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         "messages": [
           {
             "text": "saw the new reel?",
@@ -346,7 +346,7 @@
       "compositionId": "WhatsAppMessages",
       "props": {
         "contactName": "shipping",
-        "contactAvatar": "https://github.com/theexperiencecompany.png",
+        "contactAvatar": "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         "messages": [
           {
             "text": "is it really open source?",
@@ -386,7 +386,7 @@
       "compositionId": "TelegramMessages",
       "props": {
         "contactName": "launch",
-        "contactAvatar": "https://github.com/theexperiencecompany.png",
+        "contactAvatar": "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         "messages": [
           {
             "text": "demo's recorded",

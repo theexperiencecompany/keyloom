@@ -8,6 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -139,7 +140,7 @@ export const InstagramPost: React.FC<InstagramPostProps> = ({
         >
           {imageUrl.trim() ? (
             <Img
-              src={imageUrl}
+              src={proxyExternalImg(imageUrl)}
               crossOrigin="anonymous"
               style={{
                 width: "100%",
@@ -281,7 +282,7 @@ function VerifiedBadge({ size }: { size: number }) {
 function Avatar({ url, initial }: { url: string; initial: string }) {
   const inner = url.trim() ? (
     <Img
-      src={url}
+      src={proxyExternalImg(url)}
       crossOrigin="anonymous"
       width={72}
       height={72}

@@ -9,7 +9,7 @@ export const TESTIMONIAL_CARD_HEIGHT = 720;
 export const testimonialCardDefaultProps: TestimonialCardProps = {
   quote:
     "We replaced three tools with this and shipped our launch in half the time. It's the most thoughtful product we've used all year.",
-  avatarUrl: "https://github.com/t3dotgg.png?size=200",
+  avatarUrl: "https://avatars.githubusercontent.com/t3dotgg?s=200",
   name: "Theo Browne",
   role: "Founder",
   company: "Ping",

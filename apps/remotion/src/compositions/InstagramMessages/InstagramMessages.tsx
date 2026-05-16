@@ -9,6 +9,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { ChatMessage } from "../../editors/types";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -86,7 +87,7 @@ function getPalette(theme: "light" | "dark"): Palette {
 
 export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
   contactName,
-  contactAvatar = "https://github.com/aryanranderiya.png",
+  contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
   theme,
 }) => {
@@ -196,7 +197,7 @@ function Header({
           }}
         >
           <Img
-            src={avatar}
+            src={proxyExternalImg(avatar)}
             crossOrigin="anonymous"
             alt={name}
             style={{

@@ -223,7 +223,7 @@ const project = {
       {
         displayName: "Motion Studio",
         handle: "@motionstudio",
-        avatarUrl: "https://github.com/theexperiencecompany.png?size=200",
+        avatarUrl: "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         verified: "yes",
         text:
           "shipped: 60+ Remotion scenes, in-browser MP4 export, fully typed.\n\nopen source. MIT.",
@@ -251,7 +251,7 @@ const project = {
       "MessageBubbles",
       {
         contactName: "design",
-        contactAvatar: "https://github.com/theexperiencecompany.png",
+        contactAvatar: "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         messages: [
           { text: "saw the new reel?", side: "left", typingFrames: 28, delay: 12 },
           { text: "rendered in browser 🔥", side: "right", typingFrames: 32, delay: 70 },
@@ -267,7 +267,7 @@ const project = {
       "WhatsAppMessages",
       {
         contactName: "shipping",
-        contactAvatar: "https://github.com/theexperiencecompany.png",
+        contactAvatar: "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         messages: [
           { text: "is it really open source?", side: "left", typingFrames: 28, delay: 12 },
           { text: "MIT licensed", side: "right", typingFrames: 22, delay: 70 },
@@ -283,7 +283,7 @@ const project = {
       "TelegramMessages",
       {
         contactName: "launch",
-        contactAvatar: "https://github.com/theexperiencecompany.png",
+        contactAvatar: "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         messages: [
           { text: "demo's recorded", side: "left", typingFrames: 26, delay: 12 },
           { text: "via the browser?", side: "right", typingFrames: 24, delay: 70 },

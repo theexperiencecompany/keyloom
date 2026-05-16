@@ -2,6 +2,7 @@
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
+import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -138,7 +139,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
           >
             {screenImage ? (
               <Img
-                src={screenImage}
+                src={proxyExternalImg(screenImage)}
                 crossOrigin="anonymous"
                 style={{
                   width: "100%",

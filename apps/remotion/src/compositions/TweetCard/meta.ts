@@ -9,7 +9,7 @@ export const TWEET_CARD_HEIGHT = 1080;
 export const tweetCardDefaultProps: TweetCardProps = {
   displayName: "sanku",
   handle: "@sankalpa_02",
-  avatarUrl: "https://github.com/sankalpaacharya.png?size=200",
+  avatarUrl: "https://avatars.githubusercontent.com/sankalpaacharya?s=200",
   verified: "yes",
   text: "Oh boy, we have a lot to talk about today.",
   timestamp: "10:30 PM · Mar 15, 2025",

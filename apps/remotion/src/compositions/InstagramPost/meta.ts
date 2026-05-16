@@ -9,7 +9,7 @@ export const INSTAGRAM_POST_HEIGHT = 1080;
 export const instagramPostDefaultProps: InstagramPostProps = {
   username: "sanku",
   location: "Mumbai, India",
-  avatarUrl: "https://github.com/sankalpaacharya.png?size=200",
+  avatarUrl: "https://avatars.githubusercontent.com/sankalpaacharya?s=200",
   verified: "yes",
   imageUrl: "",
   caption: "golden hour hits different 🌇",

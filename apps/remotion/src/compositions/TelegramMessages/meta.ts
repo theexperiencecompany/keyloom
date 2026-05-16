@@ -8,7 +8,7 @@ export const TELEGRAM_MESSAGES_HEIGHT = 720;
 
 export const telegramMessagesDefaultProps: TelegramMessagesProps = {
   contactName: "sanku",
-  contactAvatar: "https://github.com/aryanranderiya.png",
+  contactAvatar: "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages: [
     { text: "you free tonight?", side: "left", typingFrames: 50, delay: 30 },
     { text: "yeah, what's up", side: "right", typingFrames: 55, delay: 150 },

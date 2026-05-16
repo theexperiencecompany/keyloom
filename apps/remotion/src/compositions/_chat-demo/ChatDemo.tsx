@@ -2,14 +2,18 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { Img, spring, staticFile, useVideoConfig } from "remotion";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 
 // Remotion's bundle server only serves public/ assets through `staticFile()`
 // — literal "/foo.png" strings fail with 404 inside `remotion render`. This
-// helper resolves bare paths and pass-throughs absolute URLs.
+// helper resolves bare paths, and routes absolute http(s) URLs through the
+// `/api/img/<encoded>` proxy so the export canvas stays untainted when the
+// scenario references third-party avatars.
 function asset(src: string | undefined): string | undefined {
   if (!src) return src;
-  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  if (/^(data:|blob:)/i.test(src)) return src;
+  if (/^https?:/i.test(src)) return proxyExternalImg(src);
   return staticFile(src.replace(/^\//, ""));
 }
 
@@ -39,6 +43,7 @@ function DoodleTiles({
         <Img
           key={`${r}-${c}`}
           src={src}
+          crossOrigin="anonymous"
           alt=""
           style={{
             position: "absolute",
@@ -360,6 +365,7 @@ function IMessageDemo({
         >
           <Img
             src={asset(headerAvatar) ?? ""}
+            crossOrigin="anonymous"
             alt=""
             style={{ width: 54, height: 54, objectFit: "cover" }}
           />
@@ -588,6 +594,7 @@ function WhatsAppDemo({
             >
               <Img
                 src={asset(headerAvatar) ?? ""}
+                crossOrigin="anonymous"
                 alt=""
                 style={{ width: 32, height: 32, objectFit: "cover" }}
               />
@@ -907,6 +914,7 @@ function TelegramDemo({
             >
               <Img
                 src={asset(headerAvatar) ?? ""}
+                crossOrigin="anonymous"
                 alt=""
                 style={{ width: 32, height: 32, objectFit: "cover" }}
               />
@@ -1235,6 +1243,7 @@ function SlackDemo({
             >
               <Img
                 src={asset(g.author?.avatar) ?? asset(DEFAULT_AVATAR) ?? ""}
+                crossOrigin="anonymous"
                 alt=""
                 style={{ width: 36, height: 36, objectFit: "cover" }}
               />
@@ -1753,6 +1762,7 @@ function DiscordDemo({
             >
               <Img
                 src={asset(g.author?.avatar) ?? asset(DEFAULT_AVATAR) ?? ""}
+                crossOrigin="anonymous"
                 alt=""
                 style={{ width: 40, height: 40, objectFit: "cover" }}
               />

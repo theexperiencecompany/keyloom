@@ -8,6 +8,7 @@ import {
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase } from "../../componentsBase";
+import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -398,7 +399,7 @@ function Backdrop({
     return (
       <AbsoluteFill>
         <Img
-          src={image}
+          src={proxyExternalImg(image)}
           crossOrigin="anonymous"
           style={{
             width: "100%",

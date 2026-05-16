@@ -6,6 +6,7 @@ import {
   spring,
   useVideoConfig,
 } from "remotion";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -129,7 +130,7 @@ export const TwitterFollow: React.FC<TwitterFollowProps> = ({
             }}
           >
             <Img
-              src={avatarUrl}
+              src={proxyExternalImg(avatarUrl)}
               crossOrigin="anonymous"
               alt={displayName}
               width={140}

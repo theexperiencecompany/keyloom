@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -130,7 +131,7 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
             }}
           >
             <Img
-              src={avatarUrl}
+              src={proxyExternalImg(avatarUrl)}
               crossOrigin="anonymous"
               alt={name}
               width={68}

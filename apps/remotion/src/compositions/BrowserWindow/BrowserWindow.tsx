@@ -15,6 +15,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -144,7 +145,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
           >
             {pageImageUrl.trim() ? (
               <Img
-                src={pageImageUrl}
+                src={proxyExternalImg(pageImageUrl)}
                 crossOrigin="anonymous"
                 style={{
                   width: "100%",

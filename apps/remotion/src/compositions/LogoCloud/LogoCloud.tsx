@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -120,7 +121,7 @@ function LogoItemView({
   if (logo.url) {
     return (
       <Img
-        src={logo.url}
+        src={proxyExternalImg(logo.url)}
         crossOrigin="anonymous"
         alt={logo.name}
         style={{

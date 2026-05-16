@@ -9,7 +9,7 @@ export const TWITTER_FOLLOW_HEIGHT = 1080;
 export const twitterFollowDefaultProps: TwitterFollowProps = {
   handle: "@sankalpa_02",
   displayName: "sanku",
-  avatarUrl: "https://github.com/sankalpaacharya.png?size=400",
+  avatarUrl: "https://avatars.githubusercontent.com/sankalpaacharya?s=400",
   bio: "Silly humour and programming 🤓",
   followers: 482103,
   following: 2014,

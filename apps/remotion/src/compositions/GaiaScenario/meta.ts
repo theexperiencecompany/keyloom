@@ -52,7 +52,7 @@ export const gaiaScenarioDefaultProps: GaiaScenarioProps = {
   padding: 32,
   borderRadius: 0,
   scale: 2.5,
-  userAvatarUrl: "https://github.com/aryanranderiya.png",
+  userAvatarUrl: "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   botAvatarUrl: "/images/logos/logo.webp",
   toolCallsExpanded: "true",
   scenarioJson: JSON.stringify(defaultScenario, null, 2),
@@ -124,7 +124,7 @@ export const gaiaScenarioInfo: CompositionInfo<GaiaScenarioProps> = {
       kind: "image",
       key: "userAvatarUrl",
       label: "User avatar",
-      placeholder: "https://github.com/aryanranderiya.png",
+      placeholder: "https://avatars.githubusercontent.com/aryanranderiya?s=200",
     },
     {
       kind: "image",

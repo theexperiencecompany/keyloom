@@ -16,6 +16,7 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -232,7 +233,7 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
   if (url.trim()) {
     return (
       <Img
-        src={url}
+        src={proxyExternalImg(url)}
         crossOrigin="anonymous"
         width={108}
         height={108}
