@@ -53,7 +53,7 @@ export type StudioAction =
 export const initialStudioState: StudioState = {
   project: DEFAULT_PROJECT,
   selectedClipId: null,
-  openPanel: null,
+  openPanel: "library",
 };
 
 export function studioReducer(

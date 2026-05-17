@@ -9,6 +9,8 @@ export type SlackMessagesProps = {
   contactName: string;
   messages: ChatMessage[];
   theme: "light" | "dark";
+  orientation?: "landscape" | "portrait";
+  scale?: number;
 };
 
 const LEFT_AVATAR = "default-avatar.png";
@@ -39,12 +41,19 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
   contactName,
   messages,
   theme,
+  orientation = "landscape",
+  scale = 1.5,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (
-    <ChatFill backdrop={theme === "dark" ? "#1A1D21" : "#FFFFFF"} scale={1.5}>
+    <ChatFill
+      backdrop={theme === "dark" ? "#1A1D21" : "#FFFFFF"}
+      chromeColor={theme === "dark" ? "#1A1D21" : "#FFFFFF"}
+      scale={scale}
+      orientation={orientation}
+    >
       <ChatDemo
         platform="slack"
         title={contactName}

@@ -22,6 +22,8 @@ export const whatsappMessagesDefaultProps: WhatsAppMessagesProps = {
     },
   ],
   theme: "light",
+  orientation: "landscape",
+  scale: 1.6,
 };
 
 export const whatsappMessagesInfo: CompositionInfo<WhatsAppMessagesProps> = {
@@ -35,6 +37,7 @@ export const whatsappMessagesInfo: CompositionInfo<WhatsAppMessagesProps> = {
   height: WHATSAPP_MESSAGES_HEIGHT,
   defaultProps: whatsappMessagesDefaultProps,
   brandMode: "locked",
+  phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },
     { kind: "text", key: "contactAvatar", label: "Avatar URL" },
@@ -47,6 +50,22 @@ export const whatsappMessagesInfo: CompositionInfo<WhatsAppMessagesProps> = {
         { value: "light", label: "Light" },
         { value: "dark", label: "Dark" },
       ],
+    },
+    {
+      kind: "select",
+      key: "orientation",
+      label: "Orientation",
+      options: [
+        { value: "landscape", label: "Landscape" },
+        { value: "portrait", label: "Portrait (phone)" },
+      ],
+    },
+    {
+      kind: "number",
+      key: "scale",
+      label: "UI scale (landscape)",
+      min: 0.5,
+      max: 3,
     },
   ],
 };

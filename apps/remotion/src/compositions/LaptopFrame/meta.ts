@@ -44,5 +44,11 @@ export const laptopFrameInfo: CompositionInfo<LaptopFrameProps> = {
       label: "Screen content",
       exclude: ["LaptopFrame", "PhoneFrame"],
     },
+    {
+      kind: "innerProps",
+      key: "innerProps",
+      label: "Inner content",
+      compositionKey: "innerCompositionId",
+    },
   ],
 };

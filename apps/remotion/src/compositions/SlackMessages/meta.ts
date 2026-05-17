@@ -36,6 +36,8 @@ export const slackMessagesDefaultProps: SlackMessagesProps = {
     },
   ],
   theme: "light",
+  orientation: "landscape",
+  scale: 1.5,
 };
 
 export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
@@ -49,6 +51,7 @@ export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
   height: SLACK_MESSAGES_HEIGHT,
   defaultProps: slackMessagesDefaultProps,
   brandMode: "locked",
+  phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Channel name" },
     { kind: "chat", key: "messages", label: "Messages" },
@@ -60,6 +63,22 @@ export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
         { value: "light", label: "Light" },
         { value: "dark", label: "Dark" },
       ],
+    },
+    {
+      kind: "select",
+      key: "orientation",
+      label: "Orientation",
+      options: [
+        { value: "landscape", label: "Landscape" },
+        { value: "portrait", label: "Portrait (phone)" },
+      ],
+    },
+    {
+      kind: "number",
+      key: "scale",
+      label: "UI scale (landscape)",
+      min: 0.5,
+      max: 3,
     },
   ],
 };

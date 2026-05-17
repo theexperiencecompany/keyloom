@@ -1,0 +1,155 @@
+{
+  "fps": 60,
+  "width": 1920,
+  "height": 1080,
+  "defaultTransition": {
+    "kind": "fade",
+    "durationInFrames": 10,
+    "timing": { "kind": "linear" }
+  },
+  "clips": [
+    {
+      "id": "clip_notification",
+      "compositionId": "MessagePopup",
+      "durationInFrames": 120,
+      "props": {
+        "sender": "GAIA · WhatsApp",
+        "time": "9:14 AM",
+        "body": "Sarah needs the deck by 5. Want me to draft a heads-up?",
+        "theme": "light"
+      }
+    },
+    {
+      "id": "clip_title",
+      "compositionId": "TextSoftBlurIn",
+      "durationInFrames": 180,
+      "props": {
+        "headline": "Your AI lives in your DMs.",
+        "subtitle": "GAIA. On WhatsApp."
+      }
+    },
+    {
+      "id": "clip_chat",
+      "compositionId": "PhoneFrame",
+      "durationInFrames": 1080,
+      "props": {
+        "device": "dynamic-island",
+        "innerCompositionId": "WhatsAppMessages",
+        "screenImage": "",
+        "innerProps": {
+          "contactName": "GAIA",
+          "contactAvatar": "https://github.com/theexperiencecompany.png?size=200",
+          "theme": "light",
+          "orientation": "portrait",
+          "messages": [
+            {
+              "text": "yo morning",
+              "side": "right",
+              "typingFrames": 30,
+              "delay": 20
+            },
+            {
+              "text": "Morning. 1pm w/ Alex, design @ 3, Sarah's deck still open. Brief?",
+              "side": "left",
+              "typingFrames": 90,
+              "delay": 90
+            },
+            {
+              "text": "yes",
+              "side": "right",
+              "typingFrames": 18,
+              "delay": 280
+            },
+            {
+              "text": "Alex from Acme. Met 2 wks ago re: pricing. Still owes you a Q3 reply.",
+              "side": "left",
+              "typingFrames": 100,
+              "delay": 340
+            },
+            {
+              "text": "draft a reply. push the call to 4",
+              "side": "right",
+              "typingFrames": 55,
+              "delay": 580
+            },
+            {
+              "text": "Drafted ✓  Moved to 4pm ✓",
+              "side": "left",
+              "typingFrames": 45,
+              "delay": 700
+            },
+            {
+              "text": "ping me if Naval emails",
+              "side": "right",
+              "typingFrames": 45,
+              "delay": 830
+            },
+            {
+              "text": "Watching 👀",
+              "side": "left",
+              "typingFrames": 35,
+              "delay": 940
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "clip_proof",
+      "compositionId": "Toast",
+      "durationInFrames": 150,
+      "props": {
+        "title": "Handled",
+        "description": "Reply drafted · Call moved to 4pm · Watching Naval",
+        "position": "bottom-right",
+        "variant": "success",
+        "showIcon": true,
+        "durationVisibleSec": 2.0
+      },
+      "style": {
+        "background": "#0f1014"
+      }
+    },
+    {
+      "id": "clip_stat",
+      "compositionId": "StatCounter",
+      "durationInFrames": 180,
+      "props": {
+        "target": 47,
+        "prefix": "",
+        "suffix": " min",
+        "label": "saved before lunch"
+      }
+    },
+    {
+      "id": "clip_pitch",
+      "compositionId": "TextLineByLineSlide",
+      "durationInFrames": 240,
+      "props": {
+        "headline": "No new app.\nNo new tab.\nJust message GAIA.",
+        "subtitle": ""
+      }
+    },
+    {
+      "id": "clip_brandline",
+      "compositionId": "TextShimmerSweep",
+      "durationInFrames": 150,
+      "props": {
+        "headline": "The AI that ships work.",
+        "subtitle": ""
+      }
+    },
+    {
+      "id": "clip_cta",
+      "compositionId": "TypingSearch",
+      "durationInFrames": 240,
+      "props": {
+        "query": "heygaia.io/bots",
+        "placeholder": "Start a chat with GAIA…"
+      },
+      "style": {
+        "accent": "#25D366"
+      }
+    }
+  ]
+}

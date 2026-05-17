@@ -25,6 +25,17 @@ export type ShapeField =
       exclude?: string[];
     }
   | {
+      // Renders the editor for whatever composition is selected at
+      // `compositionKey`, merged on top of that composition's defaultProps.
+      // Used by wrappers like PhoneFrame / LaptopFrame so the inner
+      // composition's fields show up in the inspector instead of being
+      // locked behind JSON-only editing.
+      kind: "innerProps";
+      key: string;
+      label: string;
+      compositionKey: string;
+    }
+  | {
       kind: "imageList";
       key: string;
       label: string;
@@ -72,6 +83,21 @@ export type CalculatedMetadata = {
  */
 export type BrandMode = "branded" | "locked";
 
+/**
+ * How a composition fits inside PhoneFrame's screen when nested.
+ *   - "width" (default): fit-to-width with vertical centering. Landscape
+ *     compositions (Browser, charts, text) render as a horizontal band
+ *     inside the phone screen with the screen background showing above
+ *     and below.
+ *   - "cover": cover-fit (Math.max). Use for compositions that internally
+ *     render portrait content sized to the phone aspect (the chat demos
+ *     in portrait orientation). PhoneFrame provides SafeAreaContext only
+ *     in this mode since the inner composition fills the screen.
+ *   - "contain": contain-fit (Math.min). Use when the whole composition
+ *     should be visible regardless of aspect, with letterbox on both axes.
+ */
+export type PhoneFitMode = "cover" | "width" | "contain";
+
 export type CompositionInfo<P extends Record<string, unknown>> = {
   id: string;
   title: string;
@@ -83,6 +109,7 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
   defaultProps: P;
   fields: Field[];
   brandMode?: BrandMode;
+  phoneFitMode?: PhoneFitMode;
   // Optional callback Remotion runs at studio load + every prop edit.
   // Use this to recompute durationInFrames (or any metadata) from
   // current props — e.g. GaiaScenario derives its length from the

@@ -11,6 +11,7 @@ export type LaptopFrameProps = {
   chassis: "silver" | "space-gray";
   innerCompositionId: string;
   screenImage: string;
+  innerProps?: Record<string, unknown>;
   clipStyle?: ClipStyle;
 };
 
@@ -56,6 +57,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   chassis,
   innerCompositionId,
   screenImage,
+  innerProps,
   clipStyle,
 }) => {
   const frame = useDesignFrame();
@@ -154,6 +156,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
                 compW={innerInfo.width}
                 compH={innerInfo.height}
                 defaultProps={innerInfo.defaultProps}
+                overrideProps={innerProps}
               />
             ) : (
               <FallbackScreen />
@@ -211,12 +214,14 @@ function ScaledScene({
   compW,
   compH,
   defaultProps,
+  overrideProps,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
   compW: number;
   compH: number;
   defaultProps: Record<string, unknown>;
+  overrideProps?: Record<string, unknown>;
 }) {
   // Contain mode: fit the whole composition inside the screen with letterbox if needed.
   const fit = Math.min(SCREEN_W / compW, SCREEN_H / compH);
@@ -224,6 +229,10 @@ function ScaledScene({
   const renderedH = compH * fit;
   const offsetX = (SCREEN_W - renderedW) / 2;
   const offsetY = (SCREEN_H - renderedH) / 2;
+
+  const merged = overrideProps
+    ? { ...defaultProps, ...overrideProps }
+    : defaultProps;
 
   return (
     <div
@@ -244,7 +253,7 @@ function ScaledScene({
           transformOrigin: "top left",
         }}
       >
-        <Component {...defaultProps} />
+        <Component {...merged} />
       </div>
     </div>
   );

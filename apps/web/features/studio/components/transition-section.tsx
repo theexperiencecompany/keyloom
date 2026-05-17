@@ -49,8 +49,9 @@ export function TransitionSection({
     projectDefault,
     index: isFirst ? 0 : 1,
   });
-  const durationSec = (effective.durationInFrames / fps).toFixed(2);
   const maxDuration = Math.min(120, Math.floor(clipDurationInFrames / 2));
+  const frameStepSec = 1 / fps;
+  const durationSecValue = effective.durationInFrames / fps;
   const supportsDirection = SUPPORTS_DIRECTION_KINDS.has(effective.kind);
   const isZoom = effective.kind === "zoom";
   const timingKind = effective.timing?.kind ?? "linear";
@@ -182,20 +183,30 @@ export function TransitionSection({
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="transition-duration" className="text-[12px]">
-                  Duration ({durationSec}s)
-                </Label>
+                <div className="flex items-baseline justify-between">
+                  <Label htmlFor="transition-duration" className="text-[12px]">
+                    Duration (s)
+                  </Label>
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    {effective.durationInFrames} frames
+                  </span>
+                </div>
                 <Input
                   id="transition-duration"
                   type="number"
-                  min={1}
-                  max={maxDuration}
-                  value={effective.durationInFrames}
+                  step={frameStepSec.toFixed(4)}
+                  min={frameStepSec.toFixed(4)}
+                  max={(maxDuration / fps).toFixed(4)}
+                  value={durationSecValue.toFixed(2)}
                   onChange={(e) => {
-                    const val = Number(e.target.value);
-                    if (!Number.isFinite(val)) return;
+                    const sec = Number(e.target.value);
+                    if (!Number.isFinite(sec)) return;
+                    const frames = Math.round(sec * fps);
                     patch({
-                      durationInFrames: Math.max(1, Math.min(maxDuration, val)),
+                      durationInFrames: Math.max(
+                        1,
+                        Math.min(maxDuration, frames),
+                      ),
                     });
                   }}
                 />

@@ -8,6 +8,8 @@ export type MessageBubblesProps = {
   contactName: string;
   contactAvatar?: string;
   messages: ChatMessage[];
+  orientation?: "landscape" | "portrait";
+  scale?: number;
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -32,12 +34,19 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   contactName,
   contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
+  orientation = "landscape",
+  scale = 1.6,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (
-    <ChatFill backdrop="#ffffff" scale={1.6}>
+    <ChatFill
+      backdrop="#ffffff"
+      chromeColor="#ffffff"
+      scale={scale}
+      orientation={orientation}
+    >
       <ChatDemo
         platform="imessage"
         title={contactName}

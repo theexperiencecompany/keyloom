@@ -69,6 +69,8 @@ function describeType(field: Field): string {
       return "Array<{ name: string; url: string }>";
     case "terminalLines":
       return "Array<{ kind: string; text: string }>";
+    case "innerProps":
+      return "Record<string, unknown>";
   }
 }
 

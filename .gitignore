@@ -35,3 +35,6 @@ npm-debug.log*
 .DS_Store
 *.pem
 .local/
+
+# Local screenshots / scratch files
+.tmp/

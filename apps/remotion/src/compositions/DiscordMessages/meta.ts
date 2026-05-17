@@ -40,6 +40,8 @@ export const discordMessagesDefaultProps: DiscordMessagesProps = {
       delay: 560,
     },
   ],
+  orientation: "landscape",
+  scale: 1.5,
 };
 
 export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
@@ -53,8 +55,25 @@ export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
   height: DISCORD_MESSAGES_HEIGHT,
   defaultProps: discordMessagesDefaultProps,
   brandMode: "locked",
+  phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Channel name" },
     { kind: "chat", key: "messages", label: "Messages" },
+    {
+      kind: "select",
+      key: "orientation",
+      label: "Orientation",
+      options: [
+        { value: "landscape", label: "Landscape" },
+        { value: "portrait", label: "Portrait (phone)" },
+      ],
+    },
+    {
+      kind: "number",
+      key: "scale",
+      label: "UI scale (landscape)",
+      min: 0.5,
+      max: 3,
+    },
   ],
 };

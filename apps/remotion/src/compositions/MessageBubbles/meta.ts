@@ -21,6 +21,8 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
       delay: 530,
     },
   ],
+  orientation: "landscape",
+  scale: 1.6,
 };
 
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
@@ -34,9 +36,26 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
   height: MESSAGE_BUBBLES_HEIGHT,
   defaultProps: messageBubblesDefaultProps,
   brandMode: "locked",
+  phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },
     { kind: "text", key: "contactAvatar", label: "Avatar URL" },
     { kind: "chat", key: "messages", label: "Messages" },
+    {
+      kind: "select",
+      key: "orientation",
+      label: "Orientation",
+      options: [
+        { value: "landscape", label: "Landscape" },
+        { value: "portrait", label: "Portrait (phone)" },
+      ],
+    },
+    {
+      kind: "number",
+      key: "scale",
+      label: "UI scale (landscape)",
+      min: 0.5,
+      max: 3,
+    },
   ],
 };

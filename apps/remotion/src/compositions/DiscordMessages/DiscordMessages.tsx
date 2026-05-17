@@ -7,6 +7,8 @@ import { ChatFill } from "../_chat-demo/ChatFill";
 export type DiscordMessagesProps = {
   contactName: string;
   messages: ChatMessage[];
+  orientation?: "landscape" | "portrait";
+  scale?: number;
 };
 
 const LEFT_AVATAR = "default-avatar.png";
@@ -38,12 +40,19 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
 export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
   contactName,
   messages,
+  orientation = "landscape",
+  scale = 1.5,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (
-    <ChatFill backdrop="#1E1F22" scale={1.5}>
+    <ChatFill
+      backdrop="#1E1F22"
+      chromeColor="#1E1F22"
+      scale={scale}
+      orientation={orientation}
+    >
       <ChatDemo platform="discord" title={contactName} messages={items} />
     </ChatFill>
   );

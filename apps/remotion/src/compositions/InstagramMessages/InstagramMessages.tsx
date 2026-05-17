@@ -10,6 +10,7 @@ import {
 } from "remotion";
 import type { ChatMessage } from "../../editors/types";
 import { proxyExternalImg } from "../../proxy-image";
+import { useSafeArea } from "../../safe-area";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -18,7 +19,11 @@ export type InstagramMessagesProps = {
   contactAvatar?: string;
   messages: ChatMessage[];
   theme: "light" | "dark";
+  orientation?: "landscape" | "portrait";
 };
+
+// 9:19.5 — modern iPhone screen aspect ratio.
+const PORTRAIT_ASPECT = "9 / 19.5";
 
 const ROW_GAP = 18;
 const BOTTOM_PADDING = 36;
@@ -90,52 +95,97 @@ export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
   contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
   theme,
+  orientation = "landscape",
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const palette = getPalette(theme);
+  const safe = useSafeArea();
+  // Auto-portrait inside a device frame (see ChatFill for the same logic).
+  const inDeviceFrame = safe.top > 0 || safe.bottom > 0;
+  const effectiveOrientation =
+    inDeviceFrame && orientation === "landscape" ? "portrait" : orientation;
 
-  return (
-    <AbsoluteFill
+  const chat = (
+    <div
       style={{
+        position: "absolute",
+        inset: 0,
         background: palette.bg,
+        color: palette.bubbleReceivedText,
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-        color: palette.bubbleReceivedText,
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      <div
+      <Header
+        name={contactName}
+        avatar={contactAvatar}
+        frame={frame}
+        fps={fps}
+        palette={palette}
+      />
+      <Conversation
+        frame={frame}
+        fps={fps}
+        messages={messages}
+        palette={palette}
+      />
+      <Composer palette={palette} />
+    </div>
+  );
+
+  const audio = messages.map((msg, i) => (
+    <Sequence key={i} from={msg.delay + msg.typingFrames}>
+      <Audio
+        src={staticFile("sounds/message_bubble/message.mp3")}
+        volume={0.85}
+      />
+    </Sequence>
+  ));
+
+  if (effectiveOrientation === "portrait") {
+    // Parent-relative sizing — don't call useVideoConfig for layout here,
+    // it returns the parent wrapper's canvas dims when nested in PhoneFrame.
+    return (
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
+          background: palette.bg,
+          overflow: "hidden",
         }}
       >
-        <Header
-          name={contactName}
-          avatar={contactAvatar}
-          frame={frame}
-          fps={fps}
-          palette={palette}
-        />
-        <Conversation
-          frame={frame}
-          fps={fps}
-          messages={messages}
-          palette={palette}
-        />
-        <Composer palette={palette} />
-      </div>
-      {messages.map((msg, i) => (
-        <Sequence key={i} from={msg.delay + msg.typingFrames}>
-          <Audio
-            src={staticFile("sounds/message_bubble/message.mp3")}
-            volume={0.85}
-          />
-        </Sequence>
-      ))}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: "50%",
+            aspectRatio: PORTRAIT_ASPECT,
+            transform: "translateX(-50%)",
+            background: palette.bg,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          {safe.top > 0 && <div style={{ flexShrink: 0, height: safe.top }} />}
+          <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+            {chat}
+          </div>
+          {safe.bottom > 0 && (
+            <div style={{ flexShrink: 0, height: safe.bottom }} />
+          )}
+        </div>
+        {audio}
+      </AbsoluteFill>
+    );
+  }
+
+  return (
+    <AbsoluteFill style={{ background: palette.bg, overflow: "hidden" }}>
+      {chat}
+      {audio}
     </AbsoluteFill>
   );
 };

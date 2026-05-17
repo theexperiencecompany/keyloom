@@ -20,7 +20,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
-import { compositions } from "../registry";
+import { compositions, compositionsById } from "../registry";
 import type { Field, SectionField } from "../schema";
 import { ChatEditor } from "./ChatEditor";
 import { ImageListEditor, type ImageListItem } from "./ImageListEditor";
@@ -35,9 +35,16 @@ type Props = {
   fields: Field[];
   value: Record<string, unknown>;
   onChange: (next: Record<string, unknown>) => void;
+  /** Drop the outer padding so this renderer can nest inside accordions / panels. */
+  compact?: boolean;
 };
 
-export function FieldsRenderer({ fields, value, onChange }: Props) {
+export function FieldsRenderer({
+  fields,
+  value,
+  onChange,
+  compact = false,
+}: Props) {
   function set(key: string, v: unknown) {
     onChange({ ...value, [key]: v });
   }
@@ -58,7 +65,7 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
     <div className={`flex min-h-0 flex-col ${hasChatField ? "h-full" : ""}`}>
       {flatFields.length > 0 && (
         <div
-          className={`shrink-0 space-y-4 px-5 py-5 ${
+          className={`shrink-0 space-y-4 ${compact ? "px-3 py-3" : "px-5 py-5"} ${
             hasChatField || hasScenarioField || sectionFields.length > 0
               ? "border-b border-border"
               : ""
@@ -109,6 +116,20 @@ export function FieldsRenderer({ fields, value, onChange }: Props) {
                   counts={field.counts}
                   layoutValue={(value[field.layoutKey] as string) ?? ""}
                   value={(value[field.key] as string[]) ?? []}
+                  onChange={(v) => set(field.key, v)}
+                />
+              );
+            }
+            if (field.kind === "innerProps") {
+              return (
+                <InnerPropsControl
+                  key={field.key}
+                  fieldKey={field.key}
+                  label={field.label}
+                  innerCompositionId={
+                    (value[field.compositionKey] as string) ?? ""
+                  }
+                  value={(value[field.key] as Record<string, unknown>) ?? {}}
                   onChange={(v) => set(field.key, v)}
                 />
               );
@@ -294,6 +315,57 @@ function CompositionPicker({
           ))}
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+function InnerPropsControl({
+  fieldKey,
+  label,
+  innerCompositionId,
+  value,
+  onChange,
+}: {
+  fieldKey: string;
+  label: string;
+  innerCompositionId: string;
+  value: Record<string, unknown>;
+  onChange: (next: Record<string, unknown>) => void;
+}) {
+  const innerInfo = compositionsById[innerCompositionId];
+
+  if (!innerInfo) {
+    return (
+      <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-[12px] text-muted-foreground">
+        Pick a composition above to edit its content.
+      </div>
+    );
+  }
+
+  const merged = { ...innerInfo.defaultProps, ...value };
+
+  return (
+    <div className="rounded-md border border-border/60 bg-muted/20">
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue={fieldKey}
+        className="border-0"
+      >
+        <AccordionItem value={fieldKey} className="border-0">
+          <AccordionTrigger className="px-3 py-2 text-xs font-semibold hover:no-underline">
+            {label} · {innerInfo.title}
+          </AccordionTrigger>
+          <AccordionContent className="px-0 pb-0">
+            <FieldsRenderer
+              fields={innerInfo.fields}
+              value={merged}
+              onChange={onChange}
+              compact
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 }

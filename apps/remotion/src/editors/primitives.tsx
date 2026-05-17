@@ -25,11 +25,16 @@ export function PrimitiveControl({ field, value, onChange }: Props) {
     case "text":
       return (
         <Wrapper htmlFor={field.key} label={field.label}>
-          <Input
+          <Textarea
             id={field.key}
             value={(value as string) ?? ""}
             placeholder={field.placeholder}
-            onChange={(e) => onChange(e.target.value)}
+            rows={1}
+            // `field-sizing-content` (in our base Textarea class) lets the
+            // box grow with the value. Cap min-h so a single-line entry
+            // looks like an Input rather than a giant pad.
+            className="min-h-9 resize-none px-3 py-1.5 text-sm"
+            onChange={(e) => onChange(normalizeNewlines(e.target.value))}
           />
         </Wrapper>
       );
@@ -41,7 +46,7 @@ export function PrimitiveControl({ field, value, onChange }: Props) {
             id={field.key}
             value={(value as string) ?? ""}
             rows={field.rows ?? 3}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onChange(normalizeNewlines(e.target.value))}
           />
         </Wrapper>
       );
@@ -114,6 +119,16 @@ export function PrimitiveControl({ field, value, onChange }: Props) {
       );
     }
   }
+}
+
+/**
+ * Convert literal `\n` escape sequences (the two-character backslash + n
+ * that arrives when a user pastes JSON-encoded text or types the escape
+ * by hand) into real newlines, so multi-line content authored in either
+ * style renders correctly in the preview.
+ */
+function normalizeNewlines(value: string): string {
+  return value.replace(/\\n/g, "\n");
 }
 
 function Wrapper({

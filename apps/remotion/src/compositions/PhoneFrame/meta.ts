@@ -30,6 +30,7 @@ export const phoneFrameInfo: CompositionInfo<PhoneFrameProps> = {
       options: [
         { value: "dynamic-island", label: "iPhone (Dynamic Island)" },
         { value: "notch", label: "iPhone (Notch)" },
+        { value: "plain", label: "Plain (no chrome)" },
       ],
     },
     {
@@ -43,6 +44,12 @@ export const phoneFrameInfo: CompositionInfo<PhoneFrameProps> = {
       key: "innerCompositionId",
       label: "Screen content",
       exclude: ["PhoneFrame"],
+    },
+    {
+      kind: "innerProps",
+      key: "innerProps",
+      label: "Inner content",
+      compositionKey: "innerCompositionId",
     },
   ],
 };

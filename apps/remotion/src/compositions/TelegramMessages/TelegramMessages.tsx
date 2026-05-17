@@ -8,6 +8,8 @@ export type TelegramMessagesProps = {
   contactName: string;
   contactAvatar?: string;
   messages: ChatMessage[];
+  orientation?: "landscape" | "portrait";
+  scale?: number;
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -32,12 +34,19 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
   contactName,
   contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
+  orientation = "landscape",
+  scale = 1.6,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (
-    <ChatFill backdrop="#2B78CD" scale={1.6}>
+    <ChatFill
+      backdrop="#2B78CD"
+      chromeColor="#FFFFFF"
+      scale={scale}
+      orientation={orientation}
+    >
       <ChatDemo
         platform="telegram"
         title={contactName}

@@ -22,6 +22,7 @@ export const instagramMessagesDefaultProps: InstagramMessagesProps = {
     { text: "take me next time", side: "left", typingFrames: 50, delay: 560 },
   ],
   theme: "light",
+  orientation: "landscape",
 };
 
 export const instagramMessagesInfo: CompositionInfo<InstagramMessagesProps> = {
@@ -35,6 +36,7 @@ export const instagramMessagesInfo: CompositionInfo<InstagramMessagesProps> = {
   height: INSTAGRAM_MESSAGES_HEIGHT,
   defaultProps: instagramMessagesDefaultProps,
   brandMode: "locked",
+  phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },
     { kind: "text", key: "contactAvatar", label: "Avatar URL" },
@@ -46,6 +48,15 @@ export const instagramMessagesInfo: CompositionInfo<InstagramMessagesProps> = {
       options: [
         { value: "light", label: "Light" },
         { value: "dark", label: "Dark" },
+      ],
+    },
+    {
+      kind: "select",
+      key: "orientation",
+      label: "Orientation",
+      options: [
+        { value: "landscape", label: "Landscape" },
+        { value: "portrait", label: "Portrait (phone)" },
       ],
     },
   ],

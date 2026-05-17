@@ -10,6 +10,9 @@ export type WhatsAppMessagesProps = {
   contactAvatar?: string;
   messages: ChatMessage[];
   theme: "light" | "dark";
+  orientation?: "landscape" | "portrait";
+  /** How much the chat UI is scaled up inside the canvas (landscape only). */
+  scale?: number;
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -35,12 +38,19 @@ export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
   contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
   theme: _theme,
+  orientation = "landscape",
+  scale = 1.6,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
   return (
-    <ChatFill backdrop="#EFEFF4" scale={1.6}>
+    <ChatFill
+      backdrop="#EFEFF4"
+      chromeColor="#F6F6F6"
+      scale={scale}
+      orientation={orientation}
+    >
       <ChatDemo
         platform="whatsapp"
         title={contactName}

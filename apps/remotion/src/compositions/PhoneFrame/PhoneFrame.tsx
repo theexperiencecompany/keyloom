@@ -4,13 +4,16 @@ import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
+import { SafeAreaContext } from "../../safe-area";
+import type { PhoneFitMode } from "../../schema";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type PhoneFrameProps = {
-  device: "dynamic-island" | "notch";
+  device: "dynamic-island" | "notch" | "plain";
   innerCompositionId: string;
   screenImage: string;
+  innerProps?: Record<string, unknown>;
   clipStyle?: ClipStyle;
 };
 
@@ -25,10 +28,36 @@ const SCREEN_RADIUS = 78;
 // the landscape frame with some vertical breathing room.
 const PHONE_SCALE = 0.6;
 
+// Safe-area insets so the inner composition doesn't render behind the
+// dynamic island / notch (top) or the home indicator (bottom). The bottom
+// dock matches the top device chrome so content sits in a symmetric column.
+const DYNAMIC_ISLAND_TOP = 22;
+const DYNAMIC_ISLAND_HEIGHT = 56;
+const NOTCH_HEIGHT = 38;
+const HOME_INDICATOR_BOTTOM = 14;
+const HOME_INDICATOR_HEIGHT = 6;
+const HOME_INDICATOR_INSET = HOME_INDICATOR_BOTTOM + HOME_INDICATOR_HEIGHT + 14; // 34
+const SAFE_INSETS = {
+  "dynamic-island": {
+    top: DYNAMIC_ISLAND_TOP + DYNAMIC_ISLAND_HEIGHT + 20, // 98
+    bottom: HOME_INDICATOR_INSET, // 34
+  },
+  notch: {
+    top: NOTCH_HEIGHT + 20, // 58
+    bottom: HOME_INDICATOR_INSET, // 34
+  },
+  // No top chrome — symmetric padding that matches the home-indicator dock.
+  plain: {
+    top: HOME_INDICATOR_INSET, // 34
+    bottom: HOME_INDICATOR_INSET, // 34
+  },
+} as const;
+
 export const PhoneFrame: React.FC<PhoneFrameProps> = ({
   device,
   innerCompositionId,
   screenImage,
+  innerProps,
   clipStyle,
 }) => {
   const frame = useDesignFrame();
@@ -109,12 +138,20 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
               compW={innerInfo.width}
               compH={innerInfo.height}
               defaultProps={innerInfo.defaultProps}
+              overrideProps={innerProps}
+              insetTop={SAFE_INSETS[device].top}
+              insetBottom={SAFE_INSETS[device].bottom}
+              fitMode={innerInfo.phoneFitMode ?? "width"}
             />
           ) : (
             <FallbackScreen />
           )}
 
-          {device === "dynamic-island" ? <DynamicIsland /> : <Notch />}
+          {device === "dynamic-island" ? (
+            <DynamicIsland />
+          ) : device === "notch" ? (
+            <Notch />
+          ) : null}
 
           <HomeIndicator />
         </div>
@@ -128,18 +165,51 @@ function ScaledScene({
   compW,
   compH,
   defaultProps,
+  overrideProps,
+  insetTop,
+  insetBottom,
+  fitMode,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
   compW: number;
   compH: number;
   defaultProps: Record<string, unknown>;
+  overrideProps?: Record<string, unknown>;
+  insetTop: number;
+  insetBottom: number;
+  fitMode: PhoneFitMode;
 }) {
-  const fit = Math.max(SCREEN_W / compW, SCREEN_H / compH);
+  // Pick the scale based on the composition's declared phoneFitMode:
+  //   - "cover":  fill the full screen, may crop (chat in portrait mode).
+  //   - "width":  fit to phone width, vertical letterbox (landscape stuff).
+  //   - "contain": fit whole composition, both-axis letterbox.
+  let fit: number;
+  if (fitMode === "cover") {
+    fit = Math.max(SCREEN_W / compW, SCREEN_H / compH);
+  } else if (fitMode === "contain") {
+    fit = Math.min(SCREEN_W / compW, SCREEN_H / compH);
+  } else {
+    fit = SCREEN_W / compW;
+  }
+
   const renderedW = compW * fit;
   const renderedH = compH * fit;
   const offsetX = (SCREEN_W - renderedW) / 2;
   const offsetY = (SCREEN_H - renderedH) / 2;
+
+  const merged = overrideProps
+    ? { ...defaultProps, ...overrideProps }
+    : defaultProps;
+
+  // Safe-area padding only matters for "cover" mode — the inner composition
+  // fills the entire screen and would otherwise sit under the dynamic island
+  // and home indicator. For "width" / "contain" the composition is centered
+  // with letterbox, so it doesn't reach those chrome zones to begin with.
+  const safeArea =
+    fitMode === "cover"
+      ? { top: insetTop / fit, bottom: insetBottom / fit }
+      : { top: 0, bottom: 0 };
 
   return (
     <div
@@ -153,7 +223,9 @@ function ScaledScene({
         transformOrigin: "top left",
       }}
     >
-      <Component {...defaultProps} />
+      <SafeAreaContext.Provider value={safeArea}>
+        <Component {...merged} />
+      </SafeAreaContext.Provider>
     </div>
   );
 }
