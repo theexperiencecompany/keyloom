@@ -38,16 +38,17 @@ export const ProjectComposition: React.FC<Project> = ({
     <AbsoluteFill
       style={{
         background: "#000",
-        // Headless rendering (CLI + @remotion/web-renderer) rasterizes each
-        // frame independently. macOS Chromium's default subpixel-antialiased
-        // font smoothing positions glyphs relative to the LCD subpixel grid,
-        // so any sub-pixel `transform: translateY()` lands the glyph on a
-        // different subpixel each frame → visible wobble in exports.
-        // Forcing grayscale AA + geometricPrecision metrics makes glyph
-        // rasterization independent of sub-pixel position.
+        // Grayscale AA stays — it's what kills the subpixel-positioning
+        // wobble on text-heavy renders. `textRendering:
+        // "geometricPrecision"` was removed because @remotion/web-renderer
+        // lowercases it and passes it to Canvas2D's `textRendering` enum,
+        // which rejects "geometricprecision" and silently falls back to a
+        // path that measures glyphs differently from the HTML render —
+        // the result was words inside flex containers (MessagePopup body)
+        // rasterizing wider than their CSS boxes and overlapping into
+        // siblings ("babe what is" → "babewhatis").
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
-        textRendering: "geometricPrecision",
       }}
     >
       <TransitionSeries>

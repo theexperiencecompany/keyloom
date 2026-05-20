@@ -220,7 +220,10 @@ Subsequent runs reuse both, so they start in about a second.
 
 - \`project.json\` — the exact project state from your studio session.
 - \`bundle/\` — a pre-built Remotion bundle of the composition library.
-  Do not edit; replace by re-downloading from the studio.
+  Do not edit; replace by re-downloading from the studio. Includes a
+  \`bundle/public/\` static-asset tree — any locally-uploaded audio your
+  project references (e.g. \`/audio/uploads/foo.mp3\`) is inlined here so
+  the bundle is self-contained and renders without a running studio.
 - \`render.mjs\` — the renderer entrypoint. Reads the bundle + project,
   writes \`output.mp4\`. Uses hardware-accelerated GL (\`gl: "angle"\`) and
   caps concurrency at the perf-core count — going wider hurts on Apple
@@ -269,12 +272,90 @@ export async function buildExportZip(opts: {
     }),
   );
 
+  // Inline locally-uploaded audio (e.g. copyrighted MP3s in
+  // `apps/web/public/audio/uploads/`). These files are gitignored, so the
+  // server-side Remotion bundle that backs `/api/render-bundle` may have been
+  // built before the user uploaded their track — meaning the bundle's
+  // `public/audio/uploads/` doesn't actually contain the file bytes. We fetch
+  // the audio via the running dev server (which serves the on-disk file fine)
+  // and write it into the zip at `bundle/public/audio/uploads/<filename>`,
+  // matching the path Remotion's render-time HTTP server will look up when
+  // the composition resolves `audio.src = "/audio/uploads/<filename>"`.
+  await inlineLocalUploads(project, zip);
+
   return zip.generateAsync({
     type: "blob",
     mimeType: "application/zip",
     compression: "DEFLATE",
     compressionOptions: { level: 6 },
   });
+}
+
+/**
+ * Path inside the zip where the Remotion render-server expects to find a
+ * file referenced by an absolute root-relative URL like
+ * `/audio/uploads/foo.mp3`. The bundle's `public/` subdirectory is what
+ * Remotion serves at the root of the local render server.
+ */
+function bundlePublicPath(rootRelativeUrl: string): string {
+  const trimmed = rootRelativeUrl.replace(/^\/+/, "");
+  return `bundle/public/${trimmed}`;
+}
+
+/**
+ * Match anything that looks like a locally-uploaded audio path: a string
+ * containing `audio/uploads/<filename>` (with an optional leading slash).
+ * Captures the part starting at `audio/uploads/` so we can place the bytes
+ * at the matching path inside the zip.
+ */
+const UPLOAD_PATH_RE = /(?:^|\/)audio\/uploads\/[^?#]+$/i;
+
+function extractUploadPath(src: string | undefined): string | null {
+  if (!src) return null;
+  // Only consider same-origin / root-relative paths. Absolute http(s) URLs
+  // pointing at upload routes from a different origin are out of scope here;
+  // the existing `inlineExternalUrls` step in `render.mjs` handles those for
+  // images, and audio from the public web is rare in practice.
+  if (
+    /^https?:\/\//i.test(src) ||
+    src.startsWith("data:") ||
+    src.startsWith("blob:")
+  ) {
+    return null;
+  }
+  const match = src.match(UPLOAD_PATH_RE);
+  if (!match) return null;
+  // Normalize so the path always starts with `audio/uploads/`.
+  const idx = match[0].indexOf("audio/uploads/");
+  return idx >= 0 ? match[0].slice(idx) : null;
+}
+
+async function inlineLocalUploads(project: Project, zip: JSZip): Promise<void> {
+  const uploadPath = extractUploadPath(project.audio?.src);
+  if (!uploadPath) return;
+
+  // Resolve relative to the studio's origin — in dev that's the dev server,
+  // in production that's the deployed app. Either way, the file exists on
+  // disk under `apps/web/public/` and is served at the same URL the project
+  // references it by, so a plain `fetch("/audio/uploads/...")` returns the
+  // raw bytes.
+  const fetchUrl = `/${uploadPath}`;
+  let res: Response;
+  try {
+    res = await fetch(fetchUrl);
+  } catch (err) {
+    console.warn(`[export-zip] failed to fetch ${fetchUrl} for bundling:`, err);
+    return;
+  }
+  if (!res.ok) {
+    console.warn(
+      `[export-zip] ${fetchUrl} returned ${res.status} ${res.statusText}; ` +
+        "skipping audio inline. The render zip will 404 on this asset.",
+    );
+    return;
+  }
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  zip.file(bundlePublicPath(uploadPath), bytes);
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {
