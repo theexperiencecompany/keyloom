@@ -220,10 +220,10 @@ Subsequent runs reuse both, so they start in about a second.
 
 - \`project.json\` — the exact project state from your studio session.
 - \`bundle/\` — a pre-built Remotion bundle of the composition library.
-  Do not edit; replace by re-downloading from the studio. Includes a
-  \`bundle/public/\` static-asset tree — any locally-uploaded audio your
-  project references (e.g. \`/audio/uploads/foo.mp3\`) is inlined here so
-  the bundle is self-contained and renders without a running studio.
+  Do not edit; replace by re-downloading from the studio. Any locally-
+  uploaded audio your project references (e.g. \`/audio/uploads/foo.mp3\`)
+  is inlined at \`bundle/audio/uploads/foo.mp3\` so the bundle is
+  self-contained and renders without a running studio.
 - \`render.mjs\` — the renderer entrypoint. Reads the bundle + project,
   writes \`output.mp4\`. Uses hardware-accelerated GL (\`gl: "angle"\`) and
   caps concurrency at the perf-core count — going wider hurts on Apple
@@ -274,13 +274,12 @@ export async function buildExportZip(opts: {
 
   // Inline locally-uploaded audio (e.g. copyrighted MP3s in
   // `apps/web/public/audio/uploads/`). These files are gitignored, so the
-  // server-side Remotion bundle that backs `/api/render-bundle` may have been
-  // built before the user uploaded their track — meaning the bundle's
-  // `public/audio/uploads/` doesn't actually contain the file bytes. We fetch
-  // the audio via the running dev server (which serves the on-disk file fine)
-  // and write it into the zip at `bundle/public/audio/uploads/<filename>`,
-  // matching the path Remotion's render-time HTTP server will look up when
-  // the composition resolves `audio.src = "/audio/uploads/<filename>"`.
+  // server-side Remotion bundle that backs `/api/render-bundle` doesn't
+  // contain the file bytes. We fetch the audio via the running dev server
+  // (which serves the on-disk file fine) and write it into the zip at
+  // `bundle/audio/uploads/<filename>`. `render.mjs` sets `serveUrl =
+  // <here>/bundle`, so Remotion's render-time HTTP server resolves
+  // `audio.src = "/audio/uploads/<filename>"` against that path directly.
   await inlineLocalUploads(project, zip);
 
   return zip.generateAsync({
@@ -292,14 +291,26 @@ export async function buildExportZip(opts: {
 }
 
 /**
- * Path inside the zip where the Remotion render-server expects to find a
- * file referenced by an absolute root-relative URL like
- * `/audio/uploads/foo.mp3`. The bundle's `public/` subdirectory is what
- * Remotion serves at the root of the local render server.
+ * Paths inside the zip where the file referenced by a root-relative URL
+ * (e.g. `/audio/uploads/foo.mp3`) should be written. We mirror the same
+ * bytes into BOTH `bundle/<path>` and `bundle/public/<path>` because
+ * different parts of the Remotion CLI render pipeline look in different
+ * places:
+ *
+ *   - `@remotion/media`'s WebCodecs audio decoder asks the bundle's
+ *     render-time HTTP server for the URL directly. The server (set up
+ *     by render.mjs with `serveUrl = path.join(here, "bundle")`) resolves
+ *     URL → filesystem as `bundle/<path>`. Missing here = the 404 the
+ *     user hits at frame 0.
+ *   - Other Remotion paths (image loads via `staticFile`, font loads,
+ *     etc.) historically expected the bundler's `public/` convention,
+ *     i.e. `bundle/public/<path>`.
+ *
+ * Writing to both is cheap (one or two MP3s) and removes the guesswork.
  */
-function bundlePublicPath(rootRelativeUrl: string): string {
+function bundleAssetPaths(rootRelativeUrl: string): readonly string[] {
   const trimmed = rootRelativeUrl.replace(/^\/+/, "");
-  return `bundle/public/${trimmed}`;
+  return [`bundle/${trimmed}`, `bundle/public/${trimmed}`] as const;
 }
 
 /**
@@ -355,7 +366,9 @@ async function inlineLocalUploads(project: Project, zip: JSZip): Promise<void> {
     return;
   }
   const bytes = new Uint8Array(await res.arrayBuffer());
-  zip.file(bundlePublicPath(uploadPath), bytes);
+  for (const dest of bundleAssetPaths(uploadPath)) {
+    zip.file(dest, bytes);
+  }
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {
