@@ -19,40 +19,6 @@ function asset(src: string | undefined): string | undefined {
 }
 
 /**
- * Render plain text as a sequence of per-word inline-block spans separated
- * by explicit nbsp spans. @remotion/web-renderer's `findWords` traverses
- * the DOM via Intl.Segmenter and measures each segment with a transient
- * temp-DOM `getBoundingClientRect()` — for whitespace segments inside a
- * single text node, Chrome's collapse rules sometimes report 0 width and
- * the next word ends up drawn flush against the previous one ("ship it"
- * → "shipit"). Splitting the text into one inline-block per word + an
- * inline-block whose content is a non-breaking space sidesteps the
- * collapse path: each child of the parent span is its own DOM box with a
- * stable bounding rect. The live browser paints it identically to a plain
- * text node, so visuals don't change.
- */
-function WordTokens({ text }: { text: string }) {
-  const tokens = text.split(/(\s+)/);
-  return (
-    <>
-      {tokens.map((tok, i) => {
-        if (tok === "") return null;
-        const isWhitespace = /^\s+$/.test(tok);
-        return (
-          <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: stable order
-            key={i}
-            style={{ display: "inline-block" }}
-          >
-            {isWhitespace ? tok.replace(/ /g, " ") : tok}
-          </span>
-        );
-      })}
-    </>
-  );
-}
-
-/**
  * Tile a doodle PNG across an absolute-positioned region. Replaces CSS
  * `background-image: url(...) repeat` which @remotion/web-renderer's
  * canvas-walk fallback silently drops in browser exports — we render real
@@ -481,7 +447,7 @@ function IMessageDemo({
                             color={isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"}
                           />
                         ) : (
-                          <WordTokens text={m.text ?? ""} />
+                          m.text
                         )}
                       </CurvedBubble>
                     </BubbleEnter>
@@ -746,11 +712,7 @@ function WhatsAppDemo({
                           ) : undefined
                         }
                       >
-                        {m.typing ? (
-                          <TypingDots color={metaColor} />
-                        ) : (
-                          <WordTokens text={m.text ?? ""} />
-                        )}
+                        {m.typing ? <TypingDots color={metaColor} /> : m.text}
                       </CurvedBubble>
                     </BubbleEnter>
                   );
@@ -1043,7 +1005,7 @@ function TelegramDemo({
                         {m.typing ? (
                           <TypingDots color={isMe ? myMeta : metaColor} />
                         ) : (
-                          <WordTokens text={m.text ?? ""} />
+                          m.text
                         )}
                       </CurvedBubble>
                     </BubbleEnter>
@@ -1659,7 +1621,7 @@ function renderSlackText(text: string, dark: boolean) {
         </code>
       );
     }
-    return <WordTokens key={i} text={p} />;
+    return <span key={i}>{p}</span>;
   });
 }
 
@@ -1997,7 +1959,7 @@ function renderDiscordText(text: string) {
         </code>
       );
     }
-    return <WordTokens key={i} text={p} />;
+    return <span key={i}>{p}</span>;
   });
 }
 

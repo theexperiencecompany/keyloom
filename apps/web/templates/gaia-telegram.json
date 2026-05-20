@@ -8,8 +8,8 @@
     "timing": { "kind": "linear" }
   },
   "audio": {
-    "src": "/audio/uploads/the-spins.mp3",
-    "title": "The Spins — Mac Miller",
+    "src": "/audio/uploads/starboy.mp3",
+    "title": "Starboy — The Weeknd",
     "volume": 0.45,
     "fadeInFrames": 60,
     "fadeOutFrames": 120,

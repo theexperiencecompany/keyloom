@@ -1,0 +1,90 @@
+diff --git a/dist/esm/index.mjs b/dist/esm/index.mjs
+index dbdeb190e074a1466ead324064f68d4a9795df45..45646ad384a3e596796ca21ac3b8b96a6af2654b 100644
+--- a/dist/esm/index.mjs
++++ b/dist/esm/index.mjs
+@@ -4077,30 +4077,64 @@ var applyTextTransform = (text, transform) => {
+ };
+ 
+ // src/drawing/text/find-line-breaks.text.ts
++// PATCHED by motion-studio:
++// The upstream implementation segments text into words+whitespace with
++// Intl.Segmenter, then for each segment it builds a transient DOM tree
++// (<text>before</text><span>segment</span><text>after</text>) and reads
++// getBoundingClientRect() on the inner span. For whitespace segments,
++// Chrome's whitespace-collapse rules sometimes return a 0-width rect
++// when the span is sandwiched between two text nodes — the next word's
++// recorded rect then lands flush against the previous word's right edge
++// and drawText paints them touching ("ship it" -> "shipit").
++// Replacement uses the DOM Range API to measure each segment in place
++// against the ORIGINAL text node, no DOM mutation, no collapse path.
+ var findWords = (span) => {
+-  const originalText = span.textContent;
+-  const segmenter = new Intl.Segmenter("en", { granularity: "word" });
+-  const segments = segmenter.segment(span.textContent);
+-  const words = Array.from(segments).map((s) => s.segment);
++  // Return one token per LINE (not per word). Canvas2D's fillText uses its
++  // own glyph metrics which differ from the DOM's — drawing each word as a
++  // separate fillText causes adjacent words to overlap because canvas's
++  // "ship" might rasterize wider than the DOM's measured "ship" rect, so
++  // it bleeds past where the space token is positioned. Drawing the whole
++  // line in one fillText keeps canvas's kerning + letterSpacing +
++  // wordSpacing consistent across the line so spacing matches what the
++  // browser would paint. Multi-line wrap is preserved by emitting one
++  // token per visual line.
++  const textNode = span.firstChild;
++  if (!textNode || textNode.nodeType !== 3 /* TEXT_NODE */) {
++    return [{ text: span.textContent, rect: span.getBoundingClientRect() }];
++  }
++  const text = textNode.textContent || "";
++  if (text.length === 0) return [];
++  const wholeRange = document.createRange();
++  wholeRange.setStart(textNode, 0);
++  wholeRange.setEnd(textNode, text.length);
++  const lineRects = Array.from(wholeRange.getClientRects());
++  if (lineRects.length <= 1) {
++    return [{ text, rect: wholeRange.getBoundingClientRect() }];
++  }
++  const measureRange = (start, end) => {
++    const r = document.createRange();
++    r.setStart(textNode, start);
++    r.setEnd(textNode, end);
++    return r.getBoundingClientRect();
++  };
+   const tokens = [];
+-  for (let i = 0;i < words.length; i++) {
+-    const wordsBefore = words.slice(0, i);
+-    const wordsAfter = words.slice(i + 1);
+-    const word = words[i];
+-    const wordsBeforeText = wordsBefore.join("");
+-    const wordsAfterText = wordsAfter.join("");
+-    const beforeNode = document.createTextNode(wordsBeforeText);
+-    const afterNode = document.createTextNode(wordsAfterText);
+-    const interstitialNode = document.createElement("span");
+-    interstitialNode.textContent = word;
+-    span.textContent = "";
+-    span.appendChild(beforeNode);
+-    span.appendChild(interstitialNode);
+-    span.appendChild(afterNode);
+-    const rect = interstitialNode.getBoundingClientRect();
+-    span.textContent = originalText;
+-    tokens.push({ text: word, rect });
++  let lineStart = 0;
++  let currentTop = measureRange(0, 1).top;
++  for (let i = 1; i < text.length; i++) {
++    const t = measureRange(i, i + 1).top;
++    if (Math.abs(t - currentTop) > 1) {
++      tokens.push({
++        text: text.slice(lineStart, i),
++        rect: measureRange(lineStart, i),
++      });
++      lineStart = i;
++      currentTop = t;
++    }
+   }
++  tokens.push({
++    text: text.slice(lineStart),
++    rect: measureRange(lineStart, text.length),
++  });
+   return tokens;
+ };
+ 
