@@ -251,9 +251,6 @@ export function Builder() {
               onUpdateAudio={(patch) =>
                 dispatch({ type: "UPDATE_PROJECT_AUDIO", patch })
               }
-              onOpenAudioLibrary={() =>
-                dispatch({ type: "TOGGLE_PANEL", panel: "audio" })
-              }
               onSelect={(id) => dispatch({ type: "SELECT_CLIP", clipId: id })}
               onReorder={(clipIds) =>
                 dispatch({ type: "REORDER_CLIPS", clipIds })

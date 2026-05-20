@@ -59,8 +59,6 @@ type Props = {
   onSelectAudio: () => void;
   /** Partial-update for project.audio (trimStartSec, durationFrames, startFrame). */
   onUpdateAudio: (patch: Partial<ProjectAudio>) => void;
-  /** Open the audio library panel (used by the empty-row "Add audio" button). */
-  onOpenAudioLibrary: () => void;
   onSelect: (id: string) => void;
   onReorder: (clipIds: string[]) => void;
   onDelete: (id: string) => void;
@@ -95,7 +93,6 @@ export function Timeline({
   audioSelected,
   onSelectAudio,
   onUpdateAudio,
-  onOpenAudioLibrary,
   onSelect,
   onReorder,
   onDelete,
@@ -457,7 +454,6 @@ export function Timeline({
             pxPerSecond={pxPerSecond}
             projectDurationFrames={total}
             onSelect={onSelectAudio}
-            onOpenLibrary={onOpenAudioLibrary}
             onUpdateAudio={onUpdateAudio}
           />
 
@@ -484,7 +480,6 @@ function AudioTrackRow({
   pxPerSecond,
   projectDurationFrames,
   onSelect,
-  onOpenLibrary,
   onUpdateAudio,
 }: {
   audio: ProjectAudio | undefined;
@@ -493,24 +488,9 @@ function AudioTrackRow({
   pxPerSecond: number;
   projectDurationFrames: number;
   onSelect: () => void;
-  onOpenLibrary: () => void;
   onUpdateAudio: (patch: Partial<ProjectAudio>) => void;
 }) {
-  if (!audio) {
-    return (
-      <div className="flex items-stretch px-3 pb-3">
-        <button
-          type="button"
-          onClick={onOpenLibrary}
-          style={{ height: AUDIO_ROW_HEIGHT, width: 220 }}
-          className="group relative flex shrink-0 select-none items-center gap-2 overflow-hidden rounded-md border border-dashed border-border bg-muted/30 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition hover:border-foreground/40 hover:bg-muted/50 hover:text-foreground"
-        >
-          <span className="text-[14px] leading-none">♪</span>
-          <span>Add audio</span>
-        </button>
-      </div>
-    );
-  }
+  if (!audio) return null;
 
   // Capture non-nullable for closure use below.
   const a = audio;
