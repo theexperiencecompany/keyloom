@@ -157,7 +157,7 @@ export function AudioPanel({ currentAudio, onSet, onClear, onClose }: Props) {
       src: track.downloadUrl,
       title: track.title,
       attribution: track.user ? `Pixabay · ${track.user}` : "Pixabay",
-      volume: currentAudio?.volume ?? 0.2,
+      volume: currentAudio?.volume ?? 0.5,
       trimStartSec: 0,
       fadeInFrames: currentAudio?.fadeInFrames ?? 15,
       fadeOutFrames: currentAudio?.fadeOutFrames ?? 30,
@@ -193,7 +193,7 @@ export function AudioPanel({ currentAudio, onSet, onClear, onClose }: Props) {
     const audio: ProjectAudio = {
       src: url,
       title: file.name,
-      volume: currentAudio?.volume ?? 0.2,
+      volume: currentAudio?.volume ?? 0.5,
       trimStartSec: 0,
       fadeInFrames: currentAudio?.fadeInFrames ?? 15,
       fadeOutFrames: currentAudio?.fadeOutFrames ?? 30,
