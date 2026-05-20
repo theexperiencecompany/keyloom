@@ -64,38 +64,80 @@ if (exportFps !== project.fps) {
   }
 }
 
-// Pre-fetch every absolute http(s) URL referenced in the project and inline
-// it as a data: URI. The headless Chrome that @remotion/renderer spawns
-// refuses to draw cross-origin images onto its capture canvas (canvas
-// tainting), and most public CDNs (github.com avatars, twitter pbs, etc.)
-// don't return Access-Control-Allow-Origin. Data URIs are same-origin by
-// definition.
-async function inlineExternalUrls(value) {
+// Pre-fetch external http(s) URLs that are media sources (images, audio)
+// and inline them as data: URIs. The headless Chrome that @remotion/renderer
+// spawns refuses to draw cross-origin images onto its capture canvas
+// (canvas tainting), and most public CDNs (github.com avatars, twitter
+// pbs, etc.) don't return Access-Control-Allow-Origin. Data URIs are
+// same-origin by definition.
+//
+// CRITICAL: only inline strings whose containing field is a known media
+// slot (src / avatar / logo / icon / image / etc). Field-blind inlining
+// also slurped non-media URLs — like \`QrCode.props.value\`, which is the
+// URL the QR ENCODES, not a media URL to fetch. The walker fetched the
+// landing page, replaced \`value\` with a multi-megabyte base64 data URI,
+// then QrCode tried to encode that into a QR matrix and crashed with
+// "amount of data is too big to be stored in a QR Code".
+const MEDIA_KEYS = new Set([
+  "src",
+  "avatar",
+  "contactAvatar",
+  "leftAvatar",
+  "rightAvatar",
+  "icon",
+  "iconCustom",
+  "iconSrc",
+  "logo",
+  "logoCustom",
+  "image",
+  "screenImage",
+  "thumbnail",
+  "background",
+  "poster",
+]);
+const MEDIA_EXT_RE =
+  /\\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|mp3|m4a|aac|wav|ogg|flac)(\\?|#|$)/i;
+function looksLikeMediaUrl(url) {
+  return MEDIA_EXT_RE.test(url);
+}
+async function inlineExternalUrls(value, key) {
   if (typeof value === "string" && /^https?:\\/\\//i.test(value)) {
+    const allowed =
+      (key !== undefined && MEDIA_KEYS.has(key)) || looksLikeMediaUrl(value);
+    if (!allowed) return value;
     try {
       const res = await fetch(value, { redirect: "follow" });
       if (!res.ok) return value;
+      const ct = res.headers.get("content-type") || "";
+      // Defensive: if the content-type doesn't look like media, bail —
+      // the URL probably resolved to an HTML page (heygaia.io/slack-bot
+      // redirects to slack.com OAuth, which is HTML).
+      if (
+        ct &&
+        !/^(image|audio|video|application\\/octet-stream)/i.test(ct)
+      ) {
+        return value;
+      }
       const buf = Buffer.from(await res.arrayBuffer());
-      const ct = res.headers.get("content-type") || "image/png";
-      return \`data:\${ct};base64,\${buf.toString("base64")}\`;
+      return \`data:\${ct || "image/png"};base64,\${buf.toString("base64")}\`;
     } catch {
       return value;
     }
   }
   if (Array.isArray(value)) {
-    return Promise.all(value.map(inlineExternalUrls));
+    return Promise.all(value.map((item) => inlineExternalUrls(item, key)));
   }
   if (value && typeof value === "object") {
     const out = {};
     for (const [k, v] of Object.entries(value)) {
-      out[k] = await inlineExternalUrls(v);
+      out[k] = await inlineExternalUrls(v, k);
     }
     return out;
   }
   return value;
 }
 
-console.log("[render] inlining external image URLs…");
+console.log("[render] inlining external media URLs…");
 const inlined = await inlineExternalUrls(project);
 
 const t0 = performance.now();
