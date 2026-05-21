@@ -41,7 +41,9 @@ export const discordMessagesDefaultProps: DiscordMessagesProps = {
     },
   ],
   orientation: "landscape",
-  scale: 1.5,
+  scale: 2,
+  leftAvatar: "default-avatar.png",
+  rightAvatar: "gaia-glow.png",
 };
 
 export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
@@ -75,5 +77,7 @@ export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
       min: 0.5,
       max: 3,
     },
+    { kind: "image", key: "leftAvatar", label: "Left avatar" },
+    { kind: "image", key: "rightAvatar", label: "Right avatar" },
   ],
 };

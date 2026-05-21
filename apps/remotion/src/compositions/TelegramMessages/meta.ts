@@ -27,7 +27,7 @@ export const telegramMessagesDefaultProps: TelegramMessagesProps = {
     },
   ],
   orientation: "landscape",
-  scale: 1.6,
+  scale: 2,
 };
 
 export const telegramMessagesInfo: CompositionInfo<TelegramMessagesProps> = {

@@ -39,7 +39,7 @@ export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
   messages,
   theme: _theme,
   orientation = "landscape",
-  scale = 1.6,
+  scale = 2,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);

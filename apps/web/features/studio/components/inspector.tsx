@@ -85,7 +85,7 @@ export function Inspector({
   const durationSec = (clip.durationInFrames / fps).toFixed(1);
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-l border-border bg-background">
+    <aside className="flex h-full min-h-0 w-80 shrink-0 flex-col border-l border-border bg-background">
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground">

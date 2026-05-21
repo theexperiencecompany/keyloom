@@ -43,6 +43,15 @@ const exportFps = fpsArg ? Number(fpsArg.slice("--fps=".length)) : project.fps;
 if (![30, 60, 120].includes(exportFps)) {
   throw new Error(\`Unsupported --fps=\${exportFps}. Allowed: 30, 60, 120.\`);
 }
+
+// Optional resolution multiplier. Pass --scale=2 to render at 2× the
+// composition's native dimensions (1080p → 4K, 720p → 1440p). Render time
+// scales roughly with pixel count, so 4K is ~4× slower than 1080p.
+const scaleArg = process.argv.find((a) => a.startsWith("--scale="));
+const renderScale = scaleArg ? Number(scaleArg.slice("--scale=".length)) : 1;
+if (!(renderScale >= 0.25 && renderScale <= 4)) {
+  throw new Error(\`Unsupported --scale=\${renderScale}. Allowed: 0.25–4.\`);
+}
 if (exportFps !== project.fps) {
   const scale = exportFps / project.fps;
   console.log(\`[render] scaling \${project.fps}fps -> \${exportFps}fps (\${scale}x)\`);
@@ -64,38 +73,80 @@ if (exportFps !== project.fps) {
   }
 }
 
-// Pre-fetch every absolute http(s) URL referenced in the project and inline
-// it as a data: URI. The headless Chrome that @remotion/renderer spawns
-// refuses to draw cross-origin images onto its capture canvas (canvas
-// tainting), and most public CDNs (github.com avatars, twitter pbs, etc.)
-// don't return Access-Control-Allow-Origin. Data URIs are same-origin by
-// definition.
-async function inlineExternalUrls(value) {
+// Pre-fetch external http(s) URLs that are media sources (images, audio)
+// and inline them as data: URIs. The headless Chrome that @remotion/renderer
+// spawns refuses to draw cross-origin images onto its capture canvas
+// (canvas tainting), and most public CDNs (github.com avatars, twitter
+// pbs, etc.) don't return Access-Control-Allow-Origin. Data URIs are
+// same-origin by definition.
+//
+// CRITICAL: only inline strings whose containing field is a known media
+// slot (src / avatar / logo / icon / image / etc). Field-blind inlining
+// also slurped non-media URLs — like \`QrCode.props.value\`, which is the
+// URL the QR ENCODES, not a media URL to fetch. The walker fetched the
+// landing page, replaced \`value\` with a multi-megabyte base64 data URI,
+// then QrCode tried to encode that into a QR matrix and crashed with
+// "amount of data is too big to be stored in a QR Code".
+const MEDIA_KEYS = new Set([
+  "src",
+  "avatar",
+  "contactAvatar",
+  "leftAvatar",
+  "rightAvatar",
+  "icon",
+  "iconCustom",
+  "iconSrc",
+  "logo",
+  "logoCustom",
+  "image",
+  "screenImage",
+  "thumbnail",
+  "background",
+  "poster",
+]);
+const MEDIA_EXT_RE =
+  /\\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|mp3|m4a|aac|wav|ogg|flac)(\\?|#|$)/i;
+function looksLikeMediaUrl(url) {
+  return MEDIA_EXT_RE.test(url);
+}
+async function inlineExternalUrls(value, key) {
   if (typeof value === "string" && /^https?:\\/\\//i.test(value)) {
+    const allowed =
+      (key !== undefined && MEDIA_KEYS.has(key)) || looksLikeMediaUrl(value);
+    if (!allowed) return value;
     try {
       const res = await fetch(value, { redirect: "follow" });
       if (!res.ok) return value;
+      const ct = res.headers.get("content-type") || "";
+      // Defensive: if the content-type doesn't look like media, bail —
+      // the URL probably resolved to an HTML page (heygaia.io/slack-bot
+      // redirects to slack.com OAuth, which is HTML).
+      if (
+        ct &&
+        !/^(image|audio|video|application\\/octet-stream)/i.test(ct)
+      ) {
+        return value;
+      }
       const buf = Buffer.from(await res.arrayBuffer());
-      const ct = res.headers.get("content-type") || "image/png";
-      return \`data:\${ct};base64,\${buf.toString("base64")}\`;
+      return \`data:\${ct || "image/png"};base64,\${buf.toString("base64")}\`;
     } catch {
       return value;
     }
   }
   if (Array.isArray(value)) {
-    return Promise.all(value.map(inlineExternalUrls));
+    return Promise.all(value.map((item) => inlineExternalUrls(item, key)));
   }
   if (value && typeof value === "object") {
     const out = {};
     for (const [k, v] of Object.entries(value)) {
-      out[k] = await inlineExternalUrls(v);
+      out[k] = await inlineExternalUrls(v, k);
     }
     return out;
   }
   return value;
 }
 
-console.log("[render] inlining external image URLs…");
+console.log("[render] inlining external media URLs…");
 const inlined = await inlineExternalUrls(project);
 
 const t0 = performance.now();
@@ -107,8 +158,11 @@ const composition = await selectComposition({
   inputProps: inlined,
 });
 
+const outW = Math.round(composition.width * renderScale);
+const outH = Math.round(composition.height * renderScale);
 console.log(
-  \`[render] starting — \${composition.width}x\${composition.height} @ \${composition.fps}fps, \${composition.durationInFrames} frames\`,
+  \`[render] starting — \${outW}x\${outH} @ \${composition.fps}fps, \${composition.durationInFrames} frames\` +
+    (renderScale !== 1 ? \` (\${renderScale}x scale)\` : ""),
 );
 
 let lastPct = -1;
@@ -118,6 +172,7 @@ await renderMedia({
   codec: "h264",
   outputLocation: outPath,
   inputProps: inlined,
+  scale: renderScale,
   // JPEG intermediate (the default) re-quantises each frame slightly,
   // feeding noise into h264 which then encodes it as visible glyph-edge
   // shimmer on at-rest text. PNG is lossless from Chromium → ffmpeg.
@@ -207,6 +262,17 @@ Supported values: \`--fps=30\`, \`--fps=60\`, \`--fps=120\`. The compositions ar
 fps-agnostic via the \`useDesignFrame()\` hook, so animation timing stays
 tied to wall-clock time regardless of which fps you pick.
 
+To render at a higher resolution (e.g. 4K from a 1080p project), pass
+\`--scale\`:
+
+\`\`\`bash
+node render.mjs --scale=2          # 1080p → 4K (3840×2160)
+node render.mjs --scale=2 --fps=60 # same, explicit fps
+\`\`\`
+
+Supported values: any number between 0.25 and 4. Render time scales
+roughly with pixel count; \`--scale=2\` takes ~4× as long as the default.
+
 The first run will:
 
 1. Install \`@remotion/renderer\` and friends (~1–2 min).
@@ -220,7 +286,10 @@ Subsequent runs reuse both, so they start in about a second.
 
 - \`project.json\` — the exact project state from your studio session.
 - \`bundle/\` — a pre-built Remotion bundle of the composition library.
-  Do not edit; replace by re-downloading from the studio.
+  Do not edit; replace by re-downloading from the studio. Any locally-
+  uploaded audio your project references (e.g. \`/audio/uploads/foo.mp3\`)
+  is inlined at \`bundle/audio/uploads/foo.mp3\` so the bundle is
+  self-contained and renders without a running studio.
 - \`render.mjs\` — the renderer entrypoint. Reads the bundle + project,
   writes \`output.mp4\`. Uses hardware-accelerated GL (\`gl: "angle"\`) and
   caps concurrency at the perf-core count — going wider hurts on Apple
@@ -269,12 +338,103 @@ export async function buildExportZip(opts: {
     }),
   );
 
+  // Inline locally-uploaded audio (e.g. copyrighted MP3s in
+  // `apps/web/public/audio/uploads/`). These files are gitignored, so the
+  // server-side Remotion bundle that backs `/api/render-bundle` doesn't
+  // contain the file bytes. We fetch the audio via the running dev server
+  // (which serves the on-disk file fine) and write it into the zip at
+  // `bundle/audio/uploads/<filename>`. `render.mjs` sets `serveUrl =
+  // <here>/bundle`, so Remotion's render-time HTTP server resolves
+  // `audio.src = "/audio/uploads/<filename>"` against that path directly.
+  await inlineLocalUploads(project, zip);
+
   return zip.generateAsync({
     type: "blob",
     mimeType: "application/zip",
     compression: "DEFLATE",
     compressionOptions: { level: 6 },
   });
+}
+
+/**
+ * Paths inside the zip where the file referenced by a root-relative URL
+ * (e.g. `/audio/uploads/foo.mp3`) should be written. We mirror the same
+ * bytes into BOTH `bundle/<path>` and `bundle/public/<path>` because
+ * different parts of the Remotion CLI render pipeline look in different
+ * places:
+ *
+ *   - `@remotion/media`'s WebCodecs audio decoder asks the bundle's
+ *     render-time HTTP server for the URL directly. The server (set up
+ *     by render.mjs with `serveUrl = path.join(here, "bundle")`) resolves
+ *     URL → filesystem as `bundle/<path>`. Missing here = the 404 the
+ *     user hits at frame 0.
+ *   - Other Remotion paths (image loads via `staticFile`, font loads,
+ *     etc.) historically expected the bundler's `public/` convention,
+ *     i.e. `bundle/public/<path>`.
+ *
+ * Writing to both is cheap (one or two MP3s) and removes the guesswork.
+ */
+function bundleAssetPaths(rootRelativeUrl: string): readonly string[] {
+  const trimmed = rootRelativeUrl.replace(/^\/+/, "");
+  return [`bundle/${trimmed}`, `bundle/public/${trimmed}`] as const;
+}
+
+/**
+ * Match anything that looks like a locally-uploaded audio path: a string
+ * containing `audio/uploads/<filename>` (with an optional leading slash).
+ * Captures the part starting at `audio/uploads/` so we can place the bytes
+ * at the matching path inside the zip.
+ */
+const UPLOAD_PATH_RE = /(?:^|\/)audio\/uploads\/[^?#]+$/i;
+
+function extractUploadPath(src: string | undefined): string | null {
+  if (!src) return null;
+  // Only consider same-origin / root-relative paths. Absolute http(s) URLs
+  // pointing at upload routes from a different origin are out of scope here;
+  // the existing `inlineExternalUrls` step in `render.mjs` handles those for
+  // images, and audio from the public web is rare in practice.
+  if (
+    /^https?:\/\//i.test(src) ||
+    src.startsWith("data:") ||
+    src.startsWith("blob:")
+  ) {
+    return null;
+  }
+  const match = src.match(UPLOAD_PATH_RE);
+  if (!match) return null;
+  // Normalize so the path always starts with `audio/uploads/`.
+  const idx = match[0].indexOf("audio/uploads/");
+  return idx >= 0 ? match[0].slice(idx) : null;
+}
+
+async function inlineLocalUploads(project: Project, zip: JSZip): Promise<void> {
+  const uploadPath = extractUploadPath(project.audio?.src);
+  if (!uploadPath) return;
+
+  // Resolve relative to the studio's origin — in dev that's the dev server,
+  // in production that's the deployed app. Either way, the file exists on
+  // disk under `apps/web/public/` and is served at the same URL the project
+  // references it by, so a plain `fetch("/audio/uploads/...")` returns the
+  // raw bytes.
+  const fetchUrl = `/${uploadPath}`;
+  let res: Response;
+  try {
+    res = await fetch(fetchUrl);
+  } catch (err) {
+    console.warn(`[export-zip] failed to fetch ${fetchUrl} for bundling:`, err);
+    return;
+  }
+  if (!res.ok) {
+    console.warn(
+      `[export-zip] ${fetchUrl} returned ${res.status} ${res.statusText}; ` +
+        "skipping audio inline. The render zip will 404 on this asset.",
+    );
+    return;
+  }
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  for (const dest of bundleAssetPaths(uploadPath)) {
+    zip.file(dest, bytes);
+  }
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {

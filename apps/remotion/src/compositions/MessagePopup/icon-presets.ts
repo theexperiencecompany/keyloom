@@ -3,7 +3,8 @@
  *
  * Each entry maps a stable string key (stored on the clip props) to:
  *  - `label`: user-facing name shown in the Inspector picker
- *  - `path`: static path inside `apps/remotion/public/` — the component
+ *  - `path`: static path inside the shared public dir (`apps/web/public/`,
+ *    which `apps/remotion/public/` symlinks to) — the component
  *    runs this through `staticFile()` (relative to the Remotion bundle)
  *    or `proxyExternalImg()` (when it's an absolute URL) at render time
  *

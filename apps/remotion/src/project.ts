@@ -43,6 +43,13 @@ export type ProjectAudio = {
   /** Seek into the source file before playback starts. Seconds. Default 0. */
   trimStartSec?: number;
   /**
+   * Frame within the project timeline where audio playback begins. Default
+   * 0 (audio starts with the video). The renderer wraps the <Audio> in a
+   * <Sequence from={startFrame}> so silence plays before this point. Used
+   * by the timeline's drag-to-reposition handle.
+   */
+  startFrame?: number;
+  /**
    * How many frames the audio plays for. Defaults to the project's total
    * duration (audio runs the whole video). Clamped to ≤ projectDuration in
    * the UI — audio can never outlast the video.

@@ -19,7 +19,11 @@ import {
   ZoomOutAreaIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { type Project, projectDuration } from "@workspace/compositions/project";
+import {
+  type Project,
+  type ProjectAudio,
+  projectDuration,
+} from "@workspace/compositions/project";
 import {
   resolveTransition,
   type SceneTransition,
@@ -49,6 +53,12 @@ const ZOOM_STEP = 1.25;
 type Props = {
   project: Project;
   selectedClipId: string | null;
+  /** True when the audio track row is the active selection. */
+  audioSelected: boolean;
+  /** Fired when the user clicks the audio track row or its block. */
+  onSelectAudio: () => void;
+  /** Partial-update for project.audio (trimStartSec, durationFrames, startFrame). */
+  onUpdateAudio: (patch: Partial<ProjectAudio>) => void;
   onSelect: (id: string) => void;
   onReorder: (clipIds: string[]) => void;
   onDelete: (id: string) => void;
@@ -80,6 +90,9 @@ type ClipLayout = {
 export function Timeline({
   project,
   selectedClipId,
+  audioSelected,
+  onSelectAudio,
+  onUpdateAudio,
   onSelect,
   onReorder,
   onDelete,
@@ -434,7 +447,233 @@ export function Timeline({
             </DndContext>
           )}
 
+          <AudioTrackRow
+            audio={project.audio}
+            selected={audioSelected}
+            fps={fps}
+            pxPerSecond={pxPerSecond}
+            projectDurationFrames={total}
+            onSelect={onSelectAudio}
+            onUpdateAudio={onUpdateAudio}
+          />
+
           <Playhead fps={fps} pxPerSecond={pxPerSecond} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Audio track row
+// ---------------------------------------------------------------------------
+
+// Match h-14 (56px) of SortableClipBlock so both timeline rows share a
+// single visual rhythm.
+const AUDIO_ROW_HEIGHT = 56;
+const AUDIO_HANDLE_WIDTH = 8;
+
+function AudioTrackRow({
+  audio,
+  selected,
+  fps,
+  pxPerSecond,
+  projectDurationFrames,
+  onSelect,
+  onUpdateAudio,
+}: {
+  audio: ProjectAudio | undefined;
+  selected: boolean;
+  fps: number;
+  pxPerSecond: number;
+  projectDurationFrames: number;
+  onSelect: () => void;
+  onUpdateAudio: (patch: Partial<ProjectAudio>) => void;
+}) {
+  if (!audio) return null;
+
+  // Capture non-nullable for closure use below.
+  const a = audio;
+  const startFrame = Math.max(
+    0,
+    Math.min(a.startFrame ?? 0, projectDurationFrames - 1),
+  );
+  const requestedDuration =
+    a.durationFrames ?? projectDurationFrames - startFrame;
+  const audioDuration = Math.max(
+    1,
+    Math.min(requestedDuration, projectDurationFrames - startFrame),
+  );
+  const leftPx = TRACK_PADDING_X + (startFrame / fps) * pxPerSecond;
+  const widthPx = Math.max(40, (audioDuration / fps) * pxPerSecond);
+  const sourceDurationFrames = a.sourceDurationSec
+    ? Math.floor(a.sourceDurationSec * fps)
+    : undefined;
+
+  function startBodyDrag(e: React.PointerEvent) {
+    if (e.button !== 0) return;
+    // Ignore clicks that originated on the handles.
+    const target = e.target as HTMLElement;
+    if (target.dataset.audioHandle) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    const startX = e.clientX;
+    const originStart = startFrame;
+    const maxStart = Math.max(0, projectDurationFrames - audioDuration);
+    // 4px deadzone: a casual click selects without shifting the audio's
+    // start. Tiny pointer drift on mousedown/up would otherwise rewrite
+    // startFrame by a frame or two — visually invisible but jarring when
+    // playback drifts off cue.
+    let dragging = false;
+
+    function onMove(ev: PointerEvent) {
+      const deltaPx = ev.clientX - startX;
+      if (!dragging) {
+        if (Math.abs(deltaPx) < 4) return;
+        dragging = true;
+      }
+      const deltaFrames = Math.round((deltaPx / pxPerSecond) * fps);
+      const next = Math.max(0, Math.min(maxStart, originStart + deltaFrames));
+      if (next !== originStart) {
+        onUpdateAudio({ startFrame: next });
+      }
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  function startLeftHandle(e: React.PointerEvent) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    const startX = e.clientX;
+    const originTrimSec = a.trimStartSec ?? 0;
+    const originDuration = audioDuration;
+    const originStart = startFrame;
+
+    function onMove(ev: PointerEvent) {
+      const deltaPx = ev.clientX - startX;
+      const deltaSec = deltaPx / pxPerSecond;
+      // Dragging the left handle right = trim more from the source, AND
+      // push the project start later by the same amount so the audio's
+      // tail stays anchored in place. Dragging left = un-trim and pull
+      // the start earlier (clamped to 0 trim and 0 startFrame).
+      const maxTrim = a.sourceDurationSec
+        ? Math.max(0, a.sourceDurationSec - 0.1)
+        : Number.POSITIVE_INFINITY;
+      const nextTrim = Math.max(0, Math.min(maxTrim, originTrimSec + deltaSec));
+      const trimDeltaSec = nextTrim - originTrimSec;
+      const trimDeltaFrames = Math.round(trimDeltaSec * fps);
+      const nextStart = Math.max(0, originStart + trimDeltaFrames);
+      const nextDuration = Math.max(1, originDuration - trimDeltaFrames);
+      onUpdateAudio({
+        trimStartSec: nextTrim,
+        startFrame: nextStart,
+        durationFrames: nextDuration,
+      });
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  function startRightHandle(e: React.PointerEvent) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+    const startX = e.clientX;
+    const originDuration = audioDuration;
+    const maxDuration = sourceDurationFrames
+      ? Math.min(
+          sourceDurationFrames - Math.round((a.trimStartSec ?? 0) * fps),
+          projectDurationFrames - startFrame,
+        )
+      : projectDurationFrames - startFrame;
+
+    function onMove(ev: PointerEvent) {
+      const deltaPx = ev.clientX - startX;
+      const deltaFrames = Math.round((deltaPx / pxPerSecond) * fps);
+      const next = Math.max(
+        Math.round(fps * 0.5),
+        Math.min(maxDuration, originDuration + deltaFrames),
+      );
+      onUpdateAudio({ durationFrames: next });
+    }
+    function onUp() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    }
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  }
+
+  const label = a.title?.trim() || "Audio";
+
+  const seconds = audioDuration / fps;
+
+  return (
+    <div className="pb-3">
+      <div
+        style={{ height: AUDIO_ROW_HEIGHT, position: "relative" }}
+        className="w-full"
+      >
+        <div
+          onPointerDown={startBodyDrag}
+          style={{
+            position: "absolute",
+            left: leftPx,
+            width: widthPx,
+            top: 0,
+            bottom: 0,
+            cursor: "grab",
+          }}
+          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600 px-3 py-2 text-white transition-shadow ${
+            selected
+              ? "z-10 ring-2 ring-primary ring-offset-1 ring-offset-background"
+              : ""
+          }`}
+        >
+          {/* Inner top highlight + outline — matches SortableClipBlock. */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-md"
+            style={{
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
+            }}
+          />
+
+          {/* Left trim handle */}
+          <span
+            data-audio-handle="left"
+            onPointerDown={startLeftHandle}
+            style={{ width: AUDIO_HANDLE_WIDTH, cursor: "ew-resize" }}
+            className="absolute inset-y-0 left-0 z-[2] bg-black/20 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+          />
+
+          <p className="relative truncate text-[11px] font-semibold leading-tight drop-shadow-sm">
+            ♪ {label}
+          </p>
+          <p className="relative text-[10px] tabular-nums text-white/75">
+            {seconds.toFixed(2)}s
+          </p>
+
+          {/* Right trim handle */}
+          <span
+            data-audio-handle="right"
+            onPointerDown={startRightHandle}
+            style={{ width: AUDIO_HANDLE_WIDTH, cursor: "ew-resize" }}
+            className="absolute inset-y-0 right-0 z-[2] bg-black/20 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+          />
         </div>
       </div>
     </div>

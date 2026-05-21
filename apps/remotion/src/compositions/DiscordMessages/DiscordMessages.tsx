@@ -9,12 +9,19 @@ export type DiscordMessagesProps = {
   messages: ChatMessage[];
   orientation?: "landscape" | "portrait";
   scale?: number;
+  leftAvatar?: string;
+  rightAvatar?: string;
 };
 
-const LEFT_AVATAR = "default-avatar.png";
-const RIGHT_AVATAR = "gaia-glow.png";
+const DEFAULT_LEFT_AVATAR = "default-avatar.png";
+const DEFAULT_RIGHT_AVATAR = "gaia-glow.png";
 
-function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
+function buildItems(
+  messages: ChatMessage[],
+  frame: number,
+  leftAvatar: string,
+  rightAvatar: string,
+): ChatMessageItem[] {
   const out: ChatMessageItem[] = [];
   for (let i = 0; i < messages.length; i++) {
     const m = messages[i]!;
@@ -27,7 +34,7 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
       from: isMe ? "me" : "them",
       author: isMe ? "GAIA" : "Aryan",
       authorColor: isMe ? "#9CC3FF" : "#F47FFF",
-      avatar: isMe ? RIGHT_AVATAR : LEFT_AVATAR,
+      avatar: isMe ? rightAvatar : leftAvatar,
       text: m.text,
       typing: isTyping,
       time: "now",
@@ -41,10 +48,12 @@ export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
   contactName,
   messages,
   orientation = "landscape",
-  scale = 1.5,
+  scale = 2,
+  leftAvatar = DEFAULT_LEFT_AVATAR,
+  rightAvatar = DEFAULT_RIGHT_AVATAR,
 }) => {
   const frame = useDesignFrame();
-  const items = buildItems(messages, frame);
+  const items = buildItems(messages, frame, leftAvatar, rightAvatar);
 
   return (
     <ChatFill

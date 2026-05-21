@@ -4,6 +4,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Img, spring, staticFile, useVideoConfig } from "remotion";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
+import { useDesignFrame } from "../../use-design-frame";
 
 // Remotion's bundle server only serves public/ assets through `staticFile()`
 // — literal "/foo.png" strings fail with 404 inside `remotion render`. This
@@ -1967,6 +1968,14 @@ function renderDiscordText(text: string) {
  * ========================================================================= */
 
 function TypingDots({ color }: { color: string }) {
+  // Drive the dots from Remotion's frame clock, not CSS keyframes. CSS
+  // animations run on the browser's wall clock, which is sampled at a
+  // slightly different phase on every render frame during export — that's
+  // what makes the dots look shaky and out-of-sync with the bubble's
+  // spring-driven enter. snap()ing the translate to whole pixels also
+  // eliminates the residual subpixel shimmer.
+  const frame = useDesignFrame();
+  const periodFrames = 60 * 1.2; // 1.2s cycle at design fps
   return (
     <span
       role="status"
@@ -1978,26 +1987,30 @@ function TypingDots({ color }: { color: string }) {
         padding: "2px 0",
       }}
     >
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: 9999,
-            background: color,
-            opacity: 0.6,
-            animation: `chat-demo-typing 1.2s ${i * 0.15}s infinite ease-in-out`,
-            display: "inline-block",
-          }}
-        />
-      ))}
-      <style>{`
-				@keyframes chat-demo-typing {
-					0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-					30% { transform: translateY(-3px); opacity: 0.9; }
-				}
-			`}</style>
+      {[0, 1, 2].map((i) => {
+        // Stagger each dot by ~0.15s, matching the original CSS timing.
+        const staggered = frame - i * 9;
+        const t = ((staggered % periodFrames) + periodFrames) % periodFrames;
+        const phase = t / periodFrames; // 0..1
+        // Single-hump bounce: opacity peaks and dot lifts ~3px around 30%.
+        const bump = Math.max(0, Math.sin(phase * Math.PI));
+        const translateY = -snap(bump * 3);
+        const opacity = 0.4 + bump * 0.5;
+        return (
+          <span
+            key={i}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 9999,
+              background: color,
+              opacity,
+              transform: `translate3d(0, ${translateY}px, 0)`,
+              display: "inline-block",
+            }}
+          />
+        );
+      })}
     </span>
   );
 }

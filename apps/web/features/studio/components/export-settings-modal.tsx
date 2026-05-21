@@ -56,6 +56,11 @@ const PRESET_LABELS: Record<
     description:
       "Full resolution, 50 Mbps, all-intra. Eliminates encoder shimmer on static text — best for typography-heavy reels.",
   },
+  uhd4k: {
+    title: "4K (UHD)",
+    description:
+      "2× resolution (3840×2160 for 1080p projects), 80 Mbps, 60fps. Slowest render; ideal for YouTube masters.",
+  },
 };
 
 export function ExportSettingsModal({
@@ -229,13 +234,13 @@ export function ExportSettingsModal({
                 <Input
                   type="number"
                   min={0.25}
-                  max={1}
+                  max={2}
                   step={0.05}
                   value={options.scale}
                   onChange={(e) =>
                     patch(
                       "scale",
-                      Math.max(0.25, Math.min(1, Number(e.target.value))),
+                      Math.max(0.25, Math.min(2, Number(e.target.value))),
                     )
                   }
                 />

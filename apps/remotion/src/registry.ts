@@ -7,6 +7,7 @@ import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 import { featureCardInfo } from "./compositions/FeatureCard/meta";
 import { gaiaScenarioInfo } from "./compositions/GaiaScenario/meta";
 import { githubStarButtonInfo } from "./compositions/GitHubStarButton/meta";
+import { imageSceneInfo } from "./compositions/ImageScene/meta";
 import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
 import { instagramPostInfo } from "./compositions/InstagramPost/meta";
 import { laptopFrameInfo } from "./compositions/LaptopFrame/meta";
@@ -19,6 +20,7 @@ import { perspectiveMarqueeInfo } from "./compositions/PerspectiveMarquee/meta";
 import { phoneFrameInfo } from "./compositions/PhoneFrame/meta";
 import { pieChartInfo } from "./compositions/PieChart/meta";
 import { pricingCardInfo } from "./compositions/PricingCard/meta";
+import { qrCodeInfo } from "./compositions/QrCode/meta";
 import { radarChartInfo } from "./compositions/RadarChart/meta";
 import { radialChartInfo } from "./compositions/RadialChart/meta";
 import { showcaseInfo } from "./compositions/Showcase/meta";
@@ -120,6 +122,8 @@ export const compositions: AnyCompositionInfo[] = [
   pricingCardInfo,
   terminalInfo,
   githubStarButtonInfo,
+  imageSceneInfo,
+  qrCodeInfo,
   toastInfo,
   perspectiveMarqueeInfo,
   barChartInfo,

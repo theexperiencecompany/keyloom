@@ -34,13 +34,14 @@ type SearchResponse = {
 type Props = {
   currentAudio?: ProjectAudio;
   onSet: (audio: ProjectAudio) => void;
+  onClear: () => void;
   onClose: () => void;
 };
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const SEARCH_DEBOUNCE_MS = 300;
 
-export function AudioPanel({ currentAudio, onSet, onClose }: Props) {
+export function AudioPanel({ currentAudio, onSet, onClear, onClose }: Props) {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -156,8 +157,9 @@ export function AudioPanel({ currentAudio, onSet, onClose }: Props) {
       src: track.downloadUrl,
       title: track.title,
       attribution: track.user ? `Pixabay · ${track.user}` : "Pixabay",
-      volume: currentAudio?.volume ?? 0.2,
+      volume: currentAudio?.volume ?? 0.5,
       trimStartSec: 0,
+      startFrame: 0,
       fadeInFrames: currentAudio?.fadeInFrames ?? 15,
       fadeOutFrames: currentAudio?.fadeOutFrames ?? 30,
       loop: currentAudio?.loop ?? false,
@@ -192,8 +194,9 @@ export function AudioPanel({ currentAudio, onSet, onClose }: Props) {
     const audio: ProjectAudio = {
       src: url,
       title: file.name,
-      volume: currentAudio?.volume ?? 0.2,
+      volume: currentAudio?.volume ?? 0.5,
       trimStartSec: 0,
+      startFrame: 0,
       fadeInFrames: currentAudio?.fadeInFrames ?? 15,
       fadeOutFrames: currentAudio?.fadeOutFrames ?? 30,
       loop: currentAudio?.loop ?? false,
@@ -231,6 +234,26 @@ export function AudioPanel({ currentAudio, onSet, onClose }: Props) {
           <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
         </Button>
       </div>
+
+      {currentAudio && (
+        <div className="mx-3 mt-3 flex items-center gap-2 px-1">
+          <p
+            className="min-w-0 flex-1 truncate text-[12px] font-medium text-foreground"
+            title={currentAudio.title || currentAudio.src}
+          >
+            {currentAudio.title?.trim() || "Audio"}
+          </p>
+          <button
+            type="button"
+            onClick={onClear}
+            className="shrink-0 rounded p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            title="Remove attached audio"
+            aria-label="Remove attached audio"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </button>
+        </div>
+      )}
 
       <div className="space-y-2 px-3 pb-2 pt-3">
         <div className="relative">

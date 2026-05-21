@@ -7,6 +7,15 @@
     "durationInFrames": 12,
     "timing": { "kind": "linear" }
   },
+  "audio": {
+    "src": "http://localhost:4992/audio/uploads/instant-crush.mp3",
+    "title": "Instant Crush — Daft Punk feat. Julian Casablancas",
+    "volume": 0.45,
+    "fadeInFrames": 60,
+    "fadeOutFrames": 120,
+    "trimStartSec": 14,
+    "loop": false
+  },
   "clips": [
     {
       "id": "clip_notification",
@@ -64,14 +73,14 @@
     {
       "id": "clip_marquee",
       "compositionId": "PerspectiveMarquee",
-      "durationInFrames": 420,
+      "durationInFrames": 284,
       "props": {
         "items": "Already drafted, Already booked, Already moved, Already done",
         "speedPxPerFrame": 14,
         "perspective": 1400,
         "rotateY": -18,
         "rotateX": 5,
-        "fontSize": 150,
+        "fontSize": 110,
         "fontWeight": 700,
         "textTransform": "none"
       }
@@ -154,11 +163,20 @@
       "compositionId": "TypingSearch",
       "durationInFrames": 220,
       "props": {
-        "query": "wa.me/12762088737",
+        "query": "heygaia.io/bots",
         "placeholder": "Start a chat with GAIA…"
       },
       "style": {
         "accent": "#25D366"
+      }
+    },
+    {
+      "id": "clip_qr",
+      "compositionId": "ImageScene",
+      "durationInFrames": 280,
+      "props": {
+        "src": "/qr/gaia-qr.png",
+        "caption": "wa.me/12762088737"
       }
     }
   ]

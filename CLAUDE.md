@@ -135,26 +135,26 @@ Wrapper compositions (any component that embeds other compositions via `componen
 
 Violating this causes a circular-import TDZ crash at runtime.
 
+## Static Assets
+
+`apps/web/public/` is the **single source of truth** for every static asset (images, audio, fonts, logos, MP3 samples). `apps/remotion/public/` is a symlink to `../web/public`, so both apps see the same tree.
+
+When a composition references an asset via `staticFile()` (e.g. `staticFile("images/logos/aryan-avatar.png")`), the path is rooted at `apps/web/public/`. Drop new assets there only — do NOT create a real directory at `apps/remotion/public/`, or the studio Player and the in-browser export (which load from the Next dev server's public dir) will 404 on assets that only exist on the Remotion side.
+
 ## Adding a Composition — Required Sync Points
 
-When you add a new composition under `apps/remotion/src/compositions/<Name>/`, **all** of these must be updated in the same change. Skipping any one of them leaves the composition partially wired (silently missing from docs, broken in the studio, or invisible in the registry):
+`apps/remotion/src/registry.ts → compositions[]` is the **single source of truth**. The studio Library, Cmd-K palette, `/component/[id]/edit`, `/docs/[id]`, the docs sidebar, the home grid — every surface that lists compositions reads from this array. Adding a composition therefore requires only three files:
 
 1. **`apps/remotion/src/compositions/<Name>/<Name>.tsx`** — the React component.
 2. **`apps/remotion/src/compositions/<Name>/meta.ts`** — exports `<name>Info: CompositionInfo<Props>` with `id`, `title`, `description`, dimensions, `defaultProps`, `fields`. The `id` must be a unique PascalCase string.
-3. **`apps/remotion/src/registry.ts`** — import the `<name>Info` and add it to the `compositions` array. This drives the studio Library, the docs sidebar, and `generateStaticParams` for `/docs/[id]` and `/component/[id]/edit`.
-4. **`apps/remotion/src/componentsBase.ts`** (or **`components.ts`** for wrapper compositions) — import the component and add it to `componentsByIdBase` (or the wrapper map). The `<Project>` composition and the renderer look the component up by `id` from this map; missing here = silent black screen in the timeline / studio export.
-5. **`apps/web/content/docs/<kebab-name>.mdx`** — docs page. Mirror an existing one: `meta` export with `title`, `description`, `toc`, plus the `<Preview id />`, `<EditorLink id />`, `<PropsTable id />`, `<CompositionStats id />` blocks. The filename is the kebab-case form of the id.
-6. **`apps/web/lib/docs.ts`** — import the MDX module + `meta as <camel>Meta`, then add a `Doc` entry with `slug` (= the composition id), `href` (`/docs/<id>`), `meta`, and `Content`. Order matters: the entry's position determines prev/next nav order.
+3. **`apps/remotion/src/registry.ts` + `apps/remotion/src/componentsBase.ts`** — register the meta in `compositions` and the React component in `componentsByIdBase`. Wrapper compositions that embed other compositions live in `components.ts` instead (see "Remotion Composition Registry" above).
 
-Quick sanity check after the change:
+That's it. The composition appears everywhere — including a registry-generated docs page at `/docs/<Id>` rendered via `<AutoDoc id={...} />`, which uses the composition's `title` / `description` / `fields`.
 
-```bash
-# Every registered composition id should also appear as a slug in lib/docs.ts.
-grep '  id:' apps/remotion/src/compositions/*/meta.ts \
-  | grep -oE '"[^"]+"' | tr -d '"' | sort -u > /tmp/ids.txt
-grep -oE 'slug: "[A-Z][a-zA-Z]+"' apps/web/lib/docs.ts \
-  | sed 's/slug: "//;s/"$//' | sort -u > /tmp/slugs.txt
-comm -23 /tmp/ids.txt /tmp/slugs.txt   # should print nothing
-```
+### Optional: hand-written docs prose
 
-If that command prints anything, those compositions are registered in Remotion but don't have a docs page wired up.
+If you want bespoke prose on the docs page (gotchas, examples, design rationale), create `apps/web/content/docs/<kebab-name>.mdx` exporting `meta` + the default component, then add it to the `bespokeMdxByCompositionId` map in `apps/web/lib/docs.ts`. The map's presence overrides the auto-doc fallback for that composition. Compositions without an entry continue to use `AutoDoc`.
+
+### Cmd-K palette
+
+Press ⌘K (or Ctrl+K) anywhere in the studio. Searches across registered compositions, studio actions (export, screenshot, save, import, play, audio), and every docs page. The palette reads from `registry.compositions` and `lib/docs.docs`, so anything you register surfaces automatically.

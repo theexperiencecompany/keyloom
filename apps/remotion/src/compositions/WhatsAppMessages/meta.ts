@@ -23,7 +23,7 @@ export const whatsappMessagesDefaultProps: WhatsAppMessagesProps = {
   ],
   theme: "light",
   orientation: "landscape",
-  scale: 1.6,
+  scale: 2,
 };
 
 export const whatsappMessagesInfo: CompositionInfo<WhatsAppMessagesProps> = {

@@ -65,10 +65,10 @@ export function ProjectAudioControl({
   const fadeInSec = (fadeIn / fps).toFixed(2);
   const fadeOutSec = (fadeOut / fps).toFixed(2);
 
-  // Slider step = one second in frames so the duration slider snaps to
-  // whole-second values; users get a "9.0 s of 12.0 s" readout, not
-  // 9.13333…
-  const durationStep = Math.max(1, Math.round(fps));
+  // Slider step = 1 frame so the duration scrubs at full timeline
+  // precision. The readout still rounds to 0.1s for legibility, but the
+  // underlying value matches what the renderer sees.
+  const durationStep = 1;
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-background/95 p-4">

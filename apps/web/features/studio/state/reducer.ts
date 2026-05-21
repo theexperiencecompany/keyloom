@@ -12,9 +12,19 @@ import type { SceneTransition } from "@workspace/compositions/transitions";
 
 export type StudioPanel = "library" | "agent" | "audio" | null;
 
+/**
+ * Tagged union for what's currently selected in the studio. The inspector
+ * dispatches on `kind` to render the right pane (clip props, audio
+ * controls, etc). Null = nothing selected.
+ */
+export type StudioSelection =
+  | { kind: "clip"; id: string }
+  | { kind: "audio" }
+  | null;
+
 export type StudioState = {
   project: Project;
-  selectedClipId: string | null;
+  selection: StudioSelection;
   openPanel: StudioPanel;
 };
 
@@ -37,6 +47,8 @@ export type StudioAction =
       props: Record<string, unknown>;
     }
   | { type: "SELECT_CLIP"; clipId: string | null }
+  | { type: "SELECT_AUDIO" }
+  | { type: "CLEAR_SELECTION" }
   | { type: "TOGGLE_PANEL"; panel: StudioPanel }
   | { type: "UPDATE_CLIP_STYLE"; clipId: string; patch: Partial<ClipStyle> }
   | { type: "RESET_CLIP_STYLE"; clipId: string }
@@ -56,7 +68,7 @@ export type StudioAction =
 
 export const initialStudioState: StudioState = {
   project: DEFAULT_PROJECT,
-  selectedClipId: null,
+  selection: null,
   openPanel: "library",
 };
 
@@ -77,16 +89,18 @@ export function studioReducer(
       return {
         ...state,
         project: { ...state.project, clips: [...state.project.clips, clip] },
-        selectedClipId: clip.id,
+        selection: { kind: "clip", id: clip.id },
       };
     }
     case "DELETE_CLIP": {
       const clips = state.project.clips.filter((c) => c.id !== action.clipId);
+      const wasSelected =
+        state.selection?.kind === "clip" &&
+        state.selection.id === action.clipId;
       return {
         ...state,
         project: { ...state.project, clips },
-        selectedClipId:
-          state.selectedClipId === action.clipId ? null : state.selectedClipId,
+        selection: wasSelected ? null : state.selection,
       };
     }
     case "REORDER_CLIPS": {
@@ -201,13 +215,24 @@ export function studioReducer(
     }
     case "CLEAR_PROJECT_AUDIO": {
       const { audio: _omit, ...rest } = state.project;
+      // Clearing the audio invalidates an audio selection.
+      const selection =
+        state.selection?.kind === "audio" ? null : state.selection;
       return {
         ...state,
         project: rest,
+        selection,
       };
     }
     case "SELECT_CLIP":
-      return { ...state, selectedClipId: action.clipId };
+      return {
+        ...state,
+        selection: action.clipId ? { kind: "clip", id: action.clipId } : null,
+      };
+    case "SELECT_AUDIO":
+      return { ...state, selection: { kind: "audio" } };
+    case "CLEAR_SELECTION":
+      return { ...state, selection: null };
     case "TOGGLE_PANEL":
       return {
         ...state,
@@ -217,7 +242,7 @@ export function studioReducer(
       return {
         ...state,
         project: action.project,
-        selectedClipId: null,
+        selection: null,
       };
   }
 }

@@ -28,6 +28,7 @@ import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
 import { AgentPanel } from "./agent-panel";
 import { AudioPanel } from "./audio-panel";
+import { CommandPalette } from "./command-palette";
 import { ExportProgressOverlay } from "./export-progress-overlay";
 import { ExportSettingsModal } from "./export-settings-modal";
 import { Inspector, type InspectorTab } from "./inspector";
@@ -44,7 +45,9 @@ export function Builder() {
   // Studio state
   // ----------------------------------------------------------------------
   const [state, dispatch] = useReducer(studioReducer, initialStudioState);
-  const { project, selectedClipId, openPanel } = state;
+  const { project, selection, openPanel } = state;
+  const selectedClipId = selection?.kind === "clip" ? selection.id : null;
+  const isAudioSelected = selection?.kind === "audio";
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("content");
 
   const totalDuration = projectDuration(project);
@@ -71,6 +74,7 @@ export function Builder() {
   const isExporting =
     exportState.phase === "starting" || exportState.phase === "rendering";
   const [exportSettingsOpen, setExportSettingsOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const lastExportOptionsRef = useRef<ExportOptions | null>(null);
 
   const handleStartExport = (options: ExportOptions) => {
@@ -207,6 +211,7 @@ export function Builder() {
             <AudioPanel
               currentAudio={project.audio}
               onSet={(audio) => dispatch({ type: "SET_PROJECT_AUDIO", audio })}
+              onClear={() => dispatch({ type: "CLEAR_PROJECT_AUDIO" })}
               onClose={() => dispatch({ type: "TOGGLE_PANEL", panel: "audio" })}
             />
           )}
@@ -241,6 +246,11 @@ export function Builder() {
             <Timeline
               project={project}
               selectedClipId={selectedClipId}
+              audioSelected={isAudioSelected}
+              onSelectAudio={() => dispatch({ type: "SELECT_AUDIO" })}
+              onUpdateAudio={(patch) =>
+                dispatch({ type: "UPDATE_PROJECT_AUDIO", patch })
+              }
               onSelect={(id) => dispatch({ type: "SELECT_CLIP", clipId: id })}
               onReorder={(clipIds) =>
                 dispatch({ type: "REORDER_CLIPS", clipIds })
@@ -327,19 +337,25 @@ export function Builder() {
           )}
 
           {/*
-            Project-level Audio inspector. Mirrors how the Project default
-            transition control lives in the top bar — except audio has
-            more controls than fit in a popover, so it gets its own right-
-            rail slot when no clip is selected. Tucked inside the inspector
-            column when a clip IS selected via the inspector's own
-            footer, this would crowd the clip controls; for now we surface
-            it only when nothing is selected.
+            Audio inspector — surfaces when the user clicks the audio track
+            row in the timeline (selection.kind === "audio"). Mutually
+            exclusive with the clip inspector: a clip click clears audio
+            selection and vice versa.
           */}
-          {!selectedClip && project.audio && (
+          {isAudioSelected && project.audio && (
             <aside className="flex w-80 shrink-0 flex-col gap-3 overflow-y-auto border-l border-border bg-background p-3">
-              <p className="px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Project audio
-              </p>
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Project audio
+                </p>
+                <button
+                  type="button"
+                  onClick={() => dispatch({ type: "CLEAR_SELECTION" })}
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  Close
+                </button>
+              </div>
               <ProjectAudioControl
                 audio={project.audio}
                 fps={project.fps}
@@ -374,6 +390,36 @@ export function Builder() {
           projectHeight={project.height}
           durationInFrames={totalDuration}
           fps={project.fps}
+        />
+
+        <CommandPalette
+          open={commandPaletteOpen}
+          onOpenChange={setCommandPaletteOpen}
+          onAddComposition={(compositionId) =>
+            dispatch({ type: "ADD_CLIP", compositionId })
+          }
+          onExport={() => setExportSettingsOpen(true)}
+          onScreenshot={handleCaptureFrame}
+          onTogglePlay={playerControls.handlePlayPause}
+          onSkipToStart={playerControls.handleSkipToStart}
+          onSkipToEnd={playerControls.handleSkipToEnd}
+          onOpenLibrary={() =>
+            dispatch({ type: "TOGGLE_PANEL", panel: "library" })
+          }
+          onOpenAudio={() => dispatch({ type: "TOGGLE_PANEL", panel: "audio" })}
+          onSaveProject={handleSaveProject}
+          onImportProject={() => {
+            // Conjure a transient file picker so the cmd-K Import action
+            // doesn't depend on TopBar's hidden input being mounted.
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "application/json,.json";
+            input.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0];
+              if (file) void handleLoadProjectFile(file);
+            };
+            input.click();
+          }}
         />
       </div>
     </PlayerProvider>

@@ -53,7 +53,6 @@ export function PreviewStage({
           compositionHeight={project.height}
           style={{ width: "100%", height: "100%" }}
           loop
-          initiallyMuted
           acknowledgeRemotionLicense
         />
       </div>

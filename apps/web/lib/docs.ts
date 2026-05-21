@@ -74,6 +74,7 @@ import PieChartMDX, {
 import PricingCardMDX, {
   meta as pricingCardMeta,
 } from "@/content/docs/pricing-card.mdx";
+import QrCodeMDX, { meta as qrCodeMeta } from "@/content/docs/qr-code.mdx";
 import RadarChartMDX, {
   meta as radarChartMeta,
 } from "@/content/docs/radar-chart.mdx";
@@ -216,6 +217,212 @@ export type Doc = {
   Content: ComponentType;
 };
 
+/**
+ * Composition docs are registry-driven. For each composition in
+ * `@workspace/compositions/registry`, we either:
+ *   - render the bespoke MDX file in `content/docs/<kebab>.mdx` if its
+ *     module is listed in `bespokeMdxByCompositionId` below, OR
+ *   - render an <AutoDoc /> shell built from the composition's registry
+ *     metadata (title, description, fields).
+ *
+ * Adding a new composition therefore requires NO change to this file —
+ * the studio library, /docs sidebar, /docs/<id> route, /component/<id>/edit,
+ * cmd-K palette, and home grid all derive from a single source of truth:
+ * `registry.compositions[]`.
+ *
+ * Adding bespoke prose for a composition: drop an MDX file at
+ * `content/docs/<kebab>.mdx` exporting `meta` + a default component, add
+ * one import + one map entry below. Optional.
+ */
+
+import { compositions } from "@workspace/compositions/registry";
+import { createElement } from "react";
+import { AutoDoc } from "@/components/docs/auto-doc";
+
+type BespokeMdx = { Content: ComponentType; meta: DocMeta };
+
+// Composition-id → bespoke MDX module. Compositions absent from this map
+// automatically fall back to <AutoDoc />.
+const bespokeMdxByCompositionId: Record<string, BespokeMdx> = {
+  GaiaScenario: { Content: GaiaScenarioMDX, meta: gaiaScenarioMeta },
+  TitleSlideUp: { Content: TitleSlideUpMDX, meta: titleSlideUpMeta },
+  TitleType: { Content: TitleTypeMDX, meta: titleTypeMeta },
+  TitlePopup: { Content: TitlePopupMDX, meta: titlePopupMeta },
+  TitleFade: { Content: TitleFadeMDX, meta: titleFadeMeta },
+  TextBlurOutUp: { Content: TextBlurOutUpMDX, meta: textBlurOutUpMeta },
+  TextBottomUpLetters: {
+    Content: TextBottomUpLettersMDX,
+    meta: textBottomUpLettersMeta,
+  },
+  TextDepthParallaxWords: {
+    Content: TextDepthParallaxWordsMDX,
+    meta: textDepthParallaxWordsMeta,
+  },
+  TextFadeThrough: { Content: TextFadeThroughMDX, meta: textFadeThroughMeta },
+  TextFocusBlurResolve: {
+    Content: TextFocusBlurResolveMDX,
+    meta: textFocusBlurResolveMeta,
+  },
+  TextKineticCenterBuild: {
+    Content: TextKineticCenterBuildMDX,
+    meta: textKineticCenterBuildMeta,
+  },
+  TextLineByLineSlide: {
+    Content: TextLineByLineSlideMDX,
+    meta: textLineByLineSlideMeta,
+  },
+  TextMaskRevealUp: {
+    Content: TextMaskRevealUpMDX,
+    meta: textMaskRevealUpMeta,
+  },
+  TextMicroScaleFade: {
+    Content: TextMicroScaleFadeMDX,
+    meta: textMicroScaleFadeMeta,
+  },
+  TextPerCharacterRise: {
+    Content: TextPerCharacterRiseMDX,
+    meta: textPerCharacterRiseMeta,
+  },
+  TextPerWordCrossfade: {
+    Content: TextPerWordCrossfadeMDX,
+    meta: textPerWordCrossfadeMeta,
+  },
+  TextScaleDownFade: {
+    Content: TextScaleDownFadeMDX,
+    meta: textScaleDownFadeMeta,
+  },
+  TextSharedAxisX: { Content: TextSharedAxisXMDX, meta: textSharedAxisXMeta },
+  TextSharedAxisY: { Content: TextSharedAxisYMDX, meta: textSharedAxisYMeta },
+  TextSharedAxisZ: { Content: TextSharedAxisZMDX, meta: textSharedAxisZMeta },
+  TextShimmerSweep: {
+    Content: TextShimmerSweepMDX,
+    meta: textShimmerSweepMeta,
+  },
+  TextShortSlideDown: {
+    Content: TextShortSlideDownMDX,
+    meta: textShortSlideDownMeta,
+  },
+  TextShortSlideRight: {
+    Content: TextShortSlideRightMDX,
+    meta: textShortSlideRightMeta,
+  },
+  TextSoftBlurIn: { Content: TextSoftBlurInMDX, meta: textSoftBlurInMeta },
+  TextSpringScaleIn: {
+    Content: TextSpringScaleInMDX,
+    meta: textSpringScaleInMeta,
+  },
+  TextStaggerFromCenter: {
+    Content: TextStaggerFromCenterMDX,
+    meta: textStaggerFromCenterMeta,
+  },
+  TextStaggerFromEdges: {
+    Content: TextStaggerFromEdgesMDX,
+    meta: textStaggerFromEdgesMeta,
+  },
+  TextTopDownLetters: {
+    Content: TextTopDownLettersMDX,
+    meta: textTopDownLettersMeta,
+  },
+  TextTypewriter: { Content: TextTypewriterMDX, meta: textTypewriterMeta },
+  TypingSearch: { Content: TypingSearchMDX, meta: typingSearchMeta },
+  TypingComposer: { Content: TypingComposerMDX, meta: typingComposerMeta },
+  CursorWalkthrough: {
+    Content: CursorWalkthroughMDX,
+    meta: cursorWalkthroughMeta,
+  },
+  BrowserWindow: { Content: BrowserWindowMDX, meta: browserWindowMeta },
+  CaptionTrack: { Content: CaptionTrackMDX, meta: captionTrackMeta },
+  StatCounter: { Content: StatCounterMDX, meta: statCounterMeta },
+  TweetCard: { Content: TweetCardMDX, meta: tweetCardMeta },
+  TwitterFollow: { Content: TwitterFollowMDX, meta: twitterFollowMeta },
+  InstagramPost: { Content: InstagramPostMDX, meta: instagramPostMeta },
+  MessageBubbles: { Content: MessageBubblesMDX, meta: messageBubblesMeta },
+  WhatsAppMessages: {
+    Content: WhatsAppMessagesMDX,
+    meta: whatsappMessagesMeta,
+  },
+  TelegramMessages: {
+    Content: TelegramMessagesMDX,
+    meta: telegramMessagesMeta,
+  },
+  SlackMessages: { Content: SlackMessagesMDX, meta: slackMessagesMeta },
+  DiscordMessages: { Content: DiscordMessagesMDX, meta: discordMessagesMeta },
+  InstagramMessages: {
+    Content: InstagramMessagesMDX,
+    meta: instagramMessagesMeta,
+  },
+  MessagePopup: { Content: MessagePopupMDX, meta: messagePopupMeta },
+  PhoneFrame: { Content: PhoneFrameMDX, meta: phoneFrameMeta },
+  LaptopFrame: { Content: LaptopFrameMDX, meta: laptopFrameMeta },
+  SplitScene: { Content: SplitSceneMDX, meta: splitSceneMeta },
+  FeatureCard: { Content: FeatureCardMDX, meta: featureCardMeta },
+  MetricCard: { Content: MetricCardMDX, meta: metricCardMeta },
+  TestimonialCard: { Content: TestimonialCardMDX, meta: testimonialCardMeta },
+  LogoCloud: { Content: LogoCloudMDX, meta: logoCloudMeta },
+  PricingCard: { Content: PricingCardMDX, meta: pricingCardMeta },
+  QrCode: { Content: QrCodeMDX, meta: qrCodeMeta },
+  Terminal: { Content: TerminalMDX, meta: terminalMeta },
+  GitHubStarButton: {
+    Content: GitHubStarButtonMDX,
+    meta: githubStarButtonMeta,
+  },
+  Toast: { Content: ToastMDX, meta: toastMeta },
+  PerspectiveMarquee: {
+    Content: PerspectiveMarqueeMDX,
+    meta: perspectiveMarqueeMeta,
+  },
+  BarChart: { Content: BarChartMDX, meta: barChartMeta },
+  LineChart: { Content: LineChartMDX, meta: lineChartMeta },
+  AreaChart: { Content: AreaChartMDX, meta: areaChartMeta },
+  PieChart: { Content: PieChartMDX, meta: pieChartMeta },
+  RadarChart: { Content: RadarChartMDX, meta: radarChartMeta },
+  RadialChart: { Content: RadialChartMDX, meta: radialChartMeta },
+  Showcase: { Content: ShowcaseMDX, meta: showcaseMeta },
+};
+
+/**
+ * Derive the doc entry for a registered composition. Order in the sidebar
+ * follows registry order, so reordering compositions in `registry.ts`
+ * automatically reorders the docs nav and the prev/next chain.
+ */
+function deriveCompositionDoc(c: (typeof compositions)[number]): Doc {
+  const bespoke = bespokeMdxByCompositionId[c.id];
+  if (bespoke) {
+    return {
+      slug: c.id,
+      href: `/docs/${c.id}`,
+      meta: bespoke.meta,
+      Content: bespoke.Content,
+    };
+  }
+  // No MDX file — render an AutoDoc shell derived from the composition's
+  // registry metadata. Same four blocks every bespoke MDX uses.
+  const id = c.id;
+  const description = c.description;
+  const AutoContent: ComponentType = () =>
+    createElement(AutoDoc, { id, description });
+  return {
+    slug: id,
+    href: `/docs/${id}`,
+    meta: {
+      title: c.title,
+      description: c.description,
+      toc: [
+        { label: "Preview", id: "preview" },
+        { label: "Props", id: "props" },
+        { label: "Composition", id: "composition" },
+      ],
+    },
+    Content: AutoContent,
+  };
+}
+
+const componentDocs: Doc[] = compositions.map(deriveCompositionDoc);
+
+/**
+ * Main docs feed — introduction sits first, then every composition in
+ * registry order. Adding a composition automatically extends this list.
+ */
 export const docs: Doc[] = [
   {
     slug: "introduction",
@@ -223,393 +430,10 @@ export const docs: Doc[] = [
     meta: introductionMeta,
     Content: IntroductionMDX,
   },
-  {
-    slug: "GaiaScenario",
-    href: "/docs/GaiaScenario",
-    meta: gaiaScenarioMeta,
-    Content: GaiaScenarioMDX,
-  },
-  {
-    slug: "TitleSlideUp",
-    href: "/docs/TitleSlideUp",
-    meta: titleSlideUpMeta,
-    Content: TitleSlideUpMDX,
-  },
-  {
-    slug: "TitleType",
-    href: "/docs/TitleType",
-    meta: titleTypeMeta,
-    Content: TitleTypeMDX,
-  },
-  {
-    slug: "TitlePopup",
-    href: "/docs/TitlePopup",
-    meta: titlePopupMeta,
-    Content: TitlePopupMDX,
-  },
-  {
-    slug: "TitleFade",
-    href: "/docs/TitleFade",
-    meta: titleFadeMeta,
-    Content: TitleFadeMDX,
-  },
-  {
-    slug: "TextBlurOutUp",
-    href: "/docs/TextBlurOutUp",
-    meta: textBlurOutUpMeta,
-    Content: TextBlurOutUpMDX,
-  },
-  {
-    slug: "TextBottomUpLetters",
-    href: "/docs/TextBottomUpLetters",
-    meta: textBottomUpLettersMeta,
-    Content: TextBottomUpLettersMDX,
-  },
-  {
-    slug: "TextDepthParallaxWords",
-    href: "/docs/TextDepthParallaxWords",
-    meta: textDepthParallaxWordsMeta,
-    Content: TextDepthParallaxWordsMDX,
-  },
-  {
-    slug: "TextFadeThrough",
-    href: "/docs/TextFadeThrough",
-    meta: textFadeThroughMeta,
-    Content: TextFadeThroughMDX,
-  },
-  {
-    slug: "TextFocusBlurResolve",
-    href: "/docs/TextFocusBlurResolve",
-    meta: textFocusBlurResolveMeta,
-    Content: TextFocusBlurResolveMDX,
-  },
-  {
-    slug: "TextKineticCenterBuild",
-    href: "/docs/TextKineticCenterBuild",
-    meta: textKineticCenterBuildMeta,
-    Content: TextKineticCenterBuildMDX,
-  },
-  {
-    slug: "TextLineByLineSlide",
-    href: "/docs/TextLineByLineSlide",
-    meta: textLineByLineSlideMeta,
-    Content: TextLineByLineSlideMDX,
-  },
-  {
-    slug: "TextMaskRevealUp",
-    href: "/docs/TextMaskRevealUp",
-    meta: textMaskRevealUpMeta,
-    Content: TextMaskRevealUpMDX,
-  },
-  {
-    slug: "TextMicroScaleFade",
-    href: "/docs/TextMicroScaleFade",
-    meta: textMicroScaleFadeMeta,
-    Content: TextMicroScaleFadeMDX,
-  },
-  {
-    slug: "TextPerCharacterRise",
-    href: "/docs/TextPerCharacterRise",
-    meta: textPerCharacterRiseMeta,
-    Content: TextPerCharacterRiseMDX,
-  },
-  {
-    slug: "TextPerWordCrossfade",
-    href: "/docs/TextPerWordCrossfade",
-    meta: textPerWordCrossfadeMeta,
-    Content: TextPerWordCrossfadeMDX,
-  },
-  {
-    slug: "TextScaleDownFade",
-    href: "/docs/TextScaleDownFade",
-    meta: textScaleDownFadeMeta,
-    Content: TextScaleDownFadeMDX,
-  },
-  {
-    slug: "TextSharedAxisX",
-    href: "/docs/TextSharedAxisX",
-    meta: textSharedAxisXMeta,
-    Content: TextSharedAxisXMDX,
-  },
-  {
-    slug: "TextSharedAxisY",
-    href: "/docs/TextSharedAxisY",
-    meta: textSharedAxisYMeta,
-    Content: TextSharedAxisYMDX,
-  },
-  {
-    slug: "TextSharedAxisZ",
-    href: "/docs/TextSharedAxisZ",
-    meta: textSharedAxisZMeta,
-    Content: TextSharedAxisZMDX,
-  },
-  {
-    slug: "TextShimmerSweep",
-    href: "/docs/TextShimmerSweep",
-    meta: textShimmerSweepMeta,
-    Content: TextShimmerSweepMDX,
-  },
-  {
-    slug: "TextShortSlideDown",
-    href: "/docs/TextShortSlideDown",
-    meta: textShortSlideDownMeta,
-    Content: TextShortSlideDownMDX,
-  },
-  {
-    slug: "TextShortSlideRight",
-    href: "/docs/TextShortSlideRight",
-    meta: textShortSlideRightMeta,
-    Content: TextShortSlideRightMDX,
-  },
-  {
-    slug: "TextSoftBlurIn",
-    href: "/docs/TextSoftBlurIn",
-    meta: textSoftBlurInMeta,
-    Content: TextSoftBlurInMDX,
-  },
-  {
-    slug: "TextSpringScaleIn",
-    href: "/docs/TextSpringScaleIn",
-    meta: textSpringScaleInMeta,
-    Content: TextSpringScaleInMDX,
-  },
-  {
-    slug: "TextStaggerFromCenter",
-    href: "/docs/TextStaggerFromCenter",
-    meta: textStaggerFromCenterMeta,
-    Content: TextStaggerFromCenterMDX,
-  },
-  {
-    slug: "TextStaggerFromEdges",
-    href: "/docs/TextStaggerFromEdges",
-    meta: textStaggerFromEdgesMeta,
-    Content: TextStaggerFromEdgesMDX,
-  },
-  {
-    slug: "TextTopDownLetters",
-    href: "/docs/TextTopDownLetters",
-    meta: textTopDownLettersMeta,
-    Content: TextTopDownLettersMDX,
-  },
-  {
-    slug: "TextTypewriter",
-    href: "/docs/TextTypewriter",
-    meta: textTypewriterMeta,
-    Content: TextTypewriterMDX,
-  },
-  {
-    slug: "TypingSearch",
-    href: "/docs/TypingSearch",
-    meta: typingSearchMeta,
-    Content: TypingSearchMDX,
-  },
-  {
-    slug: "TypingComposer",
-    href: "/docs/TypingComposer",
-    meta: typingComposerMeta,
-    Content: TypingComposerMDX,
-  },
-  {
-    slug: "StatCounter",
-    href: "/docs/StatCounter",
-    meta: statCounterMeta,
-    Content: StatCounterMDX,
-  },
-  {
-    slug: "TweetCard",
-    href: "/docs/TweetCard",
-    meta: tweetCardMeta,
-    Content: TweetCardMDX,
-  },
-  {
-    slug: "TwitterFollow",
-    href: "/docs/TwitterFollow",
-    meta: twitterFollowMeta,
-    Content: TwitterFollowMDX,
-  },
-  {
-    slug: "InstagramPost",
-    href: "/docs/InstagramPost",
-    meta: instagramPostMeta,
-    Content: InstagramPostMDX,
-  },
-  {
-    slug: "CursorWalkthrough",
-    href: "/docs/CursorWalkthrough",
-    meta: cursorWalkthroughMeta,
-    Content: CursorWalkthroughMDX,
-  },
-  {
-    slug: "BrowserWindow",
-    href: "/docs/BrowserWindow",
-    meta: browserWindowMeta,
-    Content: BrowserWindowMDX,
-  },
-  {
-    slug: "CaptionTrack",
-    href: "/docs/CaptionTrack",
-    meta: captionTrackMeta,
-    Content: CaptionTrackMDX,
-  },
-  {
-    slug: "MessagePopup",
-    href: "/docs/MessagePopup",
-    meta: messagePopupMeta,
-    Content: MessagePopupMDX,
-  },
-  {
-    slug: "MessageBubbles",
-    href: "/docs/MessageBubbles",
-    meta: messageBubblesMeta,
-    Content: MessageBubblesMDX,
-  },
-  {
-    slug: "WhatsAppMessages",
-    href: "/docs/WhatsAppMessages",
-    meta: whatsappMessagesMeta,
-    Content: WhatsAppMessagesMDX,
-  },
-  {
-    slug: "InstagramMessages",
-    href: "/docs/InstagramMessages",
-    meta: instagramMessagesMeta,
-    Content: InstagramMessagesMDX,
-  },
-  {
-    slug: "SlackMessages",
-    href: "/docs/SlackMessages",
-    meta: slackMessagesMeta,
-    Content: SlackMessagesMDX,
-  },
-  {
-    slug: "DiscordMessages",
-    href: "/docs/DiscordMessages",
-    meta: discordMessagesMeta,
-    Content: DiscordMessagesMDX,
-  },
-  {
-    slug: "TelegramMessages",
-    href: "/docs/TelegramMessages",
-    meta: telegramMessagesMeta,
-    Content: TelegramMessagesMDX,
-  },
-  {
-    slug: "PhoneFrame",
-    href: "/docs/PhoneFrame",
-    meta: phoneFrameMeta,
-    Content: PhoneFrameMDX,
-  },
-  {
-    slug: "LaptopFrame",
-    href: "/docs/LaptopFrame",
-    meta: laptopFrameMeta,
-    Content: LaptopFrameMDX,
-  },
-  {
-    slug: "SplitScene",
-    href: "/docs/SplitScene",
-    meta: splitSceneMeta,
-    Content: SplitSceneMDX,
-  },
-  {
-    slug: "FeatureCard",
-    href: "/docs/FeatureCard",
-    meta: featureCardMeta,
-    Content: FeatureCardMDX,
-  },
-  {
-    slug: "MetricCard",
-    href: "/docs/MetricCard",
-    meta: metricCardMeta,
-    Content: MetricCardMDX,
-  },
-  {
-    slug: "TestimonialCard",
-    href: "/docs/TestimonialCard",
-    meta: testimonialCardMeta,
-    Content: TestimonialCardMDX,
-  },
-  {
-    slug: "LogoCloud",
-    href: "/docs/LogoCloud",
-    meta: logoCloudMeta,
-    Content: LogoCloudMDX,
-  },
-  {
-    slug: "PricingCard",
-    href: "/docs/PricingCard",
-    meta: pricingCardMeta,
-    Content: PricingCardMDX,
-  },
-  {
-    slug: "Terminal",
-    href: "/docs/Terminal",
-    meta: terminalMeta,
-    Content: TerminalMDX,
-  },
-  {
-    slug: "GitHubStarButton",
-    href: "/docs/GitHubStarButton",
-    meta: githubStarButtonMeta,
-    Content: GitHubStarButtonMDX,
-  },
-  {
-    slug: "Toast",
-    href: "/docs/Toast",
-    meta: toastMeta,
-    Content: ToastMDX,
-  },
-  {
-    slug: "PerspectiveMarquee",
-    href: "/docs/PerspectiveMarquee",
-    meta: perspectiveMarqueeMeta,
-    Content: PerspectiveMarqueeMDX,
-  },
-  {
-    slug: "BarChart",
-    href: "/docs/BarChart",
-    meta: barChartMeta,
-    Content: BarChartMDX,
-  },
-  {
-    slug: "LineChart",
-    href: "/docs/LineChart",
-    meta: lineChartMeta,
-    Content: LineChartMDX,
-  },
-  {
-    slug: "AreaChart",
-    href: "/docs/AreaChart",
-    meta: areaChartMeta,
-    Content: AreaChartMDX,
-  },
-  {
-    slug: "PieChart",
-    href: "/docs/PieChart",
-    meta: pieChartMeta,
-    Content: PieChartMDX,
-  },
-  {
-    slug: "RadarChart",
-    href: "/docs/RadarChart",
-    meta: radarChartMeta,
-    Content: RadarChartMDX,
-  },
-  {
-    slug: "RadialChart",
-    href: "/docs/RadialChart",
-    meta: radialChartMeta,
-    Content: RadialChartMDX,
-  },
-  {
-    slug: "Showcase",
-    href: "/docs/Showcase",
-    meta: showcaseMeta,
-    Content: ShowcaseMDX,
-  },
+  ...componentDocs,
 ];
 
-// Static-page docs (no composition behind them) — these are linked from the
+// Static-page docs (no composition behind them) — linked from the
 // sidebar / nav but don't appear in the components grid.
 export const staticDocs: Doc[] = [
   {

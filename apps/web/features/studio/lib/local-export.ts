@@ -134,7 +134,7 @@ export async function renderProjectLocally({
     container: "mp4",
     videoCodec: "h264",
     videoBitrate: options.bitrate,
-    scale: Math.min(1, Math.max(0.25, options.scale)),
+    scale: Math.min(2, Math.max(0.25, options.scale)),
     // The Chromium WebCodecs encoder (both hardware and software) silently
     // caps the bitrate around ~5 Mbps regardless of what we request, so the
     // shimmer-elimination heavy lift is done by the tight keyframe interval

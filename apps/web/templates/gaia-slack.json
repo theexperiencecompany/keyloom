@@ -7,79 +7,71 @@
     "durationInFrames": 12,
     "timing": { "kind": "linear" }
   },
+  "audio": {
+    "src": "/audio/uploads/lean-on.mp3",
+    "title": "Lean On — Major Lazer & DJ Snake feat. MØ",
+    "volume": 0.45,
+    "fadeInFrames": 60,
+    "fadeOutFrames": 120,
+    "trimStartSec": 0,
+    "startFrame": 0,
+    "loop": false
+  },
   "clips": [
     {
-      "id": "clip_hook_a",
-      "compositionId": "TextSoftBlurIn",
-      "durationInFrames": 130,
+      "id": "clip_notification",
+      "compositionId": "MessagePopup",
+      "durationInFrames": 120,
       "props": {
-        "headline": "Your team lives in Slack.",
-        "subtitle": ""
+        "sender": "GAIA · #leadership-q3",
+        "time": "9:14 AM",
+        "body": "Q3 retention pulled. up 6.1 pts. quick thread?",
+        "theme": "light",
+        "iconPreset": "slack"
       }
     },
     {
-      "id": "clip_hook_b",
-      "compositionId": "TitlePopup",
-      "durationInFrames": 150,
+      "id": "clip_title",
+      "compositionId": "TextSoftBlurIn",
+      "durationInFrames": 130,
       "props": {
-        "headline": "Now your AI does too.",
-        "subtitle": ""
-      },
-      "style": {
-        "accentColor": "#611f69"
+        "headline": "Your team works in Slack.",
+        "subtitle": "GAIA. In the channel."
       }
     },
     {
       "id": "clip_slack",
       "compositionId": "SlackMessages",
-      "durationInFrames": 1750,
+      "durationInFrames": 460,
       "props": {
         "contactName": "leadership-q3",
         "theme": "light",
         "orientation": "landscape",
-        "scale": 1.55,
+        "scale": 2.5,
         "messages": [
           {
-            "text": "@GAIA pull our Q3 retention numbers",
+            "text": "@GAIA pull Q3 retention",
             "side": "left",
-            "typingFrames": 55,
-            "delay": 30
+            "typingFrames": 18,
+            "delay": 10
           },
           {
-            "text": "on it, pulling from mixpanel + stripe",
+            "text": "Q3 retention 87.4%, up 6.1 pts QoQ. onboarding revamp drove it.",
             "side": "right",
-            "typingFrames": 45,
-            "delay": 195
-          },
-          {
-            "text": "Q3 retention: 87.4%, up 6.1 pts QoQ\n\nbiggest lift came from the onboarding revamp wk 3 — sub-24hr activation jumped 41% → 68%",
-            "side": "right",
-            "typingFrames": 110,
-            "delay": 290
-          },
-          {
-            "text": "summarize the #q3-planning thread",
-            "side": "left",
-            "typingFrames": 60,
-            "delay": 640
-          },
-          {
-            "text": "47 msgs across 3 days, boiled down:\n\n• 4 action items, owners assigned, deadlines logged in linear\n• 2 blockers — both on infra\n• 1 pending decision (pricing tier rename)\n\ntagged each owner in-thread so nobody can claim they missed it",
-            "side": "right",
-            "typingFrames": 150,
-            "delay": 790
+            "typingFrames": 30,
+            "delay": 70
           },
           {
             "text": "book me + sarah + raj fri 2pm for review",
             "side": "left",
-            "typingFrames": 70,
-            "delay": 1230
+            "typingFrames": 20,
+            "delay": 180
           },
           {
-            "text": "booked ✓ fri 2pm. sarah's flying back from NYC so i pushed it to zoom, sent the holds + a doc w/ those 4 action items pre-loaded",
+            "text": "booked. sent the holds + a doc with the 4 action items pre-loaded.",
             "side": "right",
-            "typingFrames": 130,
-            "delay": 1390
+            "typingFrames": 28,
+            "delay": 270
           }
         ]
       }
@@ -89,67 +81,37 @@
       "compositionId": "Toast",
       "durationInFrames": 200,
       "props": {
-        "title": "Handled in 12 seconds",
-        "description": "Mixpanel · Stripe · Linear · Calendar",
+        "title": "Done",
+        "description": "Retention pulled. Meeting booked. Doc shared.",
         "position": "bottom-right",
         "variant": "success",
         "showIcon": true,
         "durationVisibleSec": 3.0
       },
       "style": {
-        "backgroundColor": "#0f1014"
-      }
-    },
-    {
-      "id": "clip_stat",
-      "compositionId": "StatCounter",
-      "durationInFrames": 220,
-      "props": {
-        "target": 14,
-        "label": "hours saved per teammate, every week",
-        "prefix": "",
-        "suffix": "h"
-      },
-      "style": {
-        "backgroundColor": "#0f1014",
-        "textColor": "#ffffff",
-        "accentColor": "#a98ddb"
+        "background": "#0f1014"
       }
     },
     {
       "id": "clip_pitch",
       "compositionId": "TextLineByLineSlide",
-      "durationInFrames": 260,
+      "durationInFrames": 220,
       "props": {
-        "headline": "No new app.\nNo new login.\n@-mention and ship.",
+        "headline": "No new app.\nNo new login.\nJust @-mention.",
         "subtitle": ""
-      },
-      "style": {
-        "accentColor": "#611f69"
       }
     },
     {
-      "id": "clip_closer",
-      "compositionId": "TextShimmerSweep",
-      "durationInFrames": 170,
+      "id": "clip_qr",
+      "compositionId": "QrCode",
+      "durationInFrames": 280,
       "props": {
-        "headline": "GAIA. Your team's AI in Slack.",
-        "subtitle": ""
-      },
-      "style": {
-        "accentColor": "#611f69"
-      }
-    },
-    {
-      "id": "clip_cta",
-      "compositionId": "TypingSearch",
-      "durationInFrames": 200,
-      "props": {
-        "query": "heygaia.io/slack",
-        "placeholder": "Install in your workspace…"
-      },
-      "style": {
-        "accentColor": "#611f69"
+        "value": "https://heygaia.io/slack-bot",
+        "caption": "heygaia.io/bots",
+        "moduleStyle": "dots",
+        "logoPreset": "slack",
+        "logoCustom": "",
+        "logoPadding": 0
       }
     }
   ]

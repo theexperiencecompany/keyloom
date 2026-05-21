@@ -85,7 +85,7 @@ function isBlockedHost(hostname: string): boolean {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ encoded: string }> },
 ) {
   const { encoded } = await params;
@@ -105,15 +105,24 @@ export async function GET(
     return new Response("Blocked host", { status: 400 });
   }
 
+  // Forward the client's Range header so the upstream can return 206 and
+  // @remotion/media's WebCodecs decoder can stream the file instead of
+  // pulling the whole thing into memory. Without this, the decoder waits
+  // for the entire MP3 to download before any audio plays — which is what
+  // breaks "click play and hear something now" in the studio preview.
+  const rangeHeader = req.headers.get("range") ?? undefined;
+  const upstreamHeaders: Record<string, string> = {
+    "user-agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+    accept: "audio/mpeg,audio/mp3,audio/*,*/*",
+  };
+  if (rangeHeader) upstreamHeaders.range = rangeHeader;
+
   let upstream: Response;
   try {
     upstream = await fetch(parsed.toString(), {
       redirect: "follow",
-      headers: {
-        "user-agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
-        accept: "audio/mpeg,audio/mp3,audio/*,*/*",
-      },
+      headers: upstreamHeaders,
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
   } catch (err) {
@@ -121,15 +130,14 @@ export async function GET(
     return new Response(`Upstream fetch failed: ${msg}`, { status: 502 });
   }
 
-  if (!upstream.ok || !upstream.body) {
+  // 200 OK or 206 Partial Content are both acceptable; anything else is
+  // upstream telling us no.
+  if ((upstream.status !== 200 && upstream.status !== 206) || !upstream.body) {
     return new Response(`Upstream ${upstream.status}`, {
       status: upstream.status || 502,
     });
   }
 
-  // Pixabay CDN sometimes serves `application/octet-stream` for .mp3
-  // downloads — don't reject the response on that; only reject obvious
-  // non-audio (html, json) so we don't smuggle pages through the proxy.
   const upstreamCT = upstream.headers.get("content-type") ?? "";
   const looksLikeAudio =
     upstreamCT.startsWith("audio/") ||
@@ -155,18 +163,41 @@ export async function GET(
     },
   });
 
-  // Normalize the content type for downstream decoders. mp3 is the
-  // overwhelmingly common case; keep the upstream type when it's already
-  // audio/*.
   const outCT = upstreamCT.startsWith("audio/") ? upstreamCT : "audio/mpeg";
 
+  const responseHeaders: Record<string, string> = {
+    "content-type": outCT,
+    "access-control-allow-origin": "*",
+    "access-control-expose-headers":
+      "content-length,content-range,accept-ranges",
+    "cross-origin-resource-policy": "cross-origin",
+    "cache-control": "public, max-age=86400, immutable",
+    // Advertise byte-range support so @remotion/media's decoder picks the
+    // streaming path even when the upstream stripped it.
+    "accept-ranges": "bytes",
+  };
+  // Pass through length / range metadata when the upstream provided it so
+  // the decoder knows the total size + seeks correctly.
+  const upstreamCR = upstream.headers.get("content-range");
+  if (upstreamCR) responseHeaders["content-range"] = upstreamCR;
+  const upstreamCL = upstream.headers.get("content-length");
+  if (upstreamCL) responseHeaders["content-length"] = upstreamCL;
+
   return new Response(upstream.body.pipeThrough(limiter), {
-    status: 200,
-    headers: {
-      "content-type": outCT,
-      "access-control-allow-origin": "*",
-      "cross-origin-resource-policy": "cross-origin",
-      "cache-control": "public, max-age=86400, immutable",
-    },
+    status: upstream.status,
+    headers: responseHeaders,
   });
+}
+
+/**
+ * Some clients probe with HEAD before issuing a ranged GET. Without this
+ * the probe gets the App-Router default 405, which a few decoders treat
+ * as "ranges unsupported" and then refuse to stream.
+ */
+export async function HEAD(
+  req: Request,
+  ctx: { params: Promise<{ encoded: string }> },
+) {
+  const res = await GET(req, ctx);
+  return new Response(null, { status: res.status, headers: res.headers });
 }

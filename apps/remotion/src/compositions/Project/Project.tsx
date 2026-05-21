@@ -1,4 +1,11 @@
 "use client";
+// `<Audio>` from `@remotion/media` rather than the classic one from
+// `remotion`. The classic Audio is rendered as an HTML5 <audio> element
+// which `@remotion/web-renderer` (used by both the in-browser MP4 export
+// AND the screenshot path via `renderStillOnWeb`) refuses with
+// "Html5Audio is not supported". `@remotion/media`'s Audio is the
+// WebCodecs-backed replacement and works across CLI render +
+// web-renderer + Player preview.
 import { Audio } from "@remotion/media";
 import { TransitionSeries } from "@remotion/transitions";
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
@@ -31,16 +38,17 @@ export const ProjectComposition: React.FC<Project> = ({
     <AbsoluteFill
       style={{
         background: "#000",
-        // Headless rendering (CLI + @remotion/web-renderer) rasterizes each
-        // frame independently. macOS Chromium's default subpixel-antialiased
-        // font smoothing positions glyphs relative to the LCD subpixel grid,
-        // so any sub-pixel `transform: translateY()` lands the glyph on a
-        // different subpixel each frame → visible wobble in exports.
-        // Forcing grayscale AA + geometricPrecision metrics makes glyph
-        // rasterization independent of sub-pixel position.
+        // Grayscale AA stays — it's what kills the subpixel-positioning
+        // wobble on text-heavy renders. `textRendering:
+        // "geometricPrecision"` was removed because @remotion/web-renderer
+        // lowercases it and passes it to Canvas2D's `textRendering` enum,
+        // which rejects "geometricprecision" and silently falls back to a
+        // path that measures glyphs differently from the HTML render —
+        // the result was words inside flex containers (MessagePopup body)
+        // rasterizing wider than their CSS boxes and overlapping into
+        // siblings ("babe what is" → "babewhatis").
         WebkitFontSmoothing: "antialiased",
         MozOsxFontSmoothing: "grayscale",
-        textRendering: "geometricPrecision",
       }}
     >
       <TransitionSeries>
@@ -140,26 +148,31 @@ function ProjectAudioTrack({
   videoDuration: number;
 }) {
   const { fps } = useVideoConfig();
-  const requestedDuration = audio.durationFrames ?? videoDuration;
-  // Audio can never outlast the video. Clamp at render time too so JSON
-  // produced before a clip got trimmed doesn't keep silent audio playing
-  // past the final frame.
-  const audioDuration = Math.max(1, Math.min(requestedDuration, videoDuration));
+  const startFrame = Math.max(
+    0,
+    Math.min(audio.startFrame ?? 0, Math.max(0, videoDuration - 1)),
+  );
+  const requestedDuration = audio.durationFrames ?? videoDuration - startFrame;
+  // Audio can never outlast the video (clamp from the start offset).
+  const audioDuration = Math.max(
+    1,
+    Math.min(requestedDuration, videoDuration - startFrame),
+  );
   const trimBefore = Math.max(0, Math.round((audio.trimStartSec ?? 0) * fps));
   // Route http/https through the same-origin audio proxy so the canvas
   // export stays untainted; blob:/data:/local paths pass through.
   const resolvedSrc = proxyExternalAudio(audio.src);
 
   return (
-    <Sequence durationInFrames={audioDuration} layout="none">
+    <Sequence from={startFrame} durationInFrames={audioDuration} layout="none">
       <Audio
         src={resolvedSrc}
-        // `@remotion/media`'s Audio uses `trimBefore` (frames into the
-        // source) — equivalent to the classic `<Audio startFrom>` API.
+        // Skip `trimBefore` worth of frames into the source audio.
         trimBefore={trimBefore}
         loop={audio.loop ?? false}
-        // Per-frame volume envelope. Remotion calls this once per frame
-        // while the sequence is active.
+        // Per-frame volume envelope. The sequence-local frame starts at 0
+        // when `startFrame` hits, so fades remain anchored to the audio's
+        // own timeline regardless of when it begins in the project.
         volume={(frame) => audioVolumeAt(frame, audio, audioDuration)}
       />
     </Sequence>

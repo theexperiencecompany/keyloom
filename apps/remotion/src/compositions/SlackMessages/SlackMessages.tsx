@@ -11,12 +11,19 @@ export type SlackMessagesProps = {
   theme: "light" | "dark";
   orientation?: "landscape" | "portrait";
   scale?: number;
+  leftAvatar?: string;
+  rightAvatar?: string;
 };
 
-const LEFT_AVATAR = "images/logos/aryan-avatar.png";
-const RIGHT_AVATAR = "gaia-glow.png";
+const DEFAULT_LEFT_AVATAR = "images/logos/aryan-avatar.png";
+const DEFAULT_RIGHT_AVATAR = "gaia-glow.png";
 
-function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
+function buildItems(
+  messages: ChatMessage[],
+  frame: number,
+  leftAvatar: string,
+  rightAvatar: string,
+): ChatMessageItem[] {
   const out: ChatMessageItem[] = [];
   for (let i = 0; i < messages.length; i++) {
     const m = messages[i]!;
@@ -31,7 +38,7 @@ function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
       // bubble alignment, so it's always "them".
       from: "them",
       author: isGaia ? "GAIA" : "Aryan",
-      avatar: isGaia ? RIGHT_AVATAR : LEFT_AVATAR,
+      avatar: isGaia ? rightAvatar : leftAvatar,
       text: m.text,
       typing: isTyping,
       enterFrames: local,
@@ -45,10 +52,12 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
   messages,
   theme,
   orientation = "landscape",
-  scale = 1.5,
+  scale = 2.5,
+  leftAvatar = DEFAULT_LEFT_AVATAR,
+  rightAvatar = DEFAULT_RIGHT_AVATAR,
 }) => {
   const frame = useDesignFrame();
-  const items = buildItems(messages, frame);
+  const items = buildItems(messages, frame, leftAvatar, rightAvatar);
 
   return (
     <ChatFill

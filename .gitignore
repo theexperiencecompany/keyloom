@@ -38,3 +38,8 @@ npm-debug.log*
 
 # Local screenshots / scratch files
 .tmp/
+
+# Locally-uploaded audio (e.g. copyrighted tracks) used for renders.
+# apps/remotion/public is a symlink to apps/web/public — single rule covers
+# both apps.
+apps/web/public/audio/uploads/

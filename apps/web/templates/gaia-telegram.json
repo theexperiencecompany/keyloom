@@ -7,36 +7,47 @@
     "durationInFrames": 14,
     "timing": { "kind": "linear" }
   },
+  "audio": {
+    "src": "/audio/uploads/starboy.mp3",
+    "title": "Starboy — The Weeknd",
+    "volume": 0.45,
+    "fadeInFrames": 60,
+    "fadeOutFrames": 120,
+    "trimStartSec": 0,
+    "startFrame": 0,
+    "loop": false
+  },
   "clips": [
     {
       "id": "clip_notification",
       "compositionId": "MessagePopup",
-      "durationInFrames": 180,
+      "durationInFrames": 130,
       "props": {
         "sender": "GAIA · Telegram",
         "time": "now",
         "body": "merged 2 PRs. standup pushed to 10:30. ur free til 11",
-        "theme": "dark"
+        "theme": "dark",
+        "iconPreset": "telegram"
       }
     },
     {
       "id": "clip_title",
       "compositionId": "TextSoftBlurIn",
-      "durationInFrames": 180,
+      "durationInFrames": 150,
       "props": {
         "headline": "A bot that actually does things.",
         "subtitle": "Now on Telegram."
       },
       "style": {
-        "backgroundColor": "#0f1014",
-        "textColor": "#ffffff",
-        "accentColor": "#2AABEE"
+        "background": "#0f1014",
+        "color": "#ffffff",
+        "accent": "#2AABEE"
       }
     },
     {
-      "id": "clip_chat",
+      "id": "clip_chat_phone",
       "compositionId": "PhoneFrame",
-      "durationInFrames": 1700,
+      "durationInFrames": 440,
       "props": {
         "device": "dynamic-island",
         "innerCompositionId": "TelegramMessages",
@@ -47,95 +58,78 @@
           "orientation": "portrait",
           "messages": [
             {
-              "text": "/digest",
+              "text": "morning, what's the rundown",
               "side": "right",
-              "typingFrames": 28,
-              "delay": 40
+              "typingFrames": 18,
+              "delay": 10
             },
             {
-              "text": "morning, here's the rundown:\n\n• 4 PRs open — priya's 2 are merge-ready (#482, #483)\n• flight UA882 delayed 35m, gives u an extra hour\n• 1 invite for fri lunch w/ marcus, still unread",
+              "text": "4 PRs open — priya's 2 are merge-ready. flight UA882 delayed 35m, you've got an extra hour.",
               "side": "left",
-              "typingFrames": 140,
-              "delay": 150
+              "typingFrames": 32,
+              "delay": 70
             },
             {
-              "text": "merge priya's. push standup to 10:30",
+              "text": "merge priya's. push standup to 10:30.",
               "side": "right",
-              "typingFrames": 60,
-              "delay": 580
-            },
-            {
-              "text": "bet",
-              "side": "left",
               "typingFrames": 22,
-              "delay": 740
+              "delay": 180
             },
             {
-              "text": "merged #482 + #483 ✓ slack pinged the team, standup pushed to 10:30. nobody pushed back on the new time",
+              "text": "merged ✓ slack pinged the team. nobody pushed back on the new time.",
               "side": "left",
-              "typingFrames": 130,
-              "delay": 830
-            },
-            {
-              "text": "/remind call mom 8pm IST",
-              "side": "right",
-              "typingFrames": 55,
-              "delay": 1180
-            },
-            {
-              "text": "set ✓ i'll buzz u at 4:30 PM your time — and again 10 mins before in case ur deep in something",
-              "side": "left",
-              "typingFrames": 130,
-              "delay": 1340
+              "typingFrames": 30,
+              "delay": 260
             }
           ]
         }
       },
       "style": {
-        "backgroundColor": "#0f1014"
+        "background": "#0f1014"
       }
     },
     {
       "id": "clip_proof",
       "compositionId": "Toast",
-      "durationInFrames": 240,
+      "durationInFrames": 200,
       "props": {
         "title": "done in one chat",
-        "description": "2 PRs merged · slack pinged · reminder set across timezones",
+        "description": "2 PRs merged · slack pinged · standup moved",
         "position": "bottom-right",
         "variant": "success",
         "showIcon": true,
-        "durationVisibleSec": 3.2
+        "durationVisibleSec": 3.0
       },
       "style": {
-        "backgroundColor": "#0f1014",
-        "accentColor": "#2AABEE"
+        "background": "#0f1014",
+        "accent": "#2AABEE"
       }
     },
     {
       "id": "clip_pitch",
       "compositionId": "TextLineByLineSlide",
-      "durationInFrames": 240,
+      "durationInFrames": 220,
       "props": {
         "headline": "Open source.\nReal tools.\nYour Telegram.",
         "subtitle": ""
       },
       "style": {
-        "backgroundColor": "#0f1014",
-        "textColor": "#ffffff",
-        "accentColor": "#2AABEE"
+        "background": "#0f1014",
+        "color": "#ffffff",
+        "accent": "#2AABEE"
       }
     },
     {
-      "id": "clip_cta",
-      "compositionId": "TypingSearch",
-      "durationInFrames": 240,
+      "id": "clip_qr",
+      "compositionId": "QrCode",
+      "durationInFrames": 280,
       "props": {
-        "query": "t.me/heygaia_bot",
-        "placeholder": "Start a chat with GAIA…"
-      },
-      "style": {
-        "accent": "#2AABEE"
+        "value": "https://t.me/heygaia_bot",
+        "caption": "t.me/heygaia_bot",
+        "moduleStyle": "dots",
+        "logoPreset": "telegram",
+        "logoCustom": "",
+        "logoPadding": 0
       }
     }
   ]

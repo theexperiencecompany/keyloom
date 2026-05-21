@@ -35,7 +35,7 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
   contactAvatar = "https://avatars.githubusercontent.com/aryanranderiya?s=200",
   messages,
   orientation = "landscape",
-  scale = 1.6,
+  scale = 2,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);

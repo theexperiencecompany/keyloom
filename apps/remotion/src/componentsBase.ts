@@ -9,6 +9,7 @@ import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages"
 import { FeatureCard } from "./compositions/FeatureCard/FeatureCard";
 import { GaiaScenario } from "./compositions/GaiaScenario/GaiaScenario";
 import { GitHubStarButton } from "./compositions/GitHubStarButton/GitHubStarButton";
+import { ImageScene } from "./compositions/ImageScene/ImageScene";
 import { InstagramMessages } from "./compositions/InstagramMessages/InstagramMessages";
 import { InstagramPost } from "./compositions/InstagramPost/InstagramPost";
 import { LineChart } from "./compositions/LineChart/LineChart";
@@ -19,6 +20,7 @@ import { MetricCard } from "./compositions/MetricCard/MetricCard";
 import { PerspectiveMarquee } from "./compositions/PerspectiveMarquee/PerspectiveMarquee";
 import { PieChart } from "./compositions/PieChart/PieChart";
 import { PricingCard } from "./compositions/PricingCard/PricingCard";
+import { QrCode } from "./compositions/QrCode/QrCode";
 import { RadarChart } from "./compositions/RadarChart/RadarChart";
 import { RadialChart } from "./compositions/RadialChart/RadialChart";
 import { SlackMessages } from "./compositions/SlackMessages/SlackMessages";
@@ -118,6 +120,8 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   PricingCard,
   Terminal,
   GitHubStarButton,
+  ImageScene,
+  QrCode,
   Toast,
   PerspectiveMarquee,
   BarChart,

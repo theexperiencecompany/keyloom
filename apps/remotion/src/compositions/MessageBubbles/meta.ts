@@ -22,7 +22,7 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
     },
   ],
   orientation: "landscape",
-  scale: 1.6,
+  scale: 2,
 };
 
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {

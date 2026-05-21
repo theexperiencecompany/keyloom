@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { SlackMessagesProps } from "./SlackMessages";
 
-export const SLACK_MESSAGES_DURATION = 660;
+export const SLACK_MESSAGES_DURATION = 360;
 export const SLACK_MESSAGES_FPS = 60;
 export const SLACK_MESSAGES_WIDTH = 1280;
 export const SLACK_MESSAGES_HEIGHT = 720;
@@ -9,35 +9,16 @@ export const SLACK_MESSAGES_HEIGHT = 720;
 export const slackMessagesDefaultProps: SlackMessagesProps = {
   contactName: "design",
   messages: [
-    {
-      text: "ship it tomorrow?",
-      side: "left",
-      typingFrames: 50,
-      delay: 30,
-    },
-    { text: "lgtm 🚀", side: "right", typingFrames: 45, delay: 150 },
-    {
-      text: "QA signed off this morning",
-      side: "left",
-      typingFrames: 60,
-      delay: 290,
-    },
-    {
-      text: "merging now",
-      side: "right",
-      typingFrames: 48,
-      delay: 430,
-    },
-    {
-      text: "🎉🎉🎉",
-      side: "left",
-      typingFrames: 45,
-      delay: 560,
-    },
+    { text: "ship it tomorrow?", side: "left", typingFrames: 20, delay: 15 },
+    { text: "lgtm 🚀", side: "right", typingFrames: 18, delay: 80 },
+    { text: "QA signed off", side: "left", typingFrames: 22, delay: 150 },
+    { text: "merging now 🎉", side: "right", typingFrames: 20, delay: 230 },
   ],
   theme: "light",
   orientation: "landscape",
-  scale: 1.5,
+  scale: 2.5,
+  leftAvatar: "images/logos/aryan-avatar.png",
+  rightAvatar: "gaia-glow.png",
 };
 
 export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
@@ -80,5 +61,7 @@ export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
       min: 0.5,
       max: 3,
     },
+    { kind: "image", key: "leftAvatar", label: "Left avatar" },
+    { kind: "image", key: "rightAvatar", label: "Right avatar" },
   ],
 };

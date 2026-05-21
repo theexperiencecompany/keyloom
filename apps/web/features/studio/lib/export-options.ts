@@ -4,7 +4,7 @@
  * presets trade off encoding speed vs. output quality.
  */
 
-export type ExportPreset = "fast" | "balanced" | "high";
+export type ExportPreset = "fast" | "balanced" | "high" | "uhd4k";
 
 /**
  * Supported export frame rates. 60 is the design-time fps every composition
@@ -69,6 +69,13 @@ export const EXPORT_PRESETS: Record<ExportPreset, ExportOptions> = {
     // text-heavy compositions at rest.
     keyframeIntervalSec: 0,
     fps: 120,
+  },
+  uhd4k: {
+    preset: "uhd4k",
+    bitrate: 80_000_000,
+    scale: 2,
+    keyframeIntervalSec: 1,
+    fps: 60,
   },
 };
 
