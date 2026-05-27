@@ -55,6 +55,8 @@ function describeType(field: Field): string {
       return "string (hex)";
     case "image":
       return "string (url)";
+    case "audio":
+      return "string (url, with CaptionWord[] on sibling key)";
     case "number":
       return "number";
     case "select":

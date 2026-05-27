@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import Image from "next/image";
 import type { CSSProperties } from "react";
 
 export type HeroStickerProps = {
@@ -42,11 +43,7 @@ export function HeroSticker({
       className="absolute z-20 hidden cursor-grab active:cursor-grabbing xl:block"
       style={{ ...position, touchAction: "none" }}
     >
-      <motion.img
-        src={src}
-        alt=""
-        aria-hidden
-        draggable={false}
+      <motion.div
         animate={{ y: [0, -distance, 0] }}
         transition={{
           duration,
@@ -56,7 +53,17 @@ export function HeroSticker({
         }}
         className="block select-none"
         style={{ width, rotate: `${rotate}deg` }}
-      />
+      >
+        <Image
+          src={src}
+          alt=""
+          aria-hidden
+          draggable={false}
+          width={width}
+          height={width}
+          className="block h-auto w-full select-none"
+        />
+      </motion.div>
     </motion.div>
   );
 }

@@ -52,6 +52,7 @@ import { TextStaggerFromCenter } from "./compositions/TextStaggerFromCenter/Text
 import { TextStaggerFromEdges } from "./compositions/TextStaggerFromEdges/TextStaggerFromEdges";
 import { TextTopDownLetters } from "./compositions/TextTopDownLetters/TextTopDownLetters";
 import { TextTypewriter } from "./compositions/TextTypewriter/TextTypewriter";
+import { TikTokCaption } from "./compositions/TikTokCaption/TikTokCaption";
 import { TitleFade } from "./compositions/TitleFade/TitleFade";
 import { TitlePopup } from "./compositions/TitlePopup/TitlePopup";
 import { TitleSlideUp } from "./compositions/TitleSlideUp/TitleSlideUp";
@@ -82,6 +83,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   CursorWalkthrough,
   BrowserWindow,
   CaptionTrack,
+  TikTokCaption,
   TwitterFollow,
   WhatsAppMessages,
   InstagramMessages,

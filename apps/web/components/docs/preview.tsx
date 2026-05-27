@@ -1,12 +1,35 @@
 "use client";
 
 import { Player } from "@remotion/player";
-import { componentsById } from "@workspace/compositions/components";
 import { compositionsById } from "@workspace/compositions/registry";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import dynamic from "next/dynamic";
+import { type ComponentType, useMemo } from "react";
 
 export function Preview({ id }: { id: string }) {
   const info = compositionsById[id];
-  const Component = info ? componentsById[info.id] : undefined;
+
+  // Lazy-load only the requested composition. Each composition becomes its
+  // own chunk, so a docs route no longer ships the JS for every other
+  // composition (the bundle was ~MBs before this).
+  const Component = useMemo(() => {
+    if (!info) return null;
+    return dynamic<Record<string, unknown>>(
+      () =>
+        import(
+          `@workspace/compositions/compositions/${info.id}/${info.id}`
+        ).then((mod) => ({
+          default: (
+            mod as Record<string, ComponentType<Record<string, unknown>>>
+          )[info.id]!,
+        })),
+      {
+        ssr: false,
+        loading: () => <Skeleton className="h-full w-full rounded-none" />,
+      },
+    );
+  }, [info]);
+
   if (!info || !Component) {
     return (
       <div className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">

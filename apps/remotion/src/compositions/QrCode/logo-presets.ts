@@ -38,6 +38,6 @@ const BY_KEY: Record<string, QrLogoPreset> = Object.fromEntries(
 export function resolveQrLogo(key: string | undefined): string | undefined {
   if (!key) return undefined;
   const entry = BY_KEY[key];
-  if (!entry || !entry.path) return undefined;
+  if (!entry?.path) return undefined;
   return entry.path;
 }

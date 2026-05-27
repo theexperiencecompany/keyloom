@@ -88,11 +88,16 @@ export type GaiaScenarioProps = {
   toolCallsExpanded?: boolean | string;
 };
 
-// chat-ui has internal `useQuery` calls (e.g. ["integrations","user"],
-// ["integrations","config"]) that hit our QueryClient with no registered
-// queryFn. React Query's default queryFn returns undefined, which it then
-// rejects with "Query data cannot be undefined". Provide a default queryFn
-// that returns null so those background queries stay quiet.
+// chat-ui has internal `useQuery` calls for integrations (config / user /
+// status) that point at a GAIA backend not present here — the resolved
+// queryFns return `undefined`, which React Query v5 rejects with
+// "Query data cannot be undefined". We do two things to keep them silent:
+//   1) A catch-all default `queryFn` returns null for any query that
+//      forgets to register one.
+//   2) For the known chat-ui keys, prefill the cache with shaped fake
+//      data + set per-key defaults that disable every automatic refetch
+//      trigger. Because chat-ui only overrides `staleTime`, the refetch
+//      triggers below stay in effect and the real queryFn never runs.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -102,6 +107,17 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+queryClient.setQueryDefaults(["integrations"], {
+  retry: false,
+  refetchOnMount: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  refetchInterval: false,
+});
+queryClient.setQueryData(["integrations", "config"], { configurations: [] });
+queryClient.setQueryData(["integrations", "user"], { integrations: [] });
+queryClient.setQueryData(["integrations", "status"], { status: {} });
 
 const FALLBACK_SCENARIO: Scenario = {
   id: "fallback",

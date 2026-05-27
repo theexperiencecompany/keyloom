@@ -42,7 +42,6 @@ export function HeroVideoDialog({
           )}
         >
           {thumbnailSrc ? (
-            // biome-ignore lint/performance/noImgElement: consumer-supplied thumbnail src
             <img
               src={thumbnailSrc}
               alt={thumbnailAlt}
@@ -91,7 +90,6 @@ export function HeroVideoDialog({
         className="aspect-video w-[min(100vw-2rem,72rem)] max-w-none overflow-hidden border-0 bg-black p-0 sm:max-w-none"
       >
         <DialogTitle className="sr-only">{thumbnailAlt}</DialogTitle>
-        {/* biome-ignore lint/a11y/useMediaCaption: showcase video has no spoken audio */}
         <video
           src={videoSrc}
           autoPlay

@@ -4,6 +4,19 @@ export type PrimitiveField =
   | { kind: "number"; key: string; label: string; min?: number; max?: number }
   | { kind: "color"; key: string; label: string }
   | { kind: "image"; key: string; label: string; placeholder?: string }
+  | {
+      /**
+       * Audio file picker. Uploads through /api/shorts/transcribe so the
+       * Whisper-derived word array can land on the same clip atomically.
+       * Stores the served URL under `key` and the CaptionWord[] under
+       * `wordsKey` on the same props object.
+       */
+      kind: "audio";
+      key: string;
+      wordsKey: string;
+      label: string;
+      placeholder?: string;
+    }
   | { kind: "switch"; key: string; label: string }
   | {
       kind: "select";

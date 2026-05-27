@@ -26,7 +26,7 @@ import { CopyPageButton } from "./copy-page-button";
 
 function slugToFilename(slug: string): string {
   return slug.replace(/[A-Z]/g, (ch, offset: number) =>
-    offset === 0 ? ch.toLowerCase() : "-" + ch.toLowerCase(),
+    offset === 0 ? ch.toLowerCase() : `-${ch.toLowerCase()}`,
   );
 }
 

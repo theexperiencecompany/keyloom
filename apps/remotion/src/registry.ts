@@ -54,6 +54,7 @@ import { textStaggerFromCenterInfo } from "./compositions/TextStaggerFromCenter/
 import { textStaggerFromEdgesInfo } from "./compositions/TextStaggerFromEdges/meta";
 import { textTopDownLettersInfo } from "./compositions/TextTopDownLetters/meta";
 import { textTypewriterInfo } from "./compositions/TextTypewriter/meta";
+import { tikTokCaptionInfo } from "./compositions/TikTokCaption/meta";
 import { titleFadeInfo } from "./compositions/TitleFade/meta";
 import { titlePopupInfo } from "./compositions/TitlePopup/meta";
 import { titleSlideUpInfo } from "./compositions/TitleSlideUp/meta";
@@ -77,6 +78,7 @@ export const compositions: AnyCompositionInfo[] = [
   cursorWalkthroughInfo,
   browserWindowInfo,
   captionTrackInfo,
+  tikTokCaptionInfo,
   statCounterInfo,
   tweetCardInfo,
   twitterFollowInfo,

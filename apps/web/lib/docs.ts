@@ -170,6 +170,9 @@ import TextTopDownLettersMDX, {
 import TextTypewriterMDX, {
   meta as textTypewriterMeta,
 } from "@/content/docs/text-typewriter.mdx";
+import TikTokCaptionMDX, {
+  meta as tikTokCaptionMeta,
+} from "@/content/docs/tiktok-caption.mdx";
 import TitleFadeMDX, {
   meta as titleFadeMeta,
 } from "@/content/docs/title-fade.mdx";
@@ -332,6 +335,7 @@ const bespokeMdxByCompositionId: Record<string, BespokeMdx> = {
   },
   BrowserWindow: { Content: BrowserWindowMDX, meta: browserWindowMeta },
   CaptionTrack: { Content: CaptionTrackMDX, meta: captionTrackMeta },
+  TikTokCaption: { Content: TikTokCaptionMDX, meta: tikTokCaptionMeta },
   StatCounter: { Content: StatCounterMDX, meta: statCounterMeta },
   TweetCard: { Content: TweetCardMDX, meta: tweetCardMeta },
   TwitterFollow: { Content: TwitterFollowMDX, meta: twitterFollowMeta },

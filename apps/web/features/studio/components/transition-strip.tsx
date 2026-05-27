@@ -51,8 +51,8 @@ type Props = {
 
 export function TransitionStrip({
   transition,
-  prevPalette,
-  nextPalette,
+  prevPalette: _prevPalette,
+  nextPalette: _nextPalette,
   fps,
   widthPx,
   framesPerPx,

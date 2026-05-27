@@ -134,6 +134,35 @@ export function FieldsRenderer({
                 />
               );
             }
+            if (field.kind === "audio") {
+              return (
+                <PrimitiveControl
+                  key={field.key}
+                  field={field}
+                  value={value[field.key]}
+                  extraValue={value[field.wordsKey]}
+                  onChange={(v) => {
+                    if (
+                      v &&
+                      typeof v === "object" &&
+                      (v as { __audioBoth?: boolean }).__audioBoth
+                    ) {
+                      const { audioUrl, words } = v as {
+                        audioUrl: string;
+                        words: unknown[];
+                      };
+                      onChange({
+                        ...value,
+                        [field.key]: audioUrl,
+                        [field.wordsKey]: words,
+                      });
+                    } else {
+                      set(field.key, v);
+                    }
+                  }}
+                />
+              );
+            }
             if (field.kind === "iconPreset") {
               return (
                 <PrimitiveControl

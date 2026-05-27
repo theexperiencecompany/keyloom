@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import { HeroVideoDialog } from "@workspace/ui/components/hero-video-dialog";
+import Image from "next/image";
 import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
 import { FeaturedComponents } from "@/components/featured-components";
@@ -232,10 +233,12 @@ export default function LandingPage() {
           <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
             <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl md:text-7xl">
               Ship videos
-              <img
+              <Image
                 src="/images/clapperboard.png"
                 alt=""
                 aria-hidden
+                width={64}
+                height={64}
                 className="mx-1 inline-block h-[1.3em] w-auto align-[-0.22em]"
               />
               that look expensive.

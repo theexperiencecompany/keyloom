@@ -19,7 +19,7 @@ import {
 import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   ICON_PRESETS,
   type IconPreset,
@@ -112,6 +112,31 @@ export function PrimitiveControl({
           />
         </Wrapper>
       );
+
+    case "audio": {
+      // Like iconPreset, audio writes two keys atomically — audioUrl and
+      // the words array — by funneling both through onChange wrapped in a
+      // sentinel object that FieldsRenderer destructures.
+      const audioUrl = (value as string) ?? "";
+      const wordCount = Array.isArray(extraValue)
+        ? (extraValue as unknown[]).length
+        : 0;
+      const setBoth = (url: string, words: unknown[]) => {
+        onChange({ __audioBoth: true, audioUrl: url, words });
+      };
+      void onExtraChange;
+      return (
+        <Wrapper htmlFor={field.key} label={field.label}>
+          <AudioControl
+            id={field.key}
+            value={audioUrl}
+            placeholder={field.placeholder}
+            wordCount={wordCount}
+            onChange={setBoth}
+          />
+        </Wrapper>
+      );
+    }
 
     case "switch":
       return (
@@ -286,6 +311,111 @@ function ImageControl({
           />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function AudioControl({
+  id,
+  value,
+  placeholder,
+  wordCount,
+  onChange,
+}: {
+  id: string;
+  value: string;
+  placeholder?: string;
+  wordCount: number;
+  onChange: (url: string, words: unknown[]) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(file: File | null) {
+    if (!file) return;
+    setError(null);
+    setIsUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/shorts/transcribe", {
+        method: "POST",
+        body: form,
+      });
+      if (!res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? `Upload failed (${res.status})`);
+      }
+      const data = (await res.json()) as {
+        audioUrl: string;
+        words: unknown[];
+      };
+      onChange(data.audioUrl, data.words);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  const hasAudio = value.length > 0;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <label
+          className={cn(
+            "flex h-9 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted",
+            isUploading && "pointer-events-none opacity-60",
+          )}
+          title="Upload an audio file (auto-transcribed via Whisper)"
+        >
+          <HugeiconsIcon
+            icon={isUploading ? RefreshIcon : Upload04Icon}
+            size={13}
+            className={isUploading ? "animate-spin" : undefined}
+          />
+          {isUploading ? "Transcribing…" : "Upload audio"}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            disabled={isUploading}
+            onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        {hasAudio ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onChange("", [])}
+            disabled={isUploading}
+          >
+            <HugeiconsIcon icon={Cancel01Icon} size={13} />
+          </Button>
+        ) : null}
+      </div>
+      <Input
+        id={id}
+        value={value}
+        placeholder={placeholder ?? "Or paste an audio URL"}
+        onChange={(e) => onChange(e.target.value, [])}
+      />
+      {hasAudio ? (
+        <div className="space-y-1.5 rounded-md border border-border bg-background px-2.5 py-2">
+          <p className="text-[11px] text-muted-foreground">
+            {wordCount > 0
+              ? `${wordCount} word${wordCount === 1 ? "" : "s"} transcribed`
+              : "No transcript — upload a file to auto-caption."}
+          </p>
+          {/* biome-ignore lint/a11y/useMediaCaption: editor preview, not rendered video */}
+          <audio src={value} controls className="block w-full h-8" />
+        </div>
+      ) : null}
+      {error ? <p className="text-[11px] text-destructive">{error}</p> : null}
     </div>
   );
 }

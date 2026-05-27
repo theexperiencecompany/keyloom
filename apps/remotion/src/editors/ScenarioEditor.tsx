@@ -790,7 +790,6 @@ function ToolCategoryGlyph({
 }) {
   if (cat.kind === "image") {
     return (
-      // biome-ignore lint/performance/noImgElement: editor-only, no Next.js Image needed
       <img
         src={cat.src}
         alt=""

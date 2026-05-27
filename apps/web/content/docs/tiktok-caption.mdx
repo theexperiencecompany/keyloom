@@ -1,0 +1,70 @@
+export const meta = {
+  title: "TikTok Caption",
+  description:
+    "Vertical 9:16 caption track driven by word-level Whisper timestamps. The active word pops; the surrounding context ghosts in dimmer ink.",
+  toc: [
+    { label: "Preview", id: "preview" },
+    { label: "Usage", id: "usage" },
+    { label: "Generate from audio", id: "generate-from-audio" },
+    { label: "Props", id: "props" },
+    { label: "Composition", id: "composition" },
+  ],
+}
+
+## Preview
+
+<Preview id="TikTokCaption" />
+
+<EditorLink id="TikTokCaption" />
+
+## Usage
+
+The short-form voiceover look — exactly what TikTok, Reels and YouTube Shorts ship as their auto-captions. Each `word` carries `start` and `end` timestamps (seconds, relative to the start of the clip); the composition highlights whichever word the playhead is inside and ghosts the neighbours so the viewer can read ahead.
+
+Frame is **1080 × 1920** vertical by default. The composition expects either:
+
+- An `audioUrl` pointing at the corresponding voiceover (the composition will embed and sync it), or
+- Just the `words` array, if you're rendering on top of another audio source.
+
+Style is configurable via the universal `clipStyle` knobs:
+
+- `backgroundColor` — set to `"transparent"` (the default in the Studio) to layer over another clip, or to a solid color for a standalone short.
+- `textColor` — the inactive / ghost color (default: white).
+- `accentColor` — the active-word highlight (default: a punchy cyan).
+- `fontFamily` — any installed display font; the composition ships an Anton-style impact look at default scale.
+
+`fontScale` (0.5 – 2) and `captionVAlign` / `captionHAlign` let you nudge the layout to fit your subject.
+
+## Generate from audio
+
+The fastest way to get the `words` array right is to feed an MP3 through OpenAI Whisper and let it return timestamps. This project ships that pipeline at **[`/shorts`](/shorts)** — drop an MP3, get a rendered 9:16 video with the caption already tracking the voice.
+
+Under the hood the page POSTs the file to `/api/shorts/transcribe`, which proxies to Whisper's `transcriptions` endpoint with `response_format=verbose_json` and `timestamp_granularities[]=word`, then reshapes the result into the exact `{ start, end, text }` shape this composition consumes. If you're rolling your own pipeline, the only requirement is one entry per word with seconds-based timestamps.
+
+A manual minimal example:
+
+```tsx
+import { TikTokCaption } from "@workspace/compositions/compositions/TikTokCaption/TikTokCaption"
+
+<TikTokCaption
+  words={[
+    { start: 0.00, end: 0.40, text: "this" },
+    { start: 0.40, end: 0.70, text: "is" },
+    { start: 0.70, end: 1.10, text: "how" },
+    { start: 1.10, end: 1.50, text: "captions" },
+    { start: 1.50, end: 1.90, text: "should" },
+    { start: 1.90, end: 2.30, text: "look" },
+  ]}
+  audioUrl="/audio/my-voiceover.mp3"
+  captionVAlign="center"
+  fontScale={1}
+/>
+```
+
+## Props
+
+<PropsTable id="TikTokCaption" />
+
+## Composition
+
+<CompositionStats id="TikTokCaption" />
