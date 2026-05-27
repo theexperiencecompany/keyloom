@@ -103,4 +103,3 @@ By [TheExperienceCompany](https://github.com/theexperiencecompany)
 <p align="center">
   <a href="apps/remotion/public/motion.mp4">▶ Watch the showcase</a>
 </p>
->>>>>>> 8deffd0 (feat(readme): update README with video showcase and link)
