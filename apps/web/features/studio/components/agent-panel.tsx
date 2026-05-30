@@ -10,6 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { Project } from "@workspace/compositions/project";
+import { compositionsById } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
@@ -19,6 +20,7 @@ import {
   type ToolCallEntry,
   ToolCallsSection,
 } from "@/components/agent/tool-calls-section";
+import { TEMPLATES_BY_ID } from "@/lib/agent/templates";
 import { getToolMeta, toolMessageFor } from "@/lib/agent/tool-categories";
 import { parseProjectJson } from "../lib/project-io";
 import type { StudioAction } from "../state/reducer";
@@ -246,6 +248,92 @@ function runClientTool(
       return {
         ok: true,
         clipsLoaded: parsed.project.clips.length,
+        warnings: parsed.warnings,
+      };
+    }
+    case "buildFromTemplate": {
+      const templateId = String(input.templateId ?? "");
+      const template = TEMPLATES_BY_ID[templateId];
+      if (!template) {
+        return {
+          error: `Unknown templateId: ${templateId}. Call listTemplates for valid ids.`,
+        };
+      }
+      const rawPicks = (input.slotPicks ?? []) as Array<{
+        slotId?: unknown;
+        compositionId?: unknown;
+        props?: unknown;
+      }>;
+      const picksBySlot = new Map<
+        string,
+        { compositionId: string; props: Record<string, unknown> }
+      >();
+      for (const p of rawPicks) {
+        if (typeof p?.slotId !== "string") continue;
+        picksBySlot.set(p.slotId, {
+          compositionId: String(p.compositionId ?? ""),
+          props: (p.props ?? {}) as Record<string, unknown>,
+        });
+      }
+
+      // Validate every slot has a pick whose composition is in the slot's category.
+      const issues: string[] = [];
+      for (const slot of template.slots) {
+        const pick = picksBySlot.get(slot.id);
+        if (!pick) {
+          issues.push(`Missing pick for slot "${slot.id}".`);
+          continue;
+        }
+        const info = compositionsById[pick.compositionId];
+        if (!info) {
+          issues.push(
+            `slot "${slot.id}": unknown composition "${pick.compositionId}".`,
+          );
+          continue;
+        }
+        if (info.category !== slot.category) {
+          issues.push(
+            `slot "${slot.id}" requires a ${slot.category} scene; got ${info.id} (${info.category}).`,
+          );
+        }
+      }
+      if (issues.length > 0) {
+        return { error: `Slot validation failed:\n- ${issues.join("\n- ")}` };
+      }
+
+      // Assemble the project. Slot order is the source of truth; durations
+      // come from the template, not from the picked scene's default.
+      const style = input.style as Record<string, string> | undefined;
+      const hasStyle = style && Object.values(style).some(Boolean);
+      const projectJson = {
+        fps: template.fps,
+        width: template.width,
+        height: template.height,
+        defaultTransition: template.defaultTransition,
+        clips: template.slots.map((slot) => {
+          const pick = picksBySlot.get(slot.id);
+          if (!pick) throw new Error("unreachable: validated above");
+          return {
+            id: slot.id,
+            compositionId: pick.compositionId,
+            props: pick.props,
+            durationInFrames: slot.durationInFrames,
+            ...(hasStyle ? { style } : {}),
+          };
+        }),
+      };
+
+      const parsed = parseProjectJson(JSON.stringify(projectJson));
+      if (!parsed.ok) return { error: parsed.error };
+      dispatch({ type: "LOAD_PROJECT", project: parsed.project });
+      return {
+        ok: true,
+        templateId,
+        clipsLoaded: parsed.project.clips.length,
+        totalDurationFrames: template.slots.reduce(
+          (s, sl) => s + sl.durationInFrames,
+          0,
+        ),
         warnings: parsed.warnings,
       };
     }

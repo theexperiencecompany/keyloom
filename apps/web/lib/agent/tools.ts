@@ -7,6 +7,7 @@ import {
   KNOWN_CATEGORIES,
   listScenesInCategory,
 } from "./catalog";
+import { TEMPLATES, templateDurationInFrames } from "./templates";
 
 /**
  * Trim a defaultProps payload so the agent sees the SHAPE without the
@@ -108,10 +109,75 @@ const ProjectSchema = z.object({
 });
 
 export const tools = {
-  // ───── PRIMARY one-shot generation ────────────────────────────────────
+  // ───── PRIMARY: template-driven generation ────────────────────────────
+  // Templates pin duration + narrative arc + slot categories so the
+  // agent's job shrinks to "pick a scene per slot". This makes "20s
+  // ask becomes 8s build" structurally impossible — slot durations
+  // are fixed in the template definition.
+  listTemplates: tool({
+    description:
+      "Returns every video template — name, description, whenToUse, total duration in seconds, and the ordered slot list (each slot has a fixed category, fixed duration, and a role description). ALWAYS call this first for fresh video asks. Most user briefs fit a template; templates guarantee the right duration and a coherent narrative.",
+    inputSchema: z.object({}),
+    execute: async () => ({
+      templates: TEMPLATES.map((t) => ({
+        id: t.id,
+        name: t.name,
+        description: t.description,
+        whenToUse: t.whenToUse,
+        totalDurationFrames: templateDurationInFrames(t),
+        totalDurationSeconds:
+          Math.round((templateDurationInFrames(t) / t.fps) * 10) / 10,
+        fps: t.fps,
+        width: t.width,
+        height: t.height,
+        slots: t.slots.map((s) => ({
+          id: s.id,
+          role: s.role,
+          category: s.category,
+          durationInFrames: s.durationInFrames,
+          description: s.description,
+        })),
+      })),
+    }),
+  }),
+
+  buildFromTemplate: tool({
+    description:
+      "Build a project by filling every slot of a template. Duration + narrative arc + transition are pinned by the template. Workflow: call listTemplates → pick one → for each slot call listScenesInCategory(slot.category) → call getSceneDetails on the scenes you want → submit slotPicks here (one pick per slot). The picked scene must belong to the slot's category. Optionally set a project-wide `style` (background/text/accent/font) that applies to every non-brand-locked clip for visual consistency.",
+    inputSchema: z.object({
+      templateId: z.string().describe("Template id from listTemplates."),
+      slotPicks: z
+        .array(
+          z.object({
+            slotId: z.string(),
+            compositionId: z.string(),
+            props: z.record(z.string(), z.unknown()),
+          }),
+        )
+        .describe(
+          "EXACTLY one pick per slot. slotId must match a slot in the template; compositionId must belong to that slot's category.",
+        ),
+      style: z
+        .object({
+          backgroundColor: z.string().optional(),
+          textColor: z.string().optional(),
+          fontFamily: z.string().optional(),
+          accentColor: z.string().optional(),
+        })
+        .optional()
+        .describe(
+          "Optional palette applied to every non-brand-locked clip so the project has a consistent visual look. Brand-locked scenes (Slack, WhatsApp, etc.) ignore this.",
+        ),
+    }),
+    // No execute — runs client-side in AgentPanel.onToolCall (validates
+    // slot/category match, then assembles a Project and dispatches
+    // LOAD_PROJECT).
+  }),
+
+  // ───── FALLBACK: free-form generation ─────────────────────────────────
   buildProject: tool({
     description:
-      "Replace the entire timeline with a new video. Pass a complete Project JSON matching the studio's import schema. Use this when the user asks for a fresh video. Atomic: either the whole project loads or nothing does.",
+      "Replace the entire timeline with a freeform project. Use ONLY when no template fits the user's brief (unusual length, unusual arc, very specific scene order the user requested). Templates are preferred — they guarantee duration and narrative. Atomic: either the whole project loads or nothing does.",
     inputSchema: z.object({
       project: ProjectSchema.describe(
         "The complete Project JSON. Must include fps, width, height, and a non-empty clips array. Each clip needs id, compositionId, and props.",
