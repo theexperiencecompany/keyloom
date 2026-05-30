@@ -257,12 +257,6 @@ export function AgentPanel({ project, dispatch, onClose }: Props) {
           <ul className="space-y-3">
             {messages.map((m, i) => {
               const isLast = i === messages.length - 1;
-              // Only the LAST assistant message can be "thinking", and
-              // only if the parent considers the chat busy (which folds
-              // in status, lastAssistantSettled and forceIdle). This
-              // means the shimmer disappears the moment the response
-              // is effectively done — never lingers.
-              const isThinking = isBusy && isLast && m.role === "assistant";
               return (
                 <MessageBubble
                   key={m.id}
@@ -270,21 +264,31 @@ export function AgentPanel({ project, dispatch, onClose }: Props) {
                   isStreaming={
                     status === "streaming" && isLast && m.role === "assistant"
                   }
-                  isThinking={isThinking}
                 />
               );
             })}
-            {status === "submitted" ? (
+            {/*
+              ONE persistent activity indicator. Lives at the bottom of
+              the list and stays visible the entire time the chat is
+              busy — never flickers or moves position. Phrase pool
+              switches based on whether an assistant message has started
+              forming yet.
+            */}
+            {isBusy ? (
               <li className="flex items-center gap-2 py-1">
                 <WaveSpinner size="sm" pattern="square3x3" color="primary" />
-                <ThinkingPhrase pool="planning" />
+                <ThinkingPhrase
+                  pool={
+                    lastMessage?.role === "assistant" ? "working" : "planning"
+                  }
+                />
               </li>
             ) : null}
             {error ? (
               <li className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-[12px] text-destructive">
-                <span>
-                  {error.message ??
-                    "Something went wrong talking to the agent."}
+                <span className="font-medium">Agent error</span>
+                <span className="whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed opacity-90">
+                  {humanizeAgentError(error)}
                 </span>
                 <Button
                   variant="outline"
@@ -647,17 +651,10 @@ type ChatMessage = ReturnType<typeof useChat>["messages"][number];
 function MessageBubble({
   message,
   isStreaming,
-  isThinking,
 }: {
   message: ChatMessage;
   /** Raw SDK streaming flag — drives Streamdown's animation only. */
   isStreaming: boolean;
-  /**
-   * Effective "agent is still working on this message" signal from the
-   * parent — folds in status, lastAssistantSettled, and forceIdle.
-   * Drives the shimmer + spinner indicator inside the bubble.
-   */
-  isThinking: boolean;
 }) {
   const isUser = message.role === "user";
   const text = message.parts
@@ -739,24 +736,12 @@ function MessageBubble({
     );
   }
 
-  // Assistant: no card. The activity indicator stays visible across
-  // the entire response cycle:
-  //   - Wave spinner: shown for the whole `isThinking` window
-  //     (planning → tools → text streaming). Hides only when the
-  //     response is fully settled.
-  //   - Phrase ("Designing on the fly…"): shown only while there's no
-  //     text yet — switches off the moment text starts streaming so
-  //     it doesn't clash with the actual reply.
-  const showActivity = isThinking;
-  const showPhrase = isThinking && !displayText;
+  // Assistant: no card. Just tool calls + text. The activity indicator
+  // (wave spinner + rotating phrase) lives ONCE at the bottom of the
+  // messages list in AgentPanel — keeping it out of the message bubble
+  // prevents flickering and double-rendering as messages stream in.
   return (
     <li className="flex flex-col gap-2 py-1 text-[13px] leading-relaxed text-foreground">
-      {showActivity ? (
-        <div className="flex items-center gap-2">
-          <WaveSpinner size="sm" pattern="square3x3" color="primary" />
-          {showPhrase ? <ThinkingPhrase pool="working" /> : null}
-        </div>
-      ) : null}
       {toolCalls.length > 0 ? <ToolCallsSection toolCalls={toolCalls} /> : null}
       {displayText ? (
         <div className="prose prose-sm prose-invert max-w-none [&_pre]:my-2 [&_pre]:rounded-md [&_pre]:text-[12px] [&_code]:text-[12px] [&_p]:my-1 [&_ul]:my-1 [&_ol]:my-1 [&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm">
@@ -907,4 +892,39 @@ function clampClipDurations(project: Project): {
     }),
   };
   return { project: next, adjustments };
+}
+
+/**
+ * Walk the error.cause chain and return the deepest informative
+ * message. AI-SDK and OpenAI both wrap errors in generic outer
+ * messages ("Error in input stream") with the real cause nested.
+ */
+function humanizeAgentError(err: unknown): string {
+  const visited = new Set<unknown>();
+  let cur: unknown = err;
+  const layers: string[] = [];
+  while (cur && !visited.has(cur)) {
+    visited.add(cur);
+    if (cur instanceof Error) {
+      if (cur.message) layers.push(cur.message);
+      cur = (cur as { cause?: unknown }).cause;
+    } else if (typeof cur === "string") {
+      layers.push(cur);
+      cur = undefined;
+    } else if (cur && typeof cur === "object") {
+      const obj = cur as Record<string, unknown>;
+      if (typeof obj.message === "string") layers.push(obj.message);
+      else if (typeof obj.error === "string") layers.push(obj.error);
+      cur = obj.cause;
+    } else {
+      cur = undefined;
+    }
+  }
+  if (layers.length === 0) return "Something went wrong talking to the agent.";
+  // Generic outer + specific inner → prefer the inner.
+  const deepest = layers[layers.length - 1]!;
+  if (/input stream|stream.*error/i.test(deepest) && layers.length > 1) {
+    return layers[layers.length - 2]!;
+  }
+  return deepest;
 }

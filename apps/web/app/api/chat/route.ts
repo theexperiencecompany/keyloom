@@ -31,13 +31,43 @@ export async function POST(req: Request) {
   });
 
   return result.toUIMessageStreamResponse({
-    // Surface the actual error text to the client UI instead of a
-    // generic "An error occurred" — otherwise the AgentPanel just
-    // shows a vague chip and the user can't tell rate-limit from bug.
+    // Surface the actual error text to the client UI instead of the
+    // generic "Error in input stream". Walks `.cause` chains so we get
+    // the real OpenAI/Zod message buried under SDK wrappers.
     onError: (error) => {
       console.error("[agent] response error:", error);
-      if (error instanceof Error) return error.message;
-      return typeof error === "string" ? error : "Agent request failed.";
+      return formatAgentError(error);
     },
   });
+}
+
+function formatAgentError(error: unknown): string {
+  // Unwrap nested .cause chains — AI SDK and OpenAI both wrap.
+  const visited = new Set<unknown>();
+  let cur: unknown = error;
+  const layers: string[] = [];
+  while (cur && !visited.has(cur)) {
+    visited.add(cur);
+    if (cur instanceof Error) {
+      if (cur.message) layers.push(cur.message);
+      cur = (cur as { cause?: unknown }).cause;
+    } else if (typeof cur === "string") {
+      layers.push(cur);
+      cur = undefined;
+    } else if (cur && typeof cur === "object") {
+      const obj = cur as Record<string, unknown>;
+      if (typeof obj.message === "string") layers.push(obj.message);
+      else if (typeof obj.error === "string") layers.push(obj.error);
+      cur = obj.cause;
+    } else {
+      cur = undefined;
+    }
+  }
+  // Prefer the deepest (root cause) layer — that's usually the actionable one.
+  const deepest = layers[layers.length - 1] ?? "Agent request failed.";
+  // Heuristic friendly mapping for the most common opaque message.
+  if (/input stream/i.test(deepest) && layers.length > 1) {
+    return `Stream error — ${layers[layers.length - 2]}`;
+  }
+  return deepest;
 }
