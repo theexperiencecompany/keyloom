@@ -2,7 +2,42 @@ import { compositionsById } from "@workspace/compositions/registry";
 import type { CompositionCategory } from "@workspace/compositions/schema";
 import { tool } from "ai";
 import { z } from "zod";
-import { KNOWN_CATEGORIES, listScenesInCategory } from "./catalog";
+import {
+  isAgentVisible,
+  KNOWN_CATEGORIES,
+  listScenesInCategory,
+} from "./catalog";
+
+/**
+ * Trim a defaultProps payload so the agent sees the SHAPE without the
+ * bulk. Long strings get truncated with a remaining-char hint; long
+ * arrays get the first 3 items plus a remaining-count hint. The agent
+ * can still infer the schema from the keys + sample values, but a
+ * single getSceneDetails response that was 3,000+ tokens (e.g.
+ * GaiaScenario) collapses to a few hundred.
+ */
+function trimForAgent(value: unknown, depth = 0): unknown {
+  if (depth > 6) return "[deep]";
+  if (typeof value === "string") {
+    if (value.length <= 200) return value;
+    return `${value.slice(0, 180)}…[+${value.length - 180} chars truncated]`;
+  }
+  if (Array.isArray(value)) {
+    if (value.length <= 3) return value.map((v) => trimForAgent(v, depth + 1));
+    return [
+      ...value.slice(0, 3).map((v) => trimForAgent(v, depth + 1)),
+      `…[+${value.length - 3} more items, same shape]`,
+    ];
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = trimForAgent(v, depth + 1);
+    }
+    return out;
+  }
+  return value;
+}
 
 /**
  * Two-track tool surface for the studio agent:
@@ -110,11 +145,16 @@ export const tools = {
 
   getSceneDetails: tool({
     description:
-      "Returns the full defaultProps and field schema for one composition. Call this for every scene you plan to use in buildProject so your props match the actual schema instead of being invented.",
+      "Returns the trimmed defaultProps for one composition (long strings shortened, long arrays clipped to first 3 items — the SHAPE is preserved). Call this for every scene you plan to use in buildProject so your props match the schema. Drop this into clip.props as your starting point and override only what changes.",
     inputSchema: z.object({
       compositionId: z.string(),
     }),
     execute: async ({ compositionId }) => {
+      if (!isAgentVisible(compositionId)) {
+        return {
+          error: `Unknown composition id: ${compositionId}. Use listScenesInCategory to discover available scenes.`,
+        };
+      }
       const info = compositionsById[compositionId];
       if (!info) return { error: `Unknown composition id: ${compositionId}` };
       return {
@@ -123,8 +163,11 @@ export const tools = {
         description: info.description,
         category: info.category,
         brandLocked: info.brandMode === "locked",
-        defaultProps: info.defaultProps,
-        fields: info.fields,
+        defaultDurationFrames: info.durationInFrames,
+        // Trimmed payload — full defaultProps can be 3–4k tokens for
+        // heavy scenes (chat scripts, terminal lines). The agent gets
+        // the schema shape + sample values, not the bulk.
+        defaultProps: trimForAgent(info.defaultProps),
       };
     },
   }),

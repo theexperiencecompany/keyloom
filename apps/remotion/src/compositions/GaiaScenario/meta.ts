@@ -61,6 +61,8 @@ export const gaiaScenarioDefaultProps: GaiaScenarioProps = {
 export const gaiaScenarioInfo: CompositionInfo<GaiaScenarioProps> = {
   id: "GaiaScenario",
   category: "media",
+  // Internal/branded composition — invisible to the studio agent.
+  hideFromAgent: true,
   title: "GAIA",
   description:
     "Render a GAIA chat scenario from JSON. Fills the parent canvas at any size.",

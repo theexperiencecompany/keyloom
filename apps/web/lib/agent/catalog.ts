@@ -4,6 +4,12 @@ import type {
   CompositionCategory,
 } from "@workspace/compositions/schema";
 
+// The agent only ever sees this filtered slice — compositions flagged
+// `hideFromAgent: true` (internal/branded scenes like GaiaScenario)
+// are excluded from every discovery surface so the LLM can't pick them.
+// They still appear in the studio library and docs.
+const AGENT_COMPOSITIONS = compositions.filter((c) => !c.hideFromAgent);
+
 /**
  * Lean category index for the agent's system prompt.
  *
@@ -32,7 +38,7 @@ const CATEGORY_DESCRIPTIONS: Record<CompositionCategory, string> = {
   captions:
     "Voiceover-driven caption tracks — TikTok-style word highlight, CaptionTrack.",
   media:
-    "Images, QR codes, marquees, scenario players (GaiaScenario, ImageScene, PerspectiveMarquee, QrCode).",
+    "Images, QR codes, marquees, scenario players (ImageScene, PerspectiveMarquee, QrCode).",
 };
 
 const CATEGORY_ORDER: CompositionCategory[] = [
@@ -73,25 +79,28 @@ export function listScenesInCategory(category: CompositionCategory): Array<{
   height: number;
   brandLocked: boolean;
 }> {
-  return compositions
-    .filter((c) => c.category === category)
-    .map((c) => ({
-      id: c.id,
-      title: c.title,
-      description: c.description,
-      durationInFrames: c.durationInFrames,
-      fps: c.fps,
-      width: c.width,
-      height: c.height,
-      brandLocked: c.brandMode === "locked",
-    }));
+  return AGENT_COMPOSITIONS.filter((c) => c.category === category).map((c) => ({
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    durationInFrames: c.durationInFrames,
+    fps: c.fps,
+    width: c.width,
+    height: c.height,
+    brandLocked: c.brandMode === "locked",
+  }));
+}
+
+/** Whether the agent is allowed to see (and pick) a composition by id. */
+export function isAgentVisible(compositionId: string): boolean {
+  return AGENT_COMPOSITIONS.some((c) => c.id === compositionId);
 }
 
 export const KNOWN_CATEGORIES = CATEGORY_ORDER;
 
 function countByCategory(): Map<CompositionCategory, number> {
   const out = new Map<CompositionCategory, number>();
-  for (const c of compositions) {
+  for (const c of AGENT_COMPOSITIONS) {
     out.set(c.category, (out.get(c.category) ?? 0) + 1);
   }
   return out;

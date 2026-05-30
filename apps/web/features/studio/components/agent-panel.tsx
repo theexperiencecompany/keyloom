@@ -7,7 +7,6 @@ import {
   RefreshIcon,
   SparklesIcon,
   StopCircleIcon,
-  ToolsIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { Project } from "@workspace/compositions/project";
@@ -16,6 +15,11 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
+import {
+  type ToolCallEntry,
+  ToolCallsSection,
+} from "@/components/agent/tool-calls-section";
+import { getToolMeta, toolMessageFor } from "@/lib/agent/tool-categories";
 import { parseProjectJson } from "../lib/project-io";
 import type { StudioAction } from "../state/reducer";
 
@@ -385,27 +389,20 @@ function MessageBubble({
     .filter((p): p is { type: "text"; text: string } => p.type === "text")
     .map((p) => p.text)
     .join("");
-  const toolParts = message.parts.filter((p) => p.type.startsWith("tool-"));
+  const toolCalls = isUser ? [] : extractToolCalls(message);
 
   return (
     <li className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[88%] space-y-1.5 rounded-lg px-3 py-2 text-[13px] leading-relaxed ${
+        className={`max-w-[88%] space-y-2 rounded-lg px-3 py-2 text-[13px] leading-relaxed ${
           isUser
             ? "bg-primary text-primary-foreground"
             : "border border-border bg-muted/40 text-foreground"
         }`}
       >
-        {toolParts.map((p, i) => (
-          <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: tool parts are append-only and stable within a message
-            key={i}
-            className="flex items-center gap-1.5 rounded-md border border-border/60 bg-background/40 px-2 py-1 text-[11px] text-muted-foreground"
-          >
-            <HugeiconsIcon icon={ToolsIcon} className="size-3" />
-            <span className="font-mono">{p.type.replace(/^tool-/, "")}</span>
-          </div>
-        ))}
+        {toolCalls.length > 0 ? (
+          <ToolCallsSection toolCalls={toolCalls} />
+        ) : null}
         {text ? (
           isUser ? (
             <div className="whitespace-pre-wrap">{text}</div>
@@ -423,4 +420,34 @@ function MessageBubble({
       </div>
     </li>
   );
+}
+
+/**
+ * Walk an assistant message's UIMessage parts and pull each tool invocation
+ * into the ToolCallEntry shape the section expects. AI-SDK v5 emits one
+ * `tool-<name>` part per call; the part's `input`/`output` are filled in
+ * progressively as the call streams in and completes.
+ */
+function extractToolCalls(message: ChatMessage): ToolCallEntry[] {
+  const out: ToolCallEntry[] = [];
+  for (const part of message.parts) {
+    if (!part.type.startsWith("tool-")) continue;
+    const toolName = part.type.replace(/^tool-/, "");
+    const p = part as unknown as {
+      input?: Record<string, unknown>;
+      output?: unknown;
+      toolCallId?: string;
+    };
+    const input = p.input ?? {};
+    const meta = getToolMeta(toolName);
+    out.push({
+      toolName,
+      toolCategory: meta.category,
+      message: toolMessageFor(toolName, input),
+      toolCallId: p.toolCallId,
+      inputs: Object.keys(input).length > 0 ? input : undefined,
+      output: p.output,
+    });
+  }
+  return out;
 }
