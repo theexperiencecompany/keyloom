@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/theexperiencecompany/motion-studio/blob/master/LICENSE"><img src="https://img.shields.io/github/license/theexperiencecompany/motion-studio?color=blue" alt="License" /></a>
+  <a href="https://github.com/theexperiencecompany/motion-studio/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT" /></a>
   <a href="https://github.com/theexperiencecompany/motion-studio/stargazers"><img src="https://img.shields.io/github/stars/theexperiencecompany/motion-studio?style=flat&logo=github&color=yellow" alt="Stars" /></a>
   <a href="https://github.com/theexperiencecompany/motion-studio/commits/master"><img src="https://img.shields.io/github/commit-activity/m/theexperiencecompany/motion-studio" alt="Last update" /></a>
   <a href="https://github.com/theexperiencecompany/motion-studio/issues"><img src="https://img.shields.io/github/issues/theexperiencecompany/motion-studio" alt="Issues" /></a>
@@ -62,6 +62,20 @@
 
 ---
 
+## Table of Contents
+
+- [What this is](#what-this-is)
+- [Two ways to use it](#two-ways-to-use-it)
+- [What's inside](#whats-inside)
+- [Tech Stack](#tech-stack)
+- [Repo layout](#repo-layout)
+- [Getting started](#getting-started)
+- [License](#license)
+- [Contributing](#contributing)
+- [Star History](#star-history)
+
+---
+
 ## What this is
 
 A set of high-quality, animated video scenes — every scene is a single React component you can copy into your own project. On top of that lives a browser-based **Studio** for stitching scenes on a timeline, configuring per-clip styling and transitions, and exporting to MP4.
@@ -80,6 +94,77 @@ No SDK. No install. The library and the studio share the same scene registry, so
 - **Per-clip transitions** — fade, swipe, zoom between scenes.
 - **Stackable effects** — fade-out, slide-out, Ken Burns, zoom-out layered on top of any clip.
 - **Project save / load** as JSON, plus MP4 export.
+
+## Tech Stack
+
+Motion Studio is a Bun + Turbo monorepo. The web app is Next.js; the video engine is Remotion; the agent flow runs on the Vercel AI SDK with OpenAI.
+
+<table>
+  <tr>
+    <th>Layer</th>
+    <th>Tools</th>
+  </tr>
+  <tr>
+    <td><b>Web Frontend</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Next.js%2016-000?logo=nextdotjs&logoColor=white" alt="Next.js 16" />
+      <img src="https://img.shields.io/badge/React%2019-61DAFB?logo=react&logoColor=000" alt="React 19" />
+      <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+      <img src="https://img.shields.io/badge/Tailwind%20CSS%204-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4" />
+      <img src="https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=white" alt="shadcn/ui" />
+      <img src="https://img.shields.io/badge/Motion-000?logo=framer&logoColor=white" alt="Motion" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>Video Engine</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Remotion%204-7C3AED?logoColor=white" alt="Remotion 4" />
+      <img src="https://img.shields.io/badge/FFmpeg.wasm-007808?logo=ffmpeg&logoColor=white" alt="FFmpeg.wasm" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>AI / Agent</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Vercel%20AI%20SDK-000?logo=vercel&logoColor=white" alt="Vercel AI SDK" />
+      <img src="https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white" alt="OpenAI" />
+      <img src="https://img.shields.io/badge/Whisper-412991?logo=openai&logoColor=white" alt="Whisper" />
+      <img src="https://img.shields.io/badge/Streamdown-A78BFA" alt="Streamdown" />
+      <img src="https://img.shields.io/badge/Shiki-FFB000" alt="Shiki" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>State &amp; Interaction</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Zustand-2D3748" alt="Zustand" />
+      <img src="https://img.shields.io/badge/dnd--kit-22B5BF" alt="dnd-kit" />
+      <img src="https://img.shields.io/badge/Sonner-000" alt="Sonner" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>Data &amp; UI Atoms</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Recharts-22B5BF" alt="Recharts" />
+      <img src="https://img.shields.io/badge/HugeIcons-A78BFA" alt="HugeIcons" />
+      <img src="https://img.shields.io/badge/MDX-1B1F24?logo=mdx&logoColor=white" alt="MDX" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>Tooling</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Bun-FBF0DF?logo=bun&logoColor=000" alt="Bun" />
+      <img src="https://img.shields.io/badge/Turborepo-EF4444?logo=turborepo&logoColor=white" alt="Turborepo" />
+      <img src="https://img.shields.io/badge/Biome-60A5FA?logo=biome&logoColor=white" alt="Biome" />
+      <img src="https://img.shields.io/badge/Husky-8B5A2B" alt="Husky" />
+    </td>
+  </tr>
+  <tr>
+    <td><b>Infrastructure</b></td>
+    <td>
+      <img src="https://img.shields.io/badge/Vercel-000?logo=vercel&logoColor=white" alt="Vercel" />
+      <img src="https://img.shields.io/badge/Rybbit-1F2937" alt="Rybbit Analytics" />
+    </td>
+  </tr>
+</table>
 
 ## Repo layout
 
@@ -106,14 +191,22 @@ MIT.
 
 ---
 
+## Contributing
+
+<p align="center">
+  <a href="https://github.com/theexperiencecompany/motion-studio/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=theexperiencecompany/motion-studio" alt="Contributors" />
+  </a>
+</p>
+
 ## Star History
 
 <p align="center">
-  <a href="https://www.star-history.com/#theexperiencecompany/gaia&Date">
+  <a href="https://www.star-history.com/#theexperiencecompany/motion-studio&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=theexperiencecompany/gaia&type=Date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=theexperiencecompany/gaia&type=Date" />
-      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=theexperiencecompany/gaia&type=Date" />
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=theexperiencecompany/motion-studio&type=Date&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=theexperiencecompany/motion-studio&type=Date" />
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=theexperiencecompany/motion-studio&type=Date" />
     </picture>
   </a>
 </p>
@@ -127,10 +220,3 @@ MIT.
   <a href="https://heygaia.io">heygaia.io</a> • <a href="https://docs.heygaia.io">Documentation</a> • <a href="https://heygaia.io/contact">Contact Us</a>
 </p>
 
-## Contributing
-
-<p align="center">
-  <a href="https://github.com/theexperiencecompany/gaia/graphs/contributors">
-    <img src="https://contrib.rocks/image?repo=theexperiencecompany/gaia" alt="Contributors" />
-  </a>
-</p>
