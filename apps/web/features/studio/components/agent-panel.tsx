@@ -212,7 +212,7 @@ export function AgentPanel({ project, dispatch, onClose }: Props) {
           <div>
             <p className="text-sm font-medium text-foreground">Agent</p>
             <p className="text-[11px] text-muted-foreground">
-              Brief it, get a video
+              Describe it — it builds the timeline
             </p>
           </div>
         </div>
