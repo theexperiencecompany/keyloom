@@ -1,6 +1,10 @@
 import { areaChartInfo } from "./compositions/AreaChart/meta";
 import { barChartInfo } from "./compositions/BarChart/meta";
 import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
+import { blueGridInfo } from "./compositions/backgrounds/BlueGrid/meta";
+import { futuristicArchInfo } from "./compositions/backgrounds/FuturisticArch/meta";
+import { liquidChromeInfo } from "./compositions/backgrounds/LiquidChrome/meta";
+import { whiteRadialBurstInfo } from "./compositions/backgrounds/WhiteRadialBurst/meta";
 import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
@@ -132,11 +136,14 @@ export const compositions: AnyCompositionInfo[] = [
   perspectiveMarqueeInfo,
   barChartInfo,
   lineChartInfo,
-  fontHookInfo,
   areaChartInfo,
   pieChartInfo,
   radarChartInfo,
   radialChartInfo,
+  blueGridInfo,
+  whiteRadialBurstInfo,
+  liquidChromeInfo,
+  futuristicArchInfo,
   showcaseInfo,
 ];
 

@@ -144,6 +144,7 @@ export type PhoneFitMode = "cover" | "width" | "contain";
  *   layout       — wrapper compositions (PhoneFrame, LaptopFrame, Split)
  *   captions     — voiceover-driven caption tracks
  *   media        — images, QR codes, marquees, scenario players
+ *   background   — ambient looping backdrops (gradients, grids, particles)
  */
 export type CompositionCategory =
   | "text"
@@ -153,7 +154,8 @@ export type CompositionCategory =
   | "marketing"
   | "layout"
   | "captions"
-  | "media";
+  | "media"
+  | "background";
 
 export type CompositionInfo<P extends Record<string, unknown>> = {
   id: string;

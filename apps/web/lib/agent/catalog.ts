@@ -39,6 +39,8 @@ const CATEGORY_DESCRIPTIONS: Record<CompositionCategory, string> = {
     "Voiceover-driven caption tracks — TikTok-style word highlight, CaptionTrack.",
   media:
     "Images, QR codes, marquees, scenario players (ImageScene, PerspectiveMarquee, QrCode).",
+  background:
+    "Ambient looping backdrops — a cobalt grid, a white radial burst, a liquid-chrome surface, and minimal futuristic architecture (BlueGrid, WhiteRadialBurst, LiquidChrome, FuturisticArch).",
 };
 
 const CATEGORY_ORDER: CompositionCategory[] = [
@@ -50,6 +52,7 @@ const CATEGORY_ORDER: CompositionCategory[] = [
   "layout",
   "captions",
   "media",
+  "background",
 ];
 
 /**

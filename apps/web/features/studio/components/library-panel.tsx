@@ -7,7 +7,6 @@ import {
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Player } from "@remotion/player";
 import { componentsById } from "@workspace/compositions/components";
 import { effects as allEffects } from "@workspace/compositions/effects/registry";
 import type { AnyEffectInfo } from "@workspace/compositions/effects/schema";
@@ -28,6 +27,8 @@ import {
   TooltipTrigger,
 } from "@workspace/ui/components/tooltip";
 import { useState } from "react";
+
+import { CompositionPreviewCard } from "./composition-preview-card";
 
 type Tab = "components" | "effects";
 
@@ -169,15 +170,22 @@ function ComponentsList({
   const textAnimations = compositions.filter(
     (c) => c.id.startsWith("Title") || c.id.startsWith("Text"),
   );
+  // Background scenes are applied as per-clip backdrops via the inspector's
+  // Style → Background → Scene picker — never added as standalone clips — so
+  // they are excluded from the Library list and search entirely.
   const others = compositions.filter(
-    (c) => !c.id.startsWith("Title") && !c.id.startsWith("Text"),
+    (c) =>
+      !c.id.startsWith("Title") &&
+      !c.id.startsWith("Text") &&
+      c.category !== "background",
   );
 
   const searchResults = query
     ? compositions.filter(
         (c) =>
-          c.title.toLowerCase().includes(query) ||
-          c.description.toLowerCase().includes(query),
+          c.category !== "background" &&
+          (c.title.toLowerCase().includes(query) ||
+            c.description.toLowerCase().includes(query)),
       )
     : null;
 
@@ -361,31 +369,7 @@ function PreviewTooltipItem({
           hideArrow
           className="block w-72 max-w-none overflow-hidden border border-border bg-background p-0 shadow-xl"
         >
-          <div className="w-72">
-            <div
-              className="w-full overflow-hidden"
-              style={{ aspectRatio: `${info.width} / ${info.height}` }}
-            >
-              <Player
-                component={Component}
-                inputProps={info.defaultProps}
-                durationInFrames={info.durationInFrames}
-                fps={info.fps}
-                compositionWidth={info.width}
-                compositionHeight={info.height}
-                style={{ width: "100%", height: "100%" }}
-                autoPlay
-                loop
-                initiallyMuted
-                acknowledgeRemotionLicense
-              />
-            </div>
-            <div className="px-3 py-2">
-              <p className="text-[11px] text-muted-foreground">
-                {info.description}
-              </p>
-            </div>
-          </div>
+          <CompositionPreviewCard info={info} />
         </TooltipContent>
       )}
     </Tooltip>

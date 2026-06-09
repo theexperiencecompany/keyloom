@@ -13,6 +13,16 @@ export type ClipStyle = {
   textColor?: string;
   fontFamily?: string;
   accentColor?: string;
+  /**
+   * Optional background *scene* — the `id` of a `category: "background"`
+   * composition rendered full-bleed behind this clip's own content. When set,
+   * `Project.tsx` composites that composition as a backdrop layer and forces
+   * the clip's own background transparent so the scene shows through. Mutually
+   * exclusive with `backgroundColor` in the inspector's Color | Scene toggle,
+   * though the resolver still ignores it (only the four fields above feed
+   * `resolveClipStyle`).
+   */
+  backgroundScene?: string;
 };
 
 export type ClipStyleDefaults = {

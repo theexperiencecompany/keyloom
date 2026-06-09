@@ -57,16 +57,49 @@ export const ProjectComposition: React.FC<Project> = ({
           const Component = componentsById[clip.compositionId];
           const info = compositionsById[clip.compositionId];
           const isLocked = info?.brandMode === "locked";
-          const styleProps = isLocked ? {} : { clipStyle: clip.style };
 
-          const inner = Component ? (
-            <Component key={`c-${clip.id}`} {...clip.props} {...styleProps} />
+          // Optional background-scene backdrop (Inspector → Style → Background
+          // → Scene). Locked compositions never receive clipStyle, so they
+          // can't carry a backdrop. When a valid scene is set, the clip's own
+          // background is forced transparent so the backdrop shows through.
+          const backdropId = isLocked ? undefined : clip.style?.backgroundScene;
+          const BackdropComponent = backdropId
+            ? componentsById[backdropId]
+            : undefined;
+          const backdropInfo = backdropId
+            ? compositionsById[backdropId]
+            : undefined;
+          const hasBackdrop = Boolean(BackdropComponent && backdropInfo);
+
+          const contentStyle = isLocked
+            ? {}
+            : {
+                clipStyle: hasBackdrop
+                  ? { ...clip.style, backgroundColor: "transparent" }
+                  : clip.style,
+              };
+
+          const content = Component ? (
+            <Component key={`c-${clip.id}`} {...clip.props} {...contentStyle} />
           ) : (
             <MissingClip
               key={`c-${clip.id}`}
               compositionId={clip.compositionId}
             />
           );
+
+          const inner =
+            hasBackdrop && BackdropComponent && backdropInfo ? (
+              <AbsoluteFill key={`bg-${clip.id}`}>
+                <BackdropComponent
+                  {...backdropInfo.defaultProps}
+                  clipStyle={{ ...clip.style, backgroundColor: undefined }}
+                />
+                {content}
+              </AbsoluteFill>
+            ) : (
+              content
+            );
 
           // Camera life — subtle Ken Burns on every non-locked clip.
           // Skipped for brand-locked scenes (authentic apps shouldn't

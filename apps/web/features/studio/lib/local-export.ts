@@ -18,6 +18,7 @@ import {
   canRenderMediaOnWeb,
   type RenderMediaOnWebProgressCallback,
   renderMediaOnWeb,
+  type WebRendererHardwareAcceleration,
 } from "@remotion/web-renderer";
 import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import { type Project, projectDuration } from "@workspace/compositions/project";
@@ -35,6 +36,61 @@ export type LocalExportArgs = {
   signal?: AbortSignal;
   onProgress?: (progress: number) => void;
 };
+
+type WebRenderArgs = Parameters<typeof renderMediaOnWeb>[0];
+type WebRenderResult = Awaited<ReturnType<typeof renderMediaOnWeb>>;
+
+/**
+ * `canRenderMediaOnWeb` can't probe `hardwareAcceleration`, so the feature
+ * check passes while the actual hardware encoder still rejects a given config
+ * (e.g. avc1.640029 @ 50 Mbps @ 1080p on a machine with no H.264 hardware
+ * encode). `prefer-hardware` throws in that case instead of falling back, so
+ * we try acceleration modes in order: hardware first (fast path), then let the
+ * browser negotiate, then force software. The browser's software encoder
+ * (Chrome's bundled OpenH264) handles configs the hardware path won't.
+ */
+const ACCELERATION_FALLBACK: WebRendererHardwareAcceleration[] = [
+  "prefer-hardware",
+  "no-preference",
+  "prefer-software",
+];
+
+/** True when an error looks like a rejected WebCodecs encoder config (worth retrying with a different acceleration mode) rather than a genuine render failure. */
+function isEncoderConfigError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /not supported by this browser|encoder configuration|hardware acceleration|configuration is not supported|isConfigSupported/i.test(
+    msg,
+  );
+}
+
+async function renderWithAccelerationFallback(
+  baseOptions: Omit<WebRenderArgs, "hardwareAcceleration">,
+): Promise<WebRenderResult> {
+  let lastError: unknown;
+  for (let i = 0; i < ACCELERATION_FALLBACK.length; i++) {
+    const hardwareAcceleration = ACCELERATION_FALLBACK[i]!;
+    try {
+      return await renderMediaOnWeb({ ...baseOptions, hardwareAcceleration });
+    } catch (err) {
+      lastError = err;
+      const signal = (baseOptions as { signal?: AbortSignal | null }).signal;
+      // Respect user cancellation and don't retry genuine (non-config) errors.
+      if (signal?.aborted) throw err;
+      if (
+        i === ACCELERATION_FALLBACK.length - 1 ||
+        !isEncoderConfigError(err)
+      ) {
+        throw err;
+      }
+      const next = ACCELERATION_FALLBACK[i + 1];
+      console.warn(
+        `[export] H.264 encoder rejected "${hardwareAcceleration}"; retrying with "${next}".`,
+        err,
+      );
+    }
+  }
+  throw lastError;
+}
 
 /**
  * Quick feature-detect for the export modal — checks WebGL + WebCodecs +
@@ -114,7 +170,7 @@ export async function renderProjectLocally({
             : project.defaultTransition,
         };
 
-  const result = await renderMediaOnWeb({
+  const result = await renderWithAccelerationFallback({
     composition: {
       id: "Project",
       component: ProjectComposition as React.ComponentType<
@@ -135,15 +191,6 @@ export async function renderProjectLocally({
     videoCodec: "h264",
     videoBitrate: options.bitrate,
     scale: Math.min(2, Math.max(0.25, options.scale)),
-    // The Chromium WebCodecs encoder (both hardware and software) silently
-    // caps the bitrate around ~5 Mbps regardless of what we request, so the
-    // shimmer-elimination heavy lift is done by the tight keyframe interval
-    // below — that gives the encoder fewer inter-frame prediction chains to
-    // accumulate per-frame quantisation drift across at-rest text. We keep
-    // hardware acceleration on so renders stay fast; for a truly pristine
-    // export, point the user at the downloadable CLI renderer (which uses
-    // libx264 directly and honors the full bitrate spec).
-    hardwareAcceleration: "prefer-hardware",
     // Distance between H.264 keyframes (smaller = more keyframes = less
     // inter-frame prediction shimmer on at-rest text). The "high" preset
     // requests all-intra by setting this to the per-frame duration; we

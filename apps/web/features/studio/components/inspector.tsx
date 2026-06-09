@@ -77,7 +77,8 @@ export function Inspector({
     clip.style?.backgroundColor ||
       clip.style?.textColor ||
       clip.style?.fontFamily ||
-      clip.style?.accentColor,
+      clip.style?.accentColor ||
+      clip.style?.backgroundScene,
   );
   const hasTransitionOverride = clip.transition !== undefined;
   const motionBadgeCount = (hasTransitionOverride ? 1 : 0) + clipEffects.length;
@@ -147,6 +148,7 @@ export function Inspector({
             </div>
           )}
           <ClipStyleSection
+            key={clip.id}
             style={clip.style}
             onPatch={onUpdateStyle}
             onReset={onResetStyle}

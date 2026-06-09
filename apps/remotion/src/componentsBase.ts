@@ -3,6 +3,10 @@ import type { ComponentType } from "react";
 import { AreaChart } from "./compositions/AreaChart/AreaChart";
 import { BarChart } from "./compositions/BarChart/BarChart";
 import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
+import { BlueGrid } from "./compositions/backgrounds/BlueGrid/BlueGrid";
+import { FuturisticArch } from "./compositions/backgrounds/FuturisticArch/FuturisticArch";
+import { LiquidChrome } from "./compositions/backgrounds/LiquidChrome/LiquidChrome";
+import { WhiteRadialBurst } from "./compositions/backgrounds/WhiteRadialBurst/WhiteRadialBurst";
 import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
 import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages";
@@ -134,4 +138,8 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   PieChart,
   RadarChart,
   RadialChart,
+  BlueGrid,
+  WhiteRadialBurst,
+  LiquidChrome,
+  FuturisticArch,
 };
