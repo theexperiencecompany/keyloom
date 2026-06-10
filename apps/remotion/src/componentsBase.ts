@@ -43,6 +43,7 @@ import { TextKineticCenterBuild } from "./compositions/TextKineticCenterBuild/Te
 import { TextLineByLineSlide } from "./compositions/TextLineByLineSlide/TextLineByLineSlide";
 import { TextMaskRevealUp } from "./compositions/TextMaskRevealUp/TextMaskRevealUp";
 import { TextMicroScaleFade } from "./compositions/TextMicroScaleFade/TextMicroScaleFade";
+import { TextMorph } from "./compositions/TextMorph/TextMorph";
 import { TextPerCharacterRise } from "./compositions/TextPerCharacterRise/TextPerCharacterRise";
 import { TextPerWordCrossfade } from "./compositions/TextPerWordCrossfade/TextPerWordCrossfade";
 import { TextScaleDownFade } from "./compositions/TextScaleDownFade/TextScaleDownFade";
@@ -99,6 +100,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   DiscordMessages,
   TelegramMessages,
   TextMicroScaleFade,
+  TextMorph,
   TextShimmerSweep,
   TextFadeThrough,
   TextSharedAxisZ,

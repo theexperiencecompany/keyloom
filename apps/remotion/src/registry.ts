@@ -102,6 +102,7 @@ export const compositions: AnyCompositionInfo[] = [
   laptopFrameInfo,
   splitSceneInfo,
   textMicroScaleFadeInfo,
+  textMorphInfo,
   textShimmerSweepInfo,
   textFadeThroughInfo,
   textSharedAxisZInfo,
