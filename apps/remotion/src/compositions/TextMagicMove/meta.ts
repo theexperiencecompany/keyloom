@@ -1,8 +1,6 @@
 import type { CompositionInfo } from "../../schema";
-import {
-  computeMagicMoveDuration,
-  type TextMagicMoveProps,
-} from "./TextMagicMove";
+import type { TextMagicMoveProps } from "./TextMagicMove";
+import { computeMagicMoveDuration } from "./timing";
 
 export const TEXT_MAGIC_MOVE_FPS = 60;
 export const TEXT_MAGIC_MOVE_WIDTH = 1920;

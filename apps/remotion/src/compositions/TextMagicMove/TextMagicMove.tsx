@@ -6,6 +6,7 @@ import type { ClipStyle } from "../../clip-style";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import { resolveTitleStyle, snap, snapZero } from "../title-shared";
+import { MAGIC_ENTER, MAGIC_HOLD, MAGIC_MORPH, parsePhrases } from "./timing";
 
 /**
  * Kinetic-typography MAGIC MOVE. Feed it a list of phrases (one per line); it
@@ -28,13 +29,6 @@ import { resolveTitleStyle, snap, snapZero } from "../title-shared";
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
-// All timings in DESIGN frames (60fps); useDesignFrame keeps them tied to
-// wall-clock time at any export fps.
-export const MAGIC_ENTER = 22; // first phrase's entrance
-export const MAGIC_HOLD = 56; // each phrase fully shown
-export const MAGIC_MORPH = 28; // hand-off between two phrases
-export const MAGIC_END_PAD = 24; // tail after the last phrase
-
 const FONT_WEIGHT = 700;
 const LETTER_SPACING = "-0.02em";
 const SPACE_EM = 0.3; // gap between words, in em
@@ -50,22 +44,6 @@ export type TextMagicMoveProps = {
 
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-/** Parse the newline-separated `phrases` prop into trimmed word arrays. */
-function parsePhrases(phrases: string): string[][] {
-  const lines = phrases
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((l) => l.split(/\s+/).filter(Boolean));
-  return lines.length ? lines : [["Magic", "move"]];
-}
-
-/** Total clip length for a phrase set, in design frames. */
-export function computeMagicMoveDuration(phrases: string): number {
-  const n = parsePhrases(phrases).length;
-  return n * MAGIC_HOLD + Math.max(0, n - 1) * MAGIC_MORPH + MAGIC_END_PAD;
-}
 
 type Layout = { boxes: { text: string; cx: number }[] };
 
