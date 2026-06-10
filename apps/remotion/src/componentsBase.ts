@@ -2,6 +2,7 @@
 import type { ComponentType } from "react";
 import { AreaChart } from "./compositions/AreaChart/AreaChart";
 import { BarChart } from "./compositions/BarChart/BarChart";
+import { BounceCards } from "./compositions/BounceCards/BounceCards";
 import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
 import { AuroraGradient } from "./compositions/backgrounds/AuroraGradient/AuroraGradient";
 import { BlueGrid } from "./compositions/backgrounds/BlueGrid/BlueGrid";
@@ -41,6 +42,7 @@ import { TextFadeThrough } from "./compositions/TextFadeThrough/TextFadeThrough"
 import { TextFocusBlurResolve } from "./compositions/TextFocusBlurResolve/TextFocusBlurResolve";
 import { TextKineticCenterBuild } from "./compositions/TextKineticCenterBuild/TextKineticCenterBuild";
 import { TextLineByLineSlide } from "./compositions/TextLineByLineSlide/TextLineByLineSlide";
+import { TextMagicMove } from "./compositions/TextMagicMove/TextMagicMove";
 import { TextMaskRevealUp } from "./compositions/TextMaskRevealUp/TextMaskRevealUp";
 import { TextMicroScaleFade } from "./compositions/TextMicroScaleFade/TextMicroScaleFade";
 import { TextMorph } from "./compositions/TextMorph/TextMorph";
@@ -99,6 +101,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   SlackMessages,
   DiscordMessages,
   TelegramMessages,
+  TextMagicMove,
   TextMicroScaleFade,
   TextMorph,
   TextShimmerSweep,
@@ -132,6 +135,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   Terminal,
   GitHubStarButton,
   ImageScene,
+  BounceCards,
   QrCode,
   Toast,
   PerspectiveMarquee,

@@ -1,5 +1,6 @@
 import { areaChartInfo } from "./compositions/AreaChart/meta";
 import { barChartInfo } from "./compositions/BarChart/meta";
+import { bounceCardsInfo } from "./compositions/BounceCards/meta";
 import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
 import { auroraGradientInfo } from "./compositions/backgrounds/AuroraGradient/meta";
 import { blueGridInfo } from "./compositions/backgrounds/BlueGrid/meta";
@@ -43,6 +44,7 @@ import { textFadeThroughInfo } from "./compositions/TextFadeThrough/meta";
 import { textFocusBlurResolveInfo } from "./compositions/TextFocusBlurResolve/meta";
 import { textKineticCenterBuildInfo } from "./compositions/TextKineticCenterBuild/meta";
 import { textLineByLineSlideInfo } from "./compositions/TextLineByLineSlide/meta";
+import { textMagicMoveInfo } from "./compositions/TextMagicMove/meta";
 import { textMaskRevealUpInfo } from "./compositions/TextMaskRevealUp/meta";
 import { textMicroScaleFadeInfo } from "./compositions/TextMicroScaleFade/meta";
 import { textMorphInfo } from "./compositions/TextMorph/meta";
@@ -101,6 +103,7 @@ export const compositions: AnyCompositionInfo[] = [
   phoneFrameInfo,
   laptopFrameInfo,
   splitSceneInfo,
+  textMagicMoveInfo,
   textMicroScaleFadeInfo,
   textMorphInfo,
   textShimmerSweepInfo,
@@ -134,6 +137,7 @@ export const compositions: AnyCompositionInfo[] = [
   terminalInfo,
   githubStarButtonInfo,
   imageSceneInfo,
+  bounceCardsInfo,
   qrCodeInfo,
   toastInfo,
   perspectiveMarqueeInfo,

@@ -1,20 +1,21 @@
 "use client";
-
 import {
   AbsoluteFill,
+  Img,
   interpolate,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 
-export const BOUNCE_CARDS_FPS = 30;
-export const BOUNCE_CARDS_WIDTH = 1280;
-export const BOUNCE_CARDS_HEIGHT = 720;
-export const BOUNCE_CARDS_DURATION = 210;
+export type BounceCardsProps = {
+  images: string[];
+  clipStyle?: ClipStyle;
+};
 
-// Fan layout for the five cards — same idea as the original CSS
+// Fan layout for up to five cards — same idea as the original CSS
 // `transformStyles`, expressed as discrete rotate + x-offset values so we can
 // drive them with Remotion's frame-based spring instead of GSAP.
 type CardLayout = { rotate: number; x: number };
@@ -27,43 +28,48 @@ const LAYOUT: CardLayout[] = [
   { rotate: 2, x: 340 },
 ];
 
-const IMAGES = [
-  "images/stickers/sticker_03.webp",
-  "images/stickers/sticker_07.webp",
-  "images/stickers/sticker_11.webp",
-  "images/stickers/sticker_14.webp",
-  "images/stickers/sticker_19.webp",
-];
-
 const CARD_SIZE = 240;
 const STAGGER_FRAMES = 4; // ~0.13s between each card popping in
 const SPOTLIGHT_START = 70; // frame the hover-style spotlight cycle begins
 const SPOTLIGHT_EVERY = 28; // frames each card stays centred/forward
 
-export type BounceCardsProps = {
-  images?: string[];
-};
-
-export function BounceCards({ images = IMAGES }: BounceCardsProps) {
+export const BounceCards: React.FC<BounceCardsProps> = ({
+  images,
+  clipStyle,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const s = resolveClipStyle(clipStyle, {
+    background: "#0b1120",
+    color: "#ffffff",
+    fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+    accent: "#6366f1",
+  });
+
+  const count = images.length || 1;
 
   // Which card is currently "spotlit" (mimics the original hover-push). -1
   // until the spotlight phase starts, then cycles through the cards.
   const spotlight =
     frame < SPOTLIGHT_START
       ? -1
-      : Math.floor((frame - SPOTLIGHT_START) / SPOTLIGHT_EVERY) % images.length;
+      : Math.floor((frame - SPOTLIGHT_START) / SPOTLIGHT_EVERY) % count;
 
   return (
     <AbsoluteFill
       style={{
-        background:
-          "radial-gradient(120% 120% at 50% 0%, #1e293b 0%, #0b1120 60%, #060a14 100%)",
+        background: s.background,
         alignItems: "center",
         justifyContent: "center",
       }}
     >
+      {/* color-independent vignette for depth on any background */}
+      <AbsoluteFill
+        style={{
+          background:
+            "radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.45) 100%)",
+        }}
+      />
       <div style={{ position: "relative", width: 0, height: 0 }}>
         {images.map((src, i) => {
           const layout = LAYOUT[i % LAYOUT.length] ?? { rotate: 0, x: 0 };
@@ -93,7 +99,7 @@ export function BounceCards({ images = IMAGES }: BounceCardsProps) {
 
           return (
             <div
-              key={src}
+              key={`${src}-${i}`}
               style={{
                 position: "absolute",
                 left: -CARD_SIZE / 2,
@@ -106,12 +112,12 @@ export function BounceCards({ images = IMAGES }: BounceCardsProps) {
                 background: "#0f172a",
                 border: "5px solid #ffffff",
                 boxShadow: isSpot
-                  ? "0 30px 60px rgba(0,0,0,0.55)"
+                  ? `0 30px 60px rgba(0,0,0,0.55), 0 0 0 3px ${s.accent}66`
                   : "0 16px 32px rgba(0,0,0,0.4)",
                 zIndex: isSpot ? 10 : 1,
               }}
             >
-              <img
+              <Img
                 src={staticFile(src)}
                 alt=""
                 style={{
@@ -127,4 +133,4 @@ export function BounceCards({ images = IMAGES }: BounceCardsProps) {
       </div>
     </AbsoluteFill>
   );
-}
+};

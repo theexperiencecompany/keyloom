@@ -62,6 +62,7 @@
         "@radix-ui/react-separator": "^1.1.8",
         "@radix-ui/react-tooltip": "^1.2.8",
         "@remotion/cli": "4.0.459",
+        "@remotion/layout-utils": "4.0.459",
         "@remotion/media": "4.0.459",
         "@remotion/tailwind-v4": "4.0.459",
         "@remotion/transitions": "4.0.459",
@@ -1171,6 +1172,8 @@
     "@remotion/compositor-linux-x64-musl": ["@remotion/compositor-linux-x64-musl@4.0.459", "", { "os": "linux", "cpu": "x64" }, "sha512-ECPqxb3xs0LUdWD4w23tseBhquehCNvSeD0pDaYxk+oBJPJ9QwqBhosKYgGmm9p3ar6YvT8ig+Y044IRStqHcw=="],
 
     "@remotion/compositor-win32-x64-msvc": ["@remotion/compositor-win32-x64-msvc@4.0.459", "", { "os": "win32", "cpu": "x64" }, "sha512-0Nj75T9O8mk8UiEucJZDW7v8xByTYhN7UeA6RlMM08s/RTreOlpP12JP9xSH7028vIErBBV0ZEbX6FpKxAI8SQ=="],
+
+    "@remotion/layout-utils": ["@remotion/layout-utils@4.0.459", "", {}, "sha512-NymvgZflh5/FbGzbOjqMmqmlKm/4hjdTHuD864IiK3Q+DyznvhZ2TbpnlbtgVLvAdpBZjMwGt0ejDGkwzcxiOg=="],
 
     "@remotion/licensing": ["@remotion/licensing@4.0.459", "", {}, "sha512-7/e1RXXp7aGTt5nMSlgEnvCLjy604aiBDI9pweT+kLZoCEcKeDHMX01CXN3HNtESWp7H5L2X6z8wYCGUOq5brA=="],
 
