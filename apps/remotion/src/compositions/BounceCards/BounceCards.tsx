@@ -63,13 +63,6 @@ export const BounceCards: React.FC<BounceCardsProps> = ({
         justifyContent: "center",
       }}
     >
-      {/* color-independent vignette for depth on any background */}
-      <AbsoluteFill
-        style={{
-          background:
-            "radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.45) 100%)",
-        }}
-      />
       <div style={{ position: "relative", width: 0, height: 0 }}>
         {images.map((src, i) => {
           const layout = LAYOUT[i % LAYOUT.length] ?? { rotate: 0, x: 0 };
