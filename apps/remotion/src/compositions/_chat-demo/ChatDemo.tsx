@@ -674,6 +674,13 @@ function IMessageDemo({
   keyboardOpen?: number;
 }) {
   const grouped = curvedThread(messages);
+  // The read receipt sits under the LAST message you sent and stays there even
+  // after they reply — only a newer sent message moves it down. Track that
+  // group so the receipt persists across subsequent incoming bubbles.
+  let lastMeGroupIndex = -1;
+  grouped.forEach((g, i) => {
+    if (g.from === "me") lastMeGroupIndex = i;
+  });
   const hasBg = !!backgroundImage;
   // Glass runs with or without a wallpaper. With one it refracts the image;
   // without, it refracts the solid sheet and draws a self-defining adaptive
@@ -948,8 +955,7 @@ function IMessageDemo({
                       </BubbleEnter>
                     );
                   })}
-                  {gi === grouped.length - 1 &&
-                    group.from === "me" &&
+                  {gi === lastMeGroupIndex &&
                     (() => {
                       const last = group.items[group.items.length - 1];
                       if (!last || last.typing) return null;
