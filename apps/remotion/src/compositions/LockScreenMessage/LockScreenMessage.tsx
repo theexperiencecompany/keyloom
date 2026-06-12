@@ -68,7 +68,12 @@ type Notif = {
 // Frame offsets (design fps = 60).
 const D_CLOCK = 0;
 const D_NOTIF_START = 14;
-const NOTIF_STAGGER = 7;
+const GHOST_STAGGER = 5;
+
+// Collapsed-deck metrics (iOS lock screen): each card behind the hero is inset
+// (narrower) and pushed down so only a sliver peeks out below it.
+const STACK_PEEK = 34; // px each deeper card sticks out below
+const STACK_INSET = 28; // px each deeper card narrows per side
 
 function collectNotifs(p: LockScreenMessageProps): Notif[] {
   const raw: Notif[] = [
@@ -186,28 +191,12 @@ export const LockScreenMessage: React.FC<LockScreenMessageProps> = (props) => {
         </div>
       </div>
 
-      {/* Notification stack — anchored to the lower portion like iOS. */}
-      <div
-        style={{
-          position: "absolute",
-          left: 36,
-          right: 36,
-          top: 1230,
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-        }}
-      >
-        {notifs.map((n, i) => (
-          <NotificationCard
-            key={i}
-            frame={frame}
-            fps={fps}
-            delay={D_NOTIF_START + i * NOTIF_STAGGER}
-            notif={n}
-          />
-        ))}
-      </div>
+      {/* Notification deck — anchored to the lower portion like iOS. */}
+      {notifs.length > 0 && (
+        <div style={{ position: "absolute", left: 36, right: 36, top: 1230 }}>
+          <NotificationStack notifs={notifs} frame={frame} fps={fps} />
+        </div>
+      )}
 
       <BottomChrome />
     </AbsoluteFill>
@@ -276,6 +265,79 @@ function StatusBar() {
   );
 }
 
+/**
+ * Collapsed iOS deck: the newest notification renders full and readable on
+ * top (in flow, so it sets the stack's height); every older one tucks behind
+ * it as a narrower, dimmed glass card pushed down so just a sliver peeks out
+ * below — the recognizable lock-screen pile.
+ */
+function NotificationStack({
+  notifs,
+  frame,
+  fps,
+}: {
+  notifs: Notif[];
+  frame: number;
+  fps: number;
+}) {
+  const ghosts = notifs.slice(1, 3); // up to two cards behind the hero
+  return (
+    <div style={{ position: "relative" }}>
+      {/* Deeper cards first so they paint behind the hero. */}
+      {ghosts.map((_, k) => (
+        <GhostCard key={k} depth={k + 1} frame={frame} fps={fps} />
+      ))}
+      <NotificationCard
+        frame={frame}
+        fps={fps}
+        delay={D_NOTIF_START}
+        notif={notifs[0]!}
+      />
+    </div>
+  );
+}
+
+/** A blank glass card peeking out behind the hero notification. */
+function GhostCard({
+  depth,
+  frame,
+  fps,
+}: {
+  depth: number;
+  frame: number;
+  fps: number;
+}) {
+  const pop = spring({
+    frame: frame - (D_NOTIF_START + depth * GHOST_STAGGER),
+    fps,
+    config: { damping: 18, stiffness: 150, mass: 0.9 },
+  });
+  // Rest at its peek offset; slide up into place from below on entrance.
+  const y = depth * STACK_PEEK + (1 - pop) * 32;
+  const inset = depth * STACK_INSET;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: inset,
+        right: inset,
+        height: "100%",
+        zIndex: 1,
+        borderRadius: 38,
+        background: `rgba(60,64,76,${0.34 - depth * 0.05})`,
+        border: "1px solid rgba(255,255,255,0.12)",
+        boxShadow: "0 18px 44px rgba(0,0,0,0.20)",
+        backdropFilter: "blur(30px) saturate(150%)",
+        WebkitBackdropFilter: "blur(30px) saturate(150%)",
+        transform: `translate3d(0, ${snap(y)}px, 0)`,
+        opacity: pop,
+        filter: `brightness(${1 - depth * 0.1})`,
+      }}
+    />
+  );
+}
+
 const AVATAR = 82;
 const BADGE = 34;
 
@@ -303,6 +365,8 @@ function NotificationCard({
   return (
     <div
       style={{
+        position: "relative",
+        zIndex: 2,
         borderRadius: 38,
         // Neutral frosted glass — light enough to read as iOS material,
         // dark enough to keep white text legible over any wallpaper.
