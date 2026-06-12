@@ -165,16 +165,12 @@ function BubbleEnter({
 const TYPING_BUBBLE_H = 32;
 
 /**
- * iMessage dots → message morph.
- *
- * Real iMessage doesn't pop the message in — the typing bubble's surface
- * simply *becomes* the message:
- *   • single-line message (same height as the dots pill): no transform at all,
- *     the content just settles in (we fade the text in over a few frames).
- *   • taller (multi-line) message: the row's height glides from the one-line
- *     pill to the message's measured natural height, bottom-anchored, so the
- *     conversation is pushed up smoothly — the "one line grows into many"
- *     effect. No scale transform; growth only.
+ * iMessage dots → message morph. The WHOLE message bubble — surface and text
+ * together, already at its final size — scales up from the tail corner while
+ * fading in, exactly like the real swap (mid-transition you see a smaller,
+ * dimmer bubble with the text inside it). In sync, the row's layout height
+ * glides from the dots pill to the message's measured natural height so a
+ * taller message pushes the thread up smoothly. One motion, no bounce.
  *
  * Natural height is measured from the live DOM (same pattern as the
  * keyboard/glass measurement); until known the row renders at natural size,
@@ -203,20 +199,21 @@ function BubbleReveal({
 
   if (revealFrames === undefined) return <>{children}</>;
 
-  // Only messages meaningfully taller than the dots pill get the growth —
-  // single-line bubbles match the pill's height, so animating them would add
-  // a pointless wobble.
-  const isTaller = fullH !== null && fullH > TYPING_BUBBLE_H + 6;
-
+  // Heavily damped spring — a clean, smooth settle with no visible overshoot.
   const s = spring({
     frame: Math.max(0, revealFrames),
     fps,
-    config: { damping: 16, mass: 0.75, stiffness: 200 },
+    config: { damping: 22, mass: 0.8, stiffness: 180 },
     durationInFrames: 16,
   });
-  const height = isTaller
-    ? TYPING_BUBBLE_H + ((fullH as number) - TYPING_BUBBLE_H) * Math.min(1, s)
-    : undefined;
+  const scale = 0.35 + 0.65 * s;
+  const opacity = Math.min(1, s * 1.8);
+  // The bubble is scaled small while the row grows, so nothing ever overlaps
+  // the messages above — no clipping needed.
+  const height =
+    fullH !== null
+      ? TYPING_BUBBLE_H + (fullH - TYPING_BUBBLE_H) * Math.min(1, s)
+      : undefined;
 
   return (
     <div
@@ -226,16 +223,20 @@ function BubbleReveal({
         flexDirection: "column",
         justifyContent: "flex-end",
         alignItems: from === "me" ? "flex-end" : "flex-start",
-        // While growing, clip the bubble's top so it reveals upward instead of
-        // overlapping the row above. The 8px tail-side padding (cancelled by
-        // the negative margin) keeps the tail inside the clip box.
-        overflow: height === undefined ? "visible" : "hidden",
-        ...(from === "me"
-          ? { paddingRight: 8, marginRight: -8 }
-          : { paddingLeft: 8, marginLeft: -8 }),
+        overflow: "visible",
       }}
     >
-      <div ref={innerRef}>{children}</div>
+      <div
+        ref={innerRef}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: from === "me" ? "bottom right" : "bottom left",
+          opacity,
+          willChange: "transform, opacity",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -1040,25 +1041,6 @@ function IMessageDemo({
                                     isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
                                   }
                                 />
-                              ) : m.revealFrames !== undefined ? (
-                                // The bubble surface persists from the dots —
-                                // only the text eases in, so the swap reads as
-                                // the indicator becoming the message.
-                                <span
-                                  style={{
-                                    opacity: interpolate(
-                                      m.revealFrames,
-                                      [2, 10],
-                                      [0, 1],
-                                      {
-                                        extrapolateLeft: "clamp",
-                                        extrapolateRight: "clamp",
-                                      },
-                                    ),
-                                  }}
-                                >
-                                  {m.text}
-                                </span>
                               ) : (
                                 m.text
                               )}
