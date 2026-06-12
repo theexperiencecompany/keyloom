@@ -317,156 +317,180 @@ export function Keyboard({
         width: "100%",
         height: KB_H * scale,
         position: "relative",
-        // Let the key-press pop balloon overflow ABOVE the top row, but keep
-        // the sides/bottom clipped so nothing spills past the keyboard edges.
-        clipPath: "inset(-120px 0 0 0)",
-        background: p.bg,
         fontFamily: SF_STACK,
       }}
     >
+      {/* Keyboard panel surface — its own layer with generously rounded TOP
+          corners + a soft glass rim along the top edge, matching the liquid
+          glass chrome (call button / name chip). Kept separate from the
+          key/balloon clip below so the balloon's upward overflow can't square
+          these corners off. */}
       <div
         style={{
           position: "absolute",
-          top: 0,
-          left: KB_PAD_X,
-          width: KB_W,
-          height: KB_H,
-          transform: `scale(${scale})`,
-          transformOrigin: "top left",
+          inset: 0,
+          background: p.bg,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          boxShadow:
+            theme === "dark"
+              ? "inset 0 1px 0 rgba(255,255,255,0.10), inset 1px 0 0 rgba(255,255,255,0.05), inset -1px 0 0 rgba(255,255,255,0.05)"
+              : "inset 0 1px 0 rgba(255,255,255,0.55)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          // Let the key-press pop balloon overflow ABOVE the top row, but keep
+          // the sides/bottom clipped so nothing spills past the keyboard edges.
+          clipPath: "inset(-120px 0 0 0)",
         }}
       >
-        {KEYS.map((k, i) => {
-          const isPressed = active === k && k.kind === "letter";
-          const isShift = k.label === "⇧";
-          const isDelete = k.label === "⌫";
-          const isGlobe = k.label === "🌐";
-          const bg =
-            k.kind === "letter"
-              ? isPressed
-                ? p.pressedKey
-                : p.letterKey
-              : k.kind === "return"
-                ? p.returnKey
-                : p.fnKey;
-          const fontSize =
-            k.kind === "letter"
-              ? 22
-              : k.kind === "space"
-                ? 15
-                : k.label === "123"
-                  ? 16
-                  : 17;
-          // The pressed letter hides its own glyph — it now lives in the balloon.
-          const showGlyph = !(isPressed && balloon);
-          let content: React.ReactNode = "";
-          if (showGlyph) {
-            if (isShift) content = <ShiftIcon color={p.fnText} />;
-            else if (isDelete) content = <BackspaceIcon color={p.fnText} />;
-            else if (isGlobe) content = <SmileyIcon color={p.smiley} />;
-            else if (k.kind === "space") content = "";
-            else if (k.kind === "return") content = "return";
-            else content = k.label;
-          }
-          return (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: k.x,
-                top: k.y,
-                width: k.w,
-                height: k.h,
-                borderRadius: 8.5,
-                background: bg,
-                boxShadow: p.letterKeyShadow,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: k.kind === "letter" ? p.text : p.fnText,
-                fontSize,
-                fontWeight: 400,
-                letterSpacing: k.kind === "space" ? "0.04em" : 0,
-                lineHeight: 1,
-              }}
-            >
-              {content}
-            </div>
-          );
-        })}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: KB_PAD_X,
+            width: KB_W,
+            height: KB_H,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        >
+          {KEYS.map((k, i) => {
+            const isPressed = active === k && k.kind === "letter";
+            const isShift = k.label === "⇧";
+            const isDelete = k.label === "⌫";
+            const isGlobe = k.label === "🌐";
+            const bg =
+              k.kind === "letter"
+                ? isPressed
+                  ? p.pressedKey
+                  : p.letterKey
+                : k.kind === "return"
+                  ? p.returnKey
+                  : p.fnKey;
+            const fontSize =
+              k.kind === "letter"
+                ? 22
+                : k.kind === "space"
+                  ? 15
+                  : k.label === "123"
+                    ? 16
+                    : 17;
+            // The pressed letter hides its own glyph — it now lives in the balloon.
+            const showGlyph = !(isPressed && balloon);
+            let content: React.ReactNode = "";
+            if (showGlyph) {
+              if (isShift) content = <ShiftIcon color={p.fnText} />;
+              else if (isDelete) content = <BackspaceIcon color={p.fnText} />;
+              else if (isGlobe) content = <SmileyIcon color={p.smiley} />;
+              else if (k.kind === "space") content = "";
+              else if (k.kind === "return") content = "return";
+              else content = k.label;
+            }
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  left: k.x,
+                  top: k.y,
+                  width: k.w,
+                  height: k.h,
+                  borderRadius: 8.5,
+                  background: bg,
+                  boxShadow: p.letterKeyShadow,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: k.kind === "letter" ? p.text : p.fnText,
+                  fontSize,
+                  fontWeight: 400,
+                  letterSpacing: k.kind === "space" ? "0.04em" : 0,
+                  lineHeight: 1,
+                }}
+              >
+                {content}
+              </div>
+            );
+          })}
 
-        {/* Utility bar below the keys: globe (switch keyboard) on the left,
+          {/* Utility bar below the keys: globe (switch keyboard) on the left,
             dictation mic on the right — both plain icons on the surface. */}
-        <div
-          style={{
-            position: "absolute",
-            left: 18,
-            top: UTILITY_Y - 15,
-            width: 30,
-            height: 30,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <GlobeIcon color={p.smiley} />
-        </div>
-        <div
-          style={{
-            position: "absolute",
-            left: 358,
-            top: UTILITY_Y - 13,
-            width: 26,
-            height: 26,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <MicIcon color={p.smiley} />
-        </div>
+          <div
+            style={{
+              position: "absolute",
+              left: 18,
+              top: UTILITY_Y - 15,
+              width: 30,
+              height: 30,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <GlobeIcon color={p.smiley} />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              left: 358,
+              top: UTILITY_Y - 13,
+              width: 26,
+              height: 26,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MicIcon color={p.smiley} />
+          </div>
 
-        {/* Press "pop" balloon — neck first (behind), then the balloon head. */}
-        {balloon && (
-          <>
-            <div
-              style={{
-                position: "absolute",
-                left: balloon.neckLeft,
-                top: balloon.neckTop,
-                width: balloon.neckW,
-                height: Math.max(0, balloon.neckH),
-                background: p.balloon,
-                borderRadius: 6,
-                opacity: pop,
-                transform: `scaleY(${0.6 + 0.4 * pop})`,
-                transformOrigin: "bottom center",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: balloon.left,
-                top: balloon.top,
-                width: balloon.bw,
-                height: balloon.bh,
-                background: p.balloon,
-                borderRadius: 12,
-                boxShadow: p.balloonShadow,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: p.balloonText,
-                fontSize: 30,
-                fontWeight: 400,
-                opacity: pop,
-                transform: `translateY(${(1 - pop) * 8}px) scale(${0.82 + 0.18 * pop})`,
-                transformOrigin: "bottom center",
-              }}
-            >
-              {balloon.char}
-            </div>
-          </>
-        )}
+          {/* Press "pop" balloon — neck first (behind), then the balloon head. */}
+          {balloon && (
+            <>
+              <div
+                style={{
+                  position: "absolute",
+                  left: balloon.neckLeft,
+                  top: balloon.neckTop,
+                  width: balloon.neckW,
+                  height: Math.max(0, balloon.neckH),
+                  background: p.balloon,
+                  borderRadius: 6,
+                  opacity: pop,
+                  transform: `scaleY(${0.6 + 0.4 * pop})`,
+                  transformOrigin: "bottom center",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  left: balloon.left,
+                  top: balloon.top,
+                  width: balloon.bw,
+                  height: balloon.bh,
+                  background: p.balloon,
+                  borderRadius: 12,
+                  boxShadow: p.balloonShadow,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: p.balloonText,
+                  fontSize: 30,
+                  fontWeight: 400,
+                  opacity: pop,
+                  transform: `translateY(${(1 - pop) * 8}px) scale(${0.82 + 0.18 * pop})`,
+                  transformOrigin: "bottom center",
+                }}
+              >
+                {balloon.char}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

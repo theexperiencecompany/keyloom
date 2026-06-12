@@ -124,18 +124,15 @@ function BubbleEnter({
   from?: "me" | "them";
   children: React.ReactNode;
 }) {
-  const { fps } = useVideoConfig();
   const frame = Math.max(0, enterFrames ?? 9999);
-  const s = spring({
-    frame,
-    fps,
-    config: { damping: 15, mass: 0.7, stiffness: 210 },
-    durationInFrames: 18,
-  });
   // iMessage bubbles inflate from their tail corner (bottom-right for sent,
-  // bottom-left for received) with a snappy spring and a quick fade — no
-  // vertical slide, which is what made the old entrance read as a generic
-  // bounce. The scale-from-corner is the recognizable iMessage send/receive.
+  // bottom-left for received) with a quick fade — no vertical slide. An eased
+  // grow (NOT a spring) so it settles cleanly with zero overshoot/bounce.
+  const s = interpolate(frame, [0, 14], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
   const scale = 0.5 + 0.5 * s;
   const opacity = Math.min(1, s * 2.2);
   return (
@@ -163,6 +160,9 @@ function BubbleEnter({
 // Approximate rendered height of the typing-dots bubble (line box + padding).
 // Used as the starting height for the dots → message morph.
 const TYPING_BUBBLE_H = 32;
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 
 /**
  * iMessage dots → message morph. The WHOLE message bubble — surface and text
@@ -236,6 +236,239 @@ function BubbleReveal({
         }}
       >
         {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The iMessage typing indicator has its OWN bubble shape — a rounded blob with
+ * a two-circle "puff" tail (a medium circle hugging the bottom corner + a
+ * smaller detached one below it), NOT the hooked tail of a message bubble.
+ * This renders that authentic shape. `bodyRef` measures only the rounded body
+ * so the dots → message morph grows from the body's footprint while the puff
+ * circles simply fade.
+ */
+function TypingBubble({
+  from,
+  background,
+  tailColor,
+  color,
+  dotsColor,
+  bodyRef,
+}: {
+  from: "me" | "them";
+  background: string;
+  tailColor: string;
+  color: string;
+  dotsColor: string;
+  bodyRef?: React.Ref<HTMLDivElement>;
+}) {
+  const isMe = from === "me";
+  const side = isMe ? "right" : "left";
+  const puff: React.CSSProperties = {
+    position: "absolute",
+    borderRadius: 9999,
+    background,
+  };
+  return (
+    <div style={{ position: "relative", display: "inline-block" }}>
+      {/* puff tail — two circles trailing off the bottom corner */}
+      <span
+        aria-hidden
+        style={{ ...puff, bottom: -1, [side]: -3, width: 11, height: 11 }}
+      />
+      <span
+        aria-hidden
+        style={{ ...puff, bottom: -6, [side]: -7, width: 6, height: 6 }}
+      />
+      {/* The body is a real message bubble (just without the hooked tail), so
+          its size/shape/radius/padding is IDENTICAL to the message it morphs
+          into — a single-line reply needs no vertical distortion, only a
+          width grow + dots→text crossfade. */}
+      <div ref={bodyRef} style={{ display: "inline-block" }}>
+        <CurvedBubble
+          from={from}
+          tail={false}
+          background={background}
+          tailColor={tailColor}
+          color={color}
+        >
+          <TypingDots color={dotsColor} />
+        </CurvedBubble>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Continuous iMessage typing-dots → message morph. Unlike a fade-out + pop-in,
+ * the gray typing pill is never removed: the real message bubble grows out of
+ * the exact footprint of the dots pill (anchored at the tail corner) while the
+ * dots crossfade into the text. One unbroken bubble that swells into place,
+ * exactly like iOS — no vanish, no scale-from-tiny pop.
+ *
+ * Both footprints are measured live. Remotion re-renders every frame, so the
+ * measure → re-render happens within the SAME frame (useLayoutEffect commits
+ * before paint): the text bubble is rendered in normal flow — so it wraps
+ * against the same max width as a settled bubble — and the dots pill is the
+ * same surface we fade out, measured from its own node.
+ */
+function DotsToMessage({
+  from,
+  tail,
+  background,
+  tailColor,
+  color,
+  dotsColor,
+  text,
+  typing,
+  revealFrames,
+}: {
+  from: "me" | "them";
+  tail: boolean;
+  background: string;
+  tailColor: string;
+  color: string;
+  dotsColor: string;
+  text?: string;
+  typing: boolean;
+  /** Frames since the dots swapped to the message; undefined = no morph. */
+  revealFrames?: number;
+}) {
+  const textRef = useRef<HTMLDivElement>(null);
+  const dotsRef = useRef<HTMLDivElement>(null);
+  const [textSize, setTextSize] = useState<{ w: number; h: number } | null>(
+    null,
+  );
+  const [dotsSize, setDotsSize] = useState<{ w: number; h: number } | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    const t = textRef.current;
+    if (t) {
+      const w = t.offsetWidth;
+      const h = t.offsetHeight;
+      if (w > 0 && h > 0 && (!textSize || textSize.w !== w || textSize.h !== h))
+        setTextSize({ w, h });
+    }
+    const d = dotsRef.current;
+    if (d) {
+      const w = d.offsetWidth;
+      const h = d.offsetHeight;
+      if (w > 0 && h > 0 && (!dotsSize || dotsSize.w !== w || dotsSize.h !== h))
+        setDotsSize({ w, h });
+    }
+  });
+
+  const isMe = from === "me";
+  const originX = isMe ? "right" : "left";
+
+  const dotsPill = (ref?: React.Ref<HTMLDivElement>) => (
+    <TypingBubble
+      from={from}
+      background={background}
+      tailColor={tailColor}
+      color={color}
+      dotsColor={dotsColor}
+      bodyRef={ref}
+    />
+  );
+
+  const textPill = (
+    <CurvedBubble
+      from={from}
+      tail={tail}
+      background={background}
+      tailColor={tailColor}
+      color={color}
+    >
+      {text}
+    </CurvedBubble>
+  );
+
+  // Pure typing phase — just the pulsing pill (BubbleEnter pops it in).
+  if (typing) return dotsPill(dotsRef);
+
+  // Message arrived without ever showing dots — plain bubble; BubbleEnter
+  // gives it the standard send/receive pop.
+  if (revealFrames === undefined) return textPill;
+
+  // A short eased grow — NO spring, so there's zero overshoot/bounce. The
+  // message settles in ~9 frames.
+  const s = interpolate(Math.max(0, revealFrames), [0, 9], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+
+  // Until both footprints are known (the first rendered frame of the morph),
+  // keep the pill on screen and hold the text invisible IN FLOW so it measures
+  // against the real wrap width. Same-frame re-render → no visible flash.
+  if (textSize === null || dotsSize === null) {
+    return (
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: isMe ? "flex-end" : "flex-start",
+        }}
+      >
+        {dotsPill(dotsRef)}
+        <div ref={textRef} style={{ opacity: 0, pointerEvents: "none" }}>
+          {textPill}
+        </div>
+      </div>
+    );
+  }
+
+  // Subtle UNIFORM inflate from the tail corner (bottom-left received /
+  // bottom-right sent) — not a width stretch, which read as an elastic
+  // left-to-right bounce. The row height glides from the pill to the message
+  // so the thread pushes up smoothly, and the dots crossfade into the text.
+  const sc = lerp(0.86, 1, s);
+  const layoutH = lerp(dotsSize.h, textSize.h, s);
+  const dotsOpacity = clamp01(1 - s / 0.4);
+  const textOpacity = clamp01((s - 0.1) / 0.45);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        height: layoutH,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        alignItems: isMe ? "flex-end" : "flex-start",
+        overflow: "visible",
+      }}
+    >
+      {dotsOpacity > 0.01 && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            [originX]: 0,
+            opacity: dotsOpacity,
+            pointerEvents: "none",
+            willChange: "opacity",
+          }}
+        >
+          {dotsPill()}
+        </div>
+      )}
+      <div
+        ref={textRef}
+        style={{
+          transform: `scale(${sc})`,
+          transformOrigin: `bottom ${originX}`,
+          opacity: textOpacity,
+          willChange: "transform, opacity",
+        }}
+      >
+        {textPill}
       </div>
     </div>
   );
@@ -1013,40 +1246,52 @@ function IMessageDemo({
                         enterFrames={m.enterFrames}
                         from={group.from}
                       >
-                        <BubbleReveal
-                          revealFrames={m.typing ? undefined : m.revealFrames}
-                          from={group.from}
-                        >
-                          {m.image && !m.typing ? (
-                            <ImageBubble
-                              src={m.image}
-                              from={group.from}
-                              tail={isLast}
-                            />
-                          ) : (
-                            <CurvedBubble
-                              from={group.from}
-                              tail={isLast}
-                              background={
-                                isMe ? IMESSAGE_GRADIENT : themBubbleBg
-                              }
-                              tailColor={
-                                isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
-                              }
-                              color={isMe ? "#fff" : themText}
-                            >
-                              {m.typing ? (
-                                <TypingDots
-                                  color={
-                                    isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
-                                  }
-                                />
-                              ) : (
-                                m.text
-                              )}
-                            </CurvedBubble>
-                          )}
-                        </BubbleReveal>
+                        {m.image ? (
+                          // Photos can't morph from dots like text — keep the
+                          // scale-from-tail reveal once the typing phase ends.
+                          <BubbleReveal
+                            revealFrames={m.typing ? undefined : m.revealFrames}
+                            from={group.from}
+                          >
+                            {m.typing ? (
+                              <TypingBubble
+                                from={group.from}
+                                background={
+                                  isMe ? IMESSAGE_GRADIENT : themBubbleBg
+                                }
+                                tailColor={
+                                  isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
+                                }
+                                color={isMe ? "#fff" : themText}
+                                dotsColor={
+                                  isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
+                                }
+                              />
+                            ) : (
+                              <ImageBubble
+                                src={m.image}
+                                from={group.from}
+                                tail={isLast}
+                              />
+                            )}
+                          </BubbleReveal>
+                        ) : (
+                          <DotsToMessage
+                            from={group.from}
+                            tail={isLast}
+                            background={isMe ? IMESSAGE_GRADIENT : themBubbleBg}
+                            tailColor={
+                              isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
+                            }
+                            color={isMe ? "#fff" : themText}
+                            dotsColor={
+                              isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
+                            }
+                            text={m.text}
+                            typing={!!m.typing}
+                            revealFrames={m.revealFrames}
+                          />
+                        )}
                       </BubbleEnter>
                     );
                   })}
@@ -2922,10 +3167,13 @@ function TypingDots({ color }: { color: string }) {
       role="status"
       aria-label="typing"
       style={{
+        // Sit in the bubble's normal line box so the typing body has the exact
+        // same height as a one-line message bubble (the body IS a message
+        // bubble) — the dots → text morph then has nothing to distort.
         display: "inline-flex",
         alignItems: "center",
+        verticalAlign: "middle",
         gap: 4,
-        padding: "2px 0",
       }}
     >
       {[0, 1, 2].map((i) => {
@@ -2936,8 +3184,8 @@ function TypingDots({ color }: { color: string }) {
         // iMessage dots PULSE — they fade and scale in place; they do NOT
         // bounce vertically (that's what made ours read as bouncy).
         const bump = Math.max(0, Math.sin(phase * Math.PI));
-        const opacity = 0.4 + bump * 0.6;
-        const scale = 0.72 + bump * 0.28;
+        const opacity = 0.45 + bump * 0.55;
+        const scale = 0.74 + bump * 0.26;
         return (
           <span
             key={i}
