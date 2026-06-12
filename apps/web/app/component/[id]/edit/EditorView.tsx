@@ -70,13 +70,14 @@ export function EditorView({
         inputProps: props,
         container: "mp4",
         videoCodec: "h264",
-        hardwareAcceleration: "prefer-hardware",
-        // Eliminate h264's at-rest "ever so slight" shimmer on text by
-        // forcing every frame to be a keyframe (no inter-frame prediction
-        // drift) and giving the encoder enough bitrate that text edges
-        // stay deterministic frame-to-frame.
-        videoBitrate: 50_000_000,
-        keyframeIntervalInSeconds: 1 / Math.max(1, info.fps),
+        // Let the browser pick a working encoder. Forcing "prefer-hardware"
+        // together with the very high bitrate below made hardware encoders
+        // reject the config outright (avc1.640029 @ 50 Mbps unsupported).
+        hardwareAcceleration: "no-preference",
+        // High bitrate keeps text edges crisp without shimmer, but 50 Mbps
+        // exceeds many encoders' limits — 16 Mbps is still visually lossless
+        // at 720p/1080p and is broadly supported.
+        videoBitrate: 16_000_000,
         onProgress: ({ progress: p }) => setProgress(p),
       });
       const blob = await result.getBlob();

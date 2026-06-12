@@ -70,7 +70,10 @@ export function Preview({
         className="overflow-hidden rounded-lg border border-border bg-background"
         style={{
           aspectRatio: `${previewWidth} / ${previewHeight}`,
-          ...(isPortrait ? { height: "480px" } : { width: "100%" }),
+          // Portrait (phone) previews get a tall box so the content renders at
+          // a legible size instead of being squeezed tiny; capped to the
+          // viewport so it never overflows the page.
+          ...(isPortrait ? { height: "min(78vh, 760px)" } : { width: "100%" }),
         }}
       >
         <Player

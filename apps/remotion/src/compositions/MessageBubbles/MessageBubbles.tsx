@@ -1,6 +1,14 @@
 import { Audio } from "@remotion/media";
-import { useMemo } from "react";
-import { Sequence, spring, staticFile, useVideoConfig } from "remotion";
+import { useEffect, useMemo, useState } from "react";
+import {
+  continueRender,
+  delayRender,
+  prefetch,
+  Sequence,
+  spring,
+  staticFile,
+  useVideoConfig,
+} from "remotion";
 import type { ChatMessage } from "../../editors/types";
 import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -9,6 +17,31 @@ import { KEYBOARD_BG } from "../_chat-demo/Keyboard";
 
 /** iMessage send/receive sound — played as each bubble lands. */
 const MESSAGE_SFX = "sounds/message_bubble/message.mp3";
+
+/**
+ * Prefetch the SFX once into a cached (blob) source and block the render until
+ * it's ready, then hand the SAME cached source to every cue. One decode, no
+ * per-bubble network/load race — so the sound never silently fails to play and
+ * never lags an export. Falls back to the static path if prefetch resolves with
+ * no URL (or fails).
+ */
+function useCachedSfx(path: string): string {
+  const asset = useMemo(() => staticFile(path), [path]);
+  const [handle] = useState(() => delayRender(`prefetch-sfx:${path}`));
+  const [src, setSrc] = useState(asset);
+  useEffect(() => {
+    const { waitUntilDone } = prefetch(asset, { method: "blob-url" });
+    waitUntilDone()
+      .then((resolved: unknown) => {
+        if (typeof resolved === "string" && resolved) setSrc(resolved);
+        continueRender(handle);
+      })
+      .catch(() => continueRender(handle));
+    // Intentionally NOT calling free(): the cached blob must stay valid for the
+    // whole render (every cue reuses it).
+  }, [asset, handle]);
+  return src;
+}
 
 export type MessageBubblesProps = {
   contactName: string;
@@ -163,6 +196,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
         .map((m) => Math.max(0, Math.round(m.delay + m.typingFrames))),
     [messages],
   );
+  const sfxSrc = useCachedSfx(MESSAGE_SFX);
   const { items, composerText, pressedKey, pressT } = buildChatState(
     messages,
     frame,
@@ -195,7 +229,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
     <>
       {sfxCues.map((from, i) => (
         <Sequence key={`sfx-${i}`} from={from} name="message-sfx">
-          <Audio src={staticFile(MESSAGE_SFX)} volume={0.8} />
+          <Audio src={sfxSrc} volume={0.8} />
         </Sequence>
       ))}
       <ChatFill

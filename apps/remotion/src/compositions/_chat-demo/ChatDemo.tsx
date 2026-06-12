@@ -1397,10 +1397,12 @@ function IMessageDemo({
               style={{
                 display: "flex",
                 flex: 1,
-                alignItems: "center",
+                // Bottom-align so the send button stays at the bottom as the
+                // field grows up with a wrapping multi-line message.
+                alignItems: "flex-end",
                 justifyContent: "space-between",
-                padding: "0 8px 0 16px",
-                height: 36,
+                padding: "5px 8px 5px 16px",
+                minHeight: 36,
               }}
               glassStyle={
                 hasBg
@@ -1430,12 +1432,19 @@ function IMessageDemo({
               }
             >
               <div
-                className="min-w-0 flex-1 overflow-hidden whitespace-nowrap"
+                className="min-w-0 flex-1"
                 style={{
                   fontSize: 15,
                   letterSpacing: "-0.01em",
                   lineHeight: "20px",
                   textAlign: "left",
+                  // Wrap long messages onto new lines (grows the field) instead
+                  // of clipping/scrolling in one line.
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  // Nudge so single-line text sits centered against the
+                  // bottom-aligned send button.
+                  paddingBottom: 3,
                 }}
               >
                 {composerText ? (
