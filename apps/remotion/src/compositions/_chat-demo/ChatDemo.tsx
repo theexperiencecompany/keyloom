@@ -533,8 +533,10 @@ function IMessageDemo({
  * enhancement for the live preview.
  * ========================================================================= */
 
+// Subtle neutral graphite — just enough tone for the frosted bubbles to
+// read against, without the loud color gradient.
 export const GLASS_CHAT_BACKDROP =
-  "linear-gradient(160deg, #4f6df5 0%, #7a5cf0 35%, #c06ae0 68%, #f08bb5 100%)";
+  "linear-gradient(180deg, #54545a 0%, #3c3c42 100%)";
 
 const GLASS_ME_BG =
   "linear-gradient(180deg, rgba(86,164,255,0.85) 0%, rgba(18,108,244,0.78) 100%)";
