@@ -115,6 +115,10 @@ function buildChatState(
       image: m.image,
       typing: inTyping,
       enterFrames: local,
+      // Drives the dots → message morph (bubble inflates from the tail and the
+      // row height grows). Only meaningful when a typing phase actually ran.
+      revealFrames:
+        !inTyping && m.typingFrames > 0 ? local - m.typingFrames : undefined,
     });
   }
 

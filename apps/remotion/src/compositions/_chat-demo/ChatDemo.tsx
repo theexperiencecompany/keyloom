@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@workspace/ui/lib/utils";
-import { useId, useLayoutEffect, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
   continueRender,
   delayRender,
@@ -106,6 +106,13 @@ export interface ChatMessageItem {
   typing?: boolean;
   /** Frames since this message first became visible. Drives the pop-in animation. */
   enterFrames?: number;
+  /**
+   * Frames since the typing indicator swapped to the real message. Drives the
+   * iMessage "morph": the bubble inflates from the tail corner and the row's
+   * height grows from the dots bubble to the full message. Only set for
+   * messages that actually showed a typing phase.
+   */
+  revealFrames?: number;
 }
 
 function BubbleEnter({
@@ -145,6 +152,81 @@ function BubbleEnter({
           transform: `scale(${scale})`,
           transformOrigin: from === "me" ? "bottom right" : "bottom left",
           opacity,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// Approximate rendered height of the typing-dots bubble (line box + padding).
+// Used as the starting height for the dots → message morph.
+const TYPING_BUBBLE_H = 32;
+
+/**
+ * iMessage dots → message morph. When the typing indicator swaps to the real
+ * message, the new bubble inflates from the tail corner with the same spring
+ * personality as BubbleEnter, AND the row's layout height animates from the
+ * dots bubble's height to the message's natural height — so a taller message
+ * pushes the conversation up smoothly instead of the thread jumping.
+ *
+ * The natural height is measured from the live DOM (same pattern as the
+ * keyboard/glass measurement); until it's known the row renders at natural
+ * size, which only lasts a frame and is imperceptible.
+ */
+function BubbleReveal({
+  revealFrames,
+  from,
+  children,
+}: {
+  /** Frames since the dots swapped to the message; undefined = no morph. */
+  revealFrames?: number;
+  from?: "me" | "them";
+  children: React.ReactNode;
+}) {
+  const { fps } = useVideoConfig();
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [fullH, setFullH] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const h = el.offsetHeight;
+    if (h > 0 && h !== fullH) setFullH(h);
+  });
+
+  if (revealFrames === undefined) return <>{children}</>;
+
+  const s = spring({
+    frame: Math.max(0, revealFrames),
+    fps,
+    config: { damping: 15, mass: 0.7, stiffness: 210 },
+    durationInFrames: 18,
+  });
+  const scale = 0.6 + 0.4 * s;
+  const height =
+    fullH !== null
+      ? TYPING_BUBBLE_H + (fullH - TYPING_BUBBLE_H) * Math.min(1, s)
+      : undefined;
+
+  return (
+    <div
+      style={{
+        height,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        alignItems: from === "me" ? "flex-end" : "flex-start",
+        overflow: "visible",
+      }}
+    >
+      <div
+        ref={innerRef}
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: from === "me" ? "bottom right" : "bottom left",
+          willChange: "transform",
         }}
       >
         {children}
@@ -925,33 +1007,40 @@ function IMessageDemo({
                         enterFrames={m.enterFrames}
                         from={group.from}
                       >
-                        {m.image && !m.typing ? (
-                          <ImageBubble
-                            src={m.image}
-                            from={group.from}
-                            tail={isLast}
-                          />
-                        ) : (
-                          <CurvedBubble
-                            from={group.from}
-                            tail={isLast}
-                            background={isMe ? IMESSAGE_GRADIENT : themBubbleBg}
-                            tailColor={
-                              isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
-                            }
-                            color={isMe ? "#fff" : themText}
-                          >
-                            {m.typing ? (
-                              <TypingDots
-                                color={
-                                  isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
-                                }
-                              />
-                            ) : (
-                              m.text
-                            )}
-                          </CurvedBubble>
-                        )}
+                        <BubbleReveal
+                          revealFrames={m.typing ? undefined : m.revealFrames}
+                          from={group.from}
+                        >
+                          {m.image && !m.typing ? (
+                            <ImageBubble
+                              src={m.image}
+                              from={group.from}
+                              tail={isLast}
+                            />
+                          ) : (
+                            <CurvedBubble
+                              from={group.from}
+                              tail={isLast}
+                              background={
+                                isMe ? IMESSAGE_GRADIENT : themBubbleBg
+                              }
+                              tailColor={
+                                isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
+                              }
+                              color={isMe ? "#fff" : themText}
+                            >
+                              {m.typing ? (
+                                <TypingDots
+                                  color={
+                                    isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
+                                  }
+                                />
+                              ) : (
+                                m.text
+                              )}
+                            </CurvedBubble>
+                          )}
+                        </BubbleReveal>
                       </BubbleEnter>
                     );
                   })}
