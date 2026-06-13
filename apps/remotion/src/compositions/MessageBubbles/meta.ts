@@ -103,8 +103,15 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
       if (end > lastEnd) lastEnd = end;
     }
     const HOLD = Math.round(MESSAGE_BUBBLES_FPS * 1.2);
+    // Canvas follows the orientation: a portrait phone renders a true 9:16
+    // vertical video, landscape stays 16:9. (The dims are derived here rather
+    // than hardcoded on the composition so switching the Orientation field
+    // reshapes the export.)
+    const portrait = props.orientation === "portrait";
     return {
       durationInFrames: Math.max(MESSAGE_BUBBLES_DURATION, lastEnd + HOLD),
+      width: portrait ? MESSAGE_BUBBLES_HEIGHT : MESSAGE_BUBBLES_WIDTH,
+      height: portrait ? MESSAGE_BUBBLES_WIDTH : MESSAGE_BUBBLES_HEIGHT,
     };
   },
 };

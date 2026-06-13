@@ -62,10 +62,10 @@ export function ChatFill({
   // down to a narrow vertical slice. Defaulting to portrait there matches
   // every realistic use case.
   const inDeviceFrame = safe.top > 0 || safe.bottom > 0;
-  const effectiveOrientation =
-    inDeviceFrame && orientation === "landscape" ? "portrait" : orientation;
 
-  if (effectiveOrientation === "portrait") {
+  // Inside a device frame (PhoneFrame): fit the chat to the phone screen,
+  // honoring the safe-area insets the frame provides.
+  if (inDeviceFrame) {
     return (
       <AbsoluteFill
         style={{
@@ -104,9 +104,11 @@ export function ChatFill({
     );
   }
 
-  // Landscape: render the chat at (100 / scale)% of the parent, then scale
-  // up to fill — gives the chat a smaller design-px size while still
-  // covering the canvas. Parent-relative so this works at any nesting depth.
+  // Standalone (no device frame): render the chat at (100 / scale)% of the
+  // parent, then scale up to FILL the whole canvas — works the same for a 16:9
+  // landscape canvas or a 9:16 portrait canvas. The canvas dimensions (set from
+  // the Orientation prop) decide the shape; the chat always fills it instead of
+  // sitting in a narrow centered column with black side bars.
   const pct = 100 / scale;
   return (
     <AbsoluteFill

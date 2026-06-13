@@ -34,23 +34,37 @@ export function EditorView({
   const [durationInFrames, setDurationInFrames] = useState(
     info.durationInFrames,
   );
+  // Dimensions can also depend on props (e.g. orientation → portrait makes the
+  // canvas 9:16). calculateMetadata is the source of truth, so preview AND
+  // export both follow it rather than the static registry size.
+  const [dims, setDims] = useState({ width: info.width, height: info.height });
   useEffect(() => {
     if (!calculateMetadata) {
       setDurationInFrames(info.durationInFrames);
+      setDims({ width: info.width, height: info.height });
       return;
     }
     let cancelled = false;
     Promise.resolve(calculateMetadata({ props }))
       .then((meta) => {
-        if (!cancelled && meta?.durationInFrames) {
-          setDurationInFrames(meta.durationInFrames);
-        }
+        if (cancelled) return;
+        if (meta?.durationInFrames) setDurationInFrames(meta.durationInFrames);
+        setDims({
+          width: meta?.width ?? info.width,
+          height: meta?.height ?? info.height,
+        });
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [calculateMetadata, props, info.durationInFrames]);
+  }, [
+    calculateMetadata,
+    props,
+    info.durationInFrames,
+    info.width,
+    info.height,
+  ]);
 
   async function handleDownload() {
     if (!Component) return;
@@ -62,8 +76,8 @@ export function EditorView({
         composition: {
           id: info.id,
           component: Component as React.ComponentType<Record<string, unknown>>,
-          width: info.width,
-          height: info.height,
+          width: dims.width,
+          height: dims.height,
           fps: info.fps,
           durationInFrames,
         },
@@ -124,15 +138,15 @@ export function EditorView({
       <div className="flex items-center justify-center bg-muted/20 p-4 lg:min-h-0">
         <div
           className="max-h-full w-full max-w-[1600px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
-          style={{ aspectRatio: `${info.width} / ${info.height}` }}
+          style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
         >
           <Player
             component={Component}
             inputProps={playerProps}
             durationInFrames={durationInFrames}
             fps={info.fps}
-            compositionWidth={info.width}
-            compositionHeight={info.height}
+            compositionWidth={dims.width}
+            compositionHeight={dims.height}
             style={{ width: "100%", height: "100%" }}
             controls
             loop
