@@ -30,160 +30,62 @@ const MENU_ITEMS = [
   { key: "store", label: "Store" },
 ] as const;
 
-/** A flat colored-circle icon per attachment row (approximating the iOS icons). */
+/** Real iOS app-icon images for the rows that ship one (in
+ *  apps/web/public/components/messagebubble/); the rest fall back to a flat
+ *  CSS/SVG icon. */
+const ICON_PNG: Record<string, string> = {
+  halo: "haloai.png",
+  camera: "camera.png",
+  photos: "photos.png",
+  audio: "audio.png",
+  store: "store.png",
+};
+
 function MenuIcon({ kind }: { kind: string }) {
+  const png = ICON_PNG[kind];
+  if (png) {
+    return (
+      <Img
+        src={asset(`components/messagebubble/${png}`) ?? ""}
+        crossOrigin="anonymous"
+        alt=""
+        style={{
+          width: 30,
+          height: 30,
+          borderRadius: 7,
+          objectFit: "cover",
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
   const base: React.CSSProperties = {
     width: 30,
     height: 30,
-    borderRadius: 9999,
+    // Rounded square (app-icon shape) to match the real PNG icons above.
+    borderRadius: 7,
     flexShrink: 0,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     boxShadow: "inset 0 1px 1px rgba(255,255,255,0.25)",
   };
-  switch (kind) {
-    case "halo":
-      return (
-        <div
-          style={{
-            ...base,
-            background: "linear-gradient(160deg, #4aa3ff 0%, #2d7df0 100%)",
-          }}
-        >
-          <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden>
-            <ellipse
-              cx="12"
-              cy="6.5"
-              rx="6"
-              ry="2"
-              fill="none"
-              stroke="#ffe27a"
-              strokeWidth="1.6"
-            />
-            <circle cx="9.4" cy="12.5" r="1.3" fill="#fff" />
-            <circle cx="14.6" cy="12.5" r="1.3" fill="#fff" />
-            <path
-              d="M9 15.5c1.8 1.6 4.2 1.6 6 0"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-      );
-    case "camera":
-      return (
-        <div
-          style={{
-            ...base,
-            background: "linear-gradient(160deg, #3a3a3c 0%, #1c1c1e 100%)",
-          }}
-        >
-          <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden>
-            <circle cx="12" cy="12" r="7" fill="#2c2c2e" />
-            <circle
-              cx="12"
-              cy="12"
-              r="5"
-              fill="none"
-              stroke="#8e8e93"
-              strokeWidth="1.4"
-            />
-            <circle cx="12" cy="12" r="2.4" fill="#0a84ff" opacity="0.8" />
-            <circle cx="10.6" cy="10.6" r="0.9" fill="#fff" opacity="0.9" />
-          </svg>
-        </div>
-      );
-    case "photos":
-      return (
-        <div
-          style={{
-            ...base,
-            background: "#fff",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 3.5,
-              borderRadius: 9999,
-              background:
-                "conic-gradient(#f9c50d, #f4731f, #ee3e54, #b14fd8, #4a90e2, #34c759, #f9c50d)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 10.5,
-              borderRadius: 9999,
-              background: "#fff",
-            }}
-          />
-        </div>
-      );
-    case "stickers":
-      return (
-        <div
-          style={{
-            ...base,
-            background: "linear-gradient(160deg, #c76bff 0%, #9b3fe0 100%)",
-          }}
-        >
-          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden>
-            <path
-              d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9 6.7 19.1l1-5.8L3.5 9.2l5.9-.9z"
-              fill="#fff"
-            />
-          </svg>
-        </div>
-      );
-    case "audio":
-      return (
-        <div
-          style={{
-            ...base,
-            background: "linear-gradient(160deg, #ff5a6a 0%, #ec2840 100%)",
-          }}
-        >
-          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden>
-            <path
-              d="M10 17V7l8-2v10"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle cx="7.5" cy="17" r="2.6" fill="#fff" />
-            <circle cx="15.5" cy="15" r="2.6" fill="#fff" />
-          </svg>
-        </div>
-      );
-    default: // store
-      return (
-        <div
-          style={{
-            ...base,
-            background: "linear-gradient(160deg, #2aa3ff 0%, #0a6ee0 100%)",
-          }}
-        >
-          <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden>
-            <path
-              d="M7 16l5-9 5 9M9 13h6"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      );
-  }
+  // Only "Stickers" has no PNG yet — flat CSS icon.
+  return (
+    <div
+      style={{
+        ...base,
+        background: "linear-gradient(160deg, #c76bff 0%, #9b3fe0 100%)",
+      }}
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden>
+        <path
+          d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9 6.7 19.1l1-5.8L3.5 9.2l5.9-.9z"
+          fill="#fff"
+        />
+      </svg>
+    </div>
+  );
 }
 
 /** Deterministic gradient "photos" to fill the grid around the real one. */
@@ -226,8 +128,12 @@ export function PhotoPicker({
   const photosTapped = t >= 0.16 && t < 0.26; // Photos row pressed
   const toGrid = ease(0.26, 0.38, Easing.out(Easing.cubic)); // 0 menu → 1 grid
   const photoTap = ease(0.5, 0.6); // the chosen tile presses
-  // The chosen photo flies up to the thread — quick ease-out.
+  // Grid slides away as the send finishes.
   const closing = ease(0.72, 1, Easing.out(Easing.cubic));
+  // The chosen photo flies to the thread at a CONSTANT speed (no decel drift),
+  // staying opaque almost the whole way so it reads as a direct send rather than
+  // a slow dissolve in mid-air.
+  const fly = ease(0.74, 1, Easing.linear);
   const menuVisible = menuIn * (1 - toGrid);
 
   const tiles = [image, ...FILLER_GRADIENTS];
@@ -290,7 +196,7 @@ export function PhotoPicker({
                   isTarget && photoTap > 0 ? "0 0 0 3px #0a84ff inset" : "none",
               }}
             >
-              {isTarget && closing < 0.2 && (
+              {isTarget && fly < 0.02 && (
                 <Img
                   src={asset(tile) ?? ""}
                   crossOrigin="anonymous"
@@ -335,7 +241,7 @@ export function PhotoPicker({
           send reads as "grid → message" like iMessage. It starts on the tile and
           lifts up-and-right, shrinking toward bubble size, then the real bubble
           (which lands as the flow ends) takes over. */}
-      {closing > 0.001 && (
+      {fly > 0.001 && (
         <div
           style={{
             position: "absolute",
@@ -344,15 +250,15 @@ export function PhotoPicker({
             top: 7,
             width: "calc((100% - 22px) / 3)",
             aspectRatio: "1 / 1",
-            borderRadius: 6 + closing * 12,
+            borderRadius: 6 + fly * 10,
             overflow: "hidden",
-            // Lift up and to the right toward where the outgoing photo bubble
-            // lands, shrinking toward bubble size; fade out near the end so the
-            // real bubble (landing as the flow finishes) takes over seamlessly.
-            transform: `translate(${closing * 215}px, ${closing * -190}px) scale(${1 - closing * 0.25})`,
+            // Head up-and-right toward where the outgoing photo bubble lands
+            // (just above the composer), shrinking toward bubble size. Stay
+            // opaque almost all the way, then a quick fade as the real bubble
+            // takes over at the very end.
+            transform: `translate(${fly * 205}px, ${fly * -105}px) scale(${1 - fly * 0.42})`,
             transformOrigin: "center",
-            opacity:
-              closing < 0.72 ? 1 : Math.max(0, 1 - (closing - 0.72) / 0.28),
+            opacity: fly < 0.85 ? 1 : Math.max(0, 1 - (fly - 0.85) / 0.15),
             boxShadow: "0 18px 44px rgba(0,0,0,0.5)",
             zIndex: 5,
           }}
