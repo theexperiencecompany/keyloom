@@ -8,6 +8,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton";
 import dynamic from "next/dynamic";
 import { type ComponentType, useMemo } from "react";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 
 export function Preview({
   id,
@@ -55,11 +56,15 @@ export function Preview({
       </div>
     );
   }
-  const previewWidth = width ?? info.width;
-  const previewHeight = height ?? info.height;
   const inputProps = props
     ? { ...info.defaultProps, ...props }
     : info.defaultProps;
+  // Apply calculateMetadata so the preview's duration/dimensions match the
+  // editor (e.g. content-driven length + portrait canvas) instead of the static
+  // registry values.
+  const meta = resolveCompositionMeta(info, inputProps);
+  const previewWidth = width ?? meta.width;
+  const previewHeight = height ?? meta.height;
   const isPortrait = previewHeight > previewWidth;
 
   return (
@@ -79,8 +84,8 @@ export function Preview({
         <Player
           component={Component}
           inputProps={inputProps}
-          durationInFrames={info.durationInFrames}
-          fps={info.fps}
+          durationInFrames={meta.durationInFrames}
+          fps={meta.fps}
           compositionWidth={previewWidth}
           compositionHeight={previewHeight}
           style={{ width: "100%", height: "100%" }}

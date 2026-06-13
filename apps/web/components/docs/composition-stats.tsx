@@ -1,16 +1,20 @@
 import { compositionsById } from "@workspace/compositions/registry";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 
 export function CompositionStats({ id }: { id: string }) {
   const info = compositionsById[id];
   if (!info) return null;
 
+  // Use the resolved metadata (applies calculateMetadata) so the stats match
+  // what the editor renders — e.g. content-driven duration + portrait dims.
+  const meta = resolveCompositionMeta(info);
   const items = [
     { label: "ID", value: info.id },
-    { label: "Resolution", value: `${info.width}×${info.height}` },
-    { label: "FPS", value: String(info.fps) },
+    { label: "Resolution", value: `${meta.width}×${meta.height}` },
+    { label: "FPS", value: String(meta.fps) },
     {
       label: "Duration",
-      value: `${(info.durationInFrames / info.fps).toFixed(1)}s`,
+      value: `${(meta.durationInFrames / meta.fps).toFixed(1)}s`,
     },
   ];
 
