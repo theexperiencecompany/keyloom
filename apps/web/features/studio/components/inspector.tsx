@@ -32,7 +32,7 @@ import { TransitionSection } from "./transition-section";
 
 type Info = NonNullable<(typeof compositionsById)[string]>;
 
-export type InspectorTab = "content" | "style" | "motion";
+export type InspectorTab = "content" | "messages" | "style" | "motion";
 
 type Props = {
   clip: Clip;
@@ -73,6 +73,16 @@ export function Inspector({
   const clipEffects = clip.effects ?? [];
   const isLocked = info.brandMode === "locked";
 
+  // Chat compositions (MessageBubbles, WhatsApp, …) get a dedicated "Messages"
+  // tab for the conversation editor, so it has the full panel height and isn't
+  // crammed under the other settings. Everything else stays on the General tab.
+  const hasChatField = info.fields.some((f) => f.kind === "chat");
+  const generalFields = info.fields.filter((f) => f.kind !== "chat");
+  const chatFields = info.fields.filter((f) => f.kind === "chat");
+  // If a non-chat clip is selected while the Messages tab was active, fall back
+  // to General so the panel isn't blank.
+  const activeTab = tab === "messages" && !hasChatField ? "content" : tab;
+
   const hasStyleOverrides = Boolean(
     clip.style?.backgroundColor ||
       clip.style?.textColor ||
@@ -103,15 +113,20 @@ export function Inspector({
       </div>
 
       <Tabs
-        value={tab}
+        value={activeTab}
         onValueChange={(v) => onTabChange(v as InspectorTab)}
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="px-3 py-2">
           <TabsList className="w-full">
             <TabsTrigger value="content" className="flex-1">
-              Content
+              {hasChatField ? "General" : "Content"}
             </TabsTrigger>
+            {hasChatField && (
+              <TabsTrigger value="messages" className="flex-1">
+                Messages
+              </TabsTrigger>
+            )}
             <TabsTrigger value="style" className="flex-1">
               <span className="flex items-center gap-1.5">
                 Style
@@ -129,11 +144,24 @@ export function Inspector({
 
         <TabsContent value="content" className="min-h-0 flex-1 overflow-y-auto">
           <FieldsRenderer
-            fields={info.fields}
+            fields={generalFields}
             value={clip.props}
             onChange={onChange}
           />
         </TabsContent>
+
+        {hasChatField && (
+          <TabsContent
+            value="messages"
+            className="min-h-0 flex-1 overflow-y-auto"
+          >
+            <FieldsRenderer
+              fields={chatFields}
+              value={clip.props}
+              onChange={onChange}
+            />
+          </TabsContent>
+        )}
 
         <TabsContent value="style" className="min-h-0 flex-1 overflow-y-auto">
           {isLocked && (

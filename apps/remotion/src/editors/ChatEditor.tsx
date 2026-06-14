@@ -42,9 +42,9 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropGap, setDropGap] = useState<number | null>(null);
   const [fileOver, setFileOver] = useState(false);
-
-  const lastSide = value[value.length - 1]?.side ?? "left";
-  const nextSide: ChatMessage["side"] = lastSide === "left" ? "right" : "left";
+  // The side the composer sends as. The user picks it (You / Them) — it no
+  // longer auto-alternates, so you can send several in a row from the same side.
+  const [side, setSide] = useState<ChatMessage["side"]>("right");
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevLength = useRef(value.length);
@@ -65,17 +65,14 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   function addMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setMessages([
-      ...value,
-      { text: trimmed, side: nextSide, typingFrames: 0, delay: 0 },
-    ]);
+    setMessages([...value, { text: trimmed, side, typingFrames: 0, delay: 0 }]);
     setDraft("");
   }
 
   function addImage(dataUrl: string) {
     setMessages([
       ...value,
-      { text: "", side: nextSide, image: dataUrl, typingFrames: 0, delay: 0 },
+      { text: "", side, image: dataUrl, typingFrames: 0, delay: 0 },
     ]);
   }
 
@@ -221,7 +218,8 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
 
       <Composer
         draft={draft}
-        nextSide={nextSide}
+        side={side}
+        onSideChange={setSide}
         onDraftChange={setDraft}
         onSend={() => addMessage(draft)}
         onPickFiles={onFiles}

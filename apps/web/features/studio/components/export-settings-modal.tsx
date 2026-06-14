@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  Cancel01Icon,
+  CloudUploadIcon,
+  ComputerIcon,
+  Download04Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { Project } from "@workspace/compositions/project";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -314,6 +321,7 @@ export function ExportSettingsModal({
             onClick={handleDownloadZip}
             disabled={zip.busy}
           >
+            <HugeiconsIcon icon={Download04Icon} size={16} />
             {zip.busy
               ? `Packaging… ${formatElapsed(zipElapsedMs)}`
               : zip.finishedAt && !zip.error
@@ -324,6 +332,7 @@ export function ExportSettingsModal({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <HugeiconsIcon icon={Cancel01Icon} size={16} />
             Cancel
           </Button>
           {onStartServer && (
@@ -336,7 +345,8 @@ export function ExportSettingsModal({
               disabled={zip.busy}
               title="Render in the cloud on AWS Lambda via real Chromium — pixel-identical to the preview (glass, blur, WebGL, fonts). Doesn't use your machine."
             >
-              Render exact (Chromium)
+              <HugeiconsIcon icon={CloudUploadIcon} size={16} />
+              Render on Cloud
             </Button>
           )}
           <Button
@@ -346,6 +356,7 @@ export function ExportSettingsModal({
             }}
             disabled={zip.busy}
           >
+            <HugeiconsIcon icon={ComputerIcon} size={16} />
             Start render in browser
           </Button>
         </DialogFooter>
