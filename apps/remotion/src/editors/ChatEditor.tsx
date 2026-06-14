@@ -2,7 +2,6 @@
 
 import {
   BubbleChatIcon,
-  Clock01Icon,
   Delete02Icon,
   DragDropVerticalIcon,
   ImageAdd02Icon,
@@ -13,10 +12,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { cn } from "@workspace/ui/lib/utils";
@@ -53,12 +50,47 @@ function recomputeTimings(messages: ChatMessage[]): ChatMessage[] {
   });
 }
 
+/** Fixed label for the single conversation divider (not user-editable). */
+const DIVIDER_LABEL = "Today";
+
+/**
+ * The "Today" divider splits the thread: messages ABOVE it are history (already
+ * on screen from frame 0), messages BELOW animate in. Its index is the first
+ * message carrying the divider label, falling back to the count of leading
+ * history messages (so an imported/legacy project still resolves a position).
+ */
+function computeDividerIndex(messages: ChatMessage[]): number {
+  const labelled = messages.findIndex((m) => m.time != null);
+  if (labelled >= 0) return labelled;
+  let k = 0;
+  while (k < messages.length && messages[k]?.history) k++;
+  return k;
+}
+
+/**
+ * Re-stamp the divider invariant onto the list: messages [0,k) are history,
+ * [k,n) animate, and only message k carries the fixed "Today" label. Run after
+ * every edit so the divider stays a clean prefix split however messages are
+ * added, deleted, or reordered around it.
+ */
+function applyDivider(messages: ChatMessage[], k: number): ChatMessage[] {
+  const clamped = Math.max(0, Math.min(k, messages.length));
+  return messages.map((m, i) => ({
+    ...m,
+    history: i < clamped ? true : undefined,
+    time: i === clamped && i < messages.length ? DIVIDER_LABEL : undefined,
+  }));
+}
+
 export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   const [draft, setDraft] = useState("");
   // Drag-to-reorder state. `dragIndex` is the row being dragged; `dropGap` is
   // the insertion slot (0…n) the drop line is currently showing.
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropGap, setDropGap] = useState<number | null>(null);
+  // What's currently being dragged: a message row (reorder) or the "Today"
+  // divider (re-split history/animated). Both share the dropGap hover preview.
+  const [dragKind, setDragKind] = useState<"row" | "divider" | null>(null);
   const [fileOver, setFileOver] = useState(false);
   // The side the composer sends as. The user picks it (You / Them) — it no
   // longer auto-alternates, so you can send several in a row from the same side.
@@ -76,34 +108,46 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
     prevLength.current = value.length;
   }, [value.length]);
 
-  function setMessages(next: ChatMessage[]) {
-    onChange(recomputeTimings(next));
+  // Current divider position, derived from the data each render. Messages
+  // [0, dividerIndex) are history; [dividerIndex, n) animate in.
+  const dividerIndex = computeDividerIndex(value);
+
+  // Every mutation funnels through here: re-stamp the divider split, then
+  // recompute the frame timings, then push up. `dividerK` lets a mutation move
+  // the divider (drag) or keep it put (everything else).
+  function commit(next: ChatMessage[], dividerK: number) {
+    onChange(recomputeTimings(applyDivider(next, dividerK)));
   }
 
   function addMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setMessages([...value, { text: trimmed, side, typingFrames: 0, delay: 0 }]);
+    // New messages append below the divider (they animate in). Divider stays.
+    commit(
+      [...value, { text: trimmed, side, typingFrames: 0, delay: 0 }],
+      dividerIndex,
+    );
     setDraft("");
   }
 
   function addImage(dataUrl: string) {
-    setMessages([
-      ...value,
-      { text: "", side, image: dataUrl, typingFrames: 0, delay: 0 },
-    ]);
+    commit(
+      [...value, { text: "", side, image: dataUrl, typingFrames: 0, delay: 0 }],
+      dividerIndex,
+    );
   }
 
   function patchMessage(i: number, patch: Partial<ChatMessage>) {
     const next = value.slice();
     next[i] = { ...next[i]!, ...patch };
-    setMessages(next);
+    commit(next, dividerIndex);
   }
 
   function deleteMessage(i: number) {
     const next = value.slice();
     next.splice(i, 1);
-    setMessages(next);
+    // Deleting a history message shifts the divider up by one.
+    commit(next, i < dividerIndex ? dividerIndex - 1 : dividerIndex);
   }
 
   function flipSide(i: number) {
@@ -123,7 +167,14 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
     if (!item) return;
     const target = from < gap ? gap - 1 : gap;
     next.splice(target, 0, item);
-    setMessages(next);
+    // The divider is a fixed slot: messages dragged above it become history,
+    // below it animate. So keep the same numeric position.
+    commit(next, dividerIndex);
+  }
+
+  /** Move the "Today" divider to a new slot (history above, animated below). */
+  function setDivider(k: number) {
+    commit(value, k);
   }
 
   function onFiles(files: FileList | null) {
@@ -142,6 +193,15 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
   function resetDrag() {
     setDragIndex(null);
     setDropGap(null);
+    setDragKind(null);
+  }
+
+  function handleDrop() {
+    if (dropGap !== null) {
+      if (dragKind === "divider") setDivider(dropGap);
+      else if (dragIndex !== null) reorder(dragIndex, dropGap);
+    }
+    resetDrag();
   }
 
   return (
@@ -183,6 +243,12 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
         ) : (
           <div
             className="px-3 py-5"
+            // Make the ENTIRE list a valid drop zone. A native drop only fires
+            // where dragover called preventDefault; without this you could only
+            // release the divider/row precisely over a message row (gaps, drop
+            // lines and the divider chip rejected it, so it snapped back). The
+            // precise target gap is still whatever row was last hovered.
+            onDragOver={(e) => e.preventDefault()}
             onDragLeave={(e) => {
               // Only clear when truly leaving the list, not on child enter.
               if (!e.currentTarget.contains(e.relatedTarget as Node))
@@ -190,39 +256,55 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
             }}
             onDrop={(e) => {
               e.preventDefault();
-              if (dragIndex !== null && dropGap !== null)
-                reorder(dragIndex, dropGap);
-              resetDrag();
+              handleDrop();
             }}
           >
             {value.map((m, i) => (
               <div key={i}>
                 <DropLine active={dropGap === i} />
-                {m.time != null && (
-                  <DayDivider
-                    value={m.time}
-                    onChange={(t) => patchMessage(i, { time: t })}
-                    onRemove={() => patchMessage(i, { time: undefined })}
+                {i === dividerIndex && (
+                  <TodayDivider
+                    index={i}
+                    dragging={dragKind === "divider"}
+                    onDragStart={() => {
+                      setDragKind("divider");
+                      setDragIndex(null);
+                    }}
+                    onDragEnd={resetDrag}
+                    onHoverGap={(gap) => setDropGap(gap)}
                   />
                 )}
                 <BubbleRow
                   msg={m}
                   index={i}
                   dragging={dragIndex === i}
-                  isHistory={!!m.history}
+                  isHistory={i < dividerIndex}
                   onText={(text) => patchMessage(i, { text })}
                   onBlurEmpty={() => pruneIfEmpty(i)}
                   onFlip={() => flipSide(i)}
                   onDelete={() => deleteMessage(i)}
-                  onToggleHistory={() =>
-                    patchMessage(i, { history: m.history ? undefined : true })
-                  }
-                  onDragStart={() => setDragIndex(i)}
+                  onDragStart={() => {
+                    setDragKind("row");
+                    setDragIndex(i);
+                  }}
                   onDragEnd={resetDrag}
                   onHoverGap={(gap) => setDropGap(gap)}
                 />
               </div>
             ))}
+            {/* Divider can also sit at the very bottom (everything is history). */}
+            {dividerIndex >= value.length && (
+              <TodayDivider
+                index={value.length}
+                dragging={dragKind === "divider"}
+                onDragStart={() => {
+                  setDragKind("divider");
+                  setDragIndex(null);
+                }}
+                onDragEnd={resetDrag}
+                onHoverGap={(gap) => setDropGap(gap)}
+              />
+            )}
             <DropLine active={dropGap === value.length} />
           </div>
         )}
@@ -280,7 +362,6 @@ function BubbleRow({
   onBlurEmpty,
   onFlip,
   onDelete,
-  onToggleHistory,
   onDragStart,
   onDragEnd,
   onHoverGap,
@@ -293,7 +374,6 @@ function BubbleRow({
   onBlurEmpty: () => void;
   onFlip: () => void;
   onDelete: () => void;
-  onToggleHistory: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
   onHoverGap: (gap: number) => void;
@@ -304,6 +384,9 @@ function BubbleRow({
       className={cn(
         "group flex w-full items-center gap-1.5 transition-opacity",
         dragging && "opacity-40",
+        // History (above the divider) reads dimmed — it's already on screen at
+        // frame 0 and doesn't animate.
+        !dragging && isHistory && "opacity-55",
       )}
       onDragOver={(e) => {
         // Reordering is in progress (a row sets dataTransfer); pick the gap by
@@ -337,13 +420,7 @@ function BubbleRow({
         aria-hidden
       />
 
-      {isRight && (
-        <RowActions
-          isHistory={isHistory}
-          onToggleHistory={onToggleHistory}
-          onDelete={onDelete}
-        />
-      )}
+      {isRight && <RowActions onDelete={onDelete} />}
 
       {msg.image ? (
         <ImageBubbleEditor src={msg.image} isRight={isRight} onFlip={onFlip} />
@@ -357,13 +434,7 @@ function BubbleRow({
         />
       )}
 
-      {!isRight && (
-        <RowActions
-          isHistory={isHistory}
-          onToggleHistory={onToggleHistory}
-          onDelete={onDelete}
-        />
-      )}
+      {!isRight && <RowActions onDelete={onDelete} />}
 
       <div
         className="transition-[flex-grow] duration-300 ease-out"
@@ -458,15 +529,7 @@ function BubbleBody({
   );
 }
 
-function RowActions({
-  isHistory,
-  onToggleHistory,
-  onDelete,
-}: {
-  isHistory: boolean;
-  onToggleHistory: () => void;
-  onDelete: () => void;
-}) {
+function RowActions({ onDelete }: { onDelete: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -481,14 +544,6 @@ function RowActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuCheckboxItem
-          checked={isHistory}
-          onCheckedChange={() => onToggleHistory()}
-        >
-          <HugeiconsIcon icon={Clock01Icon} size={15} />
-          Already on screen
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={onDelete}
           className="text-red-500 focus:text-red-500"
@@ -501,33 +556,53 @@ function RowActions({
   );
 }
 
-/** Editable "Today"/date divider chip shown above the message that owns it. */
-function DayDivider({
-  value,
-  onChange,
-  onRemove,
+/**
+ * The single "Today" divider. The label is FIXED (not editable) — it just marks
+ * where history ends and the new, animated conversation begins. Drag its handle
+ * up or down to move the split: everything above becomes "already on screen",
+ * everything below animates in.
+ */
+function TodayDivider({
+  index,
+  dragging,
+  onDragStart,
+  onDragEnd,
+  onHoverGap,
 }: {
-  value: string;
-  onChange: (v: string) => void;
-  onRemove: () => void;
+  index: number;
+  dragging: boolean;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onHoverGap: (gap: number) => void;
 }) {
   return (
-    <div className="group/divider flex items-center justify-center gap-1.5 py-2">
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Today"
-        className="max-w-[180px] rounded-md bg-muted px-2.5 py-1 text-center text-[11px] font-medium text-muted-foreground outline-none focus:ring-1 focus:ring-foreground/20"
-        style={{ fieldSizing: "content" } as React.CSSProperties}
-      />
+    <div
+      className={cn(
+        "group/divider flex items-center justify-center gap-1.5 py-2 transition-opacity",
+        dragging && "opacity-40",
+      )}
+      onDragOver={(e) => {
+        e.preventDefault();
+        onHoverGap(index);
+      }}
+    >
       <button
         type="button"
-        onClick={onRemove}
-        title="Remove divider"
-        className="flex size-5 items-center justify-center rounded-full text-muted-foreground/50 opacity-0 transition-opacity hover:bg-muted hover:text-red-500 group-hover/divider:opacity-100"
+        draggable
+        onDragStart={(e) => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", "divider");
+          onDragStart();
+        }}
+        onDragEnd={onDragEnd}
+        title="Drag to move the divider — messages above it are already on screen"
+        className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground/40 opacity-0 transition-opacity hover:bg-muted hover:text-muted-foreground active:cursor-grabbing group-hover/divider:opacity-100"
       >
-        <HugeiconsIcon icon={Delete02Icon} size={12} />
+        <HugeiconsIcon icon={DragDropVerticalIcon} size={14} />
       </button>
+      <div className="rounded-md bg-muted px-2.5 py-1 text-center text-[11px] font-medium text-muted-foreground">
+        {DIVIDER_LABEL}
+      </div>
     </div>
   );
 }

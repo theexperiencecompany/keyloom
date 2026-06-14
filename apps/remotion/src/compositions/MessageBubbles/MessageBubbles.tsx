@@ -19,6 +19,9 @@ import { IMessageChat } from "./IMessageChat";
 
 /** iMessage send/receive sound — played as each bubble lands. */
 const MESSAGE_SFX = "sounds/message_bubble/message.mp3";
+/** Short keyboard "tick" — played on every character typed on the keyboard.
+ *  Drop a brief (~60–100ms) key-tap mp3 here. */
+const KEY_SFX = "sounds/keyboard/key.mp3";
 
 /**
  * Logical width (px) the whole chat is laid out at before being uniformly
@@ -69,6 +72,12 @@ export type MessageBubblesProps = {
   theme?: "light" | "dark";
   /** Show the on-screen keyboard typing out outgoing messages in real time. */
   showKeyboard?: boolean;
+  /**
+   * Extra photos shown in the attachment-picker gallery alongside the one being
+   * sent (which is always the first tile). Up to 5; any empty slots fall back to
+   * gradient placeholders. Each is `{ name, url }` (static path or http URL).
+   */
+  galleryImages?: { name: string; url: string }[];
 };
 
 /** Pop balloon hold + rise timings (frames) for the keyboard key press. */
@@ -224,6 +233,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   backgroundImage,
   theme = "dark",
   showKeyboard = false,
+  galleryImages,
 }) => {
   // Load Apple's SF Pro Display so the chat renders in the real iMessage font
   // in headless exports too (blocks the render until decoded; never fails it).
@@ -253,6 +263,31 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
     [messages],
   );
   const sfxSrc = useCachedSfx(MESSAGE_SFX);
+
+  // A "tick" per character typed on the keyboard. Only outgoing TEXT messages
+  // are typed on the keyboard (incoming show dots, photos run the picker,
+  // history is already on screen) — and only when the keyboard is shown. Mirror
+  // the per-char press timing buildChatState uses: char j fires at
+  // delay + ((j + 0.5) / len) * typingFrames.
+  const keyTapCues = useMemo(() => {
+    if (!showKeyboard) return [];
+    const cues: number[] = [];
+    for (const m of messages) {
+      if (m.history || m.image || m.side !== "right") continue;
+      const chars = Array.from(m.text);
+      const len = chars.length;
+      if (len === 0 || (m.typingFrames ?? 0) <= 0) continue;
+      for (let j = 0; j < len; j++) {
+        if (chars[j] === " ") continue; // space bar is near-silent on iOS
+        cues.push(
+          Math.max(0, Math.round(m.delay + ((j + 0.5) / len) * m.typingFrames)),
+        );
+      }
+    }
+    return cues;
+  }, [messages, showKeyboard]);
+  const keySfxSrc = useCachedSfx(KEY_SFX);
+
   const { items, composerText, pressedKey, pressT, attachment } =
     buildChatState(messages, frame, showKeyboard);
 
@@ -273,6 +308,12 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
       {sfxCues.map((from, i) => (
         <Sequence key={`sfx-${i}`} from={from} name="message-sfx">
           <Audio src={sfxSrc} volume={0.8} />
+        </Sequence>
+      ))}
+      {/* Keyboard "tick" on every typed character — subtle, under the swoosh. */}
+      {keyTapCues.map((from, i) => (
+        <Sequence key={`key-${i}`} from={from} name="key-tap">
+          <Audio src={keySfxSrc} volume={0.35} />
         </Sequence>
       ))}
       <ChatFill
@@ -298,6 +339,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           attachment={attachment}
           keyboardOpen={keyboardOpen}
           designWidth={PHONE_DESIGN_WIDTH}
+          galleryImages={galleryImages}
         />
       </ChatFill>
     </>

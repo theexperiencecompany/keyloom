@@ -103,11 +103,15 @@ export function PhotoPicker({
   image,
   t,
   theme = "dark",
+  galleryImages,
 }: {
   image: string;
   /** 0→1 progress through the whole attachment flow. */
   t: number;
   theme?: "light" | "dark";
+  /** Extra photos shown in the gallery grid besides the one being sent. Any
+   *  empty slots fall back to the gradient placeholders. */
+  galleryImages?: { name: string; url: string }[];
 }) {
   const dark = theme !== "light";
   const labelColor = dark ? "#ffffff" : "#000000";
@@ -140,7 +144,16 @@ export function PhotoPicker({
   // Subtle expanding ripple for the Photos tap, instead of a hard rectangle.
   const photosRipple = ease(0.2, 0.42);
 
-  const tiles = [image, ...FILLER_GRADIENTS];
+  // Grid = the photo being sent (always first), then the user's gallery photos,
+  // then gradient placeholders to fill out 6 tiles.
+  const galleryUrls = (galleryImages ?? [])
+    .map((g) => g?.url)
+    .filter((u): u is string => Boolean(u));
+  const tiles: { image?: string; gradient?: string }[] = [
+    { image },
+    ...galleryUrls.map((url) => ({ image: url })),
+    ...FILLER_GRADIENTS.map((gradient) => ({ gradient })),
+  ];
 
   return (
     <div style={{ position: "absolute", inset: 0, fontFamily: SF_PRO_STACK }}>
@@ -203,16 +216,17 @@ export function PhotoPicker({
                 borderBottomLeftRadius: i === 3 ? GRID_R : 0,
                 borderBottomRightRadius: i === 5 ? GRID_R : 0,
                 overflow: "hidden",
-                // The chosen tile empties out as its photo flies to the thread.
-                background: isTarget ? "#000" : tile,
+                // Image tiles paint the photo; gradient tiles use the CSS
+                // gradient as the fill.
+                background: tile.image ? "#000" : tile.gradient,
                 transform: `scale(${tapScale})`,
                 boxShadow:
                   isTarget && photoTap > 0 ? "0 0 0 3px #0a84ff inset" : "none",
               }}
             >
-              {isTarget && (
+              {tile.image && (
                 <Img
-                  src={asset(tile) ?? ""}
+                  src={asset(tile.image) ?? ""}
                   crossOrigin="anonymous"
                   alt=""
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}

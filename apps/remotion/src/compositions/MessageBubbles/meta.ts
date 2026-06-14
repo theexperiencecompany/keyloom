@@ -104,6 +104,7 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
   backgroundImage: "",
   theme: "dark",
   showKeyboard: true,
+  galleryImages: [],
 };
 
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
@@ -141,6 +142,13 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
       key: "backgroundImage",
       label: "Background wallpaper",
       placeholder: "images/... or https://...",
+    },
+    {
+      kind: "imageList",
+      key: "galleryImages",
+      label: "Gallery photos (attachment picker)",
+      itemLabel: "Photo",
+      max: 5,
     },
     { kind: "switch", key: "showKeyboard", label: "Keyboard (typing)" },
     {

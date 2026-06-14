@@ -99,6 +99,8 @@ export type IMessageChatProps = {
    *  is laid out at. Passed to the keyboard so it derives its scale
    *  deterministically instead of measuring the DOM each frame. */
   designWidth?: number;
+  /** Extra gallery photos for the attachment picker (besides the sent one). */
+  galleryImages?: { name: string; url: string }[];
 };
 
 export function IMessageChat({
@@ -119,6 +121,7 @@ export function IMessageChat({
   attachment = null,
   keyboardOpen = 1,
   designWidth,
+  galleryImages,
 }: IMessageChatProps) {
   const grouped = groupThread(messages);
   // Caret blink for the idle (placeholder) composer — a ~1s cycle: on, quick
@@ -952,6 +955,7 @@ export function IMessageChat({
                   image={attachment.image}
                   t={attachment.t}
                   theme={theme}
+                  galleryImages={galleryImages}
                 />
               )}
             </div>
