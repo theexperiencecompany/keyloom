@@ -40,8 +40,16 @@ const PHONE_DESIGN_WIDTH = 384;
  * never lags an export. Falls back to the static path if prefetch resolves with
  * no URL (or fails).
  */
+/** Inline (uploaded data URL) or already-absolute sources bypass staticFile. */
+function isInlineOrRemote(src: string): boolean {
+  return /^(data:|blob:|https?:)/.test(src);
+}
+
 function useCachedSfx(path: string): string {
-  const asset = useMemo(() => staticFile(path), [path]);
+  const asset = useMemo(
+    () => (isInlineOrRemote(path) ? path : staticFile(path)),
+    [path],
+  );
   const [handle] = useState(() => delayRender(`prefetch-sfx:${path}`));
   const [src, setSrc] = useState(asset);
   useEffect(() => {
@@ -57,6 +65,25 @@ function useCachedSfx(path: string): string {
   }, [asset, handle]);
   return src;
 }
+
+/**
+ * One per-bubble custom sound cue. Each instance owns its own prefetch (via
+ * useCachedSfx) so distinct sounds are cached independently — distinct from the
+ * two shared, top-level cues (message swoosh + keyboard tap). Plays at `from`,
+ * layered on top of the default swoosh for that bubble.
+ */
+const CachedSfxSequence: React.FC<{
+  path: string;
+  from: number;
+  volume: number;
+}> = ({ path, from, volume }) => {
+  const src = useCachedSfx(path);
+  return (
+    <Sequence from={from} name="custom-sfx" layout="none">
+      <Audio src={src} volume={volume} />
+    </Sequence>
+  );
+};
 
 export type MessageBubblesProps = {
   contactName: string;
@@ -262,6 +289,22 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
         .map((m) => Math.max(0, Math.round(m.delay + m.typingFrames))),
     [messages],
   );
+
+  // Per-bubble custom sound effects, fired at the same "land" frame as the
+  // default swoosh. A bubble opts in via msg.sound (preset path or uploaded
+  // data URL); history bubbles never land, so they're skipped.
+  const customSfxCues = useMemo(
+    () =>
+      messages
+        .filter(
+          (m) => !m.history && (m.image || m.text.trim()) && m.sound?.trim(),
+        )
+        .map((m) => ({
+          from: Math.max(0, Math.round(m.delay + m.typingFrames)),
+          src: m.sound!.trim(),
+        })),
+    [messages],
+  );
   const sfxSrc = useCachedSfx(MESSAGE_SFX);
 
   // A "tick" per character typed on the keyboard. Only outgoing TEXT messages
@@ -309,6 +352,15 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
         <Sequence key={`sfx-${i}`} from={from} name="message-sfx">
           <Audio src={sfxSrc} volume={0.8} />
         </Sequence>
+      ))}
+      {/* Per-bubble custom sound effects, layered on top of the swoosh. */}
+      {customSfxCues.map((cue, i) => (
+        <CachedSfxSequence
+          key={`custom-sfx-${i}-${cue.from}`}
+          path={cue.src}
+          from={cue.from}
+          volume={1}
+        />
       ))}
       {/* Keyboard "thwack" on every typed character — punchy, front and center. */}
       {keyTapCues.map((from, i) => (

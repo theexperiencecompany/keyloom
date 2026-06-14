@@ -24,4 +24,11 @@ export type ChatMessage = {
    * ignored for history messages.
    */
   history?: boolean;
+  /**
+   * Optional custom sound effect played the moment THIS bubble lands, layered
+   * on top of the default iMessage swoosh. A static asset path (e.g.
+   * "sounds/memes/fahhh.mp3") or an inline data URL from an uploaded file.
+   * History messages never trigger it (they're on screen from frame 0).
+   */
+  sound?: string;
 };

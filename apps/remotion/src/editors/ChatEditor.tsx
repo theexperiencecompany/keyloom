@@ -7,6 +7,8 @@ import {
   ImageAdd02Icon,
   MoreHorizontalIcon,
   Sent02Icon,
+  Upload02Icon,
+  VolumeHighIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
@@ -14,6 +16,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
 import { cn } from "@workspace/ui/lib/utils";
@@ -52,6 +60,22 @@ function recomputeTimings(messages: ChatMessage[]): ChatMessage[] {
 
 /** Fixed label for the single conversation divider (not user-editable). */
 const DIVIDER_LABEL = "Today";
+
+/**
+ * Built-in sound effects a bubble can play as it lands. Paths are rooted at
+ * apps/web/public (served via Remotion's staticFile). Users can also upload
+ * their own clip, which is stored inline as a data URL on `msg.sound`.
+ */
+const SOUND_PRESETS: { label: string; path: string }[] = [
+  { label: "Fahhh 💀", path: "sounds/memes/fahhh.mp3" },
+  { label: "Message pop", path: "sounds/message_bubble/message.mp3" },
+  { label: "Keyboard tap", path: "sounds/keyboard/key.mp3" },
+];
+
+// Sentinel radio values for the "no sound" and "uploaded clip" rows — kept
+// distinct from any real asset path.
+const SOUND_NONE = "__none__";
+const SOUND_CUSTOM = "__custom__";
 
 /**
  * The "Today" divider splits the thread: messages ABOVE it are history (already
@@ -282,6 +306,7 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
                   onText={(text) => patchMessage(i, { text })}
                   onBlurEmpty={() => pruneIfEmpty(i)}
                   onFlip={() => flipSide(i)}
+                  onSound={(sound) => patchMessage(i, { sound })}
                   onDelete={() => deleteMessage(i)}
                   onDragStart={() => {
                     setDragKind("row");
@@ -361,6 +386,7 @@ function BubbleRow({
   onText,
   onBlurEmpty,
   onFlip,
+  onSound,
   onDelete,
   onDragStart,
   onDragEnd,
@@ -373,6 +399,7 @@ function BubbleRow({
   onText: (t: string) => void;
   onBlurEmpty: () => void;
   onFlip: () => void;
+  onSound: (sound: string | undefined) => void;
   onDelete: () => void;
   onDragStart: () => void;
   onDragEnd: () => void;
@@ -420,7 +447,9 @@ function BubbleRow({
         aria-hidden
       />
 
-      {isRight && <RowActions onDelete={onDelete} />}
+      {isRight && (
+        <RowActions sound={msg.sound} onSound={onSound} onDelete={onDelete} />
+      )}
 
       {msg.image ? (
         <ImageBubbleEditor src={msg.image} isRight={isRight} onFlip={onFlip} />
@@ -434,7 +463,9 @@ function BubbleRow({
         />
       )}
 
-      {!isRight && <RowActions onDelete={onDelete} />}
+      {!isRight && (
+        <RowActions sound={msg.sound} onSound={onSound} onDelete={onDelete} />
+      )}
 
       <div
         className="transition-[flex-grow] duration-300 ease-out"
@@ -529,7 +560,40 @@ function BubbleBody({
   );
 }
 
-function RowActions({ onDelete }: { onDelete: () => void }) {
+function RowActions({
+  sound,
+  onSound,
+  onDelete,
+}: {
+  sound?: string;
+  onSound: (sound: string | undefined) => void;
+  onDelete: () => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Which radio row is checked: a known preset path, the "uploaded clip"
+  // sentinel (a data URL that matches no preset), or "none".
+  const radioValue = sound
+    ? SOUND_PRESETS.some((p) => p.path === sound)
+      ? sound
+      : SOUND_CUSTOM
+    : SOUND_NONE;
+
+  function onPick(value: string) {
+    if (value === SOUND_NONE) onSound(undefined);
+    else if (value !== SOUND_CUSTOM) onSound(value);
+    // SOUND_CUSTOM is display-only — it just reflects an already-uploaded clip.
+  }
+
+  function onUpload(file: File | null | undefined) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") onSound(reader.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -544,6 +608,42 @@ function RowActions({ onDelete }: { onDelete: () => void }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <HugeiconsIcon icon={VolumeHighIcon} size={15} />
+            Custom sound
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-52">
+            <DropdownMenuRadioGroup value={radioValue} onValueChange={onPick}>
+              <DropdownMenuRadioItem value={SOUND_NONE}>
+                None
+              </DropdownMenuRadioItem>
+              {SOUND_PRESETS.map((p) => (
+                <DropdownMenuRadioItem key={p.path} value={p.path}>
+                  {p.label}
+                </DropdownMenuRadioItem>
+              ))}
+              {radioValue === SOUND_CUSTOM && (
+                <DropdownMenuRadioItem value={SOUND_CUSTOM}>
+                  Uploaded clip
+                </DropdownMenuRadioItem>
+              )}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={(e) => {
+                // Keep the menu open so the hidden input stays mounted while the
+                // OS file dialog runs and fires onChange.
+                e.preventDefault();
+                fileRef.current?.click();
+              }}
+            >
+              <HugeiconsIcon icon={Upload02Icon} size={15} />
+              Upload sound…
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={onDelete}
           className="text-red-500 focus:text-red-500"
@@ -552,6 +652,16 @@ function RowActions({ onDelete }: { onDelete: () => void }) {
           Delete message
         </DropdownMenuItem>
       </DropdownMenuContent>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="audio/*"
+        hidden
+        onChange={(e) => {
+          onUpload(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
     </DropdownMenu>
   );
 }
