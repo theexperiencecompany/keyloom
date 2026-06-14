@@ -141,7 +141,7 @@ export function EditorView({
         open={showExportModal}
         onOpenChange={setShowExportModal}
         onStart={(options) => exporter.start(project, options)}
-        onStartServer={() => exporter.startServer(project)}
+        onStartServer={(options) => exporter.startLambda(project, options)}
         project={project}
         projectWidth={project.width}
         projectHeight={project.height}

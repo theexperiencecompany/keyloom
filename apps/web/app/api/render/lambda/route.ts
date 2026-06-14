@@ -44,7 +44,10 @@ function lambdaConfig() {
     region: region as AwsRegion,
     serveUrl,
     functionName,
-    concurrency: intEnv("REMOTION_LAMBDA_CONCURRENCY", 2),
+    // `framesPerLambda` and `concurrency` are mutually exclusive in Remotion —
+    // they control the same chunking knob, so passing both throws. We use
+    // `framesPerLambda` (frames per worker); `concurrencyPerLambda` (browser
+    // tabs inside one worker) is a separate setting and coexists fine.
     concurrencyPerLambda: intEnv("REMOTION_LAMBDA_CONCURRENCY_PER_LAMBDA", 1),
     framesPerLambda: intEnv("REMOTION_LAMBDA_FRAMES_PER_LAMBDA", 20),
     maxRetries: intEnv("REMOTION_LAMBDA_MAX_RETRIES", 3),
@@ -121,7 +124,7 @@ function errorMessage(err: unknown): string {
       message,
     )
   ) {
-    return "AWS Lambda throttled this render because too many workers were active. Wait a minute and retry, or lower REMOTION_LAMBDA_CONCURRENCY in apps/web/.env.local.";
+    return "AWS Lambda throttled this render because too many workers were active. Wait a minute and retry, or raise REMOTION_LAMBDA_FRAMES_PER_LAMBDA in apps/web/.env.local (fewer, larger chunks = fewer concurrent workers).";
   }
   return message;
 }
@@ -228,7 +231,6 @@ export async function POST(request: Request) {
       region,
       serveUrl,
       functionName,
-      concurrency,
       concurrencyPerLambda,
       framesPerLambda,
       maxRetries,
@@ -248,7 +250,6 @@ export async function POST(request: Request) {
       scale: Math.min(2, Math.max(0.25, options.scale)),
       forceFps: options.fps,
       forceDurationInFrames,
-      concurrency,
       concurrencyPerLambda,
       framesPerLambda,
       maxRetries,

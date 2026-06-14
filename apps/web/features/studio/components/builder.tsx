@@ -114,7 +114,7 @@ export function Builder() {
   const {
     state: exportState,
     start: startExport,
-    startServer: startServerExport,
+    startLambda: startLambdaExport,
     reset: resetExport,
     cancel: cancelExport,
     download: downloadExport,
@@ -490,7 +490,7 @@ export function Builder() {
           open={exportSettingsOpen}
           onOpenChange={setExportSettingsOpen}
           onStart={handleStartExport}
-          onStartServer={() => startServerExport(project)}
+          onStartServer={(options) => startLambdaExport(project, options)}
           project={project}
           projectWidth={project.width}
           projectHeight={project.height}
