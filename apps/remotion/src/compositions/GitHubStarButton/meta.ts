@@ -8,7 +8,7 @@ export const GITHUB_STAR_BUTTON_HEIGHT = 1080;
 
 export const githubStarButtonDefaultProps: GitHubStarButtonProps = {
   owner: "theexperiencecompany",
-  repo: "motion-studio",
+  repo: "keyloom",
   startCount: 1240,
   endCount: 1289,
   theme: "light",

@@ -2,7 +2,7 @@ import { buildCatalogText } from "./catalog";
 
 const CATALOG = buildCatalogText();
 
-export const systemPrompt = `# Motion Studio Agent
+export const systemPrompt = `# Keyloom Agent
 
 You build short motion-graphics videos by assembling Remotion compositions on a timeline. Your output is structured tool calls — never prose plans. The studio renders your build and the user watches it on a timeline.
 

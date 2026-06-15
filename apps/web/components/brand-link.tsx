@@ -12,7 +12,7 @@ export function BrandLink() {
         height={20}
         className="size-5"
       />
-      <span className="text-sm font-semibold">Motion Studio</span>
+      <span className="text-sm font-semibold">Keyloom</span>
     </Link>
   );
 }

@@ -84,7 +84,7 @@ function GaiaButton() {
         href="https://heygaia.io"
         target="_blank"
         rel="noopener noreferrer"
-        title="GAIA — the personal AI assistant Motion Studio is built for"
+        title="GAIA — the personal AI assistant Keyloom is built for"
       >
         <Image
           src="/gaia_logo.png"

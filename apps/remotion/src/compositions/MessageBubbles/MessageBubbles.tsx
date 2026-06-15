@@ -10,7 +10,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { ChatMessage } from "../../editors/types";
-import { useDesignFrame } from "../../use-design-frame";
+import { DESIGN_FPS, useDesignFrame } from "../../use-design-frame";
 import type { ChatMessageItem } from "../_chat-demo/ChatDemo";
 import { ChatFill } from "../_chat-demo/ChatFill";
 import { KEYBOARD_BG } from "../_chat-demo/Keyboard";
@@ -331,6 +331,13 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   }, [messages, showKeyboard]);
   const keySfxSrc = useCachedSfx(KEY_SFX);
 
+  // All cue frames above are computed in DESIGN frames (60fps) — the same clock
+  // `useDesignFrame()` animates on. Audio <Sequence from> wants ACTUAL render
+  // frames, so when the project is exported at a non-60 fps the cues must be
+  // rescaled or every sound drifts out of sync. At 60fps this is a no-op.
+  const toRenderFrame = (designFrame: number) =>
+    Math.round((designFrame * fps) / DESIGN_FPS);
+
   const { items, composerText, pressedKey, pressT, attachment } =
     buildChatState(messages, frame, showKeyboard);
 
@@ -349,7 +356,11 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   return (
     <>
       {sfxCues.map((from, i) => (
-        <Sequence key={`sfx-${i}`} from={from} name="message-sfx">
+        <Sequence
+          key={`sfx-${i}`}
+          from={toRenderFrame(from)}
+          name="message-sfx"
+        >
           <Audio src={sfxSrc} volume={0.8} />
         </Sequence>
       ))}
@@ -358,13 +369,13 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
         <CachedSfxSequence
           key={`custom-sfx-${i}-${cue.from}`}
           path={cue.src}
-          from={cue.from}
+          from={toRenderFrame(cue.from)}
           volume={1}
         />
       ))}
       {/* Keyboard "thwack" on every typed character — punchy, front and center. */}
       {keyTapCues.map((from, i) => (
-        <Sequence key={`key-${i}`} from={from} name="key-tap">
+        <Sequence key={`key-${i}`} from={toRenderFrame(from)} name="key-tap">
           <Audio src={keySfxSrc} volume={0.85} />
         </Sequence>
       ))}

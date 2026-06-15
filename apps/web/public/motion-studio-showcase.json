@@ -254,7 +254,7 @@
       "compositionId": "GitHubStarButton",
       "props": {
         "owner": "theexperiencecompany",
-        "repo": "motion-studio",
+        "repo": "keyloom",
         "startCount": 1240,
         "endCount": 1872,
         "theme": "light"
@@ -269,7 +269,7 @@
       "id": "clip-16",
       "compositionId": "TweetCard",
       "props": {
-        "displayName": "Motion Studio",
+        "displayName": "Keyloom",
         "handle": "@motionstudio",
         "avatarUrl": "https://avatars.githubusercontent.com/theexperiencecompany?s=200",
         "verified": "yes",
@@ -428,7 +428,7 @@
         "contactName": "general",
         "messages": [
           {
-            "text": "ship motion studio v1?",
+            "text": "ship keyloom v1?",
             "side": "left",
             "typingFrames": 30,
             "delay": 12
@@ -464,7 +464,7 @@
       "id": "clip-22",
       "compositionId": "DiscordMessages",
       "props": {
-        "contactName": "motion-studio",
+        "contactName": "keyloom",
         "messages": [
           {
             "text": "tried the new charts?",
@@ -626,7 +626,7 @@
       "compositionId": "TitleSlideUp",
       "props": {
         "headline": "Ship the reel.",
-        "subtitle": "motion-studio.heygaia.io"
+        "subtitle": "keyloom.heygaia.io"
       },
       "durationInFrames": 168,
       "transition": {

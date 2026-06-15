@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="apps/web/public/images/clapperboard.png" alt="Motion Studio" width="160" />
+  <img src="apps/web/public/images/clapperboard.png" alt="Keyloom" width="160" />
 </p>
 
-<h1 align="center">Motion Studio</h1>
+<h1 align="center">Keyloom</h1>
 
 <p align="center">
   An open-source library of animated video primitives, plus a browser studio to assemble them — built on <a href="https://www.remotion.dev">Remotion</a>.
@@ -41,7 +41,7 @@
     playsinline
     width="100%"
   >
-    <a href="https://github.com/theexperiencecompany/motion-studio/raw/refs/heads/master/apps/remotion/public/motion.mp4">▶ Watch the Motion Studio showcase</a>
+    <a href="https://github.com/theexperiencecompany/motion-studio/raw/refs/heads/master/apps/remotion/public/motion.mp4">▶ Watch the Keyloom showcase</a>
   </video>
 </p>
 
@@ -50,11 +50,11 @@
 <table align="center">
   <tr>
     <td width="50%" valign="top">
-      <img src="apps/web/public/images/screenshots/components.jpg" alt="Browse the Motion Studio component library" />
+      <img src="apps/web/public/images/screenshots/components.jpg" alt="Browse the Keyloom component library" />
       <p align="center"><sub><i>Browse 70+ animated scenes — every preview is a one-click drop onto the timeline.</i></sub></p>
     </td>
     <td width="50%" valign="top">
-      <img src="apps/web/public/images/screenshots/studio.jpg" alt="The Motion Studio editor — timeline, preview and inspector" />
+      <img src="apps/web/public/images/screenshots/studio.jpg" alt="The Keyloom editor — timeline, preview and inspector" />
       <p align="center"><sub><i>Assemble scenes on a timeline, edit per-clip styling and transitions, export to MP4.</i></sub></p>
     </td>
   </tr>
@@ -97,7 +97,7 @@ No SDK. No install. The library and the studio share the same scene registry, so
 
 ## Tech Stack
 
-Motion Studio is a Bun + Turbo monorepo. The web app is Next.js; the video engine is Remotion; the agent flow runs on the Vercel AI SDK with OpenAI.
+Keyloom is a Bun + Turbo monorepo. The web app is Next.js; the video engine is Remotion; the agent flow runs on the Vercel AI SDK with OpenAI.
 
 <table>
   <tr>

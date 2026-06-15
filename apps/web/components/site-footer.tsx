@@ -15,7 +15,7 @@ export function SiteFooter() {
             height={20}
             className="size-5"
           />
-          <span className="font-semibold text-foreground">Motion Studio</span>
+          <span className="font-semibold text-foreground">Keyloom</span>
         </Link>
 
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-muted-foreground">

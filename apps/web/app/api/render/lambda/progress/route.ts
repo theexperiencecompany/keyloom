@@ -87,7 +87,7 @@ export async function POST(request: Request) {
         progress.outKey,
         typeof body.filename === "string"
           ? body.filename
-          : `motion-studio-${body.renderId}.mp4`,
+          : `keyloom-${body.renderId}.mp4`,
       ),
     });
   } catch (err) {

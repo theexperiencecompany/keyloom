@@ -77,6 +77,10 @@ const SOUND_PRESETS: { label: string; path: string }[] = [
 const SOUND_NONE = "__none__";
 const SOUND_CUSTOM = "__custom__";
 
+// New bubbles get the keyboard-tap "send" sound by default (the user can still
+// switch it to None / Fahhh / Message pop / an upload per bubble).
+const DEFAULT_SOUND = "sounds/keyboard/key.mp3";
+
 /**
  * The "Today" divider splits the thread: messages ABOVE it are history (already
  * on screen from frame 0), messages BELOW animate in. Its index is the first
@@ -148,7 +152,16 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
     if (!trimmed) return;
     // New messages append below the divider (they animate in). Divider stays.
     commit(
-      [...value, { text: trimmed, side, typingFrames: 0, delay: 0 }],
+      [
+        ...value,
+        {
+          text: trimmed,
+          side,
+          typingFrames: 0,
+          delay: 0,
+          sound: DEFAULT_SOUND,
+        },
+      ],
       dividerIndex,
     );
     setDraft("");
@@ -156,7 +169,17 @@ export function ChatEditor({ value, onChange }: EditorProps<ChatMessage[]>) {
 
   function addImage(dataUrl: string) {
     commit(
-      [...value, { text: "", side, image: dataUrl, typingFrames: 0, delay: 0 }],
+      [
+        ...value,
+        {
+          text: "",
+          side,
+          image: dataUrl,
+          typingFrames: 0,
+          delay: 0,
+          sound: DEFAULT_SOUND,
+        },
+      ],
       dividerIndex,
     );
   }

@@ -102,7 +102,7 @@ function partition(): Group[] {
       id: "gaia",
       label: "GAIA",
       description:
-        "Showcase scenes for GAIA — the personal AI assistant Motion Studio is built for.",
+        "Showcase scenes for GAIA — the personal AI assistant Keyloom is built for.",
       items: gaia,
     },
     {

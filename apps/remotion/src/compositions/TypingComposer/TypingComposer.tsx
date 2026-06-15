@@ -25,7 +25,7 @@ const CLICK_FEEDBACK = 10;
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 // GAIA pixel values × SCALE. Same proportions as the real composer, sized
-// for the 1920×1080 motion-studio canvas.
+// for the 1920×1080 keyloom canvas.
 const SCALE = 2;
 
 const BAR_WIDTH = 640 * SCALE;

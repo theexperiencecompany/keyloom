@@ -12,7 +12,7 @@ import {
 import type { IconSvgElement } from "@hugeicons/react";
 
 /**
- * Motion-Studio tool category map for the agent panel's ToolCallsSection.
+ * Keyloom tool category map for the agent panel's ToolCallsSection.
  *
  * Each studio agent tool maps to a category (build / discovery / edit /
  * style / delete / list). The ToolCallsSection stacks one icon per

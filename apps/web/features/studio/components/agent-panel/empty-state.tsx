@@ -22,7 +22,7 @@ export function EmptyState({ onPick }: { onPick: (text: string) => void }) {
       <div className="flex flex-col items-center gap-3">
         <Image
           src="/logo.png"
-          alt="Motion Studio"
+          alt="Keyloom"
           width={56}
           height={56}
           className="size-14 object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.45)]"

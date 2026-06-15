@@ -6,7 +6,7 @@ import Link from "next/link";
 import { CreatorPreviewCard } from "@/components/creators/creator-preview-card";
 
 export const metadata: Metadata = {
-  title: "Creators — Motion Studio",
+  title: "Creators — Keyloom",
   description:
     "Components built for short-form creators — TikTok-style captions, vertical voiceover tools, and viral-content scenes.",
 };

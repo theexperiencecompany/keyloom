@@ -40,5 +40,5 @@ export async function renderProjectOnServer({
 
   const blob = await res.blob();
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  return { blob, filename: `motion-studio-${stamp}.mp4` };
+  return { blob, filename: `keyloom-${stamp}.mp4` };
 }

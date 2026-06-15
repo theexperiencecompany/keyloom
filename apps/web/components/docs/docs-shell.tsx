@@ -178,7 +178,7 @@ export function DocsShell({ doc }: { doc: Doc }) {
               </span>
             </div>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              Motion Studio is the commercial reel kit for GAIA, the personal AI
+              Keyloom is the commercial reel kit for GAIA, the personal AI
               assistant.
             </p>
             <span className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground/80 transition-colors group-hover:text-foreground">

@@ -66,22 +66,43 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
       typingFrames: 55,
       delay: 40,
       time: "Today",
+      sound: "sounds/keyboard/key.mp3",
     },
     {
       text: "i left it on the counter",
       side: "right",
       typingFrames: 55,
       delay: 200,
+      sound: "sounds/keyboard/key.mp3",
     },
-    { text: "again?? 🙄", side: "left", typingFrames: 45, delay: 360 },
+    {
+      text: "again?? 🙄",
+      side: "left",
+      typingFrames: 45,
+      delay: 360,
+      sound: "sounds/keyboard/key.mp3",
+    },
     {
       text: "can you bring it pls",
       side: "right",
       typingFrames: 55,
       delay: 500,
+      sound: "sounds/keyboard/key.mp3",
     },
-    { text: "pleaseee 🥺", side: "right", typingFrames: 45, delay: 640 },
-    { text: "fine, on my way 🚗", side: "left", typingFrames: 55, delay: 790 },
+    {
+      text: "pleaseee 🥺",
+      side: "right",
+      typingFrames: 45,
+      delay: 640,
+      sound: "sounds/keyboard/key.mp3",
+    },
+    {
+      text: "fine, on my way 🚗",
+      side: "left",
+      typingFrames: 55,
+      delay: 790,
+      sound: "sounds/keyboard/key.mp3",
+    },
     // Outgoing PHOTO — with the keyboard on, this plays the iMessage attachment
     // picker (+ → Photos → grid → tap) over the long typingFrames window, then
     // sends as a photo bubble. (Demo image; swap for any photo.)

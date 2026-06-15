@@ -205,7 +205,7 @@ export async function renderProjectLocally({
   });
 
   const blob = await result.getBlob();
-  const filename = `motion-studio-${new Date()
+  const filename = `keyloom-${new Date()
     .toISOString()
     .replace(/[:.]/g, "-")
     .slice(0, 19)}.mp4`;

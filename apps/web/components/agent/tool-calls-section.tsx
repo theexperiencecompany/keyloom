@@ -75,7 +75,7 @@ function Chevron({
  *
  * Adapted from heygaia's shadcn registry component (ui.heygaia.io/r/
  * tool-calls-section.json) — paths, icons, and category palette are
- * Motion-Studio-specific.
+ * Keyloom-specific.
  */
 export function ToolCallsSection({
   toolCalls,

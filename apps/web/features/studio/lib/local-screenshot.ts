@@ -57,7 +57,7 @@ export async function captureCurrentFrame(
 
 export function downloadPngBlob(
   blob: Blob,
-  filename = "motion-studio-frame.png",
+  filename = "keyloom-frame.png",
 ): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -72,5 +72,5 @@ export function downloadPngBlob(
 /** Filename helper — ISO timestamp with colons/dots replaced. */
 export function screenshotFilename(now: Date = new Date()): string {
   const iso = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  return `motion-studio-frame-${iso}.png`;
+  return `keyloom-frame-${iso}.png`;
 }

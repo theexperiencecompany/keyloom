@@ -266,7 +266,7 @@ export default function LandingPage() {
           <HeroVideoDialog
             videoSrc="/motion-studio-showcase.mp4"
             thumbnailSrc="/motion-studio-showcase-poster.png"
-            thumbnailAlt="Motion Studio showcase video"
+            thumbnailAlt="Keyloom showcase video"
             animationStyle="from-center"
           />
         </div>

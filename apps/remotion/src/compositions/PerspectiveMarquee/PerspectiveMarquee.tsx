@@ -48,7 +48,7 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
     .split(/[,\n]/)
     .map((t) => t.trim())
     .filter(Boolean);
-  const baseItems = parsed.length > 0 ? parsed : ["Motion Studio"];
+  const baseItems = parsed.length > 0 ? parsed : ["Keyloom"];
 
   // Estimate width per item so we can build a seamless loop without DOM measurement.
   const gapPx = Math.max(1, fontSize * 1.2);

@@ -155,7 +155,7 @@ export function ExportSettingsModal({
     try {
       const blob = await buildExportZip({ project });
       const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-      downloadBlob(blob, `motion-studio-render-${stamp}.zip`);
+      downloadBlob(blob, `keyloom-render-${stamp}.zip`);
       dispatchZip({ type: "finish", finishedAt: Date.now() });
       // Leave the modal open briefly so the user sees the final time before
       // it disappears. They can close it manually too.

@@ -111,7 +111,7 @@ function findBlobUrl(value: unknown, path = "project"): string | null {
 }
 
 function filenameForNow(): string {
-  return `motion-studio-${new Date()
+  return `keyloom-${new Date()
     .toISOString()
     .replace(/[:.]/g, "-")
     .slice(0, 19)}.mp4`;
