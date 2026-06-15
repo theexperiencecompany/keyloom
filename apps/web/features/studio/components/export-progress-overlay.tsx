@@ -50,6 +50,23 @@ export function ExportProgressOverlay({
     return () => clearTimeout(followUp);
   }, [phase]);
 
+  // Safety net for a stuck page. The export-settings Radix Dialog (and its
+  // Radix DropdownMenu) lock `pointer-events: none` on <body> while open and
+  // close the instant this overlay opens — Radix's cleanup races the unmount
+  // and can leave the lock stuck, so once this overlay is dismissed NOTHING on
+  // the page is clickable or hoverable. Whenever the overlay is active or has
+  // just closed, force-restore body interactivity.
+  useEffect(() => {
+    if (document.body.style.pointerEvents === "none") {
+      document.body.style.pointerEvents = "";
+    }
+    return () => {
+      if (document.body.style.pointerEvents === "none") {
+        document.body.style.pointerEvents = "";
+      }
+    };
+  }, [phase]);
+
   // Escape key closes the modal once render is done or errored.
   useEffect(() => {
     if (!dismissable) return;
