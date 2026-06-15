@@ -19,9 +19,6 @@ import { IMessageChat } from "./IMessageChat";
 
 /** iMessage send/receive sound — played as each bubble lands. */
 const MESSAGE_SFX = "sounds/message_bubble/message.mp3";
-/** Short keyboard "tick" — played on every character typed on the keyboard.
- *  Drop a brief (~60–100ms) key-tap mp3 here. */
-const KEY_SFX = "sounds/keyboard/key.mp3";
 
 /**
  * Logical width (px) the whole chat is laid out at before being uniformly
@@ -313,29 +310,12 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   );
   const sfxSrc = useCachedSfx(MESSAGE_SFX);
 
-  // A "tick" per character typed on the keyboard. Only outgoing TEXT messages
-  // are typed on the keyboard (incoming show dots, photos run the picker,
-  // history is already on screen) — and only when the keyboard is shown. Mirror
-  // the per-char press timing buildChatState uses: char j fires at
-  // delay + ((j + 0.5) / len) * typingFrames.
-  const keyTapCues = useMemo(() => {
-    if (!showKeyboard) return [];
-    const cues: number[] = [];
-    for (const m of messages) {
-      if (m.history || m.image || m.side !== "right") continue;
-      const chars = Array.from(m.text);
-      const len = chars.length;
-      if (len === 0 || (m.typingFrames ?? 0) <= 0) continue;
-      for (let j = 0; j < len; j++) {
-        if (chars[j] === " ") continue; // space bar is near-silent on iOS
-        cues.push(
-          Math.max(0, Math.round(m.delay + ((j + 0.5) / len) * m.typingFrames)),
-        );
-      }
-    }
-    return cues;
-  }, [messages, showKeyboard]);
-  const keySfxSrc = useCachedSfx(KEY_SFX);
+  // NOTE: we deliberately do NOT play a sound per typed keystroke. That meant
+  // ~one <Audio> per character (100+ across a chat), which overwhelmed the
+  // Player — it stuttered, dropped video frames while audio kept going, and the
+  // whoop drifted progressively AHEAD of the picture. The per-bubble "send"
+  // sound (customSfxCues, default keyboard tap) covers the typing feel with one
+  // cue per message instead.
 
   // All cue frames above are computed in DESIGN frames (60fps) — the same clock
   // `useDesignFrame()` animates on. Audio <Sequence from> wants ACTUAL render
@@ -347,11 +327,10 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   // One-shot SFX must be wrapped in a SHORT, bounded Sequence so each <Audio>
   // unmounts right after it plays. An unbounded Sequence keeps every cue's
   // audio tag mounted until the end of the video, and the Player's classic
-  // <Audio> caps simultaneous shared tags (default 5) — so dozens of lingering
-  // key taps overflow it and crash. Durations are the real sound lengths
-  // (key ≈0.085s, message ≈0.5s, presets ≤ fahhh's 2.3s) scaled to render fps.
+  // <Audio> caps simultaneous shared tags — lingering cues overflow it.
+  // Durations are the real sound lengths (message ≈0.5s, presets ≤ fahhh's
+  // 2.3s) scaled to render fps.
   const SWOOSH_FRAMES = Math.ceil(0.6 * fps);
-  const KEY_TAP_FRAMES = Math.max(4, Math.ceil(0.15 * fps));
   const CUSTOM_SFX_FRAMES = Math.ceil(2.5 * fps);
 
   const { items, composerText, pressedKey, pressT, attachment } =
@@ -390,17 +369,6 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           durationInFrames={CUSTOM_SFX_FRAMES}
           volume={1}
         />
-      ))}
-      {/* Keyboard "thwack" on every typed character — punchy, front and center. */}
-      {keyTapCues.map((from, i) => (
-        <Sequence
-          key={`key-${i}`}
-          from={toRenderFrame(from)}
-          durationInFrames={KEY_TAP_FRAMES}
-          name="key-tap"
-        >
-          <SmartAudio src={keySfxSrc} volume={0.85} />
-        </Sequence>
       ))}
       <ChatFill
         backdrop={backdrop}
