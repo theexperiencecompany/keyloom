@@ -75,11 +75,17 @@ function useCachedSfx(path: string): string {
 const CachedSfxSequence: React.FC<{
   path: string;
   from: number;
+  durationInFrames: number;
   volume: number;
-}> = ({ path, from, volume }) => {
+}> = ({ path, from, durationInFrames, volume }) => {
   const src = useCachedSfx(path);
   return (
-    <Sequence from={from} name="custom-sfx" layout="none">
+    <Sequence
+      from={from}
+      durationInFrames={durationInFrames}
+      name="custom-sfx"
+      layout="none"
+    >
       <SmartAudio src={src} volume={volume} />
     </Sequence>
   );
@@ -338,6 +344,16 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   const toRenderFrame = (designFrame: number) =>
     Math.round((designFrame * fps) / DESIGN_FPS);
 
+  // One-shot SFX must be wrapped in a SHORT, bounded Sequence so each <Audio>
+  // unmounts right after it plays. An unbounded Sequence keeps every cue's
+  // audio tag mounted until the end of the video, and the Player's classic
+  // <Audio> caps simultaneous shared tags (default 5) — so dozens of lingering
+  // key taps overflow it and crash. Durations are the real sound lengths
+  // (key ≈0.085s, message ≈0.5s, presets ≤ fahhh's 2.3s) scaled to render fps.
+  const SWOOSH_FRAMES = Math.ceil(0.6 * fps);
+  const KEY_TAP_FRAMES = Math.max(4, Math.ceil(0.15 * fps));
+  const CUSTOM_SFX_FRAMES = Math.ceil(2.5 * fps);
+
   const { items, composerText, pressedKey, pressT, attachment } =
     buildChatState(messages, frame, showKeyboard);
 
@@ -359,6 +375,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
         <Sequence
           key={`sfx-${i}`}
           from={toRenderFrame(from)}
+          durationInFrames={SWOOSH_FRAMES}
           name="message-sfx"
         >
           <SmartAudio src={sfxSrc} volume={0.8} />
@@ -370,12 +387,18 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           key={`custom-sfx-${i}-${cue.from}`}
           path={cue.src}
           from={toRenderFrame(cue.from)}
+          durationInFrames={CUSTOM_SFX_FRAMES}
           volume={1}
         />
       ))}
       {/* Keyboard "thwack" on every typed character — punchy, front and center. */}
       {keyTapCues.map((from, i) => (
-        <Sequence key={`key-${i}`} from={toRenderFrame(from)} name="key-tap">
+        <Sequence
+          key={`key-${i}`}
+          from={toRenderFrame(from)}
+          durationInFrames={KEY_TAP_FRAMES}
+          name="key-tap"
+        >
           <SmartAudio src={keySfxSrc} volume={0.85} />
         </Sequence>
       ))}

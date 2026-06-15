@@ -137,8 +137,17 @@ export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
     </div>
   );
 
+  // Bound each one-shot swoosh so its audio tag unmounts after it plays —
+  // otherwise unbounded Sequences keep every cue mounted to the end and the
+  // Player's classic <Audio> (capped at 5 shared tags) overflows. message.mp3
+  // is ~0.5s.
+  const swooshFrames = Math.ceil(0.6 * fps);
   const audio = messages.map((msg, i) => (
-    <Sequence key={i} from={msg.delay + msg.typingFrames}>
+    <Sequence
+      key={i}
+      from={msg.delay + msg.typingFrames}
+      durationInFrames={swooshFrames}
+    >
       <SmartAudio
         src={staticFile("sounds/message_bubble/message.mp3")}
         volume={0.85}
