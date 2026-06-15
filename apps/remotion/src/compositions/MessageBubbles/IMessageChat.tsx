@@ -303,7 +303,7 @@ export function IMessageChat({
           // dark band that swallows the top messages.
           style={{ background: "transparent", padding: "44px 16px 12px" }}
         >
-          <div style={{ position: "absolute", left: 24, top: 72 }}>
+          <div style={{ position: "absolute", left: 24, top: 56 }}>
             <CssLiquidGlass
               radius={20}
               style={{
@@ -361,7 +361,7 @@ export function IMessageChat({
             </CssLiquidGlass>
           </div>
 
-          <div style={{ position: "absolute", right: 24, top: 72 }}>
+          <div style={{ position: "absolute", right: 24, top: 56 }}>
             <CssLiquidGlass
               radius={20}
               style={{
