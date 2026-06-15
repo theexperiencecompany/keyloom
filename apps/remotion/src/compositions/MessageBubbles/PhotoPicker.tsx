@@ -42,20 +42,33 @@ const ICON_PNG: Record<string, string> = {
 function MenuIcon({ kind }: { kind: string }) {
   const png = ICON_PNG[kind];
   if (png) {
+    // The source PNGs are full-bleed iOS *squircles*. Just clipping them to a
+    // circle leaves the rounded-square's flat sides showing, so it still reads
+    // as a rounded square. Put the image in a circular clip and scale the art
+    // up a touch so the squircle's corners fall outside the circle — the icon
+    // then reads as a clean, fully-round disc like the real attachment menu.
     return (
-      <Img
-        src={asset(`components/messagebubble/${png}`) ?? ""}
-        crossOrigin="anonymous"
-        alt=""
+      <div
         style={{
           width: 28,
           height: 28,
-          // Circular icons, like the real iMessage attachment menu.
           borderRadius: 9999,
-          objectFit: "cover",
+          overflow: "hidden",
           flexShrink: 0,
         }}
-      />
+      >
+        <Img
+          src={asset(`components/messagebubble/${png}`) ?? ""}
+          crossOrigin="anonymous"
+          alt=""
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            transform: "scale(1.14)",
+          }}
+        />
+      </div>
     );
   }
   const base: React.CSSProperties = {
