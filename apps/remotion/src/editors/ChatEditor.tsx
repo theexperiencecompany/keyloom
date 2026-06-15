@@ -499,6 +499,19 @@ function BubbleRow({
   );
 }
 
+/**
+ * Resolve a bubble image for the editor's plain <img>. Uploaded clips
+ * (data:/blob:) and remote URLs pass through; a bare static path like
+ * "images/imessage-wallpaper.jpg" (served from apps/web/public, which the
+ * composition resolves via staticFile) gets a leading slash so the browser
+ * loads it from the site root instead of relative to the current route —
+ * otherwise the default template's photo silently 404s and shows blank.
+ */
+function previewSrc(src: string): string {
+  if (/^(data:|blob:|https?:)/i.test(src)) return src;
+  return `/${src.replace(/^\/+/, "")}`;
+}
+
 function ImageBubbleEditor({
   src,
   isRight,
@@ -520,7 +533,7 @@ function ImageBubbleEditor({
     >
       {/* eslint-disable-next-line @remotion/warn-native-media-tag */}
       <img
-        src={src}
+        src={previewSrc(src)}
         alt=""
         className="block h-auto max-h-40 w-full object-cover"
       />
