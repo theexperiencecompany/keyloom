@@ -2,8 +2,6 @@
 
 import { ArrowReloadHorizontalIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Player } from "@remotion/player";
-import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import { FieldsRenderer } from "@workspace/compositions/editors";
 import { type Project, projectDuration } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
@@ -15,10 +13,25 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { ExportProgressOverlay } from "@/features/studio/components/export-progress-overlay";
 import { ExportSettingsModal } from "@/features/studio/components/export-settings-modal";
 import { useExportRender } from "@/features/studio/hooks/use-export-render";
+
+// Lazy so the editor shell (tabs/fields/header) isn't blocked by compiling the
+// whole composition tree that `ProjectComposition` pulls in.
+const EditorPreview = dynamic(
+  () => import("./editor-preview").then((m) => m.EditorPreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+        Loading preview…
+      </div>
+    ),
+  },
+);
 
 export function EditorView({
   info,
@@ -202,20 +215,11 @@ export function EditorView({
           className="max-h-full w-full max-w-[1600px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
           style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
         >
-          <Player
-            component={ProjectComposition}
-            inputProps={project}
-            durationInFrames={totalDuration}
-            fps={project.fps}
-            compositionWidth={project.width}
-            compositionHeight={project.height}
-            style={{ width: "100%", height: "100%" }}
-            controls
-            loop
-            autoPlay
-            initiallyMuted
-            numberOfSharedAudioTags={12}
-            acknowledgeRemotionLicense
+          <EditorPreview
+            project={project}
+            totalDuration={totalDuration}
+            width={project.width}
+            height={project.height}
           />
         </div>
       </div>
