@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowReloadHorizontalIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Player } from "@remotion/player";
 import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import { FieldsRenderer } from "@workspace/compositions/editors";
@@ -103,6 +105,16 @@ export function EditorView({
   const hasChatField = info.fields.some((f) => f.kind === "chat");
   const generalFields = info.fields.filter((f) => f.kind !== "chat");
   const chatFields = info.fields.filter((f) => f.kind === "chat");
+  // Clearing the chat field empties the thread so a fresh conversation can be
+  // built from scratch.
+  const chatKey = chatFields[0]?.key;
+  const chatMessages = chatKey
+    ? (props[chatKey] as unknown[] | undefined)
+    : undefined;
+  const hasMessages = Array.isArray(chatMessages) && chatMessages.length > 0;
+  const clearMessages = () => {
+    if (chatKey) setProps((p) => ({ ...p, [chatKey]: [] }));
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] lg:min-h-0 lg:flex-1">
@@ -124,13 +136,32 @@ export function EditorView({
             </div>
             <TabsContent
               value="messages"
-              className="min-h-0 flex-1 overflow-y-auto"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
-              <FieldsRenderer
-                fields={chatFields}
-                value={props}
-                onChange={setProps}
-              />
+              <div className="flex items-center justify-between border-b border-border px-4 py-2">
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Conversation
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={clearMessages}
+                  disabled={!hasMessages}
+                  title="Clear all messages"
+                >
+                  <HugeiconsIcon
+                    icon={ArrowReloadHorizontalIcon}
+                    className="size-3.5"
+                  />
+                </Button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <FieldsRenderer
+                  fields={chatFields}
+                  value={props}
+                  onChange={setProps}
+                />
+              </div>
             </TabsContent>
             <TabsContent
               value="settings"
