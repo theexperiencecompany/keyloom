@@ -20,6 +20,15 @@ import { IMessageChat } from "./IMessageChat";
 /** iMessage send/receive sound — played as each bubble lands. */
 const MESSAGE_SFX = "sounds/message_bubble/message.mp3";
 
+/** Soft mechanical keyboard tap — played once per typed character while the
+ *  on-screen keyboard is shown. */
+const KEY_SFX = "sounds/keyboard/key.mp3";
+
+/** Hard cap on per-keystroke tap cues so a very long script can't mount an
+ *  unbounded number of <Audio> tags (the reason per-keystroke audio was once
+ *  pulled entirely). Generous — enough for several full messages. */
+const MAX_KEY_TAPS = 400;
+
 /**
  * Logical width (px) the whole chat is laid out at before being uniformly
  * scaled to fill the canvas (see ChatFill's `designWidth`). 402 ≈ an iPhone's
@@ -331,13 +340,40 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
     [messages],
   );
   const sfxSrc = useCachedSfx(MESSAGE_SFX);
+  const keySfxSrc = useCachedSfx(KEY_SFX);
 
-  // NOTE: we deliberately do NOT play a sound per typed keystroke. That meant
-  // ~one <Audio> per character (100+ across a chat), which overwhelmed the
-  // Player — it stuttered, dropped video frames while audio kept going, and the
-  // whoop drifted progressively AHEAD of the picture. The per-bubble "send"
-  // sound (customSfxCues, default keyboard tap) covers the typing feel with one
-  // cue per message instead.
+  // One keyboard-tap cue per typed CHARACTER, fired at the exact frame that
+  // character "presses" its key — the SAME press clock the visual key-pop uses
+  // in buildChatState: tj = delay + ((j + 0.5) / len) * typingFrames. Only with
+  // the keyboard shown, and only for OUTGOING text messages (incoming text is
+  // the other person; photos run the attachment flow, not typing). Each tap is
+  // wrapped in its own SHORT bounded <Sequence> below so it unmounts right
+  // after it plays.
+  //
+  // History: per-keystroke audio was once removed because mounting ~one <Audio>
+  // per character (100s across a chat) stuttered the Player and let audio drift
+  // ahead of the picture. It's re-added here but (a) only in keyboard mode,
+  // (b) capped at MAX_KEY_TAPS, (c) skipping spaces, and (d) on the lightweight
+  // HTML5 <Audio> the Player now uses via SmartAudio — so the cue count stays
+  // bounded and the engine stays cheap.
+  const keyTapCues = useMemo(() => {
+    if (!showKeyboard) return [] as number[];
+    const cues: number[] = [];
+    for (const m of messages) {
+      if (m.history || m.side !== "right" || m.image) continue;
+      if (!m.text.trim() || m.typingFrames <= 0) continue;
+      const chars = Array.from(m.text);
+      const len = chars.length || 1;
+      for (let j = 0; j < len; j++) {
+        if (chars[j] === " ") continue; // spacebar is a near-silent beat
+        cues.push(
+          Math.max(0, Math.round(m.delay + ((j + 0.5) / len) * m.typingFrames)),
+        );
+        if (cues.length >= MAX_KEY_TAPS) return cues;
+      }
+    }
+    return cues;
+  }, [messages, showKeyboard]);
 
   // All cue frames above are computed in DESIGN frames (60fps) — the same clock
   // `useDesignFrame()` animates on. Audio <Sequence from> wants ACTUAL render
@@ -354,6 +390,8 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   // 2.3s) scaled to render fps.
   const SWOOSH_FRAMES = Math.ceil(0.6 * fps);
   const CUSTOM_SFX_FRAMES = Math.ceil(2.5 * fps);
+  // key.mp3 is ~0.085s; give it a hair of room, then unmount.
+  const KEY_TAP_FRAMES = Math.max(1, Math.ceil(0.12 * fps));
 
   const { items, composerText, pressedKey, pressT, attachment } =
     buildChatState(messages, frame, showKeyboard);
@@ -400,6 +438,18 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           durationInFrames={CUSTOM_SFX_FRAMES}
           volume={1}
         />
+      ))}
+      {/* Per-keystroke keyboard taps (keyboard mode only). */}
+      {keyTapCues.map((from, i) => (
+        <Sequence
+          key={`key-tap-${i}-${from}`}
+          from={toRenderFrame(from)}
+          durationInFrames={KEY_TAP_FRAMES}
+          name="key-tap"
+          layout="none"
+        >
+          <SmartAudio src={keySfxSrc} volume={0.4} />
+        </Sequence>
       ))}
       <ChatFill
         backdrop={backdrop}
