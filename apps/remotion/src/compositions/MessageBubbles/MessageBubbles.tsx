@@ -124,6 +124,95 @@ const POP_HOLD = 7;
 const POP_RISE = 2;
 
 /**
+ * Human-ish keyboard typing. The TEMPO stays uniform (every keystroke costs the
+ * same — no per-key speed jitter, which read as laggy), but every so often a
+ * word gets a real typo: a wrong neighbouring key is tapped, there's a beat to
+ * "notice" it, a backspace deletes it, and the correct key is retyped. That's
+ * what makes it feel like a person typing instead of a perfect machine.
+ *
+ * Returns a keystroke timeline: each event carries the composer text AFTER that
+ * keystroke and the key that caused it (for the on-screen key pop; `null` for a
+ * space, `"backspace"` for a delete). `at` is the design-frame offset within
+ * the message's typing window, normalised so the message finishes exactly as
+ * its window ends — so send timing (and the swoosh) is unchanged.
+ *
+ * Deterministic: all randomness is seeded off the message text, so a clip
+ * renders identically every time (Remotion requires stable frames).
+ */
+type KeyEvent = { at: number; text: string; key: string | null };
+
+/** mulberry32 seeded from a string — cheap, deterministic. */
+function makeRng(seed: string): () => number {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+  }
+  return () => {
+    h += 0x6d2b79f5;
+    let t = h;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** QWERTY left/right neighbour of a letter — a plausible fat-finger mistype. */
+const KEY_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+function neighborKey(c: string, rng: () => number): string {
+  const lower = c.toLowerCase();
+  for (const row of KEY_ROWS) {
+    const idx = row.indexOf(lower);
+    if (idx === -1) continue;
+    const opts: string[] = [];
+    if (idx > 0) opts.push(row[idx - 1]!);
+    if (idx < row.length - 1) opts.push(row[idx + 1]!);
+    if (opts.length) return opts[Math.floor(rng() * opts.length)]!;
+  }
+  return lower;
+}
+
+const typingCache = new Map<string, KeyEvent[]>();
+
+function buildTyping(text: string, typingFrames: number): KeyEvent[] {
+  const cacheKey = `${typingFrames}|${text}`;
+  const cached = typingCache.get(cacheKey);
+  if (cached) return cached;
+
+  const chars = Array.from(text);
+  const rng = makeRng(text);
+  // Build in abstract "cost" units (≈ one keystroke each), then scale to fit
+  // typingFrames so typos never make a message overrun its window.
+  const raw: { cost: number; text: string; key: string | null }[] = [];
+  let shown = "";
+
+  for (let j = 0; j < chars.length; j++) {
+    const c = chars[j]!;
+    const isLetter = /[a-z]/i.test(c);
+    // Occasional typo mid-word (~7% of letters): wrong key → notice → fix.
+    if (isLetter && shown.length > 0 && rng() < 0.07) {
+      const wrong = neighborKey(c, rng);
+      shown += wrong;
+      raw.push({ cost: 1, text: shown, key: wrong });
+      shown = shown.slice(0, -1);
+      raw.push({ cost: 1.6, text: shown, key: "backspace" }); // a beat to notice
+    }
+    shown += c;
+    raw.push({ cost: 1, text: shown, key: c === " " ? null : c.toLowerCase() });
+  }
+
+  let total = 0;
+  for (const e of raw) total += e.cost;
+  const scale = typingFrames / (total || 1);
+  let t = 0;
+  const events: KeyEvent[] = raw.map((e) => {
+    t += e.cost;
+    return { at: t * scale, text: e.text, key: e.key };
+  });
+  typingCache.set(cacheKey, events);
+  return events;
+}
+
+/**
  * Design frames (60fps) to delay each message's sound past its "send" frame
  * (delay + typingFrames) so it lands when the bubble is DELIVERED — i.e. when
  * its pop-in/bounce animation actually arrives on screen — instead of the
@@ -212,29 +301,21 @@ function buildChatState(
     if (keyboardOn && isOutgoing && !m.image) {
       if (inTyping) {
         // Being typed on the keyboard → lives in the composer, not the thread.
-        const chars = Array.from(m.text);
-        const len = chars.length || 1;
-        const typed = Math.max(
-          0,
-          Math.min(len, Math.floor((local / m.typingFrames) * len)),
-        );
-        composerText = chars.slice(0, typed).join("");
+        // Human keystroke timeline (uniform tempo + the occasional typo/fix).
+        const events = buildTyping(m.text, m.typingFrames);
 
-        // Active key = the most-recently-registered character still inside its
-        // pop window. Each char j "presses" at the midpoint of its time slice.
-        let bestJ = -1;
-        let bestT = -Infinity;
-        for (let j = 0; j < len; j++) {
-          const tj = m.delay + ((j + 0.5) / len) * m.typingFrames;
-          if (tj <= frame && tj > bestT) {
-            bestT = tj;
-            bestJ = j;
-          }
+        // Composer shows the text of the latest keystroke that has happened;
+        // the active key is that keystroke if it's still inside its pop window.
+        let best: KeyEvent | null = null;
+        for (const e of events) {
+          if (e.at <= local) best = e;
+          else break;
         }
-        if (bestJ >= 0) {
-          const elapsed = frame - bestT;
+        composerText = best ? best.text : "";
+        if (best && best.key && best.key !== "backspace") {
+          const elapsed = local - best.at;
           if (elapsed < POP_HOLD) {
-            pressedKey = chars[bestJ]!.toLowerCase();
+            pressedKey = best.key;
             pressT = elapsed < POP_RISE ? elapsed / POP_RISE : 1;
           }
         }
@@ -342,13 +423,14 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   const sfxSrc = useCachedSfx(MESSAGE_SFX);
   const keySfxSrc = useCachedSfx(KEY_SFX);
 
-  // One keyboard-tap cue per typed CHARACTER, fired at the exact frame that
-  // character "presses" its key — the SAME press clock the visual key-pop uses
-  // in buildChatState: tj = delay + ((j + 0.5) / len) * typingFrames. Only with
-  // the keyboard shown, and only for OUTGOING text messages (incoming text is
-  // the other person; photos run the attachment flow, not typing). Each tap is
-  // wrapped in its own SHORT bounded <Sequence> below so it unmounts right
-  // after it plays.
+  // One keyboard-tap cue per physical keystroke, fired at the EXACT frame that
+  // key visibly pops — driven by the same `buildTyping` timeline the on-screen
+  // keyboard renders from, so taps land on letters, fat-finger typos AND
+  // backspaces (every key with a sound). Spaces (key === null) are a silent
+  // beat and skipped. Only with the keyboard shown, and only for OUTGOING text
+  // messages (incoming text is the other person; photos run the attachment
+  // flow, not typing). Each tap is wrapped in its own SHORT bounded <Sequence>
+  // below so it unmounts right after it plays.
   //
   // History: per-keystroke audio was once removed because mounting ~one <Audio>
   // per character (100s across a chat) stuttered the Player and let audio drift
@@ -362,13 +444,9 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
     for (const m of messages) {
       if (m.history || m.side !== "right" || m.image) continue;
       if (!m.text.trim() || m.typingFrames <= 0) continue;
-      const chars = Array.from(m.text);
-      const len = chars.length || 1;
-      for (let j = 0; j < len; j++) {
-        if (chars[j] === " ") continue; // spacebar is a near-silent beat
-        cues.push(
-          Math.max(0, Math.round(m.delay + ((j + 0.5) / len) * m.typingFrames)),
-        );
+      for (const ev of buildTyping(m.text, m.typingFrames)) {
+        if (ev.key === null) continue; // spacebar is a near-silent beat
+        cues.push(Math.max(0, Math.round(m.delay + ev.at)));
         if (cues.length >= MAX_KEY_TAPS) return cues;
       }
     }
