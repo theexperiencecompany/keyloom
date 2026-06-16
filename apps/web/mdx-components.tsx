@@ -1,12 +1,24 @@
 import type { MDXComponents } from "mdx/types";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ComponentCode } from "@/components/docs/component-code";
-import { ComponentsGrid } from "@/components/docs/components-grid";
 import { CompositionStats } from "@/components/docs/composition-stats";
 import { ContributorsGrid } from "@/components/docs/contributors-grid";
 import { EditorLink } from "@/components/docs/editor-link";
-import { Preview } from "@/components/docs/preview";
 import { PropsTable } from "@/components/docs/props-table";
+
+// These two pull in the ENTIRE Remotion component tree + a <Player> per
+// composition (WebGL shaders, charts, etc.) — by far the heaviest thing on any
+// docs page. Loaded statically, `mdx-components.tsx` dragged all of that into
+// EVERY MDX page's compile (even plain prose pages that never render a grid or
+// preview), which is what made dev route-switches crawl. Lazy-loading them so
+// a page only compiles them when it actually renders one.
+const ComponentsGrid = dynamic(() =>
+  import("@/components/docs/components-grid").then((m) => m.ComponentsGrid),
+);
+const Preview = dynamic(() =>
+  import("@/components/docs/preview").then((m) => m.Preview),
+);
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
