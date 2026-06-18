@@ -1,6 +1,10 @@
 "use client";
 
-import { Cancel01Icon, LockedIcon } from "@hugeicons/core-free-icons";
+import {
+  ArrowReloadHorizontalIcon,
+  Cancel01Icon,
+  LockedIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ClipStyle } from "@workspace/compositions/clip-style";
 import {
@@ -79,6 +83,16 @@ export function Inspector({
   const hasChatField = info.fields.some((f) => f.kind === "chat");
   const generalFields = info.fields.filter((f) => f.kind !== "chat");
   const chatFields = info.fields.filter((f) => f.kind === "chat");
+  // The conversation lives under the chat field's key; clearing it empties the
+  // thread so the user can start a fresh conversation from scratch.
+  const chatKey = chatFields[0]?.key;
+  const chatMessages = chatKey
+    ? (clip.props[chatKey] as unknown[] | undefined)
+    : undefined;
+  const hasMessages = Array.isArray(chatMessages) && chatMessages.length > 0;
+  const clearMessages = () => {
+    if (chatKey) onChange({ ...clip.props, [chatKey]: [] });
+  };
   // If a non-chat clip is selected while the Messages tab was active, fall back
   // to General so the panel isn't blank.
   const activeTab = tab === "messages" && !hasChatField ? "content" : tab;
@@ -153,13 +167,32 @@ export function Inspector({
         {hasChatField && (
           <TabsContent
             value="messages"
-            className="min-h-0 flex-1 overflow-y-auto"
+            className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            <FieldsRenderer
-              fields={chatFields}
-              value={clip.props}
-              onChange={onChange}
-            />
+            <div className="flex items-center justify-between border-b border-border px-4 py-2">
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Conversation
+              </span>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={clearMessages}
+                disabled={!hasMessages}
+                title="Clear all messages"
+              >
+                <HugeiconsIcon
+                  icon={ArrowReloadHorizontalIcon}
+                  className="size-3.5"
+                />
+              </Button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <FieldsRenderer
+                fields={chatFields}
+                value={clip.props}
+                onChange={onChange}
+              />
+            </div>
           </TabsContent>
         )}
 

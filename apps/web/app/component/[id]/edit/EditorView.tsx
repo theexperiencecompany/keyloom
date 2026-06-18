@@ -1,7 +1,7 @@
 "use client";
 
-import { Player } from "@remotion/player";
-import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
+import { ArrowReloadHorizontalIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { FieldsRenderer } from "@workspace/compositions/editors";
 import { type Project, projectDuration } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
@@ -13,10 +13,25 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { ExportProgressOverlay } from "@/features/studio/components/export-progress-overlay";
 import { ExportSettingsModal } from "@/features/studio/components/export-settings-modal";
 import { useExportRender } from "@/features/studio/hooks/use-export-render";
+
+// Lazy so the editor shell (tabs/fields/header) isn't blocked by compiling the
+// whole composition tree that `ProjectComposition` pulls in.
+const EditorPreview = dynamic(
+  () => import("./editor-preview").then((m) => m.EditorPreview),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+        Loading preview…
+      </div>
+    ),
+  },
+);
 
 export function EditorView({
   info,
@@ -103,6 +118,16 @@ export function EditorView({
   const hasChatField = info.fields.some((f) => f.kind === "chat");
   const generalFields = info.fields.filter((f) => f.kind !== "chat");
   const chatFields = info.fields.filter((f) => f.kind === "chat");
+  // Clearing the chat field empties the thread so a fresh conversation can be
+  // built from scratch.
+  const chatKey = chatFields[0]?.key;
+  const chatMessages = chatKey
+    ? (props[chatKey] as unknown[] | undefined)
+    : undefined;
+  const hasMessages = Array.isArray(chatMessages) && chatMessages.length > 0;
+  const clearMessages = () => {
+    if (chatKey) setProps((p) => ({ ...p, [chatKey]: [] }));
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] lg:min-h-0 lg:flex-1">
@@ -124,13 +149,32 @@ export function EditorView({
             </div>
             <TabsContent
               value="messages"
-              className="min-h-0 flex-1 overflow-y-auto"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
-              <FieldsRenderer
-                fields={chatFields}
-                value={props}
-                onChange={setProps}
-              />
+              <div className="flex items-center justify-between border-b border-border px-4 py-2">
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  Conversation
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={clearMessages}
+                  disabled={!hasMessages}
+                  title="Clear all messages"
+                >
+                  <HugeiconsIcon
+                    icon={ArrowReloadHorizontalIcon}
+                    className="size-3.5"
+                  />
+                </Button>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <FieldsRenderer
+                  fields={chatFields}
+                  value={props}
+                  onChange={setProps}
+                />
+              </div>
             </TabsContent>
             <TabsContent
               value="settings"
@@ -171,20 +215,11 @@ export function EditorView({
           className="max-h-full w-full max-w-[1600px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
           style={{ aspectRatio: `${dims.width} / ${dims.height}` }}
         >
-          <Player
-            component={ProjectComposition}
-            inputProps={project}
-            durationInFrames={totalDuration}
-            fps={project.fps}
-            compositionWidth={project.width}
-            compositionHeight={project.height}
-            style={{ width: "100%", height: "100%" }}
-            controls
-            loop
-            autoPlay
-            initiallyMuted
-            numberOfSharedAudioTags={12}
-            acknowledgeRemotionLicense
+          <EditorPreview
+            project={project}
+            totalDuration={totalDuration}
+            width={project.width}
+            height={project.height}
           />
         </div>
       </div>

@@ -1,6 +1,10 @@
 import { openai } from "@ai-sdk/openai";
 import type { BrandKit } from "@workspace/compositions/project";
 import { convertToModelMessages, stepCountIs, streamText } from "ai";
+import {
+  buildMentionContext,
+  type SelectedClipInput,
+} from "@/lib/agent/mentions";
 import { systemPrompt } from "@/lib/agent/system";
 import { tools } from "@/lib/agent/tools";
 
@@ -11,18 +15,28 @@ import { tools } from "@/lib/agent/tools";
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
-  const { messages, brandKit } = (await req.json()) as {
+  const { messages, brandKit, mentions, selectedClip } = (await req.json()) as {
     messages: unknown;
     brandKit?: BrandKit;
+    mentions?: unknown;
+    selectedClip?: SelectedClipInput;
   };
 
   // Append the brand kit (when set) to the system prompt so the agent
   // prefers the user's brand over generic design tokens. Cheap (~100
   // tokens max) and avoids needing a dedicated `getBrandKit` tool +
   // round trip.
-  const fullSystem = brandKit
+  let fullSystem = brandKit
     ? `${systemPrompt}\n\n---\n\n## Active brand kit${formatBrandKit(brandKit)}`
     : systemPrompt;
+
+  // When the user @mentioned components, append a focused-mode block that
+  // inlines those components' field contracts + the targeting rule, so the
+  // agent fills them precisely without discovery round-trips.
+  const mentionContext = buildMentionContext(mentions, selectedClip ?? null);
+  if (mentionContext) {
+    fullSystem = `${fullSystem}\n\n---\n\n${mentionContext}`;
+  }
 
   const result = streamText({
     model: openai("gpt-5-mini"),

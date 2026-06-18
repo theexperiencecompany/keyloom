@@ -25,7 +25,7 @@ import { ACCENT_COLORS, COLOR_BASES, PREMIUM_FONTS } from "./design-tokens";
  * single getSceneDetails response that was 3,000+ tokens (e.g.
  * GaiaScenario) collapses to a few hundred.
  */
-function trimForAgent(value: unknown, depth = 0): unknown {
+export function trimForAgent(value: unknown, depth = 0): unknown {
   if (depth > 6) return "[deep]";
   if (typeof value === "string") {
     if (value.length <= 200) return value;

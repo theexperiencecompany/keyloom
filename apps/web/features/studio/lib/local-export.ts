@@ -20,7 +20,6 @@ import {
   renderMediaOnWeb,
   type WebRendererHardwareAcceleration,
 } from "@remotion/web-renderer";
-import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import { type Project, projectDuration } from "@workspace/compositions/project";
 
 import type { ExportOptions } from "./export-options";
@@ -124,6 +123,15 @@ export async function renderProjectLocally({
   const progress: RenderMediaOnWebProgressCallback = ({ progress: p }) => {
     onProgress?.(p);
   };
+
+  // Loaded on demand (only when an export actually runs) so that importing this
+  // module — which every screen with an export button does — does NOT drag the
+  // entire Remotion composition tree (`ProjectComposition` → every component)
+  // into that route's compile. That import was making the editor route compile
+  // all ~80 compositions just to show the panel.
+  const { ProjectComposition } = await import(
+    "@workspace/compositions/compositions/Project/Project"
+  );
 
   // Scale the project's frame counts to the export fps. The project is
   // designed at `project.fps` (typically 60); each clip's

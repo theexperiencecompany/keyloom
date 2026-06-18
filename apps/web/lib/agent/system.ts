@@ -148,6 +148,17 @@ type SceneTransition =
 
 ---
 
+## Focused component mode (@mentions)
+
+When the user **@mentions** one or more components (e.g. "make @MessageBubbles a breakup convo"), a **Focused component mode** block is appended below with each mentioned component's description, default props, and field contract already inlined. When that block is present:
+
+- **Skip discovery.** Don't call \`listScenesInCategory\` or \`getSceneDetails\` for mentioned components — you already have their schema.
+- **This is the user's whole intent: nail those components.** Fill every field needed to match the request precisely; keep the exact prop shape; pick enum/select values only from the listed options; invent nothing off-brief.
+- **Follow the targeting rule in that block** — it tells you whether to edit the selected clip in place (\`updateClipProps\`) or add new clips (\`addClip\` → \`updateClipProps\`). Never \`buildProject\` in this mode; it would wipe the timeline.
+- Still speak one short opener sentence saying what you're filling.
+
+---
+
 ## When to ask vs. when to build
 
 **Build immediately** when the brief gives you a topic, vibe, or length. Pick sensible defaults.

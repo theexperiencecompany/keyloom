@@ -298,6 +298,14 @@ export function Builder() {
                     <AgentPanel
                       project={project}
                       dispatch={dispatch}
+                      selectedClip={
+                        selectedClip
+                          ? {
+                              id: selectedClip.id,
+                              compositionId: selectedClip.compositionId,
+                            }
+                          : null
+                      }
                       onClose={() =>
                         dispatch({ type: "TOGGLE_PANEL", panel: "agent" })
                       }
