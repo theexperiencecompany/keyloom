@@ -36,7 +36,7 @@ export type RenderComponentOptions = {
   outFile?: string;
 };
 
-/** What a completed render reports back. */
+/** What a completed (blocking) render reports back. */
 export type RenderComponentResult = {
   compositionId: string;
   /** Time-limited, downloadable URL to the rendered MP4. */
@@ -48,4 +48,26 @@ export type RenderComponentResult = {
   fps: number;
   width: number;
   height: number;
+};
+
+/** Handle returned by `startRender` — pass renderId + bucketName to
+ *  `getRenderStatus` to poll. */
+export type StartRenderResult = {
+  compositionId: string;
+  renderId: string;
+  bucketName: string;
+  durationInFrames: number;
+  fps: number;
+  width: number;
+  height: number;
+};
+
+/** Progress snapshot from `getRenderStatus`. `url`/`filename` are present once
+ *  `done` is true. */
+export type RenderStatus = {
+  done: boolean;
+  /** 0–1 overall progress. */
+  progress: number;
+  url?: string;
+  filename?: string;
 };
