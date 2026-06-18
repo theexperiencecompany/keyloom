@@ -6,6 +6,7 @@ import {
   db,
   type Subscription,
   subscriptions,
+  type User,
   users,
 } from "./db";
 
@@ -43,6 +44,34 @@ export async function getSubscription(
     .where(eq(subscriptions.userId, userId))
     .limit(1);
   return rows[0] ?? null;
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const rows = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Applies a subscription change from a billing webhook. Updates the user's
+ * subscription row in place, or inserts one if (unexpectedly) absent. `patch`
+ * carries status/plan/quota/period and Dodo ids.
+ */
+export async function applySubscription(
+  userId: string,
+  patch: Partial<typeof subscriptions.$inferInsert>,
+): Promise<void> {
+  const updated = await db
+    .update(subscriptions)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(subscriptions.userId, userId))
+    .returning({ id: subscriptions.id });
+  if (updated.length === 0) {
+    await db.insert(subscriptions).values({ userId, ...patch });
+  }
 }
 
 export async function listApiKeys(userId: string): Promise<ApiKey[]> {

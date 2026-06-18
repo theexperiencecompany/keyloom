@@ -2,7 +2,9 @@
 
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createApiKey, ensureAccount, revokeApiKey } from "@/lib/account";
+import { createProCheckout } from "@/lib/billing";
 
 export type CreateKeyState = {
   fullKey?: string;
@@ -33,4 +35,20 @@ export async function revokeKeyAction(formData: FormData): Promise<void> {
   const keyId = String(formData.get("keyId") ?? "");
   if (keyId) await revokeApiKey(user.id, keyId);
   revalidatePath("/account");
+}
+
+/** Starts a Dodo checkout for the Pro plan and redirects the user to it. */
+export async function upgradeAction(_formData: FormData): Promise<void> {
+  const { user } = await withAuth({ ensureSignedIn: true });
+  await ensureAccount(user.id, user.email);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const name = [user.firstName, user.lastName].filter(Boolean).join(" ");
+  const checkoutUrl = await createProCheckout({
+    userId: user.id,
+    email: user.email,
+    name: name || undefined,
+    returnUrl: `${appUrl}/account?upgrade=success`,
+  });
+  // redirect() throws NEXT_REDIRECT — must be outside any try/catch.
+  redirect(checkoutUrl);
 }

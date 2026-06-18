@@ -8,7 +8,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import { useActionState, useState } from "react";
-import { createKeyAction, revokeKeyAction } from "./actions";
+import { createKeyAction, revokeKeyAction, upgradeAction } from "./actions";
 
 type KeyRow = {
   id: string;
@@ -81,18 +81,28 @@ export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
       <section className="rounded-xl border border-border p-4">
         <h2 className="mb-2 text-sm font-medium">Plan</h2>
         {subscription ? (
-          <div className="flex items-center justify-between text-sm">
-            <div>
-              <span className="font-medium capitalize">
-                {subscription.plan}
-              </span>{" "}
-              <span className="text-muted-foreground">
-                ({subscription.status})
-              </span>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between text-sm">
+              <div>
+                <span className="font-medium capitalize">
+                  {subscription.plan}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  ({subscription.status})
+                </span>
+              </div>
+              <div className="text-muted-foreground">
+                {subscription.rendersUsed}/{subscription.renderQuota} renders
+                used
+              </div>
             </div>
-            <div className="text-muted-foreground">
-              {subscription.rendersUsed}/{subscription.renderQuota} renders used
-            </div>
+            {subscription.plan === "free" ? (
+              <form action={upgradeAction}>
+                <Button type="submit" size="sm" className="w-full sm:w-auto">
+                  Upgrade to Pro
+                </Button>
+              </form>
+            ) : null}
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">No subscription yet.</p>
