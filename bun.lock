@@ -154,6 +154,7 @@
         "@hugeicons/react": "^1.1.6",
         "@mdx-js/loader": "^3.1.1",
         "@mdx-js/react": "^3.1.1",
+        "@modelcontextprotocol/sdk": "^1.29.0",
         "@next/mdx": "^16.2.5",
         "@remotion/bundler": "4.0.459",
         "@remotion/lambda": "4.0.459",
