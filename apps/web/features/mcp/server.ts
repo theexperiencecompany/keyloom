@@ -13,23 +13,48 @@
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { type ZodRawShape, z } from "zod";
 import { getComponentSchema, listComponents } from "./components";
 import { renderComponent } from "./render";
 
 const server = new McpServer({ name: "keyloom-video", version: "0.1.0" });
 
-function jsonText(value: unknown) {
-  return {
-    content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }],
-  };
+type ToolResult = {
+  content: { type: "text"; text: string }[];
+  isError?: boolean;
+};
+type ToolHandler = (args: Record<string, unknown>) => Promise<ToolResult>;
+
+/**
+ * Registers a tool. We cast `registerTool` through `unknown`: the SDK's generic
+ * inference over a Zod input shape can exceed TypeScript's instantiation depth
+ * ("Type instantiation is excessively deep"), so we keep our own narrow handler
+ * signature and read already-validated args off a plain record (the SDK still
+ * validates inputs against `inputSchema` at runtime).
+ */
+function registerTool(
+  name: string,
+  config: { title: string; description: string; inputSchema: ZodRawShape },
+  handler: ToolHandler,
+): void {
+  (
+    server.registerTool as unknown as (
+      name: string,
+      config: unknown,
+      handler: ToolHandler,
+    ) => void
+  )(name, config, handler);
 }
 
-function errorText(message: string) {
-  return { isError: true, content: [{ type: "text" as const, text: message }] };
+function jsonText(value: unknown): ToolResult {
+  return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }] };
 }
 
-server.registerTool(
+function errorText(message: string): ToolResult {
+  return { isError: true, content: [{ type: "text", text: message }] };
+}
+
+registerTool(
   "list_components",
   {
     title: "List video components",
@@ -40,7 +65,7 @@ server.registerTool(
   async () => jsonText(listComponents()),
 );
 
-server.registerTool(
+registerTool(
   "get_component_schema",
   {
     title: "Get a component's field schema",
@@ -52,7 +77,8 @@ server.registerTool(
         .describe("Component id from list_components, e.g. 'MessageBubbles'."),
     },
   },
-  async ({ componentId }) => {
+  async (args) => {
+    const componentId = String(args.componentId ?? "");
     const schema = getComponentSchema(componentId);
     if (!schema) {
       return errorText(
@@ -63,7 +89,7 @@ server.registerTool(
   },
 );
 
-server.registerTool(
+registerTool(
   "render_component",
   {
     title: "Render a component to video",
@@ -90,14 +116,18 @@ server.registerTool(
         .describe("Absolute path to also save the MP4 to."),
     },
   },
-  async ({ componentId, props, fps, durationInFrames, scale, outFile }) => {
+  async (args) => {
     try {
-      const result = await renderComponent(componentId, props ?? {}, {
-        fps,
-        durationInFrames,
-        scale,
-        outFile,
-      });
+      const result = await renderComponent(
+        String(args.componentId ?? ""),
+        (args.props as Record<string, unknown> | undefined) ?? {},
+        {
+          fps: args.fps as number | undefined,
+          durationInFrames: args.durationInFrames as number | undefined,
+          scale: args.scale as number | undefined,
+          outFile: args.outFile as string | undefined,
+        },
+      );
       return jsonText(result);
     } catch (err) {
       return errorText(err instanceof Error ? err.message : String(err));

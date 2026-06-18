@@ -76,6 +76,13 @@ export async function renderComponent(
     expiresInSeconds: 60 * 60 * 6,
     checkIfObjectExists: true,
   });
+  // presignUrl returns null when the object isn't found — shouldn't happen once
+  // the render reports done + outKey, but guard so `url` is a definite string.
+  if (!url) {
+    throw new Error(
+      "Render finished but its output file could not be located in S3.",
+    );
+  }
   const filename = outKey.split("/").pop() ?? `${compositionId}.mp4`;
 
   let outFile: string | undefined;
