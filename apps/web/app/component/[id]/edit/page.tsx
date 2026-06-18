@@ -1,16 +1,19 @@
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  compositions,
-  compositionsById,
-} from "@workspace/compositions/registry";
+import { compositionsById } from "@workspace/compositions/registry";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditorView } from "./EditorView";
 
+// Render editor pages ON DEMAND instead of statically prerendering all 79
+// compositions at build time. It's an interactive client editor (zero SEO
+// value), and prerendering every composition — each mounting the full Remotion
+// graph — was a large, pointless chunk of the build. First request renders +
+// caches; nothing else changes for the user.
+export const dynamicParams = true;
 export function generateStaticParams() {
-  return compositions.map((c) => ({ id: c.id }));
+  return [];
 }
 
 export async function generateMetadata({
