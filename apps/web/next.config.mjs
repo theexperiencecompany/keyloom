@@ -4,6 +4,13 @@ import createMDX from "@next/mdx"
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "mdx"],
   transpilePackages: ["@workspace/ui", "@workspace/compositions"],
+  experimental: {
+    // Persist Turbopack's compiled-module cache to .next between builds, so
+    // repeat builds skip recompiling unchanged code (the ~78s compile is the
+    // bottleneck for this large composition graph). Dev caching is already on
+    // by default in Next 16; this opts the production build in too.
+    turbopackFileSystemCacheForBuild: true,
+  },
   serverExternalPackages: [
     "@remotion/bundler",
     // @remotion/renderer is a native Node package: it require()s
