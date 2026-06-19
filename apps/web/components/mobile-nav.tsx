@@ -10,8 +10,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@workspace/ui/components/sheet";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AppSidebarNav } from "@/components/app-sidebar";
+
+const navLinks = [
+  { label: "Components", href: "/" },
+  { label: "Studio", href: "/studio" },
+];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -59,12 +64,21 @@ export function MobileNav() {
         <div className="border-b border-dashed border-border px-6 py-4">
           <SheetTitle className="text-sm">Navigation</SheetTitle>
           <SheetDescription className="sr-only">
-            Browse documentation sections
+            Browse the app
           </SheetDescription>
         </div>
-        <div className="px-4 py-6">
-          <AppSidebarNav onNavigate={() => setOpen(false)} />
-        </div>
+        <nav className="flex flex-col gap-1 px-4 py-6">
+          {navLinks.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setOpen(false)}
+              className="rounded-lg px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </SheetContent>
     </Sheet>
   );

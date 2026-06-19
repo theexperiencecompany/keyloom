@@ -47,11 +47,11 @@ export default async function EditorPage({
     <div className="flex min-h-screen flex-col lg:h-screen">
       <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
         <Link
-          href={`/docs/${info.id}`}
+          href="/"
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
-          Back to docs
+          Back to components
         </Link>
         <h1 className="text-sm font-medium">{info.title}</h1>
         <div className="w-[100px]" />

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"done exit=$?\")",
+      "Bash(bun run *)",
+      "Bash(echo \"tsc exit=$?\")",
+      "Bash(disown)",
+      "Bash(curl -s -o /dev/null -w \"total=%{time_total}s http=%{http_code}\\\\n\" --max-time 120 \"http://localhost:3000/\")",
+      "Bash(pkill -9 -f \"next-server\\\\|next dev\")",
+      "Bash(ps -o pid,etime,args -p 143939,143940,143960,299121,299169)",
+      "Bash(pkill -9 -f \"next-server\")",
+      "Bash(rm -f .next/dev/lock)",
+      "Bash(nohup bun run next dev --turbopack -p 3000)",
+      "Bash(curl -s -o /dev/null -w \"total=%{time_total}s http=%{http_code}\\\\n\" --max-time 200 \"http://localhost:3000/docs/components\")",
+      "Bash(curl -s -o /dev/null -w \"total=%{time_total}s http=%{http_code}\\\\n\" --max-time 200 \"http://localhost:3000/docs/TitleFade\")",
+      "Bash(curl -s -o /dev/null -w \" total=%{time_total}s http=%{http_code}\\\\n\" --max-time 120 \"http://localhost:3000/docs/TitleFade\")",
+      "Bash(curl -s -o /dev/null -w \" total=%{time_total}s http=%{http_code}\\\\n\" --max-time 120 \"http://localhost:3000/docs/TitleType\")",
+      "Bash(exit 0)",
+      "Bash(curl -s -o /dev/null -w \"homepage: total=%{time_total}s http=%{http_code}\\\\n\" --max-time 60 \"http://localhost:3000/\")",
+      "Bash(curl -s -o /dev/null -w \"total=%{time_total}s http=%{http_code}\\\\n\" --max-time 60 \"http://localhost:3000/\")",
+      "Bash(xargs -I {} bash -c 'echo \"=== {} ===\" && head -20 {}')",
+      "Bash(grep -rn 'href=\"/docs\\\\|href={`/docs\\\\|\"/docs\"' --include=\"*.tsx\" components app)",
+      "Bash(git rm *)",
+      "Bash(grep -rn 'href=\"/docs\\\\|href={`/docs\\\\|\"/docs\"\\\\|/docs/' --include=\"*.tsx\" --include=\"*.ts\" .)",
+      "Bash(cd /home/sanku/work/aesthetic/apps/web *)",
+      "Read(//home/sanku/work/aesthetic/apps/web/apps/remotion/src/compositions/Project/**)",
+      "Bash(awk '{print $1}')"
+    ]
+  }
+}
