@@ -1,8 +1,6 @@
-import createMDX from "@next/mdx"
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ["ts", "tsx", "mdx"],
+  pageExtensions: ["ts", "tsx"],
   transpilePackages: ["@workspace/ui", "@workspace/compositions"],
   experimental: {
     // Persist Turbopack's compiled-module cache to .next between builds, so
@@ -43,11 +41,4 @@ const nextConfig = {
   },
 }
 
-const withMDX = createMDX({
-  options: {
-    remarkPlugins: [["remark-gfm", {}]],
-    rehypePlugins: [["rehype-slug", {}]],
-  },
-})
-
-export default withMDX(nextConfig)
+export default nextConfig

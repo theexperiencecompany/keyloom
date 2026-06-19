@@ -32,7 +32,7 @@ const DURATION = 150;
 
 // Compositions a creator can drop onto the canvas in this demo. Any id from
 // the registry works — these are just the seedable picks for the toolbar.
-const PICKERS = ["TitlePopup", "StatCounter", "FontHook"] as const;
+const PICKERS = ["Text", "StatCounter"] as const;
 
 type Layer = {
   id: string;
@@ -61,7 +61,7 @@ function makeLayer(
 }
 
 const INITIAL_LAYERS: Layer[] = [
-  makeLayer("TitlePopup", { x: 90, y: 150, width: 900, height: 420 }),
+  makeLayer("Text", { x: 90, y: 150, width: 900, height: 420 }),
   makeLayer("StatCounter", { x: 240, y: 760, width: 600, height: 400 }),
 ];
 

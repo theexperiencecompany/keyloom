@@ -4,7 +4,6 @@ import { componentsByIdBase } from "./componentsBase";
 import { LaptopFrame } from "./compositions/LaptopFrame/LaptopFrame";
 import { PhoneFrame } from "./compositions/PhoneFrame/PhoneFrame";
 import { Showcase } from "./compositions/Showcase/Showcase";
-import { SplitScene } from "./compositions/SplitScene/SplitScene";
 
 // Wrapper compositions (PhoneFrame, LaptopFrame, SplitScene, Showcase) import
 // this module to look up nested compositions, which creates a circular
@@ -16,6 +15,5 @@ export const componentsById: Record<string, ComponentType<any>> = {
   ...componentsByIdBase,
   PhoneFrame,
   LaptopFrame,
-  SplitScene,
   Showcase,
 };

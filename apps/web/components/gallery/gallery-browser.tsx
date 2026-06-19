@@ -2,9 +2,10 @@
 
 import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Player, Thumbnail } from "@remotion/player";
-import { componentsById } from "@workspace/compositions/components";
-import { compositions } from "@workspace/compositions/registry";
+import {
+  compositionModulePath,
+  compositions,
+} from "@workspace/compositions/registry";
 import type {
   AnyCompositionInfo,
   CompositionCategory,
@@ -12,8 +13,19 @@ import type {
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
+
+// Remotion lives behind this dynamic import, so @remotion/player and the
+// composition components are never part of the homepage's initial bundle. A
+// preview is mounted only while its card is in the viewport (see GalleryCard),
+// so the page only ever runs a handful of composition chunks at a time — never
+// all 73 (bundle-dynamic-imports + rendering-content-visibility, Vercel React).
+const LivePreview = dynamic(
+  () => import("./live-preview").then((m) => m.LivePreview),
+  { ssr: false },
+);
 
 // Public-facing labels for the internal category ids. Order here is the order
 // the tabs render in; only categories that actually have items are shown.
@@ -37,10 +49,6 @@ export function GalleryBrowser() {
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
-  // Only ONE preview animates at a time — the hovered card. Every other card
-  // shows a cheap static <Thumbnail>, so the page mounts N stills + at most one
-  // live <Player>.
-  const [activeId, setActiveId] = React.useState<string | null>(null);
 
   // Which categories are actually populated, in CATEGORY_ORDER.
   const presentCategories = React.useMemo(() => {
@@ -63,7 +71,7 @@ export function GalleryBrowser() {
   return (
     <div className="space-y-6">
       {/* Filter bar: search + category tabs */}
-      <div className="sticky top-14 z-30 -mx-4 border-b border-dashed border-border bg-background/95 px-4 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="sticky top-14 z-30 -mx-5 border-b border-dashed border-border bg-background/95 px-5 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
         <div className="flex items-center gap-2">
           {searchOpen ? (
             <div className="flex flex-1 items-center gap-2">
@@ -130,14 +138,9 @@ export function GalleryBrowser() {
           No components match “{query}”.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((info) => (
-            <GalleryCard
-              key={info.id}
-              info={info}
-              active={activeId === info.id}
-              onHover={setActiveId}
-            />
+            <GalleryCard key={info.id} info={info} />
           ))}
         </div>
       )}
@@ -170,78 +173,73 @@ function CategoryTab({
   );
 }
 
-function GalleryCard({
-  info,
-  active,
-  onHover,
-}: {
-  info: AnyCompositionInfo;
-  active: boolean;
-  onHover: (id: string | null) => void;
-}) {
-  const Component = componentsById[info.id];
-  // Frame shown at rest — ~70% through, the same point the docs grid pauses on.
-  const posterFrame = Math.min(
-    info.durationInFrames - 1,
-    Math.round(info.durationInFrames * 0.7),
-  );
+function GalleryCard({ info }: { info: AnyCompositionInfo }) {
+  // Mount the live preview the first time the card nears the viewport, then keep
+  // it mounted for good. This defers Remotion off the initial load (cards below
+  // the fold don't compile/mount until you scroll to them) WITHOUT re-blanking:
+  // once a preview has loaded, scrolling away and back leaves it in place instead
+  // of tearing it down and reloading. Same idea as <img loading="lazy">.
+  const ref = React.useRef<HTMLAnchorElement | null>(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setVisible(true);
+          io.disconnect(); // loaded once — never tear it back down
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <Link
-      href={`/docs/${info.id}`}
-      className="group block overflow-hidden rounded-xl border border-border bg-muted/20 transition-all hover:border-border/80 hover:bg-muted/40"
-      onMouseEnter={() => onHover(info.id)}
-      onMouseLeave={() => onHover(null)}
+      ref={ref}
+      // Clicking a component opens it straight in the editor (single-clip studio),
+      // not a docs page — the gallery is a product surface, not documentation.
+      href={`/component/${info.id}/edit`}
+      // No prefetch: ~73 cards all point at the heavy editor route; hover-
+      // prefetching it would kick off its slow compile. Click still works.
+      prefetch={false}
+      className="group block"
     >
+      {/* Media tile: borderless, big radius, subtle ring; the preview fills it.
+          Cap how tall a card can get (min 3:4) so portrait compositions like
+          LockScreenMessage (9:19.5) / FontHook (9:16) don't render as giant
+          towers next to landscape cards — the preview just letterboxes inside. */}
       <div
-        className="relative w-full overflow-hidden bg-background"
-        style={{ aspectRatio: `${info.width} / ${info.height}` }}
+        className="relative overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]"
+        style={{ aspectRatio: `${Math.max(info.width / info.height, 0.75)}` }}
       >
-        {Component ? (
-          <>
-            <Thumbnail
-              component={Component}
-              inputProps={info.defaultProps}
+        {visible ? (
+          <div className="absolute inset-0">
+            <LivePreview
+              modulePath={compositionModulePath(info)}
+              id={info.id}
+              defaultProps={info.defaultProps}
               durationInFrames={info.durationInFrames}
               fps={info.fps}
-              frameToDisplay={posterFrame}
-              compositionWidth={info.width}
-              compositionHeight={info.height}
-              style={{ width: "100%", height: "100%" }}
+              width={info.width}
+              height={info.height}
             />
-            {active ? (
-              <div className="absolute inset-0">
-                <Player
-                  component={Component}
-                  inputProps={info.defaultProps}
-                  durationInFrames={info.durationInFrames}
-                  fps={info.fps}
-                  compositionWidth={info.width}
-                  compositionHeight={info.height}
-                  style={{ width: "100%", height: "100%" }}
-                  loop
-                  autoPlay
-                  initiallyMuted
-                  controls={false}
-                  numberOfSharedAudioTags={0}
-                  acknowledgeRemotionLicense
-                />
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <div className="flex h-full items-center justify-center text-[12px] text-muted-foreground">
-            No preview
           </div>
+        ) : (
+          // Off-screen placeholder — no Remotion mounted.
+          <div className="absolute inset-0 bg-muted/40" />
         )}
       </div>
-      <div className="space-y-0.5 p-3">
-        <div className="truncate text-[13px] font-medium text-foreground">
+      <div className="px-0.5 pt-3">
+        <h3 className="truncate text-[15px] font-semibold leading-tight text-foreground">
           {info.title}
-        </div>
-        <div className="truncate text-[11px] text-muted-foreground">
-          {info.description}
-        </div>
+        </h3>
+        <p className="mt-1 truncate text-[13px] text-muted-foreground">
+          {CATEGORY_LABELS[info.category]}
+        </p>
       </div>
     </Link>
   );

@@ -3,15 +3,15 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
-import { GalleryBrowser } from "@/components/gallery/gallery-browser";
+import { GalleryMount } from "@/components/gallery/gallery-mount";
 import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
   return (
-    <div className="mx-auto min-h-screen max-w-[1600px] border-x border-dashed border-border">
+    <div className="mx-auto min-h-screen max-w-6xl border-x border-dashed border-border">
       <DocsHeader />
 
-      <main className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <main className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         {/* Compact intro — the gallery itself is the hero. */}
         <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end sm:gap-6">
           <div>
@@ -31,7 +31,7 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        <GalleryBrowser />
+        <GalleryMount />
       </main>
 
       <SiteFooter />

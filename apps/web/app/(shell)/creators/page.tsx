@@ -55,7 +55,7 @@ export default function CreatorsPage() {
         </p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/docs/components"
+            href="/"
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium hover:bg-accent"
           >
             Browse components

@@ -144,8 +144,7 @@ function AccountMenuFallback() {
 }
 
 const navLinks = [
-  { label: "Docs", href: "/docs" },
-  { label: "Components", href: "/docs/components" },
+  { label: "Components", href: "/" },
   { label: "Studio", href: "/studio" },
 ];
 
@@ -188,7 +187,7 @@ export function DocsHeader() {
               size="icon-sm"
               className="sm:hidden"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search docs"
+              aria-label="Search components"
             >
               <HugeiconsIcon icon={Search01Icon} size={14} />
             </Button>
@@ -200,7 +199,7 @@ export function DocsHeader() {
             >
               <HugeiconsIcon icon={Search01Icon} size={13} />
               <span className="flex-1 text-left text-[13px]">
-                Search docs...
+                Search components...
               </span>
               <kbd className="font-mono text-[11px] text-muted-foreground/60">
                 ⌘K

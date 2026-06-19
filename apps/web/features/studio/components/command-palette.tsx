@@ -9,9 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from "@workspace/ui/components/command";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { docs } from "@/lib/docs";
 
 type Props = {
   open: boolean;
@@ -34,11 +32,10 @@ type Props = {
  * studio to open. Searches across:
  *   - Every registered composition (selecting one appends a new clip)
  *   - Studio actions (export, screenshot, play, save, import…)
- *   - Every docs page (selecting one navigates to it)
  *
  * Single source of truth: the composition list comes from
- * `@workspace/compositions/registry` and the docs list from `@/lib/docs`,
- * so adding a composition or doc page surfaces here automatically.
+ * `@workspace/compositions/registry`, so adding a composition surfaces here
+ * automatically.
  */
 export function CommandPalette({
   open,
@@ -54,8 +51,6 @@ export function CommandPalette({
   onSaveProject,
   onImportProject,
 }: Props) {
-  const router = useRouter();
-
   // ⌘K / Ctrl+K toggles the palette from anywhere in the studio.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -79,9 +74,9 @@ export function CommandPalette({
       open={open}
       onOpenChange={onOpenChange}
       title="Studio commands"
-      description="Search compositions, actions, and docs"
+      description="Search compositions and actions"
     >
-      <CommandInput placeholder="Search compositions, actions, docs…" />
+      <CommandInput placeholder="Search compositions, actions…" />
       <CommandList>
         <CommandEmpty>No matches.</CommandEmpty>
 
@@ -129,27 +124,6 @@ export function CommandPalette({
                     {c.description}
                   </span>
                 ) : null}
-              </span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-
-        <CommandGroup heading="Docs">
-          {docs.map((d) => (
-            <CommandItem
-              key={d.slug}
-              value={`docs ${d.slug} ${d.meta.title} ${d.meta.description}`}
-              onSelect={() =>
-                run(() => {
-                  router.push(d.href);
-                })
-              }
-            >
-              <span className="flex flex-col gap-0.5">
-                <span className="text-[13px]">{d.meta.title}</span>
-                <span className="line-clamp-1 text-[11px] text-muted-foreground">
-                  {d.meta.description}
-                </span>
               </span>
             </CommandItem>
           ))}
