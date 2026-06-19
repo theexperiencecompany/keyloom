@@ -1,12 +1,19 @@
 "use client";
 
 import {
+  MoreHorizontalIcon,
   NewTwitterIcon,
   Search01Icon,
   StarIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
@@ -72,30 +79,51 @@ function GitHubButton() {
   );
 }
 
-function GaiaButton() {
+// Secondary external links (GAIA, X) live behind a single overflow menu so the
+// header's action cluster stays uncluttered — only the primary controls
+// (search, GitHub star, account, theme) are surfaced inline.
+function MoreMenu() {
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="hidden gap-1.5 px-2.5 sm:inline-flex"
-      asChild
-    >
-      <Link
-        href="https://heygaia.io"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="GAIA — the personal AI assistant Keyloom is built for"
-      >
-        <Image
-          src="/gaia_logo.png"
-          alt="GAIA"
-          width={20}
-          height={20}
-          className="rounded-sm"
-        />
-        <span className="text-xs font-medium">GAIA</span>
-      </Link>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="More links"
+          title="More"
+        >
+          <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem asChild>
+          <Link
+            href="https://heygaia.io"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src="/gaia_logo.png"
+              alt=""
+              width={16}
+              height={16}
+              className="rounded-sm"
+            />
+            GAIA
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link
+            href="https://x.com/madebyexp"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />X
+            (Twitter)
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -154,7 +182,7 @@ export function DocsHeader() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
+          <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
               size="icon-sm"
@@ -179,19 +207,16 @@ export function DocsHeader() {
               </kbd>
             </Button>
 
+            {/* Secondary actions: GitHub star + overflow menu, grouped together. */}
             <div className="flex items-center gap-0.5">
-              <GaiaButton />
               <GitHubButton />
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="hidden sm:inline-flex"
-                asChild
-              >
-                <Link href="https://x.com/madebyexp" title="X (Twitter)">
-                  <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
-                </Link>
-              </Button>
+              <MoreMenu />
+            </div>
+
+            {/* Divider sets the personal/identity controls apart from the rest. */}
+            <div className="hidden h-5 w-px bg-border sm:block" />
+
+            <div className="flex items-center gap-0.5">
               <React.Suspense fallback={<AccountMenuFallback />}>
                 <AccountMenu />
               </React.Suspense>
