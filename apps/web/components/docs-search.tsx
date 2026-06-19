@@ -35,8 +35,9 @@ type SearchGroup = { heading: string; items: SearchItem[] };
 
 const searchGroups: SearchGroup[] = CATEGORY_ORDER.map((cat) => ({
   heading: CATEGORY_LABELS[cat],
+  // Backgrounds are studio-only backdrops — not searchable as components.
   items: compositions
-    .filter((c) => c.category === cat)
+    .filter((c) => c.category === cat && c.category !== "background")
     .map((c) => ({
       title: c.title,
       description: c.description,

@@ -45,6 +45,12 @@ const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
 
 type Filter = "all" | CompositionCategory;
 
+// Background compositions are studio-only backdrops, not standalone products —
+// keep them out of the gallery. They stay fully available inside the editor.
+const VISIBLE_COMPOSITIONS = compositions.filter(
+  (c) => c.category !== "background",
+);
+
 export function GalleryBrowser() {
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
@@ -52,13 +58,13 @@ export function GalleryBrowser() {
 
   // Which categories are actually populated, in CATEGORY_ORDER.
   const presentCategories = React.useMemo(() => {
-    const seen = new Set(compositions.map((c) => c.category));
+    const seen = new Set(VISIBLE_COMPOSITIONS.map((c) => c.category));
     return CATEGORY_ORDER.filter((c) => seen.has(c));
   }, []);
 
   const items = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    return compositions.filter((c) => {
+    return VISIBLE_COMPOSITIONS.filter((c) => {
       if (filter !== "all" && c.category !== filter) return false;
       if (!q) return true;
       return (
