@@ -10,6 +10,7 @@ import { Button } from "@workspace/ui/components/button";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
+import { AccountMenu } from "@/components/account-menu";
 import { BrandLink } from "@/components/brand-link";
 import { DocsSearch } from "@/components/docs-search";
 import { MobileNav } from "@/components/mobile-nav";
@@ -176,6 +177,7 @@ export function DocsHeader() {
                   <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
                 </Link>
               </Button>
+              <AccountMenu />
               <ThemeToggle />
             </div>
           </div>

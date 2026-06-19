@@ -1,3 +1,4 @@
+import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { MotionConfig } from "motion/react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -48,7 +49,11 @@ export default function RootLayout({
               animation (WCAG 2.3.3). `user` reduces transform/layout
               animations to instant transitions when the preference is on. */}
           <MotionConfig reducedMotion="user">
-            <QueryProvider>{children}</QueryProvider>
+            {/* Provides client-side auth state (useAuth) app-wide so the navbar
+                can reflect sign-in status. */}
+            <AuthKitProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </AuthKitProvider>
             <Toaster position="bottom-right" richColors />
           </MotionConfig>
         </ThemeProvider>
