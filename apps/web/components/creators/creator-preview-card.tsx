@@ -17,7 +17,7 @@ export function CreatorPreviewCard({ info }: Props) {
 
   return (
     <Link
-      href={`/component/${info.id}/edit`}
+      href={`/studio?component=${info.id}`}
       className="group block overflow-hidden rounded-xl border border-border bg-muted/20 transition-colors hover:bg-muted/40"
     >
       <div className="flex items-center justify-center bg-background p-4">

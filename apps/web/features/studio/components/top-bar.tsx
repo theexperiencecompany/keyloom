@@ -1,17 +1,16 @@
 "use client";
 
-import { PaintBoardIcon } from "@hugeicons/core-free-icons";
+import {
+  ComputerIcon,
+  PaintBoardIcon,
+  SmartPhone01Icon,
+  SquareIcon,
+  Tablet01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { BrandKit } from "@workspace/compositions/project";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select";
 import { useRef, useState } from "react";
 import { BrandLink } from "@/components/brand-link";
 import { BrandKitModal } from "./brand-kit-modal";
@@ -25,10 +24,34 @@ import { ProjectTransitionControl } from "./project-transition-control";
  * Bubbles, 9:16) fill the frame instead of being cropped by the 16:9 stage.
  */
 const PROJECT_FORMATS = [
-  { id: "16:9", label: "16:9 · Landscape", width: 1920, height: 1080 },
-  { id: "9:16", label: "9:16 · Portrait", width: 1080, height: 1920 },
-  { id: "1:1", label: "1:1 · Square", width: 1080, height: 1080 },
-  { id: "4:5", label: "4:5 · Portrait", width: 1080, height: 1350 },
+  {
+    id: "16:9",
+    label: "16:9 · Landscape",
+    width: 1920,
+    height: 1080,
+    icon: ComputerIcon,
+  },
+  {
+    id: "1:1",
+    label: "1:1 · Square",
+    width: 1080,
+    height: 1080,
+    icon: SquareIcon,
+  },
+  {
+    id: "9:16",
+    label: "9:16 · Portrait",
+    width: 1080,
+    height: 1920,
+    icon: SmartPhone01Icon,
+  },
+  {
+    id: "4:5",
+    label: "4:5 · Portrait",
+    width: 1080,
+    height: 1350,
+    icon: Tablet01Icon,
+  },
 ] as const;
 
 type Props = {
@@ -75,12 +98,6 @@ export function TopBar({
   const brandKitActive = Boolean(
     brandKit && Object.values(brandKit).some(Boolean),
   );
-  // Match the current dims to a known format; fall back to the custom WxH so a
-  // hand-edited/imported project doesn't show an empty selector.
-  const activeFormat = PROJECT_FORMATS.find(
-    (f) => f.width === width && f.height === height,
-  );
-  const formatValue = activeFormat?.id ?? `${width}x${height}`;
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -90,7 +107,7 @@ export function TopBar({
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-dashed border-border bg-background/95 px-8 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-dashed border-border bg-background/95 px-8 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex items-center gap-3">
         <BrandLink />
         <span className="text-muted-foreground/50">·</span>
@@ -99,6 +116,31 @@ export function TopBar({
           {totalSeconds.toFixed(2)}s
         </span>
       </div>
+
+      {/* Canvas format — centered segmented control (replaces the dropdown). */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5">
+          {PROJECT_FORMATS.map((f) => {
+            const active = f.width === width && f.height === height;
+            return (
+              <Button
+                key={f.id}
+                type="button"
+                variant={active ? "secondary" : "ghost"}
+                size="icon-sm"
+                title={f.label}
+                aria-label={f.label}
+                aria-pressed={active}
+                onClick={() => onChangeFormat(f.width, f.height)}
+                className={active ? "shadow-sm" : "text-muted-foreground"}
+              >
+                <HugeiconsIcon icon={f.icon} className="size-4" />
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex items-center gap-2">
         <input
           ref={fileInputRef}
@@ -107,33 +149,6 @@ export function TopBar({
           className="hidden"
           onChange={handleFileChange}
         />
-        <Select
-          value={formatValue}
-          onValueChange={(id) => {
-            const fmt = PROJECT_FORMATS.find((f) => f.id === id);
-            if (fmt) onChangeFormat(fmt.width, fmt.height);
-          }}
-        >
-          <SelectTrigger
-            size="sm"
-            className="h-8 w-[150px]"
-            title="Canvas format"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PROJECT_FORMATS.map((f) => (
-              <SelectItem key={f.id} value={f.id}>
-                {f.label}
-              </SelectItem>
-            ))}
-            {!activeFormat && (
-              <SelectItem value={formatValue} disabled>
-                {width}×{height} · Custom
-              </SelectItem>
-            )}
-          </SelectContent>
-        </Select>
         <ProjectTransitionControl
           transition={projectDefaultTransition}
           fps={fps}

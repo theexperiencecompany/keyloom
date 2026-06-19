@@ -16,6 +16,7 @@ import {
 } from "@workspace/ui/components/dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import { BrandLink } from "@/components/brand-link";
 import { DocsSearch } from "@/components/docs-search";
@@ -150,6 +151,7 @@ const navLinks = [
 
 export function DocsHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const pathname = usePathname();
 
   React.useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -170,15 +172,23 @@ export function DocsHeader() {
           <BrandLink />
 
           <nav className="hidden items-center gap-1 md:flex">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {navLinks.map((l) => {
+              const active =
+                l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="ml-auto flex items-center gap-2">

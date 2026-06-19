@@ -24,7 +24,9 @@
       "Bash(grep -rn 'href=\"/docs\\\\|href={`/docs\\\\|\"/docs\"\\\\|/docs/' --include=\"*.tsx\" --include=\"*.ts\" .)",
       "Bash(cd /home/sanku/work/aesthetic/apps/web *)",
       "Read(//home/sanku/work/aesthetic/apps/web/apps/remotion/src/compositions/Project/**)",
-      "Bash(awk '{print $1}')"
+      "Bash(awk '{print $1}')",
+      "Bash(git merge *)",
+      "Bash(grep -nA18 'case \"ADD_CLIP\"' features/studio/state/reducer.ts)"
     ]
   }
 }

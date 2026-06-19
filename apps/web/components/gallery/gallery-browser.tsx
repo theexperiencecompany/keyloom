@@ -144,7 +144,7 @@ export function GalleryBrowser() {
           No components match “{query}”.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((info) => (
             <GalleryCard key={info.id} info={info} />
           ))}
@@ -203,27 +203,37 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
     return () => io.disconnect();
   }, []);
 
+  // Card shape is clamped to a [0.75, 1.4] band for consistent, slightly-tall
+  // cards. The preview COVERS the tile — sized to the composition's own aspect
+  // and scaled so the smaller side fills, with the overflow cropped — so there
+  // are no letterbox gutters (the "strip" look).
+  const compAspect = info.width / info.height;
+  const cardAspect = Math.min(Math.max(compAspect, 0.75), 1.4);
+  const coverFill: React.CSSProperties =
+    compAspect >= cardAspect ? { height: "100%" } : { width: "100%" };
+
   return (
     <Link
       ref={ref}
-      // Clicking a component opens it straight in the editor (single-clip studio),
-      // not a docs page — the gallery is a product surface, not documentation.
-      href={`/component/${info.id}/edit`}
-      // No prefetch: ~73 cards all point at the heavy editor route; hover-
-      // prefetching it would kick off its slow compile. Click still works.
+      // Clicking a component opens it in the full Studio (more features than the
+      // standalone editor) with that composition added as the first clip.
+      href={`/studio?component=${info.id}`}
+      // No prefetch: the studio is a heavy route; hover-prefetching every card
+      // would kick off its compile. Click still works.
       prefetch={false}
       className="group block"
     >
-      {/* Media tile: borderless, big radius, subtle ring; the preview fills it.
-          Cap how tall a card can get (min 3:4) so portrait compositions like
-          LockScreenMessage (9:19.5) / FontHook (9:16) don't render as giant
-          towers next to landscape cards — the preview just letterboxes inside. */}
+      {/* Media tile: borderless, big radius, subtle ring. The preview covers
+          the tile (cropping a sliver), so there are no letterbox gutters. */}
       <div
         className="relative overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]"
-        style={{ aspectRatio: `${Math.max(info.width / info.height, 0.75)}` }}
+        style={{ aspectRatio: `${cardAspect}` }}
       >
-        {visible ? (
-          <div className="absolute inset-0">
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          style={{ aspectRatio: `${compAspect}`, ...coverFill }}
+        >
+          {visible ? (
             <LivePreview
               modulePath={compositionModulePath(info)}
               id={info.id}
@@ -233,11 +243,11 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
               width={info.width}
               height={info.height}
             />
-          </div>
-        ) : (
-          // Off-screen placeholder — no Remotion mounted.
-          <div className="absolute inset-0 bg-muted/40" />
-        )}
+          ) : (
+            // Off-screen placeholder — no Remotion mounted.
+            <div className="h-full w-full bg-muted/40" />
+          )}
+        </div>
       </div>
       <div className="px-0.5 pt-3">
         <h3 className="truncate text-[15px] font-semibold leading-tight text-foreground">
