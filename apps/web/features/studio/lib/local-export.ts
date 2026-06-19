@@ -20,7 +20,6 @@
 // below, only when an export actually runs. Every screen with an export button
 // imports this module, so keeping it light keeps those routes fast to compile.
 import type {
-  canRenderMediaOnWeb,
   RenderMediaOnWebProgressCallback,
   renderMediaOnWeb,
   WebRendererHardwareAcceleration,
@@ -106,6 +105,7 @@ export async function isLocalExportSupported(project: {
   height: number;
 }): Promise<{ ok: boolean; reason?: string }> {
   if (typeof window === "undefined") return { ok: false, reason: "No DOM" };
+  const { canRenderMediaOnWeb } = await import("@remotion/web-renderer");
   const result = await canRenderMediaOnWeb({
     width: project.width,
     height: project.height,
