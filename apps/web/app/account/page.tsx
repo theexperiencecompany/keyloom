@@ -1,13 +1,26 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { ensureAccount, getSubscription, listApiKeys } from "@/lib/account";
+import { redirect } from "next/navigation";
+import {
+  ensureAccount,
+  getSubscription,
+  listApiKeys,
+  reconcileProFromDodo,
+} from "@/lib/account";
 import { AccountClient } from "./account-client";
 
 // Always fresh — keys/usage change per request.
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
-  const { user } = await withAuth({ ensureSignedIn: true });
+  // No `ensureSignedIn` here — that redirects during render and tries to set the
+  // PKCE cookie (forbidden in render). Instead send signed-out users to the
+  // sign-in route handler, which can set it.
+  const { user } = await withAuth();
+  if (!user) redirect("/api/auth/signin");
   await ensureAccount(user.id, user.email);
+  // Verify-on-return: ask Dodo if they've subscribed and flip to Pro right away,
+  // so a successful payment shows up without waiting on a webhook.
+  await reconcileProFromDodo(user.id, user.email);
 
   const [subscription, keys] = await Promise.all([
     getSubscription(user.id),

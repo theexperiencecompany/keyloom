@@ -35,10 +35,10 @@ export function AccountMenu() {
   if (!user) {
     return (
       <Button variant="outline" size="sm" className="gap-1.5" asChild>
-        <Link href="/account" title="Sign in">
+        <a href="/api/auth/signin" title="Sign in">
           <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
           <span className="hidden text-xs sm:inline">Sign in</span>
-        </Link>
+        </a>
       </Button>
     );
   }
@@ -49,7 +49,16 @@ export function AccountMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5">
-          <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
+          {user.profilePictureUrl ? (
+            // External WorkOS avatar — plain <img> avoids next/image remote-pattern config.
+            <img
+              src={user.profilePictureUrl}
+              alt=""
+              className="size-5 rounded-full object-cover"
+            />
+          ) : (
+            <HugeiconsIcon icon={UserCircleIcon} className="size-4" />
+          )}
           <span className="hidden max-w-[120px] truncate text-xs sm:inline">
             {label}
           </span>
