@@ -16,9 +16,11 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
+import { BROWSER_WINDOW_HEIGHT, BROWSER_WINDOW_WIDTH } from "./meta";
 
 // Remotion's bundle server only serves public/ assets through staticFile() —
 // literal "/foo.png" strings fail with 404 inside `remotion render`. Resolve
@@ -109,69 +111,74 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
   );
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 60,
-      }}
+    <FitContent
+      designWidth={BROWSER_WINDOW_WIDTH}
+      designHeight={BROWSER_WINDOW_HEIGHT}
+      background={s.background}
     >
-      <div
+      <AbsoluteFill
         style={{
-          width: WINDOW_WIDTH,
-          height: WINDOW_HEIGHT,
-          background: "#ffffff",
-          borderRadius: 18,
-          overflow: "hidden",
-          boxShadow:
-            "0 40px 100px rgba(15,16,20,0.18), 0 8px 24px rgba(15,16,20,0.08)",
-          border: "1px solid rgba(15,16,20,0.06)",
-          opacity: windowEnter,
-          transform: `translate3d(0, ${snap((1 - windowEnter) * 28)}px, 0) scale(${0.97 + windowEnter * 0.03})`,
+          fontFamily: s.fontFamily,
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 60,
         }}
       >
-        <TitleBar
-          url={visibleUrl}
-          isTyping={isTyping}
-          caretVisible={caretBlink}
-        />
         <div
           style={{
-            flex: 1,
-            background: pageBackgroundColor,
-            position: "relative",
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
+            background: "#ffffff",
+            borderRadius: 18,
             overflow: "hidden",
+            boxShadow:
+              "0 40px 100px rgba(15,16,20,0.18), 0 8px 24px rgba(15,16,20,0.08)",
+            border: "1px solid rgba(15,16,20,0.06)",
+            opacity: windowEnter,
+            transform: `translate3d(0, ${snap((1 - windowEnter) * 28)}px, 0) scale(${0.97 + windowEnter * 0.03})`,
+            display: "flex",
+            flexDirection: "column",
           }}
         >
+          <TitleBar
+            url={visibleUrl}
+            isTyping={isTyping}
+            caretVisible={caretBlink}
+          />
           <div
             style={{
-              position: "absolute",
-              inset: 0,
-              opacity: pageOpacity,
-              transform: `translate3d(0, ${snap(pageLift)}px, 0)`,
+              flex: 1,
+              background: pageBackgroundColor,
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            {pageImageUrl.trim() ? (
-              <Img
-                src={resolveAsset(pageImageUrl)}
-                crossOrigin="anonymous"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-            ) : null}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                opacity: pageOpacity,
+                transform: `translate3d(0, ${snap(pageLift)}px, 0)`,
+              }}
+            >
+              {pageImageUrl.trim() ? (
+                <Img
+                  src={resolveAsset(pageImageUrl)}
+                  crossOrigin="anonymous"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
-    </AbsoluteFill>
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

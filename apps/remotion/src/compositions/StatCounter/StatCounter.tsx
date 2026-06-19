@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -78,50 +79,55 @@ export const StatCounter: React.FC<StatCounterProps> = ({
     : "rgba(255,255,255,0.65)";
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-        textAlign: "center",
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <div
+      <AbsoluteFill
         style={{
-          fontSize: 280,
-          fontWeight: 800,
-          letterSpacing: "-0.06em",
-          lineHeight: 1,
-          opacity: numberPop,
-          transform: `scale(${0.85 + numberPop * 0.15})`,
-          fontVariantNumeric: "tabular-nums",
+          color: s.color,
+          fontFamily: s.fontFamily,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 80px",
+          textAlign: "center",
         }}
       >
-        {prefix}
-        {formatted}
-        {suffix}
-      </div>
-      {label.trim() && (
         <div
           style={{
-            marginTop: 36,
-            fontSize: 48,
-            fontWeight: 500,
-            letterSpacing: "-0.012em",
-            color: labelColor,
-            opacity: labelProgress,
-            transform: `translate3d(0, ${snap((1 - labelProgress) * 14)}px, 0)`,
+            fontSize: 280,
+            fontWeight: 800,
+            letterSpacing: "-0.06em",
+            lineHeight: 1,
+            opacity: numberPop,
+            transform: `scale(${0.85 + numberPop * 0.15})`,
+            fontVariantNumeric: "tabular-nums",
           }}
         >
-          {label}
+          {prefix}
+          {formatted}
+          {suffix}
         </div>
-      )}
-    </AbsoluteFill>
+        {label.trim() && (
+          <div
+            style={{
+              marginTop: 36,
+              fontSize: 48,
+              fontWeight: 500,
+              letterSpacing: "-0.012em",
+              color: labelColor,
+              opacity: labelProgress,
+              transform: `translate3d(0, ${snap((1 - labelProgress) * 14)}px, 0)`,
+            }}
+          >
+            {label}
+          </div>
+        )}
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

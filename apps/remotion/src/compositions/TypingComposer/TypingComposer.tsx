@@ -7,8 +7,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
+import { TYPING_COMPOSER_HEIGHT, TYPING_COMPOSER_WIDTH } from "./meta";
 
 export type TypingComposerProps = {
   query: string;
@@ -59,7 +61,13 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
-  const { fps, width, height } = useVideoConfig();
+  const { fps } = useVideoConfig();
+  // Layout math is authored at the fixed design size; FitContent scales the
+  // whole composition to the canvas, so use the design dims here (not the
+  // live canvas dims) or centering/cursor targets drift when the format
+  // changes.
+  const width = TYPING_COMPOSER_WIDTH;
+  const height = TYPING_COMPOSER_HEIGHT;
   const s = resolveClipStyle(clipStyle, {
     background: "#111111",
     color: "#ffffff",
@@ -156,161 +164,166 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
   const sendIconColor = hasText ? "#000000" : ZINC_400;
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        fontFamily: s.fontFamily,
-      }}
+    <FitContent
+      designWidth={TYPING_COMPOSER_WIDTH}
+      designHeight={TYPING_COMPOSER_HEIGHT}
+      background={s.background}
     >
-      {/* searchbar — bg-zinc-800 rounded-3xl px-1 pt-1 pb-2 */}
-      <div
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          left: barLeft,
-          top: barTop,
-          width: BAR_WIDTH,
-          minHeight: barHeight,
-          background: ZINC_800,
-          borderRadius: RADIUS_3XL,
-          paddingLeft: PAD_1,
-          paddingRight: PAD_1,
-          paddingTop: PAD_1,
-          paddingBottom: PAD_2,
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          opacity: barProgress,
-          transform: `translate3d(0, ${snap((1 - barProgress) * 22)}px, 0) scale(${0.97 + barProgress * 0.03})`,
+          fontFamily: s.fontFamily,
         }}
       >
-        {/* HeroUI Textarea (size=lg) — inputWrapper px-3 with extra body padding */}
+        {/* searchbar — bg-zinc-800 rounded-3xl px-1 pt-1 pb-2 */}
         <div
           style={{
-            display: "flex",
-            alignItems: renderedLineCount > 1 ? "flex-start" : "center",
-            paddingLeft: PAD_3,
-            paddingRight: PAD_3,
-            minHeight: TEXTAREA_MIN_HEIGHT,
-            boxSizing: "border-box",
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              fontSize: TEXTAREA_FONT_SIZE,
-              lineHeight: `${TEXTAREA_LINE_HEIGHT_PX}px`,
-              fontWeight: 300,
-              color: "#ffffff",
-              letterSpacing: "-0.005em",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-              minWidth: 0,
-              paddingTop: TEXTAREA_PAD_Y,
-              paddingBottom: TEXTAREA_PAD_Y,
-            }}
-          >
-            {!hasText ? (
-              <span style={{ color: PLACEHOLDER_COLOR, fontWeight: 300 }}>
-                {placeholder}
-              </span>
-            ) : (
-              lines.map((line, i) => (
-                <span key={i} style={{ display: "block" }}>
-                  {line}
-                  {i === lines.length - 1 ? (
-                    <span
-                      style={{
-                        display: "inline-block",
-                        width: 2 * SCALE,
-                        height: TEXTAREA_FONT_SIZE,
-                        marginLeft: 3 * SCALE,
-                        verticalAlign: "text-bottom",
-                        background: "#ffffff",
-                        opacity: caretBlink ? 1 : 0,
-                        borderRadius: 1,
-                      }}
-                    />
-                  ) : null}
-                </span>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* ComposerToolbar — flex justify-between px-2 pt-1 */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingLeft: PAD_2,
-            paddingRight: PAD_2,
+            position: "absolute",
+            left: barLeft,
+            top: barTop,
+            width: BAR_WIDTH,
+            minHeight: barHeight,
+            background: ZINC_800,
+            borderRadius: RADIUS_3XL,
+            paddingLeft: PAD_1,
+            paddingRight: PAD_1,
             paddingTop: PAD_1,
+            paddingBottom: PAD_2,
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            opacity: barProgress,
+            transform: `translate3d(0, ${snap((1 - barProgress) * 22)}px, 0) scale(${0.97 + barProgress * 0.03})`,
           }}
         >
-          {/* ComposerLeft — flex gap-2 */}
+          {/* HeroUI Textarea (size=lg) — inputWrapper px-3 with extra body padding */}
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: GAP_2,
-            }}
-          >
-            <RoundButton size={BTN_SIZE} bg={ZINC_700}>
-              <PlusSignSolid size={PLUS_ICON} color={ZINC_400} />
-            </RoundButton>
-            <RoundButton size={BTN_SIZE} bg={ZINC_700}>
-              <ToolsSolid size={TOOLS_ICON} color={ZINC_400} />
-            </RoundButton>
-          </div>
-
-          {/* ComposerRight — ml-2 gap-2 */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginLeft: ML_2,
-              gap: GAP_2,
-              position: "relative",
+              alignItems: renderedLineCount > 1 ? "flex-start" : "center",
+              paddingLeft: PAD_3,
+              paddingRight: PAD_3,
+              minHeight: TEXTAREA_MIN_HEIGHT,
+              boxSizing: "border-box",
             }}
           >
             <div
               style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                width: BTN_SIZE,
-                height: BTN_SIZE,
-                borderRadius: "50%",
-                border: `${2 * SCALE}px solid ${accentColor}`,
-                transform: `scale(${ringScale})`,
-                opacity: ringOpacity,
-                pointerEvents: "none",
-              }}
-            />
-            <div
-              style={{
-                width: BTN_SIZE,
-                height: BTN_SIZE,
-                minWidth: BTN_SIZE,
-                minHeight: BTN_SIZE,
-                maxWidth: BTN_SIZE,
-                borderRadius: "50%",
-                background: sendBg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transform: `scale(${sendScale})`,
+                flex: 1,
+                fontSize: TEXTAREA_FONT_SIZE,
+                lineHeight: `${TEXTAREA_LINE_HEIGHT_PX}px`,
+                fontWeight: 300,
+                color: "#ffffff",
+                letterSpacing: "-0.005em",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                minWidth: 0,
+                paddingTop: TEXTAREA_PAD_Y,
+                paddingBottom: TEXTAREA_PAD_Y,
               }}
             >
-              <ArrowUp02Solid size={SEND_ICON} color={sendIconColor} />
+              {!hasText ? (
+                <span style={{ color: PLACEHOLDER_COLOR, fontWeight: 300 }}>
+                  {placeholder}
+                </span>
+              ) : (
+                lines.map((line, i) => (
+                  <span key={i} style={{ display: "block" }}>
+                    {line}
+                    {i === lines.length - 1 ? (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: 2 * SCALE,
+                          height: TEXTAREA_FONT_SIZE,
+                          marginLeft: 3 * SCALE,
+                          verticalAlign: "text-bottom",
+                          background: "#ffffff",
+                          opacity: caretBlink ? 1 : 0,
+                          borderRadius: 1,
+                        }}
+                      />
+                    ) : null}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* ComposerToolbar — flex justify-between px-2 pt-1 */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingLeft: PAD_2,
+              paddingRight: PAD_2,
+              paddingTop: PAD_1,
+            }}
+          >
+            {/* ComposerLeft — flex gap-2 */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: GAP_2,
+              }}
+            >
+              <RoundButton size={BTN_SIZE} bg={ZINC_700}>
+                <PlusSignSolid size={PLUS_ICON} color={ZINC_400} />
+              </RoundButton>
+              <RoundButton size={BTN_SIZE} bg={ZINC_700}>
+                <ToolsSolid size={TOOLS_ICON} color={ZINC_400} />
+              </RoundButton>
+            </div>
+
+            {/* ComposerRight — ml-2 gap-2 */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginLeft: ML_2,
+                gap: GAP_2,
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: BTN_SIZE,
+                  height: BTN_SIZE,
+                  borderRadius: "50%",
+                  border: `${2 * SCALE}px solid ${accentColor}`,
+                  transform: `scale(${ringScale})`,
+                  opacity: ringOpacity,
+                  pointerEvents: "none",
+                }}
+              />
+              <div
+                style={{
+                  width: BTN_SIZE,
+                  height: BTN_SIZE,
+                  minWidth: BTN_SIZE,
+                  minHeight: BTN_SIZE,
+                  maxWidth: BTN_SIZE,
+                  borderRadius: "50%",
+                  background: sendBg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transform: `scale(${sendScale})`,
+                }}
+              >
+                <ArrowUp02Solid size={SEND_ICON} color={sendIconColor} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
-    </AbsoluteFill>
+        {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

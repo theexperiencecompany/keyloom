@@ -26,7 +26,10 @@
       "Read(//home/sanku/work/aesthetic/apps/web/apps/remotion/src/compositions/Project/**)",
       "Bash(awk '{print $1}')",
       "Bash(git merge *)",
-      "Bash(grep -nA18 'case \"ADD_CLIP\"' features/studio/state/reducer.ts)"
+      "Bash(grep -nA18 'case \"ADD_CLIP\"' features/studio/state/reducer.ts)",
+      "Bash(grep -rnE \"useVideoConfig|designWidth|DESIGN_WIDTH|zoom|transform: \\\\`?scale|fitMode|phoneFitMode|scaleToFit\" apps/remotion/src/use-design-frame.ts apps/remotion/src/compositions/Project/Project.tsx)",
+      "Bash(echo \"remotion tsc exit=$?\")",
+      "Bash(awk '/function CameraLifeWrap/,/^}/' compositions/Project/Project.tsx)"
     ]
   }
 }

@@ -8,6 +8,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 
 /**
  * Shape the `imageList` field editor reads/writes: an array of `{ name, url }`
@@ -61,57 +62,58 @@ export const BounceCards: React.FC<BounceCardsProps> = ({
     (item): item is BounceCardImage => Boolean(item?.url),
   );
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ position: "relative", width: 0, height: 0 }}>
-        {validImages.map((item, i) => {
-          const layout = LAYOUT[i % LAYOUT.length] ?? { rotate: 0, x: 0 };
+    <FitContent designWidth={1280} designHeight={720} background={s.background}>
+      <AbsoluteFill
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ position: "relative", width: 0, height: 0 }}>
+          {validImages.map((item, i) => {
+            const layout = LAYOUT[i % LAYOUT.length] ?? { rotate: 0, x: 0 };
 
-          // Elastic bounce-in: each card springs scale 0 → 1, staggered.
-          // Low damping gives the overshoot/settle of `elastic.out`. Once it
-          // settles the card holds its fan position — no further motion.
-          const enter = spring({
-            frame: frame - i * STAGGER_FRAMES,
-            fps,
-            config: { damping: 9, mass: 0.8, stiffness: 120 },
-          });
+            // Elastic bounce-in: each card springs scale 0 → 1, staggered.
+            // Low damping gives the overshoot/settle of `elastic.out`. Once it
+            // settles the card holds its fan position — no further motion.
+            const enter = spring({
+              frame: frame - i * STAGGER_FRAMES,
+              fps,
+              config: { damping: 9, mass: 0.8, stiffness: 120 },
+            });
 
-          return (
-            <div
-              key={`${item.url}-${i}`}
-              style={{
-                position: "absolute",
-                left: -CARD_SIZE / 2,
-                top: -CARD_SIZE / 2,
-                width: CARD_SIZE,
-                height: CARD_SIZE,
-                transform: `translate(${layout.x}px, 0px) rotate(${layout.rotate}deg) scale(${enter})`,
-                borderRadius: 28,
-                overflow: "hidden",
-                background: "#0f172a",
-                border: "5px solid #ffffff",
-                boxShadow: "0 16px 32px rgba(0,0,0,0.4)",
-              }}
-            >
-              <Img
-                src={resolveSrc(item.url)}
-                alt={item.name}
+            return (
+              <div
+                key={`${item.url}-${i}`}
                 style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
+                  position: "absolute",
+                  left: -CARD_SIZE / 2,
+                  top: -CARD_SIZE / 2,
+                  width: CARD_SIZE,
+                  height: CARD_SIZE,
+                  transform: `translate(${layout.x}px, 0px) rotate(${layout.rotate}deg) scale(${enter})`,
+                  borderRadius: 28,
+                  overflow: "hidden",
+                  background: "#0f172a",
+                  border: "5px solid #ffffff",
+                  boxShadow: "0 16px 32px rgba(0,0,0,0.4)",
                 }}
-              />
-            </div>
-          );
-        })}
-      </div>
-    </AbsoluteFill>
+              >
+                <Img
+                  src={resolveSrc(item.url)}
+                  alt={item.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+    </FitContent>
   );
 };

@@ -1,5 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { FitContent } from "../../fit-content";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -57,77 +58,83 @@ export const TextStaggerFromCenter: React.FC<TextStaggerFromCenterProps> = ({
   );
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-        textAlign: "center",
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <h1
+      <AbsoluteFill
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
+          color: s.color,
+          fontFamily: s.fontFamily,
           display: "flex",
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
+          padding: "0 80px",
+          textAlign: "center",
         }}
       >
-        {chars.map((char, i) => {
-          const distFromCenter = Math.abs(i - center);
-          const startFrame = HEADLINE_START + distFromCenter * CHAR_STAGGER;
-          const progress = interpolate(
-            frame,
-            [startFrame, startFrame + CHAR_DURATION],
-            [0, 1],
-            {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-              easing: CHAR_EASE,
-            },
-          );
-          const y = (1 - progress) * 12;
-          return (
-            <span
-              key={i}
-              style={{
-                display: "inline-block",
-                opacity: progress,
-                transform: `translate3d(0, ${snap(y)}px, 0)`,
-                whiteSpace: "pre",
-              }}
-            >
-              {char === " " ? " " : char}
-            </span>
-          );
-        })}
-      </h1>
-
-      {subtitle.trim() && (
-        <p
+        <h1
           style={{
-            fontSize: 38,
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: "32px 0 0",
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            filter:
+              headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
           }}
         >
-          {subtitle}
-        </p>
-      )}
-    </AbsoluteFill>
+          {chars.map((char, i) => {
+            const distFromCenter = Math.abs(i - center);
+            const startFrame = HEADLINE_START + distFromCenter * CHAR_STAGGER;
+            const progress = interpolate(
+              frame,
+              [startFrame, startFrame + CHAR_DURATION],
+              [0, 1],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: CHAR_EASE,
+              },
+            );
+            const y = (1 - progress) * 12;
+            return (
+              <span
+                key={i}
+                style={{
+                  display: "inline-block",
+                  opacity: progress,
+                  transform: `translate3d(0, ${snap(y)}px, 0)`,
+                  whiteSpace: "pre",
+                }}
+              >
+                {char === " " ? " " : char}
+              </span>
+            );
+          })}
+        </h1>
+
+        {subtitle.trim() && (
+          <p
+            style={{
+              fontSize: 38,
+              fontWeight: 400,
+              letterSpacing: "-0.012em",
+              margin: "32px 0 0",
+              color: getSubtitleColor(s.color),
+              opacity: subtitleProgress,
+              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </AbsoluteFill>
+    </FitContent>
   );
 };
