@@ -1,5 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { FitContent } from "../../fit-content";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -58,70 +59,76 @@ export const TextShortSlideRight: React.FC<TextShortSlideRightProps> = ({
   );
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-        textAlign: "center",
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <h1
+      <AbsoluteFill
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
+          color: s.color,
+          fontFamily: s.fontFamily,
           display: "flex",
-          flexWrap: "wrap",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          gap: "0 0.28em",
-          transform: `translate3d(${snap(phraseX)}px, 0, 0)`,
-          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
+          padding: "0 80px",
+          textAlign: "center",
         }}
       >
-        {words.map((word, i) => {
-          const wordOpacity = interpolate(
-            frame,
-            [
-              HEADLINE_START + i * WORD_STAGGER,
-              HEADLINE_START + i * WORD_STAGGER + WORD_OPACITY_DURATION,
-            ],
-            [0, 1],
-            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-          );
-          return (
-            <span
-              key={i}
-              style={{ display: "inline-block", opacity: wordOpacity }}
-            >
-              {word}
-            </span>
-          );
-        })}
-      </h1>
-
-      {subtitle.trim() && (
-        <p
+        <h1
           style={{
-            fontSize: 38,
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: "32px 0 0",
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "0 0.28em",
+            transform: `translate3d(${snap(phraseX)}px, 0, 0)`,
+            filter:
+              headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
           }}
         >
-          {subtitle}
-        </p>
-      )}
-    </AbsoluteFill>
+          {words.map((word, i) => {
+            const wordOpacity = interpolate(
+              frame,
+              [
+                HEADLINE_START + i * WORD_STAGGER,
+                HEADLINE_START + i * WORD_STAGGER + WORD_OPACITY_DURATION,
+              ],
+              [0, 1],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+            );
+            return (
+              <span
+                key={i}
+                style={{ display: "inline-block", opacity: wordOpacity }}
+              >
+                {word}
+              </span>
+            );
+          })}
+        </h1>
+
+        {subtitle.trim() && (
+          <p
+            style={{
+              fontSize: 38,
+              fontWeight: 400,
+              letterSpacing: "-0.012em",
+              margin: "32px 0 0",
+              color: getSubtitleColor(s.color),
+              opacity: subtitleProgress,
+              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </AbsoluteFill>
+    </FitContent>
   );
 };

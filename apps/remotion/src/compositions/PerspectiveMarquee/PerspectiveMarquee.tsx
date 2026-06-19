@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -80,73 +81,78 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
   const totalWidth = cycleWidth * copies;
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        perspective: `${perspective}px`,
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <div
+      <AbsoluteFill
         style={{
-          width: "100%",
-          height: "100%",
+          color: s.color,
+          fontFamily: s.fontFamily,
+          overflow: "hidden",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transformStyle: "preserve-3d",
+          perspective: `${perspective}px`,
         }}
       >
         <div
           style={{
-            transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             transformStyle: "preserve-3d",
-            whiteSpace: "nowrap",
-            fontSize,
-            fontWeight,
-            letterSpacing: "-0.025em",
-            textTransform,
-            lineHeight: 1,
-            position: "relative",
-            width: totalWidth,
-            height: fontSize * 1.4,
           }}
         >
-          {cycle.map((item, i) => {
-            const rawX = positions[i]! - offset;
-            const wrapped = ((rawX % totalWidth) + totalWidth) % totalWidth;
-            return (
-              <span
-                key={item.key}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  transform: `translate3d(${snap(wrapped)}px, 0, 0)`,
-                  display: "inline-block",
-                }}
-              >
-                {item.text}
-              </span>
-            );
-          })}
+          <div
+            style={{
+              transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+              transformStyle: "preserve-3d",
+              whiteSpace: "nowrap",
+              fontSize,
+              fontWeight,
+              letterSpacing: "-0.025em",
+              textTransform,
+              lineHeight: 1,
+              position: "relative",
+              width: totalWidth,
+              height: fontSize * 1.4,
+            }}
+          >
+            {cycle.map((item, i) => {
+              const rawX = positions[i]! - offset;
+              const wrapped = ((rawX % totalWidth) + totalWidth) % totalWidth;
+              return (
+                <span
+                  key={item.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    transform: `translate3d(${snap(wrapped)}px, 0, 0)`,
+                    display: "inline-block",
+                  }}
+                >
+                  {item.text}
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background: `linear-gradient(90deg, ${s.background} 0%, ${s.background}cc 12%, transparent 36%, transparent 64%, ${s.background}cc 88%, ${s.background} 100%)`,
-        }}
-      />
-    </AbsoluteFill>
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background: `linear-gradient(90deg, ${s.background} 0%, ${s.background}cc 12%, transparent 36%, transparent 64%, ${s.background}cc 88%, ${s.background} 100%)`,
+          }}
+        />
+      </AbsoluteFill>
+    </FitContent>
   );
 };

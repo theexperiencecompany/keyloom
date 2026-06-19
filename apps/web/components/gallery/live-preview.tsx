@@ -61,6 +61,9 @@ export function LivePreview({
       style={{ width: "100%", height: "100%" }}
       loop
       autoPlay
+      // Slow the loops down so a grid of autoplaying previews reads as calm
+      // ambient motion rather than a wall of frenetic animation.
+      playbackRate={0.7}
       initiallyMuted
       controls={false}
       numberOfSharedAudioTags={0}

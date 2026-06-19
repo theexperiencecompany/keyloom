@@ -3,6 +3,7 @@ import { measureText } from "@remotion/layout-utils";
 import { useEffect, useMemo, useState } from "react";
 import { AbsoluteFill, Easing } from "remotion";
 import type { ClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import { resolveTitleStyle, snap, snapZero } from "../title-shared";
@@ -297,30 +298,35 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
   }
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <div
+      <AbsoluteFill
         style={{
-          position: "relative",
-          width: "100%",
-          height: 0,
-          fontSize,
-          fontWeight: FONT_WEIGHT,
-          letterSpacing: LETTER_SPACING,
-          lineHeight: 1,
+          color: s.color,
+          fontFamily: s.fontFamily,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 80px",
         }}
       >
-        {words}
-      </div>
-    </AbsoluteFill>
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: 0,
+            fontSize,
+            fontWeight: FONT_WEIGHT,
+            letterSpacing: LETTER_SPACING,
+            lineHeight: 1,
+          }}
+        >
+          {words}
+        </div>
+      </AbsoluteFill>
+    </FitContent>
   );
 };

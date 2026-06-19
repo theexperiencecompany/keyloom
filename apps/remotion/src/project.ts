@@ -70,25 +70,6 @@ export type ProjectAudio = {
   sourceDurationSec?: number;
 };
 
-/**
- * Per-project brand kit — saved with the project JSON so importing the
- * file carries the brand across machines. The agent reads this and
- * prefers user brand values over generic design tokens; non-brand-locked
- * compositions can use these via `style` overrides.
- */
-export type BrandKit = {
-  /** Display name of the brand, surfaced in the agent's prompt context. */
-  brandName?: string;
-  /** Logo image — usually a data URL (uploaded) or external https URL. */
-  logoUrl?: string;
-  /** Main brand color used as `accent` on most clips. Hex like "#FF6B35". */
-  primaryColor?: string;
-  /** Secondary brand color used for backgrounds or highlights. */
-  secondaryColor?: string;
-  /** Google Fonts family — applied to non-brand-locked text clips. */
-  fontFamily?: string;
-};
-
 export type Project = {
   fps: number;
   width: number;
@@ -102,8 +83,6 @@ export type Project = {
   defaultTransition?: SceneTransition;
   /** Optional background music for the whole project. */
   audio?: ProjectAudio;
-  /** Optional per-project brand kit — see `BrandKit` for shape. */
-  brandKit?: BrandKit;
 };
 
 export const DEFAULT_PROJECT: Project = {

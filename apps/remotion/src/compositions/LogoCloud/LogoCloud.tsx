@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -50,54 +51,55 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
   });
 
   return (
-    <AbsoluteFill
-      style={{
-        background: bg,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-        fontFamily,
-      }}
-    >
-      <div
+    <FitContent designWidth={1280} designHeight={720} background={bg}>
+      <AbsoluteFill
         style={{
-          fontSize: 22,
-          letterSpacing: "0.18em",
-          color: muted,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          marginBottom: 56,
-          opacity: headlinePop,
-          transform: `translate3d(0, ${snap((1 - headlinePop) * 12)}px, 0)`,
-        }}
-      >
-        {headline}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${Math.min(logos.length, 5)}, minmax(0, 1fr))`,
-          gap: 56,
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyItems: "center",
-          width: "100%",
-          maxWidth: 1100,
+          justifyContent: "center",
+          padding: "0 80px",
+          fontFamily,
         }}
       >
-        {logos.map((logo, i) => (
-          <LogoItemView
-            key={i}
-            logo={logo}
-            frame={frame - (D_LOGOS_START + i * STAGGER)}
-            fps={fps}
-            color={text}
-          />
-        ))}
-      </div>
-    </AbsoluteFill>
+        <div
+          style={{
+            fontSize: 22,
+            letterSpacing: "0.18em",
+            color: muted,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            marginBottom: 56,
+            opacity: headlinePop,
+            transform: `translate3d(0, ${snap((1 - headlinePop) * 12)}px, 0)`,
+          }}
+        >
+          {headline}
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${Math.min(logos.length, 5)}, minmax(0, 1fr))`,
+            gap: 56,
+            alignItems: "center",
+            justifyItems: "center",
+            width: "100%",
+            maxWidth: 1100,
+          }}
+        >
+          {logos.map((logo, i) => (
+            <LogoItemView
+              key={i}
+              logo={logo}
+              frame={frame - (D_LOGOS_START + i * STAGGER)}
+              fps={fps}
+              color={text}
+            />
+          ))}
+        </div>
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

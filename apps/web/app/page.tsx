@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
   return (
-    <div className="mx-auto min-h-screen max-w-6xl border-x border-dashed border-border">
+    <div className="mx-auto min-h-screen max-w-7xl border-x border-dashed border-border">
       <DocsHeader />
 
       <main className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">

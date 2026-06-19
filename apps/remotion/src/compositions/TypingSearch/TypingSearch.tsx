@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -29,13 +30,20 @@ const BAR_HEIGHT = 200;
 const BUTTON_SIZE = 144;
 const BUTTON_PADDING = 22;
 
+// Native design canvas. Layout below is computed against these fixed dims (not
+// the live canvas) so <FitContent> can scale the whole design to any format.
+const DESIGN_W = 1920;
+const DESIGN_H = 1080;
+
 export const TypingSearch: React.FC<TypingSearchProps> = ({
   query,
   placeholder,
   clipStyle,
 }) => {
   const frame = useDesignFrame();
-  const { fps, width, height } = useVideoConfig();
+  const { fps } = useVideoConfig();
+  const width = DESIGN_W;
+  const height = DESIGN_H;
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -112,100 +120,103 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
   const cursorVisible = frame >= cursorStart;
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        fontFamily: s.fontFamily,
-      }}
+    <FitContent
+      designWidth={DESIGN_W}
+      designHeight={DESIGN_H}
+      background={s.background}
     >
-      <div
-        style={{
-          position: "absolute",
-          left: barLeft,
-          top: barTop,
-          width: BAR_WIDTH,
-          height: BAR_HEIGHT,
-          background: "#ffffff",
-          borderRadius: BAR_HEIGHT / 2,
-          boxShadow:
-            "0 14px 44px rgba(15,16,20,0.10), 0 2px 8px rgba(15,16,20,0.05)",
-          border: "1px solid rgba(15,16,20,0.06)",
-          display: "flex",
-          alignItems: "center",
-          gap: 28,
-          padding: `0 ${BUTTON_PADDING}px 0 56px`,
-          opacity: barProgress,
-          transform: `translate3d(0, ${snap((1 - barProgress) * 18)}px, 0) scale(${0.96 + barProgress * 0.04})`,
-        }}
-      >
-        <SearchIcon size={56} />
-
+      <AbsoluteFill style={{ fontFamily: s.fontFamily }}>
         <div
           style={{
-            flex: 1,
+            position: "absolute",
+            left: barLeft,
+            top: barTop,
+            width: BAR_WIDTH,
+            height: BAR_HEIGHT,
+            background: "#ffffff",
+            borderRadius: BAR_HEIGHT / 2,
+            boxShadow:
+              "0 14px 44px rgba(15,16,20,0.10), 0 2px 8px rgba(15,16,20,0.05)",
+            border: "1px solid rgba(15,16,20,0.06)",
             display: "flex",
             alignItems: "center",
-            fontSize: 64,
-            fontWeight: 500,
-            color: "#0f1014",
-            letterSpacing: "-0.015em",
-            minWidth: 0,
-            overflow: "hidden",
-            whiteSpace: "nowrap",
+            gap: 28,
+            padding: `0 ${BUTTON_PADDING}px 0 56px`,
+            opacity: barProgress,
+            transform: `translate3d(0, ${snap((1 - barProgress) * 18)}px, 0) scale(${0.96 + barProgress * 0.04})`,
           }}
         >
-          {charsTyped === 0 ? (
-            <span style={{ color: "rgba(15,16,20,0.35)" }}>{placeholder}</span>
-          ) : (
-            <>
-              <span>{visibleText}</span>
-              <span
-                style={{
-                  display: "inline-block",
-                  width: 4,
-                  height: 68,
-                  marginLeft: 6,
-                  background: "#0f1014",
-                  opacity: caretBlink ? 1 : 0,
-                  borderRadius: 1,
-                }}
-              />
-            </>
-          )}
-        </div>
+          <SearchIcon size={56} />
 
-        <div style={{ position: "relative" }}>
           <div
             style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              border: `3px solid ${accentColor}`,
-              transform: `scale(${ringScale})`,
-              opacity: ringOpacity,
-              pointerEvents: "none",
-            }}
-          />
-          <div
-            style={{
-              width: BUTTON_SIZE,
-              height: BUTTON_SIZE,
-              borderRadius: "50%",
-              background: accentColor,
+              flex: 1,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              color: "#ffffff",
-              transform: `scale(${buttonScale})`,
+              fontSize: 64,
+              fontWeight: 500,
+              color: "#0f1014",
+              letterSpacing: "-0.015em",
+              minWidth: 0,
+              overflow: "hidden",
+              whiteSpace: "nowrap",
             }}
           >
-            <ArrowIcon size={56} />
+            {charsTyped === 0 ? (
+              <span style={{ color: "rgba(15,16,20,0.35)" }}>
+                {placeholder}
+              </span>
+            ) : (
+              <>
+                <span>{visibleText}</span>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 4,
+                    height: 68,
+                    marginLeft: 6,
+                    background: "#0f1014",
+                    opacity: caretBlink ? 1 : 0,
+                    borderRadius: 1,
+                  }}
+                />
+              </>
+            )}
+          </div>
+
+          <div style={{ position: "relative" }}>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "50%",
+                border: `3px solid ${accentColor}`,
+                transform: `scale(${ringScale})`,
+                opacity: ringOpacity,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                width: BUTTON_SIZE,
+                height: BUTTON_SIZE,
+                borderRadius: "50%",
+                background: accentColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#ffffff",
+                transform: `scale(${buttonScale})`,
+              }}
+            >
+              <ArrowIcon size={56} />
+            </div>
           </div>
         </div>
-      </div>
 
-      {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
-    </AbsoluteFill>
+        {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

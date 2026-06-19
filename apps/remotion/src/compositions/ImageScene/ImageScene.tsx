@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -58,56 +59,61 @@ export const ImageScene: React.FC<ImageSceneProps> = ({
   const trimmedCaption = caption.trim();
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 80,
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <div
+      <AbsoluteFill
         style={{
+          color: s.color,
+          fontFamily: s.fontFamily,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 28,
-          opacity: enter,
-          transform: `translate3d(0, ${snap((1 - enter) * 24)}px, 0) scale(${0.92 + enter * 0.08})`,
+          justifyContent: "center",
+          padding: 80,
         }}
       >
-        {resolved ? (
-          <Img
-            src={resolved}
-            crossOrigin="anonymous"
-            style={{
-              maxWidth: 760,
-              maxHeight: 760,
-              width: "auto",
-              height: "auto",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
-        ) : null}
-        {trimmedCaption ? (
-          <div
-            style={{
-              fontSize: 30,
-              fontWeight: 500,
-              letterSpacing: "-0.01em",
-              textAlign: "center",
-              color: s.color,
-              maxWidth: 1000,
-            }}
-          >
-            {trimmedCaption}
-          </div>
-        ) : null}
-      </div>
-    </AbsoluteFill>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 28,
+            opacity: enter,
+            transform: `translate3d(0, ${snap((1 - enter) * 24)}px, 0) scale(${0.92 + enter * 0.08})`,
+          }}
+        >
+          {resolved ? (
+            <Img
+              src={resolved}
+              crossOrigin="anonymous"
+              style={{
+                maxWidth: 760,
+                maxHeight: 760,
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          ) : null}
+          {trimmedCaption ? (
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                textAlign: "center",
+                color: s.color,
+                maxWidth: 1000,
+              }}
+            >
+              {trimmedCaption}
+            </div>
+          ) : null}
+        </div>
+      </AbsoluteFill>
+    </FitContent>
   );
 };

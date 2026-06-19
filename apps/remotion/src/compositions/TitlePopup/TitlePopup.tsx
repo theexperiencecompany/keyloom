@@ -1,5 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { FitContent } from "../../fit-content";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -64,48 +65,53 @@ export const TitlePopup: React.FC<TitlePopupProps> = ({
   );
 
   return (
-    <AbsoluteFill
-      style={{
-        background: s.background,
-        color: s.color,
-        fontFamily: s.fontFamily,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 80px",
-        textAlign: "center",
-      }}
+    <FitContent
+      designWidth={1920}
+      designHeight={1080}
+      background={s.background}
     >
-      <h1
+      <AbsoluteFill
         style={{
-          fontSize: 132,
-          fontWeight: 700,
-          letterSpacing: "-0.045em",
-          lineHeight: 1.05,
-          margin: 0,
-          opacity,
-          transform: `scale(${scale})`,
+          color: s.color,
+          fontFamily: s.fontFamily,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 80px",
+          textAlign: "center",
         }}
       >
-        {headline}
-      </h1>
-
-      {subtitle.trim() && (
-        <p
+        <h1
           style={{
-            fontSize: 38,
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: "32px 0 0",
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            fontSize: 132,
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            margin: 0,
+            opacity,
+            transform: `scale(${scale})`,
           }}
         >
-          {subtitle}
-        </p>
-      )}
-    </AbsoluteFill>
+          {headline}
+        </h1>
+
+        {subtitle.trim() && (
+          <p
+            style={{
+              fontSize: 38,
+              fontWeight: 400,
+              letterSpacing: "-0.012em",
+              margin: "32px 0 0",
+              color: getSubtitleColor(s.color),
+              opacity: subtitleProgress,
+              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
+      </AbsoluteFill>
+    </FitContent>
   );
 };

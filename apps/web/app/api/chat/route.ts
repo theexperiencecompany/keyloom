@@ -1,5 +1,4 @@
 import { openai } from "@ai-sdk/openai";
-import type { BrandKit } from "@workspace/compositions/project";
 import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import {
   buildMentionContext,
@@ -15,20 +14,13 @@ import { tools } from "@/lib/agent/tools";
 export const maxDuration = 300;
 
 export async function POST(req: Request) {
-  const { messages, brandKit, mentions, selectedClip } = (await req.json()) as {
+  const { messages, mentions, selectedClip } = (await req.json()) as {
     messages: unknown;
-    brandKit?: BrandKit;
     mentions?: unknown;
     selectedClip?: SelectedClipInput;
   };
 
-  // Append the brand kit (when set) to the system prompt so the agent
-  // prefers the user's brand over generic design tokens. Cheap (~100
-  // tokens max) and avoids needing a dedicated `getBrandKit` tool +
-  // round trip.
-  let fullSystem = brandKit
-    ? `${systemPrompt}\n\n---\n\n## Active brand kit${formatBrandKit(brandKit)}`
-    : systemPrompt;
+  let fullSystem = systemPrompt;
 
   // When the user @mentioned components, append a focused-mode block that
   // inlines those components' field contracts + the targeting rule, so the
@@ -65,18 +57,6 @@ export async function POST(req: Request) {
       return formatAgentError(error);
     },
   });
-}
-
-function formatBrandKit(kit: BrandKit): string {
-  const lines: string[] = [];
-  if (kit.brandName) lines.push(`- **Brand name**: ${kit.brandName}`);
-  if (kit.primaryColor) lines.push(`- **Primary color**: ${kit.primaryColor}`);
-  if (kit.secondaryColor)
-    lines.push(`- **Secondary color**: ${kit.secondaryColor}`);
-  if (kit.fontFamily) lines.push(`- **Font family**: ${kit.fontFamily}`);
-  if (kit.logoUrl) lines.push(`- **Logo**: available (use in CTA / closing).`);
-  if (lines.length === 0) return "\n\n(brand kit empty)";
-  return `\n\nThe user has set a brand kit for this project. **Prefer these over the curated design tokens** when assembling \`style\` for non-brand-locked clips:\n\n${lines.join("\n")}\n\nMap the brand kit onto \`style\` like so: \`style.accent = primaryColor\`, \`style.fontFamily = fontFamily\` (if set), and use a base palette from listDesignTokens whose mood matches the brand colors.`;
 }
 
 function formatAgentError(error: unknown): string {

@@ -59,12 +59,6 @@ export function AgentPanel({
   const projectRef = useRef(project);
   projectRef.current = project;
 
-  // Same trick for brand kit — the chat transport (memoized once) reads
-  // the latest brand kit from this ref so updates flow into the next
-  // chat request without recreating useChat (which would wipe history).
-  const brandKitRef = useRef(project.brandKit);
-  brandKitRef.current = project.brandKit;
-
   // The @mention picker offers every agent-visible composition; selecting one
   // inserts `@<id>` into the message. Built once — the registry is static.
   const mentionItems = useMemo<MentionItem[]>(
@@ -76,8 +70,7 @@ export function AgentPanel({
   );
 
   // Latest @mention ids + selected clip, read at send time (refs so the
-  // memoized chat transport always sees current values — same trick as
-  // brandKit above).
+  // memoized chat transport always sees current values).
   const mentionsRef = useRef<string[]>([]);
   const selectedClipRef = useRef(selectedClip ?? null);
   selectedClipRef.current = selectedClip ?? null;
@@ -263,15 +256,13 @@ export function AgentPanel({
     }
     autoContinuationCount.current = 0;
     builtThisTurn.current = false;
-    // Piggyback the project's brandKit + any @mentioned components + the
-    // selected clip so the server can switch into focused-component mode and
-    // append the right context. Refs always point at the latest values, so
-    // edits show up on the very next send.
+    // Piggyback any @mentioned components + the selected clip so the server can
+    // switch into focused-component mode and append the right context. Refs
+    // always point at the latest values, so edits show up on the very next send.
     sendMessage(
       { text: trimmed },
       {
         body: {
-          brandKit: brandKitRef.current,
           mentions: mentionsRef.current,
           selectedClip: selectedClipRef.current,
         },
@@ -388,9 +379,7 @@ export function AgentPanel({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    regenerate({ body: { brandKit: brandKitRef.current } })
-                  }
+                  onClick={() => regenerate()}
                   className="h-7 self-start"
                 >
                   <HugeiconsIcon icon={RefreshIcon} className="size-3" />
