@@ -1,5 +1,6 @@
 import { and, eq, lt, sql } from "drizzle-orm";
 import { generateApiKey } from "./api-keys";
+import { findActiveDodoSubscription, PLANS } from "./billing";
 import {
   type ApiKey,
   apiKeys,
@@ -152,4 +153,40 @@ export async function consumeRender(userId: string): Promise<ConsumeResult> {
   }
   const row = updated[0]!;
   return { ok: true, remaining: row.renderQuota - row.rendersUsed };
+}
+
+/**
+ * Verify-on-return: ask Dodo directly whether this user has an active
+ * subscription and upgrade them to Pro if so — so the account page reflects a
+ * successful payment immediately, without depending on a webhook. Idempotent
+ * and safe to call on every /account load:
+ *   - skips the Dodo call entirely if already Pro/active,
+ *   - never downgrades here (cancellations come through the webhook),
+ *   - resets the usage counter only on the first transition into Pro.
+ * Silently no-ops if billing isn't configured or Dodo is unreachable.
+ */
+export async function reconcileProFromDodo(
+  userId: string,
+  email: string,
+): Promise<void> {
+  const current = await getSubscription(userId);
+  if (current?.plan === PLANS.pro.plan && current.status === "active") return;
+
+  let active: Awaited<ReturnType<typeof findActiveDodoSubscription>>;
+  try {
+    active = await findActiveDodoSubscription({ userId, email });
+  } catch {
+    return; // billing not configured / Dodo unreachable — leave state as-is
+  }
+  if (!active) return;
+
+  await applySubscription(userId, {
+    status: "active",
+    plan: PLANS.pro.plan,
+    renderQuota: PLANS.pro.renderQuota,
+    rendersUsed: 0, // fresh Pro period
+    dodoSubscriptionId: active.subscriptionId,
+    ...(active.customerId ? { dodoCustomerId: active.customerId } : {}),
+    ...(active.periodEnd ? { periodEnd: active.periodEnd } : {}),
+  });
 }
