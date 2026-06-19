@@ -133,11 +133,11 @@ export type CompositionTheme = {
 };
 
 /**
- * brandMode controls whether a composition inherits the project Brand Kit:
- *   - "branded" (default): accent / background / font fall back to the brand
- *     when the per-clip prop is omitted or empty.
+ * brandMode controls whether a composition accepts the universal Style
+ * controls (background / text / font / accent):
+ *   - "branded" (default): the per-clip Style overrides apply.
  *   - "locked": the composition impersonates a real product (Twitter,
- *     WhatsApp, Slack, Discord, iMessage, etc.) and ignores the brand kit
+ *     WhatsApp, Slack, Discord, iMessage, etc.) and ignores Style overrides
  *     to keep the look authentic.
  */
 export type BrandMode = "branded" | "locked";

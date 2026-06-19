@@ -255,11 +255,6 @@ export function Builder() {
           onExport={() => setExportSettingsOpen(true)}
           onSaveProject={handleSaveProject}
           onLoadProjectFile={handleLoadProjectFile}
-          brandKit={project.brandKit}
-          onUpdateBrandKit={(patch) =>
-            dispatch({ type: "UPDATE_BRAND_KIT", patch })
-          }
-          onClearBrandKit={() => dispatch({ type: "CLEAR_BRAND_KIT" })}
         />
 
         <div className="relative flex min-h-0 flex-1">

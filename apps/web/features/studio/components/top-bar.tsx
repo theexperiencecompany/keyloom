@@ -2,18 +2,15 @@
 
 import {
   ComputerIcon,
-  PaintBoardIcon,
   SmartPhone01Icon,
   SquareIcon,
   Tablet01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import type { BrandKit } from "@workspace/compositions/project";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { BrandLink } from "@/components/brand-link";
-import { BrandKitModal } from "./brand-kit-modal";
 import { ProjectTransitionControl } from "./project-transition-control";
 
 /**
@@ -69,9 +66,6 @@ type Props = {
   onExport: () => void;
   onSaveProject: () => void;
   onLoadProjectFile: (file: File) => void;
-  brandKit: BrandKit | undefined;
-  onUpdateBrandKit: (patch: Partial<BrandKit>) => void;
-  onClearBrandKit: () => void;
 };
 
 export function TopBar({
@@ -89,15 +83,8 @@ export function TopBar({
   onExport,
   onSaveProject,
   onLoadProjectFile,
-  brandKit,
-  onUpdateBrandKit,
-  onClearBrandKit,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [brandKitOpen, setBrandKitOpen] = useState(false);
-  const brandKitActive = Boolean(
-    brandKit && Object.values(brandKit).some(Boolean),
-  );
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -155,26 +142,6 @@ export function TopBar({
           onChange={onUpdateProjectTransition}
         />
         <Button
-          variant={brandKitActive ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setBrandKitOpen(true)}
-          title={
-            brandKitActive
-              ? `Brand kit: ${brandKit?.brandName ?? "active"}`
-              : "Set up brand kit"
-          }
-        >
-          <HugeiconsIcon icon={PaintBoardIcon} className="size-3.5" />
-          Brand
-          {brandKitActive ? (
-            <span
-              className="ml-1 inline-block size-2 rounded-full"
-              style={{ background: brandKit?.primaryColor ?? "#666" }}
-              aria-hidden
-            />
-          ) : null}
-        </Button>
-        <Button
           variant="ghost"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
@@ -193,13 +160,6 @@ export function TopBar({
           {exporting ? "Rendering…" : "Export"}
         </Button>
       </div>
-      <BrandKitModal
-        open={brandKitOpen}
-        onOpenChange={setBrandKitOpen}
-        brandKit={brandKit}
-        onPatch={onUpdateBrandKit}
-        onClear={onClearBrandKit}
-      />
     </header>
   );
 }
