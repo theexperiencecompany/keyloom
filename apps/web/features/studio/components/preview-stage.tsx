@@ -25,14 +25,14 @@ export function PreviewStage({
 }: Props) {
   if (!hasClips) {
     return (
-      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-muted/40 dark:bg-muted/20">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] dark:bg-muted/20">
         <EmptyStage onOpenLibrary={onOpenLibrary} />
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 items-center justify-center bg-muted/40 p-8 dark:bg-muted/20">
+    <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] p-8 dark:bg-muted/20">
       <div
         className="relative max-h-full max-w-full overflow-hidden bg-black shadow-sm ring-1 ring-border"
         style={{
