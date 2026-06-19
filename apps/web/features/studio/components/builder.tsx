@@ -10,6 +10,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
+import dynamic from "next/dynamic";
 import {
   useCallback,
   useEffect,
@@ -19,7 +20,6 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
-
 import { useAudioSearch } from "../hooks/use-audio-search";
 import { useExportRender } from "../hooks/use-export-render";
 import { usePlayerControls } from "../hooks/use-player-controls";
@@ -33,7 +33,6 @@ import {
 import { registerImageProxy } from "../lib/register-image-proxy";
 import { PlayerProvider } from "../state/player-context";
 import { initialStudioState, studioReducer } from "../state/reducer";
-import { AgentPanel } from "./agent-panel";
 import { CommandPalette } from "./command-palette";
 import { ExportProgressOverlay } from "./export-progress-overlay";
 import { ExportSettingsModal } from "./export-settings-modal";
@@ -46,6 +45,14 @@ import { Timeline } from "./timeline";
 import { ToolRail } from "./tool-rail";
 import { TopBar } from "./top-bar";
 import { UploadPanel } from "./upload-panel";
+
+// Lazy-load the agent panel — it pulls in the AI SDK + the whole tool surface,
+// which the editor doesn't need until the user opens the agent. Keeping it off
+// the initial graph speeds up the /studio compile and first paint.
+const AgentPanel = dynamic(
+  () => import("./agent-panel").then((m) => m.AgentPanel),
+  { ssr: false },
+);
 
 export function Builder() {
   // ----------------------------------------------------------------------

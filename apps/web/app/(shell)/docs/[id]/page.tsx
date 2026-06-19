@@ -17,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const doc = getDoc(id);
+  const doc = await getDoc(id);
   if (!doc) return { title: "Not found" };
   return {
     title: doc.meta.title,
@@ -31,7 +31,7 @@ export default async function ComponentDocsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const doc = getDoc(id);
+  const doc = await getDoc(id);
   if (!doc) notFound();
   return <DocsShell doc={doc} />;
 }

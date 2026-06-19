@@ -1,6 +1,6 @@
 "use client";
 
-import { Player } from "@remotion/player";
+import { Player, Thumbnail } from "@remotion/player";
 import { componentsById } from "@workspace/compositions/components";
 import { compositions } from "@workspace/compositions/registry";
 import type { AnyCompositionInfo } from "@workspace/compositions/schema";
@@ -117,6 +117,11 @@ function partition(): Group[] {
 
 export function ComponentsGrid() {
   const groups = React.useMemo(() => partition(), []);
+  // Only ONE preview animates at a time — the hovered card. Every other card
+  // shows a cheap static <Thumbnail> (a single frame, no playback loop), so the
+  // page mounts ~79 stills + at most 1 live <Player> instead of 79 players.
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+
   return (
     <div className="not-prose my-8 space-y-12">
       {groups.map((group) => (
@@ -131,7 +136,12 @@ export function ComponentsGrid() {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {group.items.map((info) => (
-              <ComponentCard key={info.id} info={info} />
+              <ComponentCard
+                key={info.id}
+                info={info}
+                active={activeId === info.id}
+                onHover={setActiveId}
+              />
             ))}
           </div>
         </section>
@@ -140,51 +150,67 @@ export function ComponentsGrid() {
   );
 }
 
-function ComponentCard({ info }: { info: AnyCompositionInfo }) {
+function ComponentCard({
+  info,
+  active,
+  onHover,
+}: {
+  info: AnyCompositionInfo;
+  active: boolean;
+  onHover: (id: string | null) => void;
+}) {
   const Component = componentsById[info.id];
-  const playerRef = React.useRef<React.ComponentRef<typeof Player>>(null);
-
-  function handleEnter() {
-    playerRef.current?.play();
-  }
-  function handleLeave() {
-    const p = playerRef.current;
-    if (!p) return;
-    p.pause();
-    p.seekTo(0);
-  }
+  // Frame shown at rest — same ~70% point the old previews paused on.
+  const posterFrame = Math.min(
+    info.durationInFrames - 1,
+    Math.round(info.durationInFrames * 0.7),
+  );
 
   return (
     <Link
       href={`/docs/${info.id}`}
       className="group block overflow-hidden rounded-lg border border-border bg-muted/20 transition-all hover:border-border/80 hover:bg-muted/40"
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
+      onMouseEnter={() => onHover(info.id)}
+      onMouseLeave={() => onHover(null)}
     >
       <div
         className="relative w-full overflow-hidden bg-background"
         style={{ aspectRatio: `${info.width} / ${info.height}` }}
       >
         {Component ? (
-          <Player
-            ref={playerRef}
-            component={Component}
-            inputProps={info.defaultProps}
-            durationInFrames={info.durationInFrames}
-            fps={info.fps}
-            compositionWidth={info.width}
-            compositionHeight={info.height}
-            style={{ width: "100%", height: "100%" }}
-            loop
-            initialFrame={Math.min(
-              info.durationInFrames - 1,
-              Math.round(info.durationInFrames * 0.7),
-            )}
-            initiallyMuted
-            controls={false}
-            numberOfSharedAudioTags={12}
-            acknowledgeRemotionLicense
-          />
+          <>
+            {/* Static frame for every card — no animation loop. */}
+            <Thumbnail
+              component={Component}
+              inputProps={info.defaultProps}
+              durationInFrames={info.durationInFrames}
+              fps={info.fps}
+              frameToDisplay={posterFrame}
+              compositionWidth={info.width}
+              compositionHeight={info.height}
+              style={{ width: "100%", height: "100%" }}
+            />
+            {/* The single live player — mounted only while THIS card is hovered. */}
+            {active ? (
+              <div className="absolute inset-0">
+                <Player
+                  component={Component}
+                  inputProps={info.defaultProps}
+                  durationInFrames={info.durationInFrames}
+                  fps={info.fps}
+                  compositionWidth={info.width}
+                  compositionHeight={info.height}
+                  style={{ width: "100%", height: "100%" }}
+                  loop
+                  autoPlay
+                  initiallyMuted
+                  controls={false}
+                  numberOfSharedAudioTags={0}
+                  acknowledgeRemotionLicense
+                />
+              </div>
+            ) : null}
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-[12px] text-muted-foreground">
             No preview

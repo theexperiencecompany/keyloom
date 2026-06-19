@@ -14,11 +14,15 @@
  * Remotion `<Composition id="Project">` for duration/dimension inference.
  */
 
-import {
-  canRenderMediaOnWeb,
-  type RenderMediaOnWebProgressCallback,
+// Type-only import — erased at runtime, so importing this module does NOT pull
+// @remotion/web-renderer (heavy WebCodecs + mediabunny) into the graph. The
+// actual functions are loaded via dynamic import() inside the export paths
+// below, only when an export actually runs. Every screen with an export button
+// imports this module, so keeping it light keeps those routes fast to compile.
+import type {
+  RenderMediaOnWebProgressCallback,
   renderMediaOnWeb,
-  type WebRendererHardwareAcceleration,
+  WebRendererHardwareAcceleration,
 } from "@remotion/web-renderer";
 import { type Project, projectDuration } from "@workspace/compositions/project";
 
@@ -65,6 +69,7 @@ function isEncoderConfigError(err: unknown): boolean {
 async function renderWithAccelerationFallback(
   baseOptions: Omit<WebRenderArgs, "hardwareAcceleration">,
 ): Promise<WebRenderResult> {
+  const { renderMediaOnWeb } = await import("@remotion/web-renderer");
   let lastError: unknown;
   for (let i = 0; i < ACCELERATION_FALLBACK.length; i++) {
     const hardwareAcceleration = ACCELERATION_FALLBACK[i]!;
@@ -100,6 +105,7 @@ export async function isLocalExportSupported(project: {
   height: number;
 }): Promise<{ ok: boolean; reason?: string }> {
   if (typeof window === "undefined") return { ok: false, reason: "No DOM" };
+  const { canRenderMediaOnWeb } = await import("@remotion/web-renderer");
   const result = await canRenderMediaOnWeb({
     width: project.width,
     height: project.height,

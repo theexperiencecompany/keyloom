@@ -99,6 +99,22 @@ function GaiaButton() {
   );
 }
 
+// Lazy + Suspense: the account menu pulls in AuthKit's client code and runs
+// useAuth() on mount. Loading it lazily keeps it off the header's critical path
+// so it can't block/freeze the page — the rest of the navbar paints immediately
+// and the menu streams in behind a lightweight fallback.
+const AccountMenu = React.lazy(() =>
+  import("@/components/account-menu").then((m) => ({ default: m.AccountMenu })),
+);
+
+function AccountMenuFallback() {
+  return (
+    <Button variant="outline" size="sm" className="gap-1.5" disabled>
+      <span className="hidden text-xs sm:inline">Account</span>
+    </Button>
+  );
+}
+
 const navLinks = [
   { label: "Docs", href: "/docs" },
   { label: "Components", href: "/docs/components" },
@@ -176,6 +192,9 @@ export function DocsHeader() {
                   <HugeiconsIcon icon={NewTwitterIcon} className="size-4" />
                 </Link>
               </Button>
+              <React.Suspense fallback={<AccountMenuFallback />}>
+                <AccountMenu />
+              </React.Suspense>
               <ThemeToggle />
             </div>
           </div>
