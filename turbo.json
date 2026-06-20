@@ -5,6 +5,15 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": [
+        "DATABASE_URL",
+        "OPENAI_API_KEY",
+        "COMPOSIO_API_KEY",
+        "DODO_*",
+        "WORKOS_*",
+        "REMOTION_*",
+        "NEXT_PUBLIC_*"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {

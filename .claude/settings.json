@@ -42,7 +42,13 @@
       "Bash(grep -nE \"LaptopFrameProps = \\\\{|chassis,|innerProps,|clipStyle,|<ScaledScene|compW=|fitMode\" LaptopFrame.tsx)",
       "Bash(awk 'NR>=2490 && NR<=2960' src/compositions/_chat-demo/ChatDemo.tsx)",
       "Bash(awk 'NR>=3009 && NR<=3290' src/compositions/_chat-demo/ChatDemo.tsx)",
-      "Bash(awk 'NR>=2340 && NR<=2440' src/compositions/_chat-demo/ChatDemo.tsx)"
+      "Bash(awk 'NR>=2340 && NR<=2440' src/compositions/_chat-demo/ChatDemo.tsx)",
+      "Bash(timeout 60 npx vercel inspect dpl_CUodwj91KM9eUExzXiQic5xszbn1 --logs)",
+      "Bash(timeout 40 npx vercel teams ls)",
+      "Bash(grep -v -iE \"telemetry|npm warn|^>|^$|visiting|opt-out\")",
+      "Bash(timeout 40 npx vercel inspect dpl_CUodwj91KM9eUExzXiQic5xszbn1 --logs --scope aryanranderiyas-projects)",
+      "Bash(python3 -c \"import sys,json; [print\\(s['context'],'|',s['state'],'|',s.get\\('description'\\),'|',s.get\\('target_url',''\\)[:90]\\) for s in json.load\\(sys.stdin\\)]\")",
+      "Bash(python3 -c \"import sys,json; [print\\(s['context'],'|',s['state'],'|',s.get\\('description'\\)\\) for s in json.load\\(sys.stdin\\)]\")"
     ]
   }
 }
