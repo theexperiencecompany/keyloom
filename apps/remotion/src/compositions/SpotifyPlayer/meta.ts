@@ -1,7 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import type { SpotifyPlayerProps } from "./SpotifyPlayer";
 
-export const SPOTIFY_PLAYER_DURATION = 240;
+export const SPOTIFY_PLAYER_DURATION = 480;
 export const SPOTIFY_PLAYER_FPS = 60;
 export const SPOTIFY_PLAYER_WIDTH = 1080;
 export const SPOTIFY_PLAYER_HEIGHT = 1920;
@@ -12,8 +12,8 @@ export const spotifyPlayerDefaultProps: SpotifyPlayerProps = {
   trackTitle: "Midnight Drive",
   artist: "Aurora Lane",
   playlist: "Late Night Coding",
-  elapsedSeconds: 67,
-  totalSeconds: 214,
+  elapsedSeconds: 28,
+  totalSeconds: 96,
   liked: true,
   tint: "#5b3a8c",
 };

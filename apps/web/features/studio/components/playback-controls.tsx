@@ -115,6 +115,5 @@ function formatClock(s: number): string {
   const safe = Math.max(0, s);
   const mm = Math.floor(safe / 60);
   const ss = Math.floor(safe % 60);
-  const cs = Math.floor((safe - Math.floor(safe)) * 100);
-  return `${mm}:${ss.toString().padStart(2, "0")}.${cs.toString().padStart(2, "0")}`;
+  return `${mm}:${ss.toString().padStart(2, "0")}`;
 }

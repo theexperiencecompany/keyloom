@@ -68,23 +68,13 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   tint,
 }) => {
   const frame = useDesignFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
 
   const total = Math.max(1, totalSeconds);
-  // Drive the scrubber clearly across the clip so it visibly reads as "playing"
-  // — start where the user set it, then advance a noticeable chunk by the end.
-  const startP = Math.min(0.92, Math.max(0, elapsedSeconds / total));
-  const endP = Math.min(0.98, startP + 0.26);
-  const progress = interpolate(
-    frame,
-    [0, durationInFrames - 1],
-    [startP, endP],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
-  const elapsed = progress * total;
+  // Real playback time: the counter ticks at one second per second (no
+  // acceleration), and the scrubber advances at the matching real rate.
+  const elapsed = Math.min(total, elapsedSeconds + frame / fps);
+  const progress = elapsed / total;
 
   // Entrance.
   const enter = interpolate(frame, [0, 26], [0, 1], {
