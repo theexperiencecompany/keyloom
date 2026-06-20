@@ -1,7 +1,26 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import {
+  type CSSProperties,
+  createContext,
+  type ReactNode,
+  useContext,
+} from "react";
 import { AbsoluteFill, useVideoConfig } from "remotion";
+
+/**
+ * Overrides the "target" size FitContent scales toward. By default FitContent
+ * fits the project canvas (useVideoConfig). But when a composition is embedded
+ * inside a frame (PhoneFrame, LaptopFrame, Showcase) the frame already scales it
+ * to a sub-region, so the frame provides the inner composition's NATIVE dims
+ * here — making FitContent a no-op (scale = 1) and letting the frame own the
+ * scaling. Without this, an embedded comp would double-scale by the project
+ * aspect inside the frame.
+ */
+export const FitTargetContext = createContext<{
+  width: number;
+  height: number;
+} | null>(null);
 
 /**
  * Makes a fixed-design composition responsive to the project canvas.
@@ -40,7 +59,10 @@ export function FitContent({
   /** Extra styles for the scaled design box (rare; e.g. fontFamily). */
   contentStyle?: CSSProperties;
 }) {
-  const { width, height } = useVideoConfig();
+  const cfg = useVideoConfig();
+  const target = useContext(FitTargetContext);
+  const width = target?.width ?? cfg.width;
+  const height = target?.height ?? cfg.height;
   const scale = Math.min(width / designWidth, height / designHeight);
 
   return (

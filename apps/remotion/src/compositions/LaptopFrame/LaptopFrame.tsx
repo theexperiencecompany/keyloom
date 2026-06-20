@@ -2,6 +2,7 @@
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
+import { FitTargetContext } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
@@ -253,7 +254,9 @@ function ScaledScene({
           transformOrigin: "top left",
         }}
       >
-        <Component {...merged} />
+        <FitTargetContext.Provider value={{ width: compW, height: compH }}>
+          <Component {...merged} />
+        </FitTargetContext.Provider>
       </div>
     </div>
   );
