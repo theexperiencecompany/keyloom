@@ -41,7 +41,6 @@ export const telegramMessagesInfo: CompositionInfo<TelegramMessagesProps> = {
   width: TELEGRAM_MESSAGES_WIDTH,
   height: TELEGRAM_MESSAGES_HEIGHT,
   defaultProps: telegramMessagesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },

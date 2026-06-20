@@ -14,6 +14,8 @@ export type LaptopFrameProps = {
   screenImage: string;
   innerProps?: Record<string, unknown>;
   clipStyle?: ClipStyle;
+  /** "cover" fills the screen (per-clip Frame toggle) instead of letterboxing. */
+  fitMode?: "contain" | "cover";
 };
 
 const LID_W = 1440;
@@ -60,6 +62,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   screenImage,
   innerProps,
   clipStyle,
+  fitMode,
 }) => {
   const frame = useDesignFrame();
   const { fps, width: canvasW, height: canvasH } = useVideoConfig();
@@ -161,6 +164,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
                 compH={innerInfo.height}
                 defaultProps={innerInfo.defaultProps}
                 overrideProps={innerProps}
+                cover={fitMode === "cover"}
               />
             ) : (
               <FallbackScreen />
@@ -219,6 +223,7 @@ function ScaledScene({
   compH,
   defaultProps,
   overrideProps,
+  cover,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
@@ -226,9 +231,12 @@ function ScaledScene({
   compH: number;
   defaultProps: Record<string, unknown>;
   overrideProps?: Record<string, unknown>;
+  cover?: boolean;
 }) {
-  // Contain mode: fit the whole composition inside the screen with letterbox if needed.
-  const fit = Math.min(SCREEN_W / compW, SCREEN_H / compH);
+  // "cover" fills the screen (crops overflow); otherwise contain with letterbox.
+  const fit = cover
+    ? Math.max(SCREEN_W / compW, SCREEN_H / compH)
+    : Math.min(SCREEN_W / compW, SCREEN_H / compH);
   const renderedW = compW * fit;
   const renderedH = compH * fit;
   const offsetX = (SCREEN_W - renderedW) / 2;

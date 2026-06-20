@@ -1,3 +1,4 @@
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import type { ChatMessage } from "../../editors/types";
 import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -9,6 +10,8 @@ export type TelegramMessagesProps = {
   messages: ChatMessage[];
   orientation?: "landscape" | "portrait";
   scale?: number;
+  /** Universal Style — background (chat wallpaper), text, font, accent. */
+  clipStyle?: ClipStyle;
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -35,13 +38,24 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
   messages,
   orientation = "landscape",
   scale = 2,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
+  // Authentic Telegram defaults; clipStyle overrides the chat wallpaper,
+  // primary text, font, and the Telegram-blue accent (header/composer icons).
+  const s = resolveClipStyle(clipStyle, {
+    background: "#2B78CD",
+    color: "#060606",
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif',
+    accent: "#037EE5",
+  });
+
   return (
     <ChatFill
-      backdrop="#2B78CD"
+      backdrop={s.background}
       chromeColor="#FFFFFF"
       scale={scale}
       orientation={orientation}
@@ -51,6 +65,10 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
         title={contactName}
         headerAvatar={contactAvatar}
         messages={items}
+        clipBackground={s.background}
+        clipColor={s.color}
+        clipFontFamily={s.fontFamily}
+        clipAccent={s.accent}
       />
     </ChatFill>
   );

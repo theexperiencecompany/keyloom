@@ -39,7 +39,6 @@ export const whatsappMessagesInfo: CompositionInfo<WhatsAppMessagesProps> = {
   width: WHATSAPP_MESSAGES_WIDTH,
   height: WHATSAPP_MESSAGES_HEIGHT,
   defaultProps: whatsappMessagesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },

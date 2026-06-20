@@ -15,7 +15,6 @@ export const twitterFollowDefaultProps: TwitterFollowProps = {
   following: 2014,
   verified: "yes",
   theme: "light",
-  backgroundColor: "#f7f9fa",
 };
 
 export const twitterFollowInfo: CompositionInfo<TwitterFollowProps> = {
@@ -29,7 +28,6 @@ export const twitterFollowInfo: CompositionInfo<TwitterFollowProps> = {
   width: TWITTER_FOLLOW_WIDTH,
   height: TWITTER_FOLLOW_HEIGHT,
   defaultProps: twitterFollowDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "text", key: "handle", label: "Handle" },
     { kind: "text", key: "displayName", label: "Display name" },
@@ -55,6 +53,5 @@ export const twitterFollowInfo: CompositionInfo<TwitterFollowProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

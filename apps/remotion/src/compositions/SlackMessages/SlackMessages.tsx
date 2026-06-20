@@ -1,4 +1,5 @@
 "use client";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import type { ChatMessage } from "../../editors/types";
 import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -12,6 +13,8 @@ export type SlackMessagesProps = {
   scale?: number;
   leftAvatar?: string;
   rightAvatar?: string;
+  /** Universal Style — background (chat screen), text, font, accent. */
+  clipStyle?: ClipStyle;
 };
 
 const DEFAULT_LEFT_AVATAR = "images/logos/aryan-avatar.png";
@@ -54,14 +57,27 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
   scale = 2.5,
   leftAvatar = DEFAULT_LEFT_AVATAR,
   rightAvatar = DEFAULT_RIGHT_AVATAR,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame, leftAvatar, rightAvatar);
 
+  // Slack is a channel view (no outgoing bubble). theme decides the DEFAULT
+  // background/text; a clipStyle override wins. Accent has no single clean
+  // element here, so the aubergine brand color is left to authentic chrome.
+  const themeBg = theme === "dark" ? "#1A1D21" : "#FFFFFF";
+  const s = resolveClipStyle(clipStyle, {
+    background: themeBg,
+    color: theme === "dark" ? "#D1D2D3" : "#1D1C1D",
+    fontFamily:
+      '"Slack-Lato", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    accent: "#4a154b",
+  });
+
   return (
     <ChatFill
-      backdrop={theme === "dark" ? "#1A1D21" : "#FFFFFF"}
-      chromeColor={theme === "dark" ? "#1A1D21" : "#FFFFFF"}
+      backdrop={s.background}
+      chromeColor={themeBg}
       scale={scale}
       orientation={orientation}
     >
@@ -70,6 +86,9 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
         title={contactName}
         theme={theme}
         messages={items}
+        clipBackground={s.background}
+        clipColor={s.color}
+        clipFontFamily={s.fontFamily}
       />
     </ChatFill>
   );

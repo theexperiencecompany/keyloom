@@ -34,7 +34,6 @@ export const slackMessagesInfo: CompositionInfo<SlackMessagesProps> = {
   width: SLACK_MESSAGES_WIDTH,
   height: SLACK_MESSAGES_HEIGHT,
   defaultProps: slackMessagesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Channel name" },

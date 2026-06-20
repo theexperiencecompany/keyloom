@@ -16,7 +16,6 @@ export const instagramPostDefaultProps: InstagramPostProps = {
   likes: 18432,
   timestamp: "2 hours ago",
   theme: "light",
-  backgroundColor: "#fafafa",
 };
 
 export const instagramPostInfo: CompositionInfo<InstagramPostProps> = {
@@ -32,7 +31,6 @@ export const instagramPostInfo: CompositionInfo<InstagramPostProps> = {
   width: INSTAGRAM_POST_WIDTH,
   height: INSTAGRAM_POST_HEIGHT,
   defaultProps: instagramPostDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "text", key: "username", label: "Username" },
     { kind: "text", key: "location", label: "Location" },
@@ -59,6 +57,5 @@ export const instagramPostInfo: CompositionInfo<InstagramPostProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

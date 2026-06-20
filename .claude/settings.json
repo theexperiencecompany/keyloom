@@ -38,7 +38,11 @@
       "Bash(cd /home/sanku/work/aesthetic/apps/remotion *)",
       "Read(//home/sanku/work/aesthetic/apps/remotion/web/node_modules/@hugeicons/core-free-icons/dist/**)",
       "Bash(echo \"remotion tsc=$?\")",
-      "Bash(grep -nA12 \"export type Clip = {\" remotion/src/project.ts)"
+      "Bash(grep -nA12 \"export type Clip = {\" remotion/src/project.ts)",
+      "Bash(grep -nE \"LaptopFrameProps = \\\\{|chassis,|innerProps,|clipStyle,|<ScaledScene|compW=|fitMode\" LaptopFrame.tsx)",
+      "Bash(awk 'NR>=2490 && NR<=2960' src/compositions/_chat-demo/ChatDemo.tsx)",
+      "Bash(awk 'NR>=3009 && NR<=3290' src/compositions/_chat-demo/ChatDemo.tsx)",
+      "Bash(awk 'NR>=2340 && NR<=2440' src/compositions/_chat-demo/ChatDemo.tsx)"
     ]
   }
 }
