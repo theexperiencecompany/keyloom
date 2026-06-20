@@ -139,10 +139,8 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
   width: MESSAGE_BUBBLES_WIDTH,
   height: MESSAGE_BUBBLES_HEIGHT,
   defaultProps: messageBubblesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
-  // Curated skins — first entry is the default look. Locked compositions
-  // still get the Theme picker (themes are hand-built, not free recoloring).
+  // Curated skins — first entry is the default look.
   themes: [{ id: "imessage", label: "iMessage" }],
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },

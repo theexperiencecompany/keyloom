@@ -101,7 +101,23 @@ export type IMessageChatProps = {
   designWidth?: number;
   /** Extra gallery photos for the attachment picker (besides the sent one). */
   galleryImages?: { name: string; url: string }[];
+  /**
+   * Universal Style overrides forwarded from the (now unlocked) MessageBubbles
+   * composition. Each maps to the one clean slot in the iMessage layout:
+   * `clipBackground` → chat sheet, `clipColor` → received-bubble text,
+   * `clipFontFamily` → root font, `clipAccent` → the sent (blue) bubble +
+   * tail. Unset (empty) means keep the authentic default.
+   */
+  clipBackground?: string;
+  clipColor?: string;
+  clipFontFamily?: string;
+  clipAccent?: string;
 };
+
+/** Use the override if set (non-empty), otherwise the authentic default. */
+function ov(value: string | undefined, fallback: string): string {
+  return value && value.trim() !== "" ? value : fallback;
+}
 
 export function IMessageChat({
   messages,
@@ -122,6 +138,10 @@ export function IMessageChat({
   keyboardOpen = 1,
   designWidth,
   galleryImages,
+  clipBackground,
+  clipColor,
+  clipFontFamily,
+  clipAccent,
 }: IMessageChatProps) {
   const grouped = groupThread(messages);
   // Caret blink for the idle (placeholder) composer — a ~1s cycle: on, quick
@@ -201,14 +221,20 @@ export function IMessageChat({
   const photoY = riseIn;
   const photoOpacity = fadeIn * (1 - sendT);
 
-  // The chat sheet (when there's no wallpaper) follows the appearance.
-  const sheetBg = dark ? "#000000" : "#ffffff";
+  // The chat sheet (when there's no wallpaper) follows the appearance — or the
+  // universal background override when one is set.
+  const sheetBg = ov(clipBackground, dark ? "#000000" : "#ffffff");
   // Chrome text/icons go light over a wallpaper OR in dark mode.
   const lightUI = hasBg || dark;
   const headerText = lightUI ? "#ffffff" : "#000000";
-  // Received bubbles use Apple's exact grays per appearance; sent stays blue.
-  const themText = dark ? "#ffffff" : "#000000";
+  // Received bubbles use Apple's exact grays per appearance; their text follows
+  // the universal text override. Sent bubbles use the universal accent (default
+  // iMessage blue) for both the fill and the tail.
+  const themText = ov(clipColor, dark ? "#ffffff" : "#000000");
   const themBubbleBg = dark ? IMESSAGE_THEM_BG_DARK : IMESSAGE_THEM_BG_LIGHT;
+  const sentBg = ov(clipAccent, IMESSAGE_GRADIENT);
+  const sentTail = ov(clipAccent, IMESSAGE_TAIL_ME_COLOR);
+  const fontStack = ov(clipFontFamily, SF_PRO_STACK);
   // The header/composer strips must NOT paint an opaque sheet color over the
   // WebGL glass canvas, or the glass chrome (buttons, name chip, composer pill)
   // is buried and only the bare icons show. Whenever glass is on we keep the
@@ -270,7 +296,7 @@ export function IMessageChat({
       bgImage={backgroundImage}
       bgColor={sheetBg}
       className={cn("h-full", className)}
-      style={{ fontFamily: SF_PRO_STACK }}
+      style={{ fontFamily: fontStack }}
     >
       <div className="relative flex h-full flex-col">
         {/* Subtle top darkness — a soft top-down gradient sitting ABOVE the
@@ -582,12 +608,8 @@ export function IMessageChat({
                             {m.typing ? (
                               <TypingBubble
                                 from={group.from}
-                                background={
-                                  isMe ? IMESSAGE_GRADIENT : themBubbleBg
-                                }
-                                tailColor={
-                                  isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
-                                }
+                                background={isMe ? sentBg : themBubbleBg}
+                                tailColor={isMe ? sentTail : themBubbleBg}
                                 color={isMe ? "#fff" : themText}
                                 dotsColor={
                                   isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
@@ -605,10 +627,8 @@ export function IMessageChat({
                           <DotsToMessage
                             from={group.from}
                             tail={isLast}
-                            background={isMe ? IMESSAGE_GRADIENT : themBubbleBg}
-                            tailColor={
-                              isMe ? IMESSAGE_TAIL_ME_COLOR : themBubbleBg
-                            }
+                            background={isMe ? sentBg : themBubbleBg}
+                            tailColor={isMe ? sentTail : themBubbleBg}
                             color={isMe ? "#fff" : themText}
                             dotsColor={
                               isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"

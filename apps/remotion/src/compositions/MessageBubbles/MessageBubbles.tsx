@@ -8,10 +8,14 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import type { ChatMessage } from "../../editors/types";
 import { SmartAudio } from "../../smart-audio";
 import { DESIGN_FPS, useDesignFrame } from "../../use-design-frame";
-import type { ChatMessageItem } from "../_chat-demo/ChatDemo";
+import {
+  type ChatMessageItem,
+  IMESSAGE_GRADIENT,
+} from "../_chat-demo/ChatDemo";
 import { ChatFill } from "../_chat-demo/ChatFill";
 import { KEYBOARD_BG } from "../_chat-demo/Keyboard";
 import { useSFProDisplay } from "../_chat-demo/sf-pro";
@@ -117,6 +121,8 @@ export type MessageBubblesProps = {
    * gradient placeholders. Each is `{ name, url }` (static path or http URL).
    */
   galleryImages?: { name: string; url: string }[];
+  /** Universal Style — sheet background, received text, font, sent accent. */
+  clipStyle?: ClipStyle;
 };
 
 /** Pop balloon hold + rise timings (frames) for the keyboard key press. */
@@ -362,6 +368,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   theme = "dark",
   showKeyboard = false,
   galleryImages,
+  clipStyle,
 }) => {
   // Load Apple's SF Pro Display so the chat renders in the real iMessage font
   // in headless exports too (blocks the render until decoded; never fails it).
@@ -484,7 +491,20 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
       })
     : 1;
 
-  const backdrop = backgroundImage || theme === "dark" ? "#000000" : "#ffffff";
+  // Universal Style. Authentic iMessage defaults per appearance: sheet bg
+  // (black/white), received-bubble text, SF Pro font, and the sent-bubble
+  // blue as the accent. Overrides forwarded into the iMessage renderer.
+  const s = resolveClipStyle(clipStyle, {
+    background: theme === "dark" ? "#000000" : "#ffffff",
+    color: theme === "dark" ? "#ffffff" : "#000000",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif",
+    accent: IMESSAGE_GRADIENT,
+  });
+  // With a wallpaper the sheet stays the authentic black so the chrome reads;
+  // otherwise the screen fill follows the universal background (transparent
+  // when a Background Scene is chosen).
+  const backdrop = backgroundImage ? "#000000" : s.background;
 
   return (
     <>
@@ -553,6 +573,10 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           keyboardOpen={keyboardOpen}
           designWidth={PHONE_DESIGN_WIDTH}
           galleryImages={galleryImages}
+          clipBackground={s.background}
+          clipColor={s.color}
+          clipFontFamily={s.fontFamily}
+          clipAccent={s.accent}
         />
       </ChatFill>
     </>

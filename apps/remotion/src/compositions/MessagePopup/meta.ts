@@ -26,7 +26,6 @@ export const messagePopupInfo: CompositionInfo<MessagePopupProps> = {
   width: MESSAGE_POPUP_WIDTH,
   height: MESSAGE_POPUP_HEIGHT,
   defaultProps: messagePopupDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "text", key: "sender", label: "Sender" },
     { kind: "text", key: "time", label: "Time" },
