@@ -68,6 +68,10 @@ export type RenderStatus = {
   done: boolean;
   /** 0–1 overall progress. */
   progress: number;
+  /** Raw, time-limited presigned S3 URL. Fragile to copy (very long); prefer
+   *  `downloadUrl` when handing a link to a client/user. */
   url?: string;
+  /** Short, copy-safe link that re-presigns and redirects to the MP4. */
+  downloadUrl?: string;
   filename?: string;
 };

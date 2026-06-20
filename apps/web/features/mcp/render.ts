@@ -6,6 +6,7 @@ import {
 import { compositionsById } from "@workspace/compositions/registry";
 import { isAgentVisible } from "@/lib/agent/catalog";
 import { getLambdaConfig } from "./config";
+import { buildDownloadUrl } from "./download-url";
 import type {
   RenderComponentOptions,
   RenderComponentResult,
@@ -116,6 +117,7 @@ export async function getRenderStatus(
     done: true,
     progress: 1,
     url,
+    downloadUrl: buildDownloadUrl(renderId, outBucket),
     filename: progress.outKey.split("/").pop() ?? `${renderId}.mp4`,
   };
 }

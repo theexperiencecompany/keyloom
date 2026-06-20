@@ -128,12 +128,23 @@ const baseHandler = createMcpHandler(
       },
       async (args) => {
         try {
-          return jsonText(
-            await getRenderStatus(
-              String(args.renderId ?? ""),
-              String(args.bucketName ?? ""),
-            ),
+          const status = await getRenderStatus(
+            String(args.renderId ?? ""),
+            String(args.bucketName ?? ""),
           );
+          if (!status.done) {
+            return jsonText({ done: false, progress: status.progress });
+          }
+          // Surface the short, copy-safe link as `url` — NOT the raw ~500-char
+          // presigned S3 URL, which wraps in terminal clients and gets mangled
+          // on copy. The short link re-presigns + redirects, so it always works
+          // and never expires out from under the user.
+          return jsonText({
+            done: true,
+            progress: 1,
+            url: status.downloadUrl,
+            filename: status.filename,
+          });
         } catch (err) {
           return errorText(err instanceof Error ? err.message : String(err));
         }
