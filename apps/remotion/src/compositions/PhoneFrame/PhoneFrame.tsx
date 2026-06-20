@@ -25,9 +25,6 @@ const SCREEN_W = PHONE_W - BEZEL * 2;
 const SCREEN_H = PHONE_H - BEZEL * 2;
 const FRAME_RADIUS = 96;
 const SCREEN_RADIUS = 78;
-// Phone is portrait; canvas is 16:9. Scale the whole phone down so it fits
-// the landscape frame with some vertical breathing room.
-const PHONE_SCALE = 0.6;
 
 // Safe-area insets so the inner composition doesn't render behind the
 // dynamic island / notch (top) or the home indicator (bottom). The bottom
@@ -62,7 +59,7 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width: canvasW, height: canvasH } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -76,7 +73,14 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
     fps,
     config: { damping: 14, stiffness: 110, mass: 0.85 },
   });
-  const scale = (0.9 + drop * 0.1) * PHONE_SCALE;
+  // Fit the phone to whatever canvas it's rendered in (it's used both as a
+  // standalone 16:9 composition AND as a per-clip frame on portrait canvases),
+  // leaving a small margin so the device never touches the edges.
+  const fitScale = Math.min(
+    (canvasW * 0.94) / PHONE_W,
+    (canvasH * 0.94) / PHONE_H,
+  );
+  const scale = (0.9 + drop * 0.1) * fitScale;
   const ty = (1 - drop) * 60;
 
   const Component = componentsById[innerCompositionId];

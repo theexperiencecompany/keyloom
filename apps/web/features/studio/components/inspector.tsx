@@ -13,7 +13,7 @@ import {
 } from "@workspace/compositions/editors";
 import { effectsById } from "@workspace/compositions/effects/registry";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
-import type { Clip } from "@workspace/compositions/project";
+import type { Clip, ClipFrame } from "@workspace/compositions/project";
 import type { compositionsById } from "@workspace/compositions/registry";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 import {
@@ -49,6 +49,7 @@ type Props = {
   onChange: ComponentProps<typeof FieldsRenderer>["onChange"];
   onUpdateStyle: (patch: Partial<ClipStyle>) => void;
   onResetStyle: () => void;
+  onSetFrame: (frame: ClipFrame | null) => void;
   onUpdateTransition: (transition: SceneTransition | undefined) => void;
   onUpdateEffect: (
     effectInstanceId: string,
@@ -69,6 +70,7 @@ export function Inspector({
   onChange,
   onUpdateStyle,
   onResetStyle,
+  onSetFrame,
   onUpdateTransition,
   onUpdateEffect,
   onRemoveEffect,
@@ -210,6 +212,37 @@ export function Inspector({
               </p>
             </div>
           )}
+          <div className="border-b px-5 py-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Frame
+            </p>
+            <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 p-1">
+              {(
+                [
+                  { value: null, label: "None" },
+                  { value: "phone", label: "Phone" },
+                  { value: "laptop", label: "Laptop" },
+                ] as const
+              ).map((opt) => {
+                const active = (clip.frame ?? null) === opt.value;
+                return (
+                  <Button
+                    key={opt.label}
+                    type="button"
+                    variant={active ? "secondary" : "ghost"}
+                    size="sm"
+                    className={`flex-1 ${active ? "shadow-sm" : "text-muted-foreground"}`}
+                    onClick={() => onSetFrame(opt.value)}
+                  >
+                    {opt.label}
+                  </Button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+              Render this clip inside a device mockup.
+            </p>
+          </div>
           <ClipStyleSection
             key={clip.id}
             style={clip.style}

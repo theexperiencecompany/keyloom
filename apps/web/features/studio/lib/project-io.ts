@@ -108,6 +108,9 @@ export function parseProjectJson(text: string): ParseResult {
       durationInFrames: resolvedDuration,
       props: propsObj,
       ...(mergedStyle ? { style: mergedStyle } : {}),
+      ...(c.frame === "phone" || c.frame === "laptop"
+        ? { frame: c.frame as "phone" | "laptop" }
+        : {}),
       ...(Array.isArray(c.effects)
         ? { effects: c.effects as ClipEffect[] }
         : {}),

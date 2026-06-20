@@ -3,6 +3,7 @@ import { effectsById } from "@workspace/compositions/effects/registry";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
 import {
   type Clip,
+  type ClipFrame,
   DEFAULT_PROJECT,
   type Project,
   type ProjectAudio,
@@ -52,6 +53,7 @@ export type StudioAction =
   | { type: "TOGGLE_PANEL"; panel: StudioPanel }
   | { type: "UPDATE_CLIP_STYLE"; clipId: string; patch: Partial<ClipStyle> }
   | { type: "RESET_CLIP_STYLE"; clipId: string }
+  | { type: "SET_CLIP_FRAME"; clipId: string; frame: ClipFrame | null }
   | {
       type: "UPDATE_CLIP_TRANSITION";
       clipId: string;
@@ -183,6 +185,17 @@ export function studioReducer(
       const clips = state.project.clips.map((c) =>
         c.id === action.clipId ? { ...c, style: undefined } : c,
       );
+      return { ...state, project: { ...state.project, clips } };
+    }
+    case "SET_CLIP_FRAME": {
+      const clips = state.project.clips.map((c) => {
+        if (c.id !== action.clipId) return c;
+        if (!action.frame) {
+          const { frame: _drop, ...rest } = c;
+          return rest;
+        }
+        return { ...c, frame: action.frame };
+      });
       return { ...state, project: { ...state.project, clips } };
     }
     case "UPDATE_CLIP_TRANSITION": {

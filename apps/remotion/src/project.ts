@@ -7,6 +7,9 @@ import {
   type SceneTransition,
 } from "./transitions";
 
+/** Device mockup a clip can render inside (studio Frame toggle). */
+export type ClipFrame = "phone" | "laptop";
+
 export type Clip = {
   id: string;
   compositionId: string;
@@ -15,6 +18,11 @@ export type Clip = {
   effects?: ClipEffect[];
   /** Universal visual overrides — see `clip-style.ts`. */
   style?: ClipStyle;
+  /**
+   * Optional device mockup this clip renders inside (Inspector → Frame).
+   * Wraps the composition in PhoneFrame / LaptopFrame at render time.
+   */
+  frame?: ClipFrame;
   /**
    * How this clip enters from the previous one. The transition window
    * overlaps the tail of the previous clip with the head of this one, so

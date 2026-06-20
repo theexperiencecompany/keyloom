@@ -62,7 +62,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width: canvasW, height: canvasH } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -76,7 +76,10 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
     fps,
     config: { damping: 14, stiffness: 110, mass: 0.85 },
   });
-  const scale = 0.9 + drop * 0.1;
+  // Fit the laptop to whatever canvas it's in (standalone 16:9 OR a per-clip
+  // frame on any aspect), leaving a small margin. ~1620×980 is the full body.
+  const fitScale = Math.min((canvasW * 0.94) / 1620, (canvasH * 0.94) / 980);
+  const scale = (0.9 + drop * 0.1) * fitScale;
   const ty = (1 - drop) * 60;
 
   const Component = componentsById[innerCompositionId];

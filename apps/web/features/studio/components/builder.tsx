@@ -436,6 +436,13 @@ export function Builder() {
                           clipId: selectedClip.id,
                         })
                       }
+                      onSetFrame={(frame) =>
+                        dispatch({
+                          type: "SET_CLIP_FRAME",
+                          clipId: selectedClip.id,
+                          frame,
+                        })
+                      }
                       onUpdateTransition={(transition) =>
                         dispatch({
                           type: "UPDATE_CLIP_TRANSITION",

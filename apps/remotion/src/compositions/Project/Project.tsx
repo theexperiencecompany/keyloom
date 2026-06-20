@@ -89,13 +89,32 @@ export const ProjectComposition: React.FC<Project> = ({
                 ...themeProps,
               };
 
-          const content = Component ? (
-            <Component key={`c-${clip.id}`} {...clip.props} {...contentStyle} />
-          ) : (
+          // Optional device mockup (Inspector → Frame). Render the clip's
+          // composition INSIDE PhoneFrame / LaptopFrame by feeding it as the
+          // frame's inner composition; style/theme ride along via innerProps so
+          // the framed clip keeps its look.
+          const FrameComp =
+            clip.frame === "phone"
+              ? componentsById.PhoneFrame
+              : clip.frame === "laptop"
+                ? componentsById.LaptopFrame
+                : null;
+
+          const content = !Component ? (
             <MissingClip
               key={`c-${clip.id}`}
               compositionId={clip.compositionId}
             />
+          ) : FrameComp ? (
+            <FrameComp
+              key={`c-${clip.id}`}
+              device="dynamic-island"
+              innerCompositionId={clip.compositionId}
+              innerProps={{ ...clip.props, ...contentStyle }}
+              screenImage=""
+            />
+          ) : (
+            <Component key={`c-${clip.id}`} {...clip.props} {...contentStyle} />
           );
 
           const inner =
