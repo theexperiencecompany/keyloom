@@ -18,7 +18,6 @@ export const tweetCardDefaultProps: TweetCardProps = {
   likes: 18432,
   views: 412000,
   theme: "light",
-  backgroundColor: "#ffffff",
 };
 
 export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
@@ -34,7 +33,6 @@ export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
   width: TWEET_CARD_WIDTH,
   height: TWEET_CARD_HEIGHT,
   defaultProps: tweetCardDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "text", key: "displayName", label: "Display name" },
     { kind: "text", key: "handle", label: "Handle" },
@@ -63,6 +61,5 @@ export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
         { value: "dark", label: "Dark" },
       ],
     },
-    { kind: "color", key: "backgroundColor", label: "Background color" },
   ],
 };

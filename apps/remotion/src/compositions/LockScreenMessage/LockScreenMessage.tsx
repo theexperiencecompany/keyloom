@@ -7,6 +7,7 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -55,6 +56,9 @@ export type LockScreenMessageProps = {
   n3Body?: string;
   n3Time?: string;
   n3Avatar?: string;
+
+  /** Universal Style — base background, clock text color, font. */
+  clipStyle?: ClipStyle;
 };
 
 type Notif = {
@@ -103,9 +107,17 @@ function collectNotifs(p: LockScreenMessageProps): Notif[] {
 }
 
 export const LockScreenMessage: React.FC<LockScreenMessageProps> = (props) => {
-  const { time, date, wallpaper } = props;
+  const { time, date, wallpaper, clipStyle } = props;
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+
+  const s = resolveClipStyle(clipStyle, {
+    background: "#0c1018",
+    color: "#ffffff",
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: "#ffffff",
+  });
 
   const wallpaperSrc =
     resolveAsset(wallpaper) ?? staticFile(DEFAULT_WALLPAPER_SRC);
@@ -121,9 +133,8 @@ export const LockScreenMessage: React.FC<LockScreenMessageProps> = (props) => {
   return (
     <AbsoluteFill
       style={{
-        background: "#0c1018",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        background: s.background,
+        fontFamily: s.fontFamily,
         overflow: "hidden",
       }}
     >
@@ -161,7 +172,7 @@ export const LockScreenMessage: React.FC<LockScreenMessageProps> = (props) => {
           left: 0,
           right: 0,
           textAlign: "center",
-          color: "#fff",
+          color: s.color,
           opacity: clockIn,
           transform: `translate3d(0, ${snap(clockY)}px, 0)`,
         }}

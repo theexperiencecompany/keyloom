@@ -2,6 +2,7 @@
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
+import { FitTargetContext } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { SafeAreaContext } from "../../safe-area";
@@ -15,6 +16,10 @@ export type PhoneFrameProps = {
   screenImage: string;
   innerProps?: Record<string, unknown>;
   clipStyle?: ClipStyle;
+  /** Override how the inner composition fits the screen (e.g. the per-clip
+   *  Frame toggle passes "cover" so the clip fills the screen, not letterboxed
+   *  against black). Falls back to the composition's own `phoneFitMode`. */
+  fitMode?: PhoneFitMode;
 };
 
 const PHONE_W = 760;
@@ -24,9 +29,6 @@ const SCREEN_W = PHONE_W - BEZEL * 2;
 const SCREEN_H = PHONE_H - BEZEL * 2;
 const FRAME_RADIUS = 96;
 const SCREEN_RADIUS = 78;
-// Phone is portrait; canvas is 16:9. Scale the whole phone down so it fits
-// the landscape frame with some vertical breathing room.
-const PHONE_SCALE = 0.6;
 
 // Safe-area insets so the inner composition doesn't render behind the
 // dynamic island / notch (top) or the home indicator (bottom). The bottom
@@ -59,9 +61,10 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
   screenImage,
   innerProps,
   clipStyle,
+  fitMode,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width: canvasW, height: canvasH } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -75,7 +78,14 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
     fps,
     config: { damping: 14, stiffness: 110, mass: 0.85 },
   });
-  const scale = (0.9 + drop * 0.1) * PHONE_SCALE;
+  // Fit the phone to whatever canvas it's rendered in (it's used both as a
+  // standalone 16:9 composition AND as a per-clip frame on portrait canvases),
+  // leaving a small margin so the device never touches the edges.
+  const fitScale = Math.min(
+    (canvasW * 0.94) / PHONE_W,
+    (canvasH * 0.94) / PHONE_H,
+  );
+  const scale = (0.9 + drop * 0.1) * fitScale;
   const ty = (1 - drop) * 60;
 
   const Component = componentsById[innerCompositionId];
@@ -133,16 +143,28 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
               }}
             />
           ) : Component && innerInfo ? (
-            <ScaledScene
-              Component={Component}
-              compW={innerInfo.width}
-              compH={innerInfo.height}
-              defaultProps={innerInfo.defaultProps}
-              overrideProps={innerProps}
-              insetTop={SAFE_INSETS[device].top}
-              insetBottom={SAFE_INSETS[device].bottom}
-              fitMode={innerInfo.phoneFitMode ?? "width"}
-            />
+            !fitMode &&
+            !innerInfo.phoneFitMode &&
+            innerInfo.height > innerInfo.width ? (
+              // Responsive portrait comp: let its own background fill the whole
+              // screen and keep its content contained — no crop, no black bars.
+              <ScreenFillScene
+                Component={Component}
+                defaultProps={innerInfo.defaultProps}
+                overrideProps={innerProps}
+              />
+            ) : (
+              <ScaledScene
+                Component={Component}
+                compW={innerInfo.width}
+                compH={innerInfo.height}
+                defaultProps={innerInfo.defaultProps}
+                overrideProps={innerProps}
+                insetTop={SAFE_INSETS[device].top}
+                insetBottom={SAFE_INSETS[device].bottom}
+                fitMode={fitMode ?? innerInfo.phoneFitMode ?? "width"}
+              />
+            )
           ) : (
             <FallbackScreen />
           )}
@@ -159,6 +181,34 @@ export const PhoneFrame: React.FC<PhoneFrameProps> = ({
     </AbsoluteFill>
   );
 };
+
+/**
+ * Renders a responsive (FitContent-based) composition so it FILLS the phone
+ * screen: its background covers the screen and its content is contained,
+ * scaled to fit — no crop, no black letterbox. Works by handing the screen
+ * size to FitContent through FitTargetContext.
+ */
+function ScreenFillScene({
+  Component,
+  defaultProps,
+  overrideProps,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Component: React.ComponentType<any>;
+  defaultProps: Record<string, unknown>;
+  overrideProps?: Record<string, unknown>;
+}) {
+  const merged = overrideProps
+    ? { ...defaultProps, ...overrideProps }
+    : defaultProps;
+  return (
+    <FitTargetContext.Provider value={{ width: SCREEN_W, height: SCREEN_H }}>
+      <div style={{ position: "absolute", inset: 0 }}>
+        <Component {...merged} />
+      </div>
+    </FitTargetContext.Provider>
+  );
+}
 
 function ScaledScene({
   Component,
@@ -224,7 +274,9 @@ function ScaledScene({
       }}
     >
       <SafeAreaContext.Provider value={safeArea}>
-        <Component {...merged} />
+        <FitTargetContext.Provider value={{ width: compW, height: compH }}>
+          <Component {...merged} />
+        </FitTargetContext.Provider>
       </SafeAreaContext.Provider>
     </div>
   );

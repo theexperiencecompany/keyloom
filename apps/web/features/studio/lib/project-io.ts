@@ -1,10 +1,6 @@
 import type { ClipStyle } from "@workspace/compositions/clip-style";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
-import type {
-  BrandKit,
-  Project,
-  ProjectAudio,
-} from "@workspace/compositions/project";
+import type { Project, ProjectAudio } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 
@@ -112,6 +108,9 @@ export function parseProjectJson(text: string): ParseResult {
       durationInFrames: resolvedDuration,
       props: propsObj,
       ...(mergedStyle ? { style: mergedStyle } : {}),
+      ...(c.frame === "phone" || c.frame === "laptop"
+        ? { frame: c.frame as "phone" | "laptop" }
+        : {}),
       ...(Array.isArray(c.effects)
         ? { effects: c.effects as ClipEffect[] }
         : {}),
@@ -128,7 +127,6 @@ export function parseProjectJson(text: string): ParseResult {
       : undefined;
 
   const audio = parseAudio(obj.audio, warnings);
-  const brandKit = parseBrandKit(obj.brandKit, warnings);
 
   return {
     ok: true,
@@ -140,30 +138,8 @@ export function parseProjectJson(text: string): ParseResult {
       clips: validClips,
       ...(defaultTransition ? { defaultTransition } : {}),
       ...(audio ? { audio } : {}),
-      ...(brandKit ? { brandKit } : {}),
     },
   };
-}
-
-function parseBrandKit(raw: unknown, warnings: string[]): BrandKit | null {
-  if (!raw) return null;
-  if (typeof raw !== "object") {
-    warnings.push("`brandKit` must be an object — ignored.");
-    return null;
-  }
-  const k = raw as Record<string, unknown>;
-  const result: BrandKit = {};
-  if (typeof k.brandName === "string" && k.brandName.trim())
-    result.brandName = k.brandName;
-  if (typeof k.logoUrl === "string" && k.logoUrl.trim())
-    result.logoUrl = k.logoUrl;
-  if (typeof k.primaryColor === "string" && k.primaryColor.trim())
-    result.primaryColor = k.primaryColor;
-  if (typeof k.secondaryColor === "string" && k.secondaryColor.trim())
-    result.secondaryColor = k.secondaryColor;
-  if (typeof k.fontFamily === "string" && k.fontFamily.trim())
-    result.fontFamily = k.fontFamily;
-  return Object.keys(result).length > 0 ? result : null;
 }
 
 function parseAudio(raw: unknown, warnings: string[]): ProjectAudio | null {

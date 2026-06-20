@@ -57,7 +57,6 @@ export const discordMessagesInfo: CompositionInfo<DiscordMessagesProps> = {
   width: DISCORD_MESSAGES_WIDTH,
   height: DISCORD_MESSAGES_HEIGHT,
   defaultProps: discordMessagesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Channel name" },

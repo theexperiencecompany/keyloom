@@ -2,6 +2,7 @@
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
+import { FitTargetContext } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
@@ -13,6 +14,8 @@ export type LaptopFrameProps = {
   screenImage: string;
   innerProps?: Record<string, unknown>;
   clipStyle?: ClipStyle;
+  /** "cover" fills the screen (per-clip Frame toggle) instead of letterboxing. */
+  fitMode?: "contain" | "cover";
 };
 
 const LID_W = 1440;
@@ -59,9 +62,10 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
   screenImage,
   innerProps,
   clipStyle,
+  fitMode,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width: canvasW, height: canvasH } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -75,7 +79,10 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
     fps,
     config: { damping: 14, stiffness: 110, mass: 0.85 },
   });
-  const scale = 0.9 + drop * 0.1;
+  // Fit the laptop to whatever canvas it's in (standalone 16:9 OR a per-clip
+  // frame on any aspect), leaving a small margin. ~1620×980 is the full body.
+  const fitScale = Math.min((canvasW * 0.94) / 1620, (canvasH * 0.94) / 980);
+  const scale = (0.9 + drop * 0.1) * fitScale;
   const ty = (1 - drop) * 60;
 
   const Component = componentsById[innerCompositionId];
@@ -157,6 +164,7 @@ export const LaptopFrame: React.FC<LaptopFrameProps> = ({
                 compH={innerInfo.height}
                 defaultProps={innerInfo.defaultProps}
                 overrideProps={innerProps}
+                cover={fitMode === "cover"}
               />
             ) : (
               <FallbackScreen />
@@ -215,6 +223,7 @@ function ScaledScene({
   compH,
   defaultProps,
   overrideProps,
+  cover,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
@@ -222,9 +231,12 @@ function ScaledScene({
   compH: number;
   defaultProps: Record<string, unknown>;
   overrideProps?: Record<string, unknown>;
+  cover?: boolean;
 }) {
-  // Contain mode: fit the whole composition inside the screen with letterbox if needed.
-  const fit = Math.min(SCREEN_W / compW, SCREEN_H / compH);
+  // "cover" fills the screen (crops overflow); otherwise contain with letterbox.
+  const fit = cover
+    ? Math.max(SCREEN_W / compW, SCREEN_H / compH)
+    : Math.min(SCREEN_W / compW, SCREEN_H / compH);
   const renderedW = compW * fit;
   const renderedH = compH * fit;
   const offsetX = (SCREEN_W - renderedW) / 2;
@@ -253,7 +265,9 @@ function ScaledScene({
           transformOrigin: "top left",
         }}
       >
-        <Component {...merged} />
+        <FitTargetContext.Provider value={{ width: compW, height: compH }}>
+          <Component {...merged} />
+        </FitTargetContext.Provider>
       </div>
     </div>
   );

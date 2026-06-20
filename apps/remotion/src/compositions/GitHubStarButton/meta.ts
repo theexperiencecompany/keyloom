@@ -27,7 +27,6 @@ export const githubStarButtonInfo: CompositionInfo<GitHubStarButtonProps> = {
   width: GITHUB_STAR_BUTTON_WIDTH,
   height: GITHUB_STAR_BUTTON_HEIGHT,
   defaultProps: githubStarButtonDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "text", key: "owner", label: "Owner" },
     { kind: "text", key: "repo", label: "Repo" },

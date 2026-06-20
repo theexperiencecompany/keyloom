@@ -80,22 +80,47 @@ export const ProjectComposition: React.FC<Project> = ({
               ? { clipTheme: themeId }
               : {};
 
+          // The clip's resolved universal style (undefined for brand-locked
+          // comps). When a Background Scene is set, the clip's own background
+          // goes transparent so the scene shows through.
+          const resolvedClipStyle = isLocked
+            ? undefined
+            : hasBackdrop
+              ? { ...clip.style, backgroundColor: "transparent" }
+              : clip.style;
           const contentStyle = isLocked
             ? themeProps
-            : {
-                clipStyle: hasBackdrop
-                  ? { ...clip.style, backgroundColor: "transparent" }
-                  : clip.style,
-                ...themeProps,
-              };
+            : { clipStyle: resolvedClipStyle, ...themeProps };
 
-          const content = Component ? (
-            <Component key={`c-${clip.id}`} {...clip.props} {...contentStyle} />
-          ) : (
+          // Optional device mockup (Inspector → Frame). Render the clip's
+          // composition INSIDE PhoneFrame / LaptopFrame. The clip's style rides
+          // along via innerProps AND is handed to the frame itself, so the
+          // background (color or scene) fills the area AROUND the device too —
+          // otherwise the frame paints its own white bg and the clip's
+          // background is lost.
+          const FrameComp =
+            clip.frame === "phone"
+              ? componentsById.PhoneFrame
+              : clip.frame === "laptop"
+                ? componentsById.LaptopFrame
+                : null;
+
+          const content = !Component ? (
             <MissingClip
               key={`c-${clip.id}`}
               compositionId={clip.compositionId}
             />
+          ) : FrameComp ? (
+            <FrameComp
+              key={`c-${clip.id}`}
+              device="dynamic-island"
+              innerCompositionId={clip.compositionId}
+              innerProps={{ ...clip.props, ...contentStyle }}
+              clipStyle={resolvedClipStyle}
+              screenImage=""
+            />
+          ) : (
+            <Component key={`c-${clip.id}`} {...clip.props} {...contentStyle} />
           );
 
           const inner =

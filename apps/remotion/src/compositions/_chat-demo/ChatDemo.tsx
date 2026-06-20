@@ -85,6 +85,24 @@ function DoodleTiles({
   );
 }
 
+/**
+ * Universal Style overrides forwarded from an unlocked chat composition. Each
+ * field is optional — undefined means "keep the platform's authentic default".
+ * A platform renderer applies only the fields that have a clean single mapping
+ * in its layout.
+ */
+export type ClipOverrides = {
+  background?: string;
+  color?: string;
+  fontFamily?: string;
+  accent?: string;
+};
+
+/** Use the override if set (non-empty), otherwise the authentic default. */
+function ov(value: string | undefined, fallback: string): string {
+  return value && value.trim() !== "" ? value : fallback;
+}
+
 export type ChatPlatform =
   | "imessage"
   | "whatsapp"
@@ -619,6 +637,18 @@ export interface ChatDemoProps {
   pressT?: number;
   /** iMessage only: 0→1 keyboard slide-up progress. */
   keyboardOpen?: number;
+  /**
+   * Universal Style overrides forwarded by the (now unlocked) chat
+   * compositions. Each platform renderer applies the single clean mapping that
+   * fits its layout: `clipBackground` → chat-screen background, `clipColor` →
+   * primary message text, `clipFontFamily` → root font, `clipAccent` → the one
+   * obvious brand accent (outgoing bubble / send button / header tint). Unset
+   * (undefined) means keep the authentic default.
+   */
+  clipBackground?: string;
+  clipColor?: string;
+  clipFontFamily?: string;
+  clipAccent?: string;
 }
 
 const DEFAULT_AVATAR = "/gaia-glow.png";
@@ -648,7 +678,17 @@ export function ChatDemo({
   pressedKey,
   pressT,
   keyboardOpen,
+  clipBackground,
+  clipColor,
+  clipFontFamily,
+  clipAccent,
 }: ChatDemoProps) {
+  const clip: ClipOverrides = {
+    background: clipBackground,
+    color: clipColor,
+    fontFamily: clipFontFamily,
+    accent: clipAccent,
+  };
   switch (platform) {
     case "imessage":
       return (
@@ -680,6 +720,7 @@ export function ChatDemo({
           headerAvatar={headerAvatar ?? DEFAULT_AVATAR}
           showComposer={showComposer}
           className={className}
+          clip={clip}
         />
       );
     case "slack":
@@ -691,6 +732,7 @@ export function ChatDemo({
           showComposer={showComposer}
           theme={theme ?? "light"}
           className={className}
+          clip={clip}
         />
       );
     case "discord":
@@ -701,6 +743,7 @@ export function ChatDemo({
           subtitle={subtitle}
           showComposer={showComposer}
           className={className}
+          clip={clip}
         />
       );
     case "telegram":
@@ -712,6 +755,7 @@ export function ChatDemo({
           headerAvatar={headerAvatar ?? DEFAULT_AVATAR}
           showComposer={showComposer}
           className={className}
+          clip={clip}
         />
       );
   }
@@ -1855,6 +1899,7 @@ function WhatsAppDemo({
   headerAvatar,
   showComposer,
   className,
+  clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
@@ -1862,22 +1907,27 @@ function WhatsAppDemo({
   headerAvatar?: string;
   showComposer: boolean;
   className?: string;
+  clip?: ClipOverrides;
 }) {
-  // Palette extracted from WhatsApp Chat.svg
-  const bg = "#EFEFF4";
+  // Palette extracted from WhatsApp Chat.svg. The universal Style controls
+  // override the chat-screen background, primary text, root font, and the
+  // signature green outgoing bubble (accent); chrome/incoming/meta stay
+  // authentic.
+  const bg = ov(clip?.background, "#EFEFF4");
   const chromeBg = "#F6F6F6";
-  const myBubble = "#DCF7C5";
+  const myBubble = ov(clip?.accent, "#DCF7C5");
   const theirBubble = "#FFFFFF";
-  const textColor = "#060606";
+  const textColor = ov(clip?.color, "#060606");
   const metaColor = "rgba(0,0,0,0.45)";
   const accent = "#007AFF";
+  const fontStack = ov(clip?.fontFamily, SF_STACK);
 
   const grouped = curvedThread(messages);
 
   return (
     <div
       className={cn("flex h-full flex-col", className)}
-      style={{ background: bg, fontFamily: SF_STACK, color: textColor }}
+      style={{ background: bg, fontFamily: fontStack, color: textColor }}
     >
       {/* Header — iOS chrome from WhatsApp Chat.svg (#F6F6F6) */}
       <div className="flex shrink-0 flex-col" style={{ background: chromeBg }}>
@@ -2147,6 +2197,7 @@ function TelegramDemo({
   headerAvatar,
   showComposer,
   className,
+  clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
@@ -2154,23 +2205,28 @@ function TelegramDemo({
   headerAvatar?: string;
   showComposer: boolean;
   className?: string;
+  clip?: ClipOverrides;
 }) {
-  // Palette extracted from Telegram Chat.svg
+  // Palette extracted from Telegram Chat.svg. The universal Style overrides the
+  // chat-screen wallpaper (blueOverlay), primary text, root font, and the
+  // Telegram-blue accent (header/composer icons). Bubbles/meta stay authentic.
   const chromeBg = "#F6F6F6";
-  const blueOverlay = "#2B78CD"; // 50% over the doodle pattern
+  const hasBgOverride = !!clip?.background && clip.background.trim() !== "";
+  const blueOverlay = ov(clip?.background, "#2B78CD"); // 50% over the doodle pattern
   const myBubble = "#E1FEC6";
   const theirBubble = "#FFFFFF";
-  const textColor = "#060606";
+  const textColor = ov(clip?.color, "#060606");
   const metaColor = "#858E99";
   const myMeta = "#3EAA3C";
-  const accent = "#037EE5";
+  const accent = ov(clip?.accent, "#037EE5");
+  const fontStack = ov(clip?.fontFamily, SF_STACK);
 
   const grouped = curvedThread(messages);
 
   return (
     <div
       className={cn("flex h-full flex-col", className)}
-      style={{ fontFamily: SF_STACK, color: textColor, background: chromeBg }}
+      style={{ fontFamily: fontStack, color: textColor, background: chromeBg }}
     >
       {/* iOS header */}
       <div className="flex shrink-0 flex-col" style={{ background: chromeBg }}>
@@ -2260,15 +2316,17 @@ function TelegramDemo({
           cols={3}
           rows={2}
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(43,120,205,0.5)",
-            pointerEvents: "none",
-            zIndex: 1,
-          }}
-        />
+        {!hasBgOverride && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(43,120,205,0.5)",
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          />
+        )}
         <div
           className="relative flex flex-1 flex-col"
           style={{ gap: 8, zIndex: 2 }}
@@ -2444,6 +2502,7 @@ function SlackDemo({
   showComposer,
   theme,
   className,
+  clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
@@ -2451,19 +2510,26 @@ function SlackDemo({
   showComposer: boolean;
   theme: "light" | "dark";
   className?: string;
+  clip?: ClipOverrides;
 }) {
   const isDark = theme === "dark";
-  const bg = isDark ? "#1A1D21" : "#FFFFFF";
-  const fg = isDark ? "#D1D2D3" : "#1D1C1D";
+  // Slack is a channel view (no outgoing bubble), so the universal Style maps
+  // background, primary text, and font here. `theme` still decides the default
+  // background; a clipStyle override wins when set. Accent has no single clean
+  // element in this layout (links/send are Slack blue, per message), so it's
+  // left authentic.
+  const bg = ov(clip?.background, isDark ? "#1A1D21" : "#FFFFFF");
+  const fg = ov(clip?.color, isDark ? "#D1D2D3" : "#1D1C1D");
   const muted = isDark ? "#ABABAD" : "#616061";
   const headerBorder = isDark ? "#2F3236" : "#E8E8E8";
+  const fontStack = ov(clip?.fontFamily, SLACK_STACK);
 
   const groups = groupByAuthor(messages);
 
   return (
     <div
       className={cn("flex h-full flex-col", className)}
-      style={{ background: bg, color: fg, fontFamily: SLACK_STACK }}
+      style={{ background: bg, color: fg, fontFamily: fontStack }}
     >
       <div
         className="flex shrink-0 items-center justify-between border-b px-4"
@@ -2954,24 +3020,31 @@ function DiscordDemo({
   subtitle: _subtitle,
   showComposer,
   className,
+  clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
   subtitle?: string;
   showComposer: boolean;
   className?: string;
+  clip?: ClipOverrides;
 }) {
-  const bg = "#1E1F22";
-  const fg = "#DBDEE1";
+  // Universal Style overrides the dark channel background, primary text, root
+  // font, and the blurple accent (the gift icon — the one obvious brand-accent
+  // element in this layout). Other chrome stays authentic.
+  const bg = ov(clip?.background, "#1E1F22");
+  const fg = ov(clip?.color, "#DBDEE1");
   const muted = "#949BA4";
   const iconBg = "#2B2D31";
+  const accent = ov(clip?.accent, "#5865F2");
+  const fontStack = ov(clip?.fontFamily, DISCORD_STACK);
 
   const groups = groupByAuthor(messages);
 
   return (
     <div
       className={cn("flex h-full flex-col", className)}
-      style={{ background: bg, color: fg, fontFamily: DISCORD_STACK }}
+      style={{ background: bg, color: fg, fontFamily: fontStack }}
     >
       {/* Channel header */}
       <div
@@ -3180,7 +3253,7 @@ function DiscordDemo({
           <DiscordCircleButton bg={iconBg} fg={fg} label="Stickers">
             <DiscordStickerIcon size={20} />
           </DiscordCircleButton>
-          <DiscordCircleButton bg={iconBg} fg="#5865F2" label="Gift">
+          <DiscordCircleButton bg={iconBg} fg={accent} label="Gift">
             <DiscordGiftIcon size={20} />
           </DiscordCircleButton>
           <div

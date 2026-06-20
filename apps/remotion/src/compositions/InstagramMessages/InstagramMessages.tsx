@@ -7,6 +7,7 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import type { ChatMessage } from "../../editors/types";
 import { proxyExternalImg } from "../../proxy-image";
 import { useSafeArea } from "../../safe-area";
@@ -20,6 +21,8 @@ export type InstagramMessagesProps = {
   messages: ChatMessage[];
   theme: "light" | "dark";
   orientation?: "landscape" | "portrait";
+  /** Universal Style — background, received-bubble text, font, sent accent. */
+  clipStyle?: ClipStyle;
 };
 
 // 9:19.5 — modern iPhone screen aspect ratio.
@@ -35,6 +38,8 @@ const SENT_BG = "#A23CF8";
 
 type Palette = {
   bg: string;
+  /** Outgoing (sent) bubble background — the universal accent. */
+  sentBg: string;
   headerBg: string;
   headerBorder: string;
   headerText: string;
@@ -55,6 +60,7 @@ function getPalette(theme: "light" | "dark"): Palette {
   if (theme === "dark") {
     return {
       bg: "#000000",
+      sentBg: SENT_BG,
       headerBg: "#000000",
       headerBorder: "rgba(255,255,255,0.1)",
       headerText: "#ffffff",
@@ -73,6 +79,7 @@ function getPalette(theme: "light" | "dark"): Palette {
   }
   return {
     bg: "#ffffff",
+    sentBg: SENT_BG,
     headerBg: "#ffffff",
     headerBorder: "rgba(0,0,0,0.08)",
     headerText: "#0f1014",
@@ -96,10 +103,29 @@ export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
   messages,
   theme,
   orientation = "landscape",
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
-  const palette = getPalette(theme);
+  const basePalette = getPalette(theme);
+  const s = resolveClipStyle(clipStyle, {
+    background: basePalette.bg,
+    color: basePalette.bubbleReceivedText,
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    accent: basePalette.sentBg,
+  });
+  // Universal Style on top of the theme palette: chat-sheet background,
+  // received-bubble text, and the sent bubble accent. Header/composer chrome
+  // and the IG gradient + button keep their authentic per-theme look.
+  const palette: Palette = {
+    ...basePalette,
+    bg: s.background,
+    headerBg: s.background,
+    composerBg: s.background,
+    bubbleReceivedText: s.color,
+    sentBg: s.accent,
+  };
   const safe = useSafeArea();
   // Auto-portrait inside a device frame (see ChatFill for the same logic).
   const inDeviceFrame = safe.top > 0 || safe.bottom > 0;
@@ -113,8 +139,7 @@ export const InstagramMessages: React.FC<InstagramMessagesProps> = ({
         inset: 0,
         background: palette.bg,
         color: palette.bubbleReceivedText,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        fontFamily: s.fontFamily,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
@@ -648,7 +673,7 @@ function TypingBubble({
   return (
     <div
       style={{
-        background: isRight ? SENT_BG : palette.receivedBg,
+        background: isRight ? palette.sentBg : palette.receivedBg,
         padding: "22px 28px",
         borderRadius: 36,
         display: "flex",
@@ -704,7 +729,7 @@ function MessageBubble({
   return (
     <div
       style={{
-        background: isRight ? SENT_BG : palette.receivedBg,
+        background: isRight ? palette.sentBg : palette.receivedBg,
         color: isRight ? palette.bubbleSentText : palette.bubbleReceivedText,
         padding: "18px 26px",
         borderRadius: 36,

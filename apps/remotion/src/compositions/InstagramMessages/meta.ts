@@ -38,7 +38,6 @@ export const instagramMessagesInfo: CompositionInfo<InstagramMessagesProps> = {
   width: INSTAGRAM_MESSAGES_WIDTH,
   height: INSTAGRAM_MESSAGES_HEIGHT,
   defaultProps: instagramMessagesDefaultProps,
-  brandMode: "locked",
   phoneFitMode: "cover",
   fields: [
     { kind: "text", key: "contactName", label: "Contact name" },

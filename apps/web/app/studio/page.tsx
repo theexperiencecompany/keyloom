@@ -23,9 +23,6 @@ export default function StudioPage() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Button asChild>
-              <Link href="/docs">Browse the docs</Link>
-            </Button>
-            <Button variant="outline" asChild>
               <Link href="/">Back home</Link>
             </Button>
           </div>

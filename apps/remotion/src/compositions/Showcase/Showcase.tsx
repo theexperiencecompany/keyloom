@@ -8,6 +8,7 @@ import {
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase } from "../../componentsBase";
+import { FitTargetContext } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
@@ -204,7 +205,15 @@ export const Showcase: React.FC<ShowcaseProps> = ({
             accent={s.accent}
           >
             {Child ? (
-              <Child {...childProps} />
+              <FitTargetContext.Provider
+                value={
+                  childInfo
+                    ? { width: childInfo.width, height: childInfo.height }
+                    : null
+                }
+              >
+                <Child {...childProps} />
+              </FitTargetContext.Provider>
             ) : (
               <div
                 style={{

@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  Book01Icon,
-  TextFontIcon,
-  VideoAiIcon,
-} from "@hugeicons/core-free-icons";
+import { VideoAiIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
+import type { CompositionCategory } from "@workspace/compositions/schema";
 import {
   CommandDialog,
   CommandEmpty,
@@ -16,63 +13,39 @@ import {
   CommandList,
 } from "@workspace/ui/components/command";
 import { useRouter } from "next/navigation";
-import { docs } from "@/lib/docs";
 
-const compositionIds = new Set(compositions.map((c) => c.id));
-const textAnimationIds = new Set(
-  compositions.filter((c) => c.id.startsWith("Title")).map((c) => c.id),
-);
-
-type SearchItem = { title: string; description: string; href: string };
-type SearchGroup = {
-  heading: string;
-  icon: typeof Book01Icon;
-  items: SearchItem[];
+// Product search: jump straight to a component's editor. (Docs were removed —
+// this used to index doc pages; now it indexes the component library.)
+const CATEGORY_LABELS: Record<CompositionCategory, string> = {
+  text: "Text",
+  social: "Social Media",
+  data: "Charts & Data",
+  devtools: "Dev Tools",
+  marketing: "Marketing",
+  layout: "Frames & Mockups",
+  captions: "Captions",
+  media: "Media",
+  background: "Backgrounds",
 };
 
-function buildSearchGroups(): SearchGroup[] {
-  const gettingStarted: SearchGroup = {
-    heading: "Getting Started",
-    icon: Book01Icon,
-    items: [],
-  };
-  const textAnimations: SearchGroup = {
-    heading: "Text Animations",
-    icon: TextFontIcon,
-    items: [],
-  };
-  const templates: SearchGroup = {
-    heading: "Templates",
-    icon: VideoAiIcon,
-    items: [],
-  };
+const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
 
-  for (const doc of docs) {
-    const item: SearchItem = {
-      title: doc.meta.title,
-      description: doc.meta.description,
-      href: doc.href,
-    };
-    if (!compositionIds.has(doc.slug)) {
-      gettingStarted.items.push(item);
-    } else if (textAnimationIds.has(doc.slug)) {
-      textAnimations.items.push(item);
-    } else {
-      templates.items.push(item);
-    }
-  }
+type SearchItem = { title: string; description: string; href: string };
+type SearchGroup = { heading: string; items: SearchItem[] };
 
-  return [gettingStarted, textAnimations, templates].filter(
-    (g) => g.items.length > 0,
-  );
-}
-
-const searchGroups = buildSearchGroups();
+const searchGroups: SearchGroup[] = CATEGORY_ORDER.map((cat) => ({
+  heading: CATEGORY_LABELS[cat],
+  // Backgrounds are studio-only backdrops — not searchable as components.
+  items: compositions
+    .filter((c) => c.category === cat && c.category !== "background")
+    .map((c) => ({
+      title: c.title,
+      description: c.description,
+      href: `/component/${c.id}/edit`,
+    })),
+})).filter((g) => g.items.length > 0);
 
 // Rank items so title substring matches always beat keyword/fuzzy matches.
-// cmdk's default fuzzy scorer happily matches "whatsapp" against any string
-// containing those letters in order (e.g. "monospaced typewriter…"), which
-// pushes unrelated entries above the obvious result.
 function scoreItem(value: string, search: string, keywords?: string[]): number {
   if (!search) return 1;
   const v = value.toLowerCase();
@@ -80,7 +53,6 @@ function scoreItem(value: string, search: string, keywords?: string[]): number {
   if (!s) return 1;
   if (v === s) return 1;
   if (v.startsWith(s)) return 0.95;
-  // Word-boundary match in title (e.g. "whatsapp messages" matches "messages").
   const titleWords = v.split(/\s+/);
   if (titleWords.some((w) => w.startsWith(s))) return 0.9;
   if (v.includes(s)) return 0.8;
@@ -105,11 +77,11 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Search docs"
-      description="Search documentation pages"
+      title="Search components"
+      description="Search the component library"
       filter={scoreItem}
     >
-      <CommandInput placeholder="Search docs..." />
+      <CommandInput placeholder="Search components..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         {searchGroups.map((group) => (
@@ -122,7 +94,7 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
                 onSelect={() => handleSelect(item.href)}
               >
                 <HugeiconsIcon
-                  icon={group.icon}
+                  icon={VideoAiIcon}
                   size={14}
                   className="shrink-0 opacity-60"
                 />

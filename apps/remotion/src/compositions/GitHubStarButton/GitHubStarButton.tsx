@@ -6,6 +6,7 @@ import {
   spring,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
 
@@ -15,6 +16,7 @@ export type GitHubStarButtonProps = {
   startCount: number;
   endCount: number;
   theme: "light" | "dark";
+  clipStyle?: ClipStyle;
 };
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
@@ -63,10 +65,19 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
   startCount,
   endCount,
   theme,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const t = THEME[theme];
+
+  const s = resolveClipStyle(clipStyle, {
+    background: theme === "dark" ? "#010409" : "#ffffff",
+    color: t.text,
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif",
+    accent: STAR_FILLED,
+  });
 
   const enter = spring({
     frame,
@@ -111,13 +122,12 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
   return (
     <AbsoluteFill
       style={{
-        background: t.pageBg,
+        background: s.background,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif",
-        color: t.text,
+        fontFamily: s.fontFamily,
+        color: s.color,
         padding: 80,
       }}
     >
@@ -183,11 +193,13 @@ export const GitHubStarButton: React.FC<GitHubStarButtonProps> = ({
               fillProgress={starFill}
               scale={starScale}
               muted={t.muted}
+              accent={s.accent}
             />
             <span>Star</span>
             <BurstParticles
               age={burstAge}
               active={burstAge > 0 && burstAge < STAR_BURST + 14}
+              accent={s.accent}
             />
           </div>
           <span
@@ -231,10 +243,12 @@ function StarSvg({
   fillProgress,
   scale,
   muted,
+  accent,
 }: {
   fillProgress: number;
   scale: number;
   muted: string;
+  accent: string;
 }) {
   return (
     <svg
@@ -246,15 +260,23 @@ function StarSvg({
     >
       <path
         d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"
-        fill={fillProgress > 0.5 ? STAR_FILLED : "transparent"}
-        stroke={fillProgress > 0.5 ? STAR_FILLED : muted}
+        fill={fillProgress > 0.5 ? accent : "transparent"}
+        stroke={fillProgress > 0.5 ? accent : muted}
         strokeWidth={1}
       />
     </svg>
   );
 }
 
-function BurstParticles({ age, active }: { age: number; active: boolean }) {
+function BurstParticles({
+  age,
+  active,
+  accent,
+}: {
+  age: number;
+  active: boolean;
+  accent: string;
+}) {
   if (!active) return null;
   const t = Math.min(1, age / STAR_BURST);
   const ease = 1 - (1 - t) ** 3;
@@ -282,7 +304,7 @@ function BurstParticles({ age, active }: { age: number; active: boolean }) {
               width: px(4),
               height: px(4),
               borderRadius: "50%",
-              background: STAR_FILLED,
+              background: accent,
               transform: `translate(${x}px, ${y}px) scale(${1 - ease})`,
               opacity: 1 - ease,
             }}

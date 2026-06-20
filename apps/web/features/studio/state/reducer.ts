@@ -2,8 +2,8 @@ import type { ClipStyle } from "@workspace/compositions/clip-style";
 import { effectsById } from "@workspace/compositions/effects/registry";
 import type { ClipEffect } from "@workspace/compositions/effects/schema";
 import {
-  type BrandKit,
   type Clip,
+  type ClipFrame,
   DEFAULT_PROJECT,
   type Project,
   type ProjectAudio,
@@ -53,6 +53,7 @@ export type StudioAction =
   | { type: "TOGGLE_PANEL"; panel: StudioPanel }
   | { type: "UPDATE_CLIP_STYLE"; clipId: string; patch: Partial<ClipStyle> }
   | { type: "RESET_CLIP_STYLE"; clipId: string }
+  | { type: "SET_CLIP_FRAME"; clipId: string; frame: ClipFrame | null }
   | {
       type: "UPDATE_CLIP_TRANSITION";
       clipId: string;
@@ -66,8 +67,6 @@ export type StudioAction =
   | { type: "SET_PROJECT_AUDIO"; audio: ProjectAudio }
   | { type: "UPDATE_PROJECT_AUDIO"; patch: Partial<ProjectAudio> }
   | { type: "CLEAR_PROJECT_AUDIO" }
-  | { type: "UPDATE_BRAND_KIT"; patch: Partial<BrandKit> }
-  | { type: "CLEAR_BRAND_KIT" }
   | { type: "LOAD_PROJECT"; project: Project };
 
 export const initialStudioState: StudioState = {
@@ -188,6 +187,17 @@ export function studioReducer(
       );
       return { ...state, project: { ...state.project, clips } };
     }
+    case "SET_CLIP_FRAME": {
+      const clips = state.project.clips.map((c) => {
+        if (c.id !== action.clipId) return c;
+        if (!action.frame) {
+          const { frame: _drop, ...rest } = c;
+          return rest;
+        }
+        return { ...c, frame: action.frame };
+      });
+      return { ...state, project: { ...state.project, clips } };
+    }
     case "UPDATE_CLIP_TRANSITION": {
       const clips = state.project.clips.map((c) =>
         c.id === action.clipId ? { ...c, transition: action.transition } : c,
@@ -240,32 +250,6 @@ export function studioReducer(
         project: rest,
         selection,
       };
-    }
-    case "UPDATE_BRAND_KIT": {
-      // Merge non-empty fields onto the existing brand kit; empty string
-      // values clear that field (matches the ClipStyle pattern).
-      const next: BrandKit = { ...(state.project.brandKit ?? {}) };
-      for (const [k, v] of Object.entries(action.patch)) {
-        const key = k as keyof BrandKit;
-        if (typeof v === "string" && v.trim() === "") {
-          delete next[key];
-        } else if (v !== undefined) {
-          next[key] = v;
-        }
-      }
-      // If nothing's set after the patch, drop the brandKit field entirely.
-      const hasAny = Object.values(next).some((v) => Boolean(v));
-      const nextProject: Project = hasAny
-        ? { ...state.project, brandKit: next }
-        : (() => {
-            const { brandKit: _drop, ...rest } = state.project;
-            return rest;
-          })();
-      return { ...state, project: nextProject };
-    }
-    case "CLEAR_BRAND_KIT": {
-      const { brandKit: _omit, ...rest } = state.project;
-      return { ...state, project: rest };
     }
     case "SELECT_CLIP":
       return {

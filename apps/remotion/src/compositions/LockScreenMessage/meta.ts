@@ -42,7 +42,6 @@ export const lockScreenMessageInfo: CompositionInfo<LockScreenMessageProps> = {
   width: LOCK_SCREEN_MESSAGE_WIDTH,
   height: LOCK_SCREEN_MESSAGE_HEIGHT,
   defaultProps: lockScreenMessageDefaultProps,
-  brandMode: "locked",
   agentNotes:
     "Use for a 'phone buzzes' beat — messages landing on a locked iPhone over a wallpaper and clock. Great cold open or punchline. Keep each body short (one or two lines reads best). Leave n2/n3 empty for a single notification.",
   fields: [

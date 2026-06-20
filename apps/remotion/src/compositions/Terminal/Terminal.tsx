@@ -7,8 +7,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
+import { TERMINAL_HEIGHT, TERMINAL_WIDTH } from "./meta";
 
 export type TerminalLineKind = "command" | "output" | "comment" | "success";
 
@@ -96,58 +98,63 @@ export const Terminal: React.FC<TerminalProps> = ({
   });
 
   return (
-    <AbsoluteFill
-      style={{
-        background: "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 96,
-        fontFamily: s.fontFamily,
-      }}
+    <FitContent
+      designWidth={TERMINAL_WIDTH}
+      designHeight={TERMINAL_HEIGHT}
+      background="#ffffff"
     >
-      <div
+      <AbsoluteFill
         style={{
-          width: "100%",
-          maxWidth,
-          borderRadius: cornerRadius,
-          background: s.background,
-          boxShadow: showShadow
-            ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
-            : "none",
-          border: "1px solid rgba(255,255,255,0.08)",
-          overflow: "hidden",
-          opacity: windowReveal,
-          transform: `translate3d(0, ${snap((1 - windowReveal) * 24)}px, 0) scale(${0.97 + windowReveal * 0.03})`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 96,
+          fontFamily: s.fontFamily,
         }}
       >
-        <TerminalChrome style={chromeStyle} title={title} />
         <div
           style={{
-            padding: `${paddingY}px ${paddingX}px`,
-            fontSize,
-            lineHeight: 1.55,
-            color: s.color,
-            minHeight: 320,
+            width: "100%",
+            maxWidth,
+            borderRadius: cornerRadius,
+            background: s.background,
+            boxShadow: showShadow
+              ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
+              : "none",
+            border: "1px solid rgba(255,255,255,0.08)",
+            overflow: "hidden",
+            opacity: windowReveal,
+            transform: `translate3d(0, ${snap((1 - windowReveal) * 24)}px, 0) scale(${0.97 + windowReveal * 0.03})`,
           }}
         >
-          {lines.map((line, i) => (
-            <TerminalRow
-              key={i}
-              line={line}
-              prompt={prompt}
-              startFrame={lineStarts[i] ?? 0}
-              frame={frame}
-              framesPerChar={framesPerChar}
-              accent={s.accent}
-              gap={lineGap}
-              color={kindColors[line.kind]}
-              cursorStyle={cursorStyle}
-            />
-          ))}
+          <TerminalChrome style={chromeStyle} title={title} />
+          <div
+            style={{
+              padding: `${paddingY}px ${paddingX}px`,
+              fontSize,
+              lineHeight: 1.55,
+              color: s.color,
+              minHeight: 320,
+            }}
+          >
+            {lines.map((line, i) => (
+              <TerminalRow
+                key={i}
+                line={line}
+                prompt={prompt}
+                startFrame={lineStarts[i] ?? 0}
+                frame={frame}
+                framesPerChar={framesPerChar}
+                accent={s.accent}
+                gap={lineGap}
+                color={kindColors[line.kind]}
+                cursorStyle={cursorStyle}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </AbsoluteFill>
+      </AbsoluteFill>
+    </FitContent>
   );
 };
 

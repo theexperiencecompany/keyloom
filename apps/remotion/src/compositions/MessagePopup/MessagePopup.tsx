@@ -6,6 +6,7 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useDesignFrame } from "../../use-design-frame";
@@ -39,6 +40,8 @@ export type MessagePopupProps = {
   iconPreset?: string;
   /** Custom uploaded/pasted icon — takes precedence over `iconPreset`. */
   iconCustom?: string;
+  /** Universal Style — background, text color, font. */
+  clipStyle?: ClipStyle;
 };
 
 export { ICON_PRESETS };
@@ -91,10 +94,27 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
   theme,
   iconPreset,
   iconCustom,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
-  const palette = getPalette(theme);
+  const basePalette = getPalette(theme);
+  const s = resolveClipStyle(clipStyle, {
+    background: basePalette.bg,
+    color: basePalette.text,
+    fontFamily:
+      "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+    accent: basePalette.text,
+  });
+  // Apply the universal Style on top of the theme palette: the screen
+  // background, the notification's primary text, and a tint for the sender
+  // name (the one obvious accent). Other chrome (time, card material) keeps
+  // its authentic per-theme value.
+  const palette: Palette = {
+    ...basePalette,
+    bg: s.background,
+    text: s.color,
+  };
 
   // Render priority: explicit custom upload > preset key > default icon.
   const iconSrc =
@@ -106,8 +126,7 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
     <AbsoluteFill
       style={{
         background: palette.bg,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
+        fontFamily: s.fontFamily,
         color: palette.text,
         overflow: "hidden",
       }}
@@ -129,6 +148,7 @@ export const MessagePopup: React.FC<MessagePopupProps> = ({
           body={body}
           iconSrc={iconSrc}
           palette={palette}
+          accent={s.accent}
         />
       </div>
     </AbsoluteFill>
@@ -143,6 +163,7 @@ function NotificationBanner({
   body,
   iconSrc,
   palette,
+  accent,
 }: {
   frame: number;
   fps: number;
@@ -151,6 +172,7 @@ function NotificationBanner({
   body: string;
   iconSrc: string;
   palette: Palette;
+  accent: string;
 }) {
   const bodyWords = body.split(" ");
 
@@ -205,7 +227,7 @@ function NotificationBanner({
               style={{
                 fontSize: 36,
                 fontWeight: 700,
-                color: palette.text,
+                color: accent,
                 letterSpacing: "-0.01em",
               }}
             >

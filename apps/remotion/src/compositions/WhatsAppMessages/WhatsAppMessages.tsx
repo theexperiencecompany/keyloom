@@ -1,4 +1,5 @@
 "use client";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import type { ChatMessage } from "../../editors/types";
 import { useDesignFrame } from "../../use-design-frame";
 import { ChatDemo, type ChatMessageItem } from "../_chat-demo/ChatDemo";
@@ -12,6 +13,8 @@ export type WhatsAppMessagesProps = {
   orientation?: "landscape" | "portrait";
   /** How much the chat UI is scaled up inside the canvas (landscape only). */
   scale?: number;
+  /** Universal Style — background (chat screen), text, font, accent. */
+  clipStyle?: ClipStyle;
 };
 
 function buildItems(messages: ChatMessage[], frame: number): ChatMessageItem[] {
@@ -39,13 +42,26 @@ export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
   theme: _theme,
   orientation = "landscape",
   scale = 2,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const items = buildItems(messages, frame);
 
+  // WhatsApp's chat screen is the full-screen background here. Authentic
+  // defaults; clipStyle overrides feed the shared ChatDemo so the universal
+  // Style controls (Background / Text / Font / Accent) apply on top of the
+  // signature green sent bubble.
+  const s = resolveClipStyle(clipStyle, {
+    background: "#EFEFF4",
+    color: "#0b141a",
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    accent: "#25d366",
+  });
+
   return (
     <ChatFill
-      backdrop="#EFEFF4"
+      backdrop={s.background}
       chromeColor="#F6F6F6"
       scale={scale}
       orientation={orientation}
@@ -55,6 +71,10 @@ export const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({
         title={contactName}
         headerAvatar={contactAvatar}
         messages={items}
+        clipBackground={s.background}
+        clipColor={s.color}
+        clipFontFamily={s.fontFamily}
+        clipAccent={s.accent}
       />
     </ChatFill>
   );

@@ -19,16 +19,7 @@ export function SiteFooter() {
         </Link>
 
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-muted-foreground">
-          <Link
-            href="/docs"
-            className="transition-colors hover:text-foreground"
-          >
-            Docs
-          </Link>
-          <Link
-            href="/docs/components"
-            className="transition-colors hover:text-foreground"
-          >
+          <Link href="/" className="transition-colors hover:text-foreground">
             Components
           </Link>
           <Link
@@ -36,12 +27,6 @@ export function SiteFooter() {
             className="transition-colors hover:text-foreground"
           >
             Studio
-          </Link>
-          <Link
-            href="/docs/contributors"
-            className="transition-colors hover:text-foreground"
-          >
-            Contributors
           </Link>
           <a
             href="https://github.com/theexperiencecompany/motion-studio"

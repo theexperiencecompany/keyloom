@@ -60,6 +60,20 @@ export function Builder() {
   // ----------------------------------------------------------------------
   const [state, dispatch] = useReducer(studioReducer, initialStudioState);
   const audioSearch = useAudioSearch();
+
+  // Deep-link from the gallery: /studio?component=<id> opens the studio with
+  // that composition added as the first clip (and selected, so the inspector
+  // shows it). Strip the param afterwards so a refresh doesn't re-add it.
+  const didInitFromParam = useRef(false);
+  useEffect(() => {
+    if (didInitFromParam.current) return;
+    didInitFromParam.current = true;
+    const id = new URLSearchParams(window.location.search).get("component");
+    if (id && compositionsById[id]) {
+      dispatch({ type: "ADD_CLIP", compositionId: id });
+      window.history.replaceState(null, "", "/studio");
+    }
+  }, []);
   // Bump the version key when changing default sizes so old persisted
   // layouts don't pin panels at sizes that no longer make sense.
   const LAYOUT_STORAGE_KEY = "studio-layout-v4";
@@ -241,11 +255,6 @@ export function Builder() {
           onExport={() => setExportSettingsOpen(true)}
           onSaveProject={handleSaveProject}
           onLoadProjectFile={handleLoadProjectFile}
-          brandKit={project.brandKit}
-          onUpdateBrandKit={(patch) =>
-            dispatch({ type: "UPDATE_BRAND_KIT", patch })
-          }
-          onClearBrandKit={() => dispatch({ type: "CLEAR_BRAND_KIT" })}
         />
 
         <div className="relative flex min-h-0 flex-1">
@@ -425,6 +434,13 @@ export function Builder() {
                         dispatch({
                           type: "RESET_CLIP_STYLE",
                           clipId: selectedClip.id,
+                        })
+                      }
+                      onSetFrame={(frame) =>
+                        dispatch({
+                          type: "SET_CLIP_FRAME",
+                          clipId: selectedClip.id,
+                          frame,
                         })
                       }
                       onUpdateTransition={(transition) =>
