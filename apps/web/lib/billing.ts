@@ -82,8 +82,13 @@ export type ActiveDodoSubscription = {
 /**
  * Asks Dodo directly whether this user currently has an active/trialing
  * subscription. Used to reconcile account state on page load WITHOUT waiting for
- * a webhook (verify-on-return). Matches by the keyloom_user_id we stamp into
- * checkout metadata, falling back to the customer email.
+ * a webhook (verify-on-return). Matches STRICTLY by the keyloom_user_id we stamp
+ * into checkout metadata at `createProCheckout` time.
+ *
+ * We deliberately do NOT fall back to matching the customer email: emails are
+ * not unique to a keyloom account (shared/test emails, re-used addresses) and
+ * an email-based match would let one subscription upgrade unrelated accounts to
+ * Pro. Identity comes only from the id we control.
  */
 export async function findActiveDodoSubscription(opts: {
   userId: string;
@@ -97,11 +102,8 @@ export async function findActiveDodoSubscription(opts: {
     data?: DodoSubscription[];
   };
   const items = res.items ?? res.data ?? [];
-  const email = opts.email.toLowerCase();
   const mine = items.filter(
-    (s) =>
-      s.metadata?.keyloom_user_id === opts.userId ||
-      s.customer?.email?.toLowerCase() === email,
+    (s) => !!opts.userId && s.metadata?.keyloom_user_id === opts.userId,
   );
   const active = mine.find(
     (s) => s.status === "active" || s.status === "trialing",
