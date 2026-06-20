@@ -32,7 +32,12 @@
       "Bash(awk '/function CameraLifeWrap/,/^}/' compositions/Project/Project.tsx)",
       "Bash(echo \"remotion exit=$?\")",
       "Bash(grep -rnA3 \"useEffect\\(\" --include=\"*.tsx\" --include=\"*.ts\" components hooks state)",
-      "Bash(grep -rnA6 \"useEffect\\(\\(\\) =>\" --include=\"*.tsx\" --include=\"*.ts\" .)"
+      "Bash(grep -rnA6 \"useEffect\\(\\(\\) =>\" --include=\"*.tsx\" --include=\"*.ts\" .)",
+      "Bash(gh pr *)",
+      "Bash(git branch *)",
+      "Bash(cd /home/sanku/work/aesthetic/apps/remotion *)",
+      "Read(//home/sanku/work/aesthetic/apps/remotion/web/node_modules/@hugeicons/core-free-icons/dist/**)",
+      "Bash(echo \"remotion tsc=$?\")"
     ]
   }
 }

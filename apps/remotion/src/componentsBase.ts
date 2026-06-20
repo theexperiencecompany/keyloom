@@ -30,6 +30,7 @@ import { QrCode } from "./compositions/QrCode/QrCode";
 import { RadarChart } from "./compositions/RadarChart/RadarChart";
 import { RadialChart } from "./compositions/RadialChart/RadialChart";
 import { SlackMessages } from "./compositions/SlackMessages/SlackMessages";
+import { SpotifyPlayer } from "./compositions/SpotifyPlayer/SpotifyPlayer";
 import { StatCounter } from "./compositions/StatCounter/StatCounter";
 import { TelegramMessages } from "./compositions/TelegramMessages/TelegramMessages";
 import { Terminal } from "./compositions/Terminal/Terminal";
@@ -56,6 +57,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   TypingSearch,
   TypingComposer,
   StatCounter,
+  SpotifyPlayer,
   TweetCard,
   CursorWalkthrough,
   BrowserWindow,

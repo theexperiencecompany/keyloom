@@ -31,6 +31,7 @@ import { radarChartInfo } from "./compositions/RadarChart/meta";
 import { radialChartInfo } from "./compositions/RadialChart/meta";
 import { showcaseInfo } from "./compositions/Showcase/meta";
 import { slackMessagesInfo } from "./compositions/SlackMessages/meta";
+import { spotifyPlayerInfo } from "./compositions/SpotifyPlayer/meta";
 import { statCounterInfo } from "./compositions/StatCounter/meta";
 import { telegramMessagesInfo } from "./compositions/TelegramMessages/meta";
 import { terminalInfo } from "./compositions/Terminal/meta";
@@ -55,6 +56,7 @@ export const compositions: AnyCompositionInfo[] = [
   captionTrackInfo,
   tikTokCaptionInfo,
   statCounterInfo,
+  spotifyPlayerInfo,
   tweetCardInfo,
   twitterFollowInfo,
   instagramPostInfo,
