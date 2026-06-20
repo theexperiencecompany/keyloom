@@ -15,23 +15,21 @@ export const spotifyPlayerDefaultProps: SpotifyPlayerProps = {
   elapsedSeconds: 28,
   totalSeconds: 96,
   liked: true,
-  tint: "#5b3a8c",
 };
 
 export const spotifyPlayerInfo: CompositionInfo<SpotifyPlayerProps> = {
   id: "SpotifyPlayer",
   category: "social",
   agentNotes:
-    "Authentic Spotify 'Now Playing' phone screen (9:16): album art, track title, artist, animated progress scrubber that advances as it plays, and the shuffle/prev/play/next/repeat control row. Use for music drops, 'now playing' beats, playlist promos. Set `tint` to a color pulled from the album art for the signature gradient.",
+    "Spotify 'Now Playing' phone screen (9:16): album art, track title, artist, animated progress scrubber that advances as it plays, and the shuffle/prev/play/next/repeat control row. Use for music drops, 'now playing' beats, playlist promos. The Style Background sets the signature gradient tint; Accent sets the green control color.",
   title: "Spotify Player",
   description:
-    "A Spotify-style Now Playing screen with album art, a live progress bar, and playback controls. Customize the track, artist, playlist, times, and gradient tint.",
+    "A Spotify-style Now Playing screen with album art, a live progress bar, and playback controls. Customize the track, artist, playlist, times, and colors.",
   durationInFrames: SPOTIFY_PLAYER_DURATION,
   fps: SPOTIFY_PLAYER_FPS,
   width: SPOTIFY_PLAYER_WIDTH,
   height: SPOTIFY_PLAYER_HEIGHT,
   defaultProps: spotifyPlayerDefaultProps,
-  brandMode: "locked",
   fields: [
     { kind: "image", key: "albumArt", label: "Album cover" },
     { kind: "text", key: "trackTitle", label: "Track title" },
@@ -50,6 +48,5 @@ export const spotifyPlayerInfo: CompositionInfo<SpotifyPlayerProps> = {
       min: 1,
     },
     { kind: "switch", key: "liked", label: "Liked" },
-    { kind: "color", key: "tint", label: "Background tint" },
   ],
 };

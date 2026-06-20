@@ -17,6 +17,7 @@ import {
   staticFile,
   useVideoConfig,
 } from "remotion";
+import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
@@ -32,8 +33,8 @@ export type SpotifyPlayerProps = {
   /** Total track length, in seconds. */
   totalSeconds: number;
   liked: boolean;
-  /** Top-of-gradient tint — Spotify derives this from the album art. */
-  tint: string;
+  /** Universal Style — background (gradient tint), text, font, accent. */
+  clipStyle?: ClipStyle;
 };
 
 // Native design canvas — Spotify's full-screen "Now Playing" is portrait 9:16.
@@ -65,10 +66,25 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   elapsedSeconds,
   totalSeconds,
   liked,
-  tint,
+  clipStyle,
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+
+  const s = resolveClipStyle(clipStyle, {
+    background: "#5b3a8c",
+    color: "#ffffff",
+    fontFamily:
+      "Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+    accent: GREEN,
+  });
+  const accent = s.accent;
+  // When a background Scene is chosen, the clip's own bg is forced transparent
+  // (Project.tsx) — let it show through instead of painting the gradient.
+  const bg =
+    s.background === "transparent"
+      ? "transparent"
+      : `linear-gradient(180deg, ${s.background} 0%, #1a1a1a 50%, #000000 100%)`;
 
   const total = Math.max(1, totalSeconds);
   // Real playback time: the counter ticks at one second per second (no
@@ -95,16 +111,11 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   const ART = W - PAD * 2;
 
   return (
-    <FitContent
-      designWidth={W}
-      designHeight={H}
-      background={`linear-gradient(180deg, ${tint} 0%, #1a1a1a 50%, #000000 100%)`}
-    >
+    <FitContent designWidth={W} designHeight={H} background={bg}>
       <AbsoluteFill
         style={{
-          fontFamily:
-            "Inter, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
-          color: "#ffffff",
+          fontFamily: s.fontFamily,
+          color: s.color,
         }}
       >
         {/* Top bar */}
@@ -224,7 +235,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
                 {artist}
               </div>
             </div>
-            <Heart liked={liked} />
+            <Heart liked={liked} accent={accent} />
           </div>
 
           {/* Scrubber */}
@@ -285,11 +296,11 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               padding: `74px ${PAD}px 0`,
             }}
           >
-            <IconWithDot active>
+            <IconWithDot accent={accent}>
               <HugeiconsIcon
                 icon={ShuffleIcon}
                 size={66}
-                color={GREEN}
+                color={accent}
                 strokeWidth={2.2}
               />
             </IconWithDot>
@@ -313,7 +324,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               padding: `78px ${PAD}px 0`,
             }}
           >
-            <HugeiconsIcon icon={ComputerDesk01Icon} size={44} color={GREEN} />
+            <HugeiconsIcon icon={ComputerDesk01Icon} size={44} color={accent} />
             <HugeiconsIcon
               icon={Share08Icon}
               size={44}
@@ -329,10 +340,10 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
 // ---- Pieces -------------------------------------------------------------
 
 function IconWithDot({
-  active,
+  accent,
   children,
 }: {
-  active?: boolean;
+  accent: string;
   children: React.ReactNode;
 }) {
   return (
@@ -350,7 +361,7 @@ function IconWithDot({
           width: 7,
           height: 7,
           borderRadius: "50%",
-          background: active ? GREEN : "transparent",
+          background: accent,
         }}
       />
     </div>
@@ -403,10 +414,10 @@ function PlayPauseButton({ frame }: { frame: number }) {
   );
 }
 
-function Heart({ liked }: { liked: boolean }) {
+function Heart({ liked, accent }: { liked: boolean; accent: string }) {
   if (liked) {
     return (
-      <svg width={56} height={56} viewBox="0 0 24 24" fill={GREEN}>
+      <svg width={56} height={56} viewBox="0 0 24 24" fill={accent}>
         <path d="M12 21s-7.4-4.7-9.8-9C.7 8.8 2.1 5 5.6 5c2 0 3.3 1.2 4.4 2.6C11.1 6.2 12.4 5 14.4 5 17.9 5 19.3 8.8 21.8 12c-2.4 4.3-9.8 9-9.8 9z" />
       </svg>
     );
