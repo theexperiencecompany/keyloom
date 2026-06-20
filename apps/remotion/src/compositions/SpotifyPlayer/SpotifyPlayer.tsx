@@ -39,9 +39,9 @@ export type SpotifyPlayerProps = {
 // Native design canvas — Spotify's full-screen "Now Playing" is portrait 9:16.
 const W = 1080;
 const H = 1920;
-const PAD = 72;
+const PAD = 80;
 
-const SPOTIFY_GREEN = "#1ed760";
+const GREEN = "#1ed760";
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 function resolveSrc(src: string): string {
@@ -68,14 +68,25 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   tint,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
-  const playedSec = frame / fps;
   const total = Math.max(1, totalSeconds);
-  const elapsed = Math.min(total, elapsedSeconds + playedSec);
-  const progress = Math.min(1, elapsed / total);
+  // Drive the scrubber clearly across the clip so it visibly reads as "playing"
+  // — start where the user set it, then advance a noticeable chunk by the end.
+  const startP = Math.min(0.92, Math.max(0, elapsedSeconds / total));
+  const endP = Math.min(0.98, startP + 0.26);
+  const progress = interpolate(
+    frame,
+    [0, durationInFrames - 1],
+    [startP, endP],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    },
+  );
+  const elapsed = progress * total;
 
-  // Entrance: the whole card eases up + fades; album art springs in a touch.
+  // Entrance.
   const enter = interpolate(frame, [0, 26], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -86,20 +97,18 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
     fps,
     config: { damping: 16, stiffness: 95, mass: 0.9 },
   });
-  const coverScale = 0.92 + coverSpring * 0.08;
-  // Slow, barely-there vertical float so the art feels "alive" while playing.
-  const float = Math.sin((frame / fps) * 1.05) * 7;
-
+  const coverScale = 0.93 + coverSpring * 0.07;
+  const float = Math.sin((frame / fps) * 1.05) * 8;
   const headerY = (1 - enter) * -18;
-  const bodyY = (1 - enter) * 30;
+  const bodyY = (1 - enter) * 34;
 
-  const TRACK_W = W - PAD * 2;
+  const ART = W - PAD * 2;
 
   return (
     <FitContent
       designWidth={W}
       designHeight={H}
-      background={`linear-gradient(180deg, ${tint} 0%, #1c1c1c 52%, #000000 100%)`}
+      background={`linear-gradient(180deg, ${tint} 0%, #1a1a1a 50%, #000000 100%)`}
     >
       <AbsoluteFill
         style={{
@@ -112,7 +121,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
         <div
           style={{
             position: "absolute",
-            top: 64,
+            top: 78,
             left: PAD,
             right: PAD,
             display: "flex",
@@ -122,37 +131,37 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
             transform: `translateY(${snap(headerY)}px)`,
           }}
         >
-          <HugeiconsIcon icon={ArrowDown01Icon} size={44} color="#ffffff" />
-          <div style={{ textAlign: "center", lineHeight: 1.35 }}>
+          <HugeiconsIcon icon={ArrowDown01Icon} size={56} color="#ffffff" />
+          <div style={{ textAlign: "center", lineHeight: 1.4 }}>
             <div
               style={{
-                fontSize: 19,
-                fontWeight: 700,
-                letterSpacing: "0.16em",
-                color: "rgba(255,255,255,0.7)",
+                fontSize: 21,
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                color: "rgba(255,255,255,0.72)",
               }}
             >
               PLAYING FROM PLAYLIST
             </div>
-            <div style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6 }}>
               {playlist}
             </div>
           </div>
-          <HugeiconsIcon icon={MoreHorizontalIcon} size={44} color="#ffffff" />
+          <HugeiconsIcon icon={MoreHorizontalIcon} size={56} color="#ffffff" />
         </div>
 
         {/* Album art */}
         <div
           style={{
             position: "absolute",
-            top: 260,
+            top: 250,
             left: PAD,
-            width: TRACK_W,
-            height: TRACK_W,
-            borderRadius: 18,
+            width: ART,
+            height: ART,
+            borderRadius: 20,
             overflow: "hidden",
             background: "#2a2a2a",
-            boxShadow: "0 60px 120px rgba(0,0,0,0.55)",
+            boxShadow: "0 70px 130px rgba(0,0,0,0.6)",
             opacity: coverSpring,
             transform: `translateY(${snap(float)}px) scale(${coverScale})`,
           }}
@@ -171,7 +180,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 220,
+                fontSize: 240,
                 color: "rgba(255,255,255,0.25)",
               }}
             >
@@ -180,7 +189,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
           )}
         </div>
 
-        {/* Lower block: title, scrubber, controls */}
+        {/* Lower block */}
         <div
           style={{
             position: "absolute",
@@ -197,16 +206,16 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 24,
+              gap: 28,
               padding: `0 ${PAD}px`,
             }}
           >
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  fontSize: 58,
+                  fontSize: 66,
                   fontWeight: 800,
-                  letterSpacing: "-0.02em",
+                  letterSpacing: "-0.025em",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -216,26 +225,26 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               </div>
               <div
                 style={{
-                  fontSize: 36,
+                  fontSize: 40,
                   fontWeight: 500,
-                  color: "rgba(255,255,255,0.62)",
-                  marginTop: 8,
+                  color: "rgba(255,255,255,0.6)",
+                  marginTop: 10,
                 }}
               >
                 {artist}
               </div>
             </div>
-            <HeartIcon liked={liked} />
+            <Heart liked={liked} />
           </div>
 
           {/* Scrubber */}
-          <div style={{ padding: `54px ${PAD}px 0` }}>
+          <div style={{ padding: `60px ${PAD}px 0` }}>
             <div
               style={{
                 position: "relative",
-                height: 6,
+                height: 9,
                 borderRadius: 999,
-                background: "rgba(255,255,255,0.28)",
+                background: "rgba(255,255,255,0.3)",
               }}
             >
               <div
@@ -252,12 +261,12 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
                   position: "absolute",
                   top: "50%",
                   left: `${progress * 100}%`,
-                  width: 22,
-                  height: 22,
+                  width: 30,
+                  height: 30,
                   borderRadius: "50%",
                   background: "#ffffff",
                   transform: "translate(-50%, -50%)",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+                  boxShadow: "0 3px 8px rgba(0,0,0,0.45)",
                 }}
               />
             </div>
@@ -265,10 +274,10 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginTop: 16,
-                fontSize: 24,
+                marginTop: 20,
+                fontSize: 27,
                 fontWeight: 500,
-                color: "rgba(255,255,255,0.6)",
+                color: "rgba(255,255,255,0.62)",
                 fontVariantNumeric: "tabular-nums",
               }}
             >
@@ -283,51 +292,41 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: `64px ${PAD + 6}px 0`,
+              padding: `74px ${PAD}px 0`,
             }}
           >
-            <HugeiconsIcon
-              icon={ShuffleIcon}
-              size={48}
-              color={SPOTIFY_GREEN}
-              strokeWidth={2}
-            />
+            <IconWithDot active>
+              <HugeiconsIcon
+                icon={ShuffleIcon}
+                size={66}
+                color={GREEN}
+                strokeWidth={2.2}
+              />
+            </IconWithDot>
             <PrevIcon />
-            <PlayButton frame={frame} />
+            <PlayPauseButton frame={frame} />
             <NextIcon />
             <HugeiconsIcon
               icon={RepeatIcon}
-              size={48}
-              color="rgba(255,255,255,0.85)"
-              strokeWidth={2}
+              size={66}
+              color="rgba(255,255,255,0.9)"
+              strokeWidth={2.2}
             />
           </div>
 
-          {/* Bottom row: device + share */}
+          {/* Bottom row */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: `72px ${PAD}px 0`,
-              color: SPOTIFY_GREEN,
+              padding: `78px ${PAD}px 0`,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <HugeiconsIcon
-                icon={ComputerDesk01Icon}
-                size={34}
-                color={SPOTIFY_GREEN}
-              />
-              <span
-                style={{ fontSize: 22, fontWeight: 600, color: SPOTIFY_GREEN }}
-              >
-                {artist}'s Studio
-              </span>
-            </div>
+            <HugeiconsIcon icon={ComputerDesk01Icon} size={44} color={GREEN} />
             <HugeiconsIcon
               icon={Share08Icon}
-              size={34}
+              size={44}
               color="rgba(255,255,255,0.85)"
             />
           </div>
@@ -337,69 +336,102 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
   );
 };
 
-// ---- Filled transport glyphs (Spotify-accurate) -------------------------
+// ---- Pieces -------------------------------------------------------------
+
+function IconWithDot({
+  active,
+  children,
+}: {
+  active?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      {children}
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: active ? GREEN : "transparent",
+        }}
+      />
+    </div>
+  );
+}
 
 function PrevIcon() {
   return (
-    <svg width={56} height={56} viewBox="0 0 24 24" fill="#ffffff">
-      <rect x="5.5" y="5" width="2.4" height="14" rx="1.2" />
-      <path d="M20 5.4v13.2L9.5 12z" />
+    <svg width={96} height={96} viewBox="0 0 24 24" fill="#ffffff">
+      <rect x="5" y="4.5" width="2.8" height="15" rx="1.4" />
+      <path d="M20.5 4.8v14.4L9 12z" />
     </svg>
   );
 }
 
 function NextIcon() {
   return (
-    <svg width={56} height={56} viewBox="0 0 24 24" fill="#ffffff">
-      <path d="M4 5.4v13.2L14.5 12z" />
-      <rect x="16.1" y="5" width="2.4" height="14" rx="1.2" />
+    <svg width={96} height={96} viewBox="0 0 24 24" fill="#ffffff">
+      <path d="M3.5 4.8v14.4L15 12z" />
+      <rect x="16.2" y="4.5" width="2.8" height="15" rx="1.4" />
     </svg>
   );
 }
 
-function PlayButton({ frame }: { frame: number }) {
-  // Gentle breathing pulse on the play knob — reads as "alive / playing".
-  const pulse = 1 + Math.sin((frame / 60) * 2.4) * 0.015;
+function PlayPauseButton({ frame }: { frame: number }) {
+  // Currently playing → show the PAUSE control. Gentle breathing pulse.
+  const pulse = 1 + Math.sin((frame / 60) * 2.4) * 0.012;
   return (
     <div
       style={{
-        width: 156,
-        height: 156,
+        width: 208,
+        height: 208,
         borderRadius: "50%",
         background: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        gap: 22,
         transform: `scale(${pulse})`,
-        boxShadow: "0 12px 36px rgba(0,0,0,0.4)",
+        boxShadow: "0 16px 44px rgba(0,0,0,0.45)",
       }}
     >
-      <svg width={62} height={62} viewBox="0 0 24 24" fill="#000000">
-        <path d="M7 4.5v15L20 12z" />
-      </svg>
+      <span
+        style={{ width: 22, height: 78, borderRadius: 4, background: "#000" }}
+      />
+      <span
+        style={{ width: 22, height: 78, borderRadius: 4, background: "#000" }}
+      />
     </div>
   );
 }
 
-function HeartIcon({ liked }: { liked: boolean }) {
+function Heart({ liked }: { liked: boolean }) {
   if (liked) {
     return (
-      <svg width={46} height={46} viewBox="0 0 24 24" fill="#1ed760">
-        <path d="M12 21s-7.5-4.9-10-9.2C.4 8.6 2 5 5.4 5c2 0 3.4 1.2 4.6 2.7C11.2 6.2 12.6 5 14.6 5 18 5 19.6 8.6 22 11.8 19.5 16.1 12 21 12 21z" />
+      <svg width={56} height={56} viewBox="0 0 24 24" fill={GREEN}>
+        <path d="M12 21s-7.4-4.7-9.8-9C.7 8.8 2.1 5 5.6 5c2 0 3.3 1.2 4.4 2.6C11.1 6.2 12.4 5 14.4 5 17.9 5 19.3 8.8 21.8 12c-2.4 4.3-9.8 9-9.8 9z" />
       </svg>
     );
   }
   return (
     <svg
-      width={46}
-      height={46}
+      width={56}
+      height={56}
       viewBox="0 0 24 24"
       fill="none"
       stroke="rgba(255,255,255,0.85)"
       strokeWidth={1.6}
     >
-      <circle cx="12" cy="12" r="9.2" />
-      <path d="M12 7.5v9M7.5 12h9" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="9.3" />
+      <path d="M12 7.4v9.2M7.4 12h9.2" strokeLinecap="round" />
     </svg>
   );
 }
