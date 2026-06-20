@@ -144,10 +144,7 @@ function AccountMenuFallback() {
   );
 }
 
-const navLinks = [
-  { label: "Components", href: "/" },
-  { label: "Studio", href: "/studio" },
-];
+const navLinks = [{ label: "Studio", href: "/studio" }];
 
 export function DocsHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);

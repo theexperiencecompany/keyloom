@@ -144,7 +144,7 @@ export function GalleryBrowser() {
           No components match “{query}”.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((info) => (
             <GalleryCard key={info.id} info={info} />
           ))}
@@ -203,14 +203,11 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
     return () => io.disconnect();
   }, []);
 
-  // Card shape is clamped to a [0.75, 1.4] band for consistent, slightly-tall
-  // cards. The preview COVERS the tile — sized to the composition's own aspect
-  // and scaled so the smaller side fills, with the overflow cropped — so there
-  // are no letterbox gutters (the "strip" look).
+  // The tile takes the composition's own aspect ratio, so the preview fills it
+  // edge-to-edge: nothing is cropped off and there are no letterbox gutters (no
+  // "black stripe" from the tile background showing through). Cards in a row may
+  // differ in height as a result — that's the trade for showing each scene whole.
   const compAspect = info.width / info.height;
-  const cardAspect = Math.min(Math.max(compAspect, 0.75), 1.4);
-  const coverFill: React.CSSProperties =
-    compAspect >= cardAspect ? { height: "100%" } : { width: "100%" };
 
   return (
     <Link
@@ -223,16 +220,14 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
       prefetch={false}
       className="group block"
     >
-      {/* Media tile: borderless, big radius, subtle ring. The preview covers
-          the tile (cropping a sliver), so there are no letterbox gutters. */}
+      {/* Media tile: borderless, big radius, subtle ring. The tile matches the
+          composition's aspect ratio, so the preview fills it edge-to-edge with
+          no crop and no letterbox gutters. */}
       <div
         className="relative overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]"
-        style={{ aspectRatio: `${cardAspect}` }}
+        style={{ aspectRatio: `${compAspect}` }}
       >
-        <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          style={{ aspectRatio: `${compAspect}`, ...coverFill }}
-        >
+        <div className="absolute inset-0">
           {visible ? (
             <LivePreview
               modulePath={compositionModulePath(info)}
