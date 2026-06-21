@@ -355,7 +355,10 @@ export function Builder() {
             )}
 
             <ResizablePanel id="studio-main" minSize="400px">
-              <main className="flex h-full min-w-0 flex-col">
+              <main
+                aria-label="Preview and timeline"
+                className="flex h-full min-w-0 flex-col"
+              >
                 <PreviewStage
                   project={project}
                   playerInputProps={playerInputProps}
