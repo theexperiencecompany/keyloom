@@ -1,5 +1,7 @@
 "use client";
 
+import { PlayIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Player, type PlayerRef } from "@remotion/player";
 import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import type { Project } from "@workspace/compositions/project";
@@ -25,16 +27,18 @@ export function PreviewStage({
 }: Props) {
   if (!hasClips) {
     return (
-      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] dark:bg-[#1a1a1a]">
-        <EmptyStage onOpenLibrary={onOpenLibrary} />
+      <div className="studio-canvas flex min-h-0 flex-1 items-center justify-center">
+        <div className="relative z-10">
+          <EmptyStage onOpenLibrary={onOpenLibrary} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] p-8 dark:bg-[#1a1a1a]">
+    <div className="studio-canvas flex min-h-0 flex-1 items-center justify-center p-10">
       <div
-        className="relative max-h-full max-w-full overflow-hidden bg-black shadow-sm ring-1 ring-border"
+        className="relative z-10 max-h-full max-w-full overflow-hidden rounded-lg bg-black shadow-[0_28px_70px_-24px_rgba(0,0,0,0.7),0_10px_28px_-16px_rgba(0,0,0,0.55)] ring-1 ring-white/10"
         style={{
           aspectRatio: `${project.width} / ${project.height}`,
           height: "100%",
@@ -63,35 +67,23 @@ export function PreviewStage({
 
 function EmptyStage({ onOpenLibrary }: { onOpenLibrary: () => void }) {
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/50">
-          <svg
-            viewBox="0 0 24 24"
-            className="size-4 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <title>Play</title>
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="text-[13px] font-medium text-foreground/80">
-            No clips yet
-          </p>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">
-            Add a scene from the library to get started.
-          </p>
-        </div>
-        <Button size="sm" onClick={onOpenLibrary} className="mt-1">
-          Add scene
-        </Button>
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] ring-1 ring-white/10 shadow-lg shadow-black/30">
+        <HugeiconsIcon
+          icon={PlayIcon}
+          className="size-6 text-foreground/70"
+          strokeWidth={1.8}
+        />
       </div>
+      <div className="text-center">
+        <p className="text-sm font-semibold text-foreground">No clips yet</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">
+          Add a scene from the library to get started.
+        </p>
+      </div>
+      <Button size="sm" onClick={onOpenLibrary} className="mt-1">
+        Add scene
+      </Button>
     </div>
   );
 }

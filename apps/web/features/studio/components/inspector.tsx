@@ -113,7 +113,7 @@ export function Inspector({
   const durationSec = (clip.durationInFrames / fps).toFixed(1);
 
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-background">
+    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-[var(--studio-sidebar)]">
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground">
@@ -123,7 +123,13 @@ export function Inspector({
             {durationSec}s
           </span>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={onClose} title="Close">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClose}
+          title="Close"
+          aria-label="Close inspector"
+        >
           <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
         </Button>
       </div>
@@ -158,7 +164,10 @@ export function Inspector({
           </TabsList>
         </div>
 
-        <TabsContent value="content" className="min-h-0 flex-1 overflow-y-auto">
+        <TabsContent
+          value="content"
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-thin"
+        >
           <FieldsRenderer
             fields={generalFields}
             value={clip.props}
@@ -171,8 +180,8 @@ export function Inspector({
             value="messages"
             className="flex min-h-0 flex-1 flex-col overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-border px-4 py-2">
-              <span className="text-[11px] font-medium text-muted-foreground">
+            <div className="flex items-center justify-between px-4 pb-1.5 pt-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Conversation
               </span>
               <Button
@@ -188,7 +197,7 @@ export function Inspector({
                 />
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
               <FieldsRenderer
                 fields={chatFields}
                 value={clip.props}
@@ -198,9 +207,12 @@ export function Inspector({
           </TabsContent>
         )}
 
-        <TabsContent value="style" className="min-h-0 flex-1 overflow-y-auto">
+        <TabsContent
+          value="style"
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-thin"
+        >
           {isLocked && (
-            <div className="flex items-start gap-2 border-b border-border bg-muted/30 px-5 py-3">
+            <div className="mx-5 mt-4 flex items-start gap-2 rounded-lg bg-muted/40 px-3.5 py-3">
               <HugeiconsIcon
                 icon={LockedIcon}
                 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
@@ -212,7 +224,7 @@ export function Inspector({
               </p>
             </div>
           )}
-          <div className="border-b px-5 py-4">
+          <div className="px-5 pb-2 pt-5">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Frame
             </p>
@@ -253,7 +265,10 @@ export function Inspector({
           />
         </TabsContent>
 
-        <TabsContent value="motion" className="min-h-0 flex-1 overflow-y-auto">
+        <TabsContent
+          value="motion"
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-thin"
+        >
           <Accordion
             type="multiple"
             defaultValue={
@@ -262,8 +277,8 @@ export function Inspector({
                 : ["transition"]
             }
           >
-            <AccordionItem value="transition" className="border-b">
-              <AccordionTrigger className="px-5 py-3 text-sm font-semibold text-foreground">
+            <AccordionItem value="transition" className="border-b-0">
+              <AccordionTrigger className="px-5 pb-2 pt-4 text-sm font-semibold text-foreground">
                 <span className="flex items-center gap-2">
                   Transition
                   {hasTransitionOverride && <Dot />}
@@ -282,7 +297,7 @@ export function Inspector({
             </AccordionItem>
 
             <AccordionItem value="effects" className="border-b-0">
-              <AccordionTrigger className="px-5 py-3 text-sm font-semibold text-foreground">
+              <AccordionTrigger className="px-5 pb-2 pt-4 text-sm font-semibold text-foreground">
                 <span className="flex items-center gap-2">
                   Effects
                   {clipEffects.length > 0 && (
@@ -349,7 +364,7 @@ function EffectCard({
           type="button"
           onClick={onRemove}
           title="Remove"
-          className="rounded-md border border-border bg-background px-2 py-1 text-[10px] font-medium hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+          className="rounded-md border border-border bg-[var(--studio-sidebar)] px-2 py-1 text-[10px] font-medium hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
         >
           Remove
         </button>
@@ -368,7 +383,7 @@ function EffectCard({
           <span className="truncate text-[12px] font-medium text-foreground">
             {info.title}
           </span>
-          <span className="rounded-sm bg-background px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+          <span className="rounded-sm bg-[var(--studio-sidebar)] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
             {info.trigger}
           </span>
         </div>

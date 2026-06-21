@@ -78,14 +78,14 @@ export function ProjectTransitionControl({ transition, fps, onChange }: Props) {
       </TooltipProvider>
       <PopoverContent align="end" className="w-80 space-y-3 p-4">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             Project default
           </p>
           {transition !== undefined && (
             <button
               type="button"
               onClick={() => onChange(undefined)}
-              className="text-[10px] font-medium text-muted-foreground hover:text-foreground"
+              className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               Reset
             </button>

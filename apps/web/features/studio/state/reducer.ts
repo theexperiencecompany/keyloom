@@ -64,6 +64,7 @@ export type StudioAction =
       transition: SceneTransition | undefined;
     }
   | { type: "SET_PROJECT_FORMAT"; width: number; height: number }
+  | { type: "SET_PROJECT_NAME"; name: string }
   | { type: "SET_PROJECT_AUDIO"; audio: ProjectAudio }
   | { type: "UPDATE_PROJECT_AUDIO"; patch: Partial<ProjectAudio> }
   | { type: "CLEAR_PROJECT_AUDIO" }
@@ -221,6 +222,12 @@ export function studioReducer(
           width: action.width,
           height: action.height,
         },
+      };
+    }
+    case "SET_PROJECT_NAME": {
+      return {
+        ...state,
+        project: { ...state.project, name: action.name },
       };
     }
     case "SET_PROJECT_AUDIO": {

@@ -13,17 +13,17 @@ export default function LandingPage() {
 
       <main className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         {/* Compact intro — the gallery itself is the hero. */}
-        <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end sm:gap-6">
+        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end sm:gap-6">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="text-pretty text-2xl font-semibold tracking-tight sm:text-3xl">
               Ship videos that look expensive.
             </h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            <p className="mt-2.5 max-w-xl text-pretty text-[15px] leading-relaxed text-muted-foreground">
               A library of cinematic scenes for Remotion. Browse, preview, and
               drop straight into a video.
             </p>
           </div>
-          <Button asChild className="hidden shrink-0 sm:inline-flex">
+          <Button asChild className="w-full shrink-0 sm:w-auto">
             <Link href="/studio">
               Open Studio
               <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />

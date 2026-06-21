@@ -294,7 +294,7 @@ export function Timeline({
   const atMaxZoom = pxPerSecond >= MAX_PX_PER_SECOND - 0.01;
 
   return (
-    <div className="shrink-0 bg-[#eeeeee] dark:bg-[#1a1a1a]">
+    <div className="shrink-0 bg-[var(--studio-center)]">
       <div className="flex items-center justify-between gap-3 px-4 py-2">
         <p className="text-xs font-medium text-muted-foreground">Timeline</p>
 
@@ -335,7 +335,8 @@ export function Timeline({
                 setPxPerSecond(DEFAULT_PX_PER_SECOND);
               }}
               title="Reset zoom"
-              className="min-w-10 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
+              aria-label="Reset zoom to 100%"
+              className="min-w-10 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               {zoomPct}%
             </button>
@@ -636,20 +637,19 @@ function AudioTrackRow({
             top: 0,
             bottom: 0,
             cursor: "grab",
+            background: "rgba(16, 185, 129, 0.16)",
+            boxShadow: selected
+              ? "inset 0 0 0 2px #10b981"
+              : "inset 0 0 0 1px rgba(16, 185, 129, 0.45)",
           }}
-          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600 px-3 py-2 text-white transition-shadow ${
-            selected
-              ? "z-10 ring-2 ring-primary ring-offset-1 ring-offset-background"
-              : ""
+          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-lg pl-[14px] pr-2.5 py-2 ${
+            selected ? "z-10" : ""
           }`}
         >
-          {/* Inner top highlight + outline — matches SortableClipBlock. */}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-md"
-            style={{
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
-            }}
+          {/* Solid accent rail — same language as a clip block. */}
+          <span
+            className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[3px]"
+            style={{ background: "#10b981" }}
           />
 
           {/* Left trim handle */}
@@ -657,13 +657,13 @@ function AudioTrackRow({
             data-audio-handle="left"
             onPointerDown={startLeftHandle}
             style={{ width: AUDIO_HANDLE_WIDTH, cursor: "ew-resize" }}
-            className="absolute inset-y-0 left-0 z-[2] bg-black/20 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+            className="absolute inset-y-0 left-0 z-[3] bg-foreground/15 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
           />
 
-          <p className="relative truncate text-[11px] font-semibold leading-tight drop-shadow-sm">
+          <p className="relative z-[1] truncate text-[11px] font-semibold leading-tight text-foreground/90">
             ♪ {label}
           </p>
-          <p className="relative text-[10px] tabular-nums text-white/75">
+          <p className="relative z-[1] text-[10px] tabular-nums text-muted-foreground">
             {seconds.toFixed(2)}s
           </p>
 
@@ -672,7 +672,7 @@ function AudioTrackRow({
             data-audio-handle="right"
             onPointerDown={startRightHandle}
             style={{ width: AUDIO_HANDLE_WIDTH, cursor: "ew-resize" }}
-            className="absolute inset-y-0 right-0 z-[2] bg-black/20 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+            className="absolute inset-y-0 right-0 z-[3] bg-foreground/15 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
           />
         </div>
       </div>
@@ -700,18 +700,18 @@ function TimeRuler({
   return (
     <div
       onPointerDown={onPointerDown}
-      className="relative h-7 cursor-ew-resize border-b border-border/60 px-3 select-none"
+      className="relative h-8 cursor-ew-resize border-b border-border px-3 select-none"
     >
       {ticks.map((t) => (
         <div
           key={t}
-          className="pointer-events-none absolute top-0 flex h-full flex-col items-start gap-0.5"
+          className="pointer-events-none absolute top-0 h-full"
           style={{ left: 12 + t * pxPerSecond }}
         >
-          <span className="mt-1 text-[9px] text-muted-foreground tabular-nums">
+          <span className="absolute top-[7px] left-1.5 text-[10px] font-semibold text-foreground/80 tabular-nums">
             {formatTime(t)}
           </span>
-          <span className="absolute bottom-0 h-1.5 w-px bg-border" />
+          <span className="absolute bottom-0 h-2 w-px bg-border" />
         </div>
       ))}
     </div>
@@ -726,7 +726,8 @@ function Playhead({ fps, pxPerSecond }: { fps: number; pxPerSecond: number }) {
       className="pointer-events-none absolute top-0 bottom-0 z-20 -ml-px w-px bg-blue-500"
       style={{ left }}
     >
-      <span className="absolute -top-px -left-[5px] size-2.5 rotate-45 rounded-[2px] bg-blue-500 shadow-[0_0_0_1px_rgba(255,255,255,0.6)]" />
+      {/* Clean rounded cap with a background-colored ring so it reads on any clip. */}
+      <span className="absolute -top-1 -left-[5px] size-[11px] rounded-full bg-blue-500 ring-2 ring-background" />
     </div>
   );
 }
