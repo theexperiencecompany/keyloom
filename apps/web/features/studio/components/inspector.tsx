@@ -113,7 +113,10 @@ export function Inspector({
   const durationSec = (clip.durationInFrames / fps).toFixed(1);
 
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-[var(--studio-sidebar)]">
+    <aside
+      aria-label="Inspector"
+      className="flex h-full min-h-0 w-full flex-col border-l border-border bg-[var(--studio-sidebar)]"
+    >
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground">
