@@ -197,6 +197,16 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
   brandMode?: BrandMode;
   phoneFitMode?: PhoneFitMode;
   /**
+   * Opt in to album-art-style background tinting. Set this to the key of an
+   * image `field` (e.g. `"albumArt"`); whenever the user changes that image in
+   * the studio, the inspector extracts its dominant color (color-thief) and
+   * writes it into the clip's `backgroundColor` Style. The composition itself
+   * stays pure — it just receives the resulting color via `clipStyle`. Only
+   * meaningful for non-locked compositions that paint their background from the
+   * universal Style. The user can still override the color manually afterward.
+   */
+  tintFromImageKey?: keyof P & string;
+  /**
    * Curated skins for this composition, surfaced as a Theme picker at the
    * top of the Inspector's Style section. Works for locked compositions
    * too (the picker is the only Style control they show). First entry =

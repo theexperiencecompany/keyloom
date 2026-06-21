@@ -1,3 +1,4 @@
+import { loadFont as loadArimo } from "@remotion/google-fonts/Arimo";
 import { loadFont as loadInter } from "@remotion/google-fonts/Inter";
 import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsMono";
 
@@ -15,9 +16,20 @@ import { loadFont as loadJetBrainsMono } from "@remotion/google-fonts/JetBrainsM
  */
 const { fontFamily: interFamily } = loadInter();
 const { fontFamily: monoFamily } = loadJetBrainsMono();
+const { fontFamily: arimoFamily } = loadArimo();
 
 /** Inter — the Lambda-safe replacement for the Apple/system sans stack. */
 export const SANS_FONT = `${interFamily}, sans-serif`;
 
 /** JetBrains Mono — the Lambda-safe replacement for `SF Mono` / `ui-monospace`. */
 export const MONO_FONT = `${monoFamily}, monospace`;
+
+/**
+ * Spotify's design guidelines recommend the platform default sans-serif, then
+ * Helvetica Neue → Helvetica → Arial (Spotify Circular is proprietary and not
+ * licensed for third parties). Arimo is metrically compatible with
+ * Helvetica/Arial, so it reproduces that exact look — and unlike the real
+ * Helvetica stack it actually renders in the headless (Lambda) export, which
+ * ships no system fonts.
+ */
+export const SPOTIFY_FONT = `${arimoFamily}, "Helvetica Neue", Helvetica, Arial, sans-serif`;

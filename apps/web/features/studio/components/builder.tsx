@@ -25,6 +25,7 @@ import { useExportRender } from "../hooks/use-export-render";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { useProjectIO } from "../hooks/use-project-io";
 import type { ExportOptions } from "../lib/export-options";
+import { extractTintColor } from "../lib/image-tint";
 import {
   captureCurrentFrame,
   downloadPngBlob,
@@ -416,13 +417,37 @@ export function Builder() {
                       projectDefaultTransition={project.defaultTransition}
                       tab={inspectorTab}
                       onTabChange={setInspectorTab}
-                      onChange={(next) =>
+                      onChange={(next) => {
                         dispatch({
                           type: "UPDATE_CLIP_PROPS",
                           clipId: selectedClip.id,
                           props: next,
-                        })
-                      }
+                        });
+                        // Album-art-style tinting: when the composition opts in
+                        // (meta.tintFromImageKey) and that image changed, extract
+                        // its dominant color in React and store it as the clip's
+                        // background. The composition stays pure — it just gets
+                        // the resulting color via clipStyle.
+                        const tintKey = selectedInfo.tintFromImageKey;
+                        if (tintKey) {
+                          const nextVal = next[tintKey];
+                          if (
+                            typeof nextVal === "string" &&
+                            nextVal &&
+                            nextVal !== selectedClip.props[tintKey]
+                          ) {
+                            void extractTintColor(nextVal).then((color) => {
+                              if (color) {
+                                dispatch({
+                                  type: "UPDATE_CLIP_STYLE",
+                                  clipId: selectedClip.id,
+                                  patch: { backgroundColor: color },
+                                });
+                              }
+                            });
+                          }
+                        }
+                      }}
                       onUpdateStyle={(patch) =>
                         dispatch({
                           type: "UPDATE_CLIP_STYLE",
