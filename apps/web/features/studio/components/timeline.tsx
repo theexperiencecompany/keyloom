@@ -335,7 +335,8 @@ export function Timeline({
                 setPxPerSecond(DEFAULT_PX_PER_SECOND);
               }}
               title="Reset zoom"
-              className="min-w-10 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
+              aria-label="Reset zoom to 100%"
+              className="min-w-10 rounded-md px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground tabular-nums outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               {zoomPct}%
             </button>
@@ -707,7 +708,7 @@ function TimeRuler({
           className="pointer-events-none absolute top-0 h-full"
           style={{ left: 12 + t * pxPerSecond }}
         >
-          <span className="absolute top-[7px] left-1.5 text-[9px] font-medium text-muted-foreground tabular-nums">
+          <span className="absolute top-[7px] left-1.5 text-[10px] font-semibold text-foreground/80 tabular-nums">
             {formatTime(t)}
           </span>
           <span className="absolute bottom-0 h-2 w-px bg-border" />

@@ -161,7 +161,11 @@ export function FontPicker({ value, onChange, placeholder }: Props) {
         className="w-[min(360px,calc(100vw-24px))] overflow-hidden p-0"
       >
         <div className="border-b border-border p-2">
+          <label htmlFor="font-picker-search" className="sr-only">
+            Search Google Fonts
+          </label>
           <input
+            id="font-picker-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search Google Fonts…"
@@ -174,6 +178,7 @@ export function FontPicker({ value, onChange, placeholder }: Props) {
                 key={cat.value}
                 type="button"
                 onClick={() => setCategory(cat.value)}
+                aria-pressed={category === cat.value}
                 className={cn(
                   "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
                   category === cat.value

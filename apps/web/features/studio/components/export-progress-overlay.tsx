@@ -125,6 +125,7 @@ export function ExportProgressOverlay({
               size="icon-xs"
               onClick={onClose}
               title="Close"
+              aria-label="Close"
             >
               ×
             </Button>
@@ -264,7 +265,11 @@ function ProgressBar({
   const smoothPct = useSmoothPct(pct);
   if (phase === "starting") {
     return (
-      <div className="relative h-2 overflow-hidden rounded-full bg-accent">
+      <div
+        role="progressbar"
+        aria-label="Preparing render"
+        className="relative h-2 overflow-hidden rounded-full bg-accent"
+      >
         <div className="absolute inset-y-0 left-0 w-1/3 animate-pulse rounded-full bg-blue-500" />
       </div>
     );
@@ -273,7 +278,14 @@ function ProgressBar({
     return <div className="h-2 rounded-full bg-red-500/30" />;
   }
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-accent">
+    <div
+      role="progressbar"
+      aria-label="Rendering progress"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(smoothPct)}
+      className="h-2 overflow-hidden rounded-full bg-accent"
+    >
       <div
         className="h-full rounded-full bg-blue-500"
         style={{ width: `${Math.max(2, smoothPct)}%` }}

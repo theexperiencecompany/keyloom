@@ -140,7 +140,6 @@ export function Builder() {
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("content");
 
   const totalDuration = projectDuration(project);
-  const totalSeconds = totalDuration / project.fps;
   const hasClips = project.clips.length > 0;
 
   const selectedClip = project.clips.find((c) => c.id === selectedClipId);
@@ -522,7 +521,7 @@ export function Builder() {
                     // with the clip inspector.
                     <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto scrollbar-thin border-l border-border bg-[var(--studio-sidebar)] p-3">
                       <div className="flex items-center justify-between px-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           Project audio
                         </p>
                         <button

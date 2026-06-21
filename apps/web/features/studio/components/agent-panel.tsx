@@ -322,6 +322,8 @@ export function AgentPanel({
           size="icon"
           onClick={onClose}
           className="size-6"
+          title="Close"
+          aria-label="Close agent panel"
         >
           <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
         </Button>
@@ -355,7 +357,11 @@ export function AgentPanel({
               forming yet.
             */}
             {isBusy ? (
-              <li className="flex items-center gap-2.5 py-1">
+              <li
+                className="flex items-center gap-2.5 py-1"
+                role="status"
+                aria-live="polite"
+              >
                 <WaveSpinner
                   size="md"
                   pattern="line"
@@ -371,7 +377,10 @@ export function AgentPanel({
               </li>
             ) : null}
             {error ? (
-              <li className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-[12px] text-destructive">
+              <li
+                role="alert"
+                className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-[12px] text-destructive"
+              >
                 <span className="font-medium">Agent error</span>
                 <span className="whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed opacity-90">
                   {humanizeAgentError(error)}

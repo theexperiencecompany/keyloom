@@ -72,6 +72,7 @@ export function LibraryPanel({
             onClick={onClose}
             className="ml-auto size-6 shrink-0"
             title="Close"
+            aria-label="Close library"
           >
             <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
           </Button>
@@ -98,7 +99,7 @@ export function LibraryPanel({
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 aria-label="Clear search"
               >
                 <HugeiconsIcon
@@ -137,9 +138,9 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${
+      className={`flex-1 rounded-md px-3 py-1.5 text-[12px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 ${
         active
-          ? "bg-accent text-foreground"
+          ? "bg-accent text-foreground shadow-sm ring-1 ring-inset ring-white/10"
           : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
       }`}
     >

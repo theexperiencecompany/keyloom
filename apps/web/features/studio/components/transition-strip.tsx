@@ -97,7 +97,11 @@ export function TransitionStrip({
   }
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: can't be a native <button> — it's a self-stretch flex child wrapping absolutely-positioned cards with pointer-drag handlers; uses the ARIA button pattern (role + tabIndex + keydown) instead.
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Transition: ${TRANSITION_LABEL[transition.kind]}, ${seconds.toFixed(2)}s`}
       title={`${TRANSITION_LABEL[transition.kind]} · ${seconds.toFixed(2)}s`}
       onClick={(e) => {
         e.stopPropagation();
@@ -113,7 +117,7 @@ export function TransitionStrip({
       onPointerEnter={() => setHovered(true)}
       onPointerLeave={() => setHovered(false)}
       style={{ width: widthPx }}
-      className="group/strip relative z-[5] shrink-0 self-stretch cursor-pointer"
+      className="group/strip relative z-[5] shrink-0 self-stretch cursor-pointer rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
     >
       {/* The strip card — a single rounded rectangle, full clip-block
           height, painted in the system blue so it reads as a discrete

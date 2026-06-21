@@ -232,6 +232,53 @@ html:root.dark {
   --studio-center: #171717;
 }
 
+/* The center canvas — a flat fill reads dead, so give it depth like Figma /
+   Framer / tldraw: a faint dot grid that fades toward the edges, plus a soft
+   inset vignette that lifts the centered preview. Both layers are decorative
+   (pointer-events:none) and sit behind the player (which gets relative z-10). */
+.studio-canvas {
+  position: relative;
+  background-color: var(--studio-center);
+}
+.studio-canvas::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.06) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 65% 70% at 50% 45%,
+    #000 25%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 65% 70% at 50% 45%,
+    #000 25%,
+    transparent 100%
+  );
+}
+.dark .studio-canvas::before {
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px
+  );
+}
+.studio-canvas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 160px 48px rgba(0, 0, 0, 0.22);
+}
+
 /* iMessage-style chat bubbles (mirrors GAIA onboarding-revamp). The tail is
    a single ::before with a clip-path silhouette, so it composites correctly
    over any background (no matching background-color hack needed). */

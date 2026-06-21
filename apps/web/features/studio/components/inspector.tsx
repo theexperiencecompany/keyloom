@@ -123,7 +123,13 @@ export function Inspector({
             {durationSec}s
           </span>
         </div>
-        <Button variant="ghost" size="icon-sm" onClick={onClose} title="Close">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={onClose}
+          title="Close"
+          aria-label="Close inspector"
+        >
           <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
         </Button>
       </div>

@@ -188,23 +188,30 @@ export function UploadPanel({
           size="icon"
           onClick={onClose}
           className="size-6"
+          title="Close"
+          aria-label="Close upload panel"
         >
           <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
         </Button>
       </div>
 
       {currentAudio && (
-        <div className="mx-3 mt-3 flex items-center gap-2 px-1">
-          <p
-            className="min-w-0 flex-1 truncate text-[12px] font-medium text-foreground"
-            title={currentAudio.title || currentAudio.src}
-          >
-            {currentAudio.title?.trim() || "Audio"}
-          </p>
+        <div className="mx-3 mt-3 flex items-center gap-2 rounded-lg bg-white/[0.03] px-2.5 py-2 ring-1 ring-inset ring-white/10">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-primary/80">
+              Attached
+            </p>
+            <p
+              className="truncate text-[12px] font-medium text-foreground"
+              title={currentAudio.title || currentAudio.src}
+            >
+              {currentAudio.title?.trim() || "Audio"}
+            </p>
+          </div>
           <button
             type="button"
             onClick={onClear}
-            className="shrink-0 rounded p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="shrink-0 rounded-md p-1 text-muted-foreground outline-none transition hover:bg-white/10 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
             title="Remove attached audio"
             aria-label="Remove attached audio"
           >
@@ -214,7 +221,7 @@ export function UploadPanel({
       )}
 
       <div className="space-y-2 px-3 pb-2 pt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           Audio
         </p>
         <div className="relative">
@@ -233,7 +240,7 @@ export function UploadPanel({
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               aria-label="Clear search"
             >
               <HugeiconsIcon icon={MultiplicationSignIcon} className="size-3" />
@@ -261,7 +268,7 @@ export function UploadPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin px-3 pb-3">
-        <p className="sticky top-0 z-[1] bg-[var(--studio-sidebar)] pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="sticky top-0 z-[1] bg-[var(--studio-sidebar)] pb-1.5 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {debouncedQuery ? "Results" : "Popular tracks"}
         </p>
         {emptyMessage ? (
@@ -282,7 +289,10 @@ export function UploadPanel({
           </ul>
         )}
         {error && !missingKey && (
-          <p className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+          <p
+            role="alert"
+            className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300"
+          >
             {error}
           </p>
         )}
@@ -303,12 +313,22 @@ function TrackRow({
   onChoose: () => void;
 }) {
   return (
-    <li className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/40">
+    <li
+      className={`group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors ${
+        playing
+          ? "bg-primary/[0.07] ring-1 ring-inset ring-primary/25"
+          : "hover:bg-white/[0.04]"
+      }`}
+    >
       <button
         type="button"
         onClick={onTogglePreview}
         aria-label={playing ? "Pause preview" : "Play preview"}
-        className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+        className={`flex size-7 shrink-0 items-center justify-center rounded-md outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring/50 ${
+          playing
+            ? "text-primary"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
       >
         <HugeiconsIcon
           icon={playing ? PauseCircleIcon : PlayCircleIcon}

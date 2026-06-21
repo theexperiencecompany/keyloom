@@ -98,7 +98,7 @@ export function SortableClipBlock({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative shrink-0 select-none overflow-hidden rounded-lg ${
+      className={`group relative shrink-0 select-none overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
         selected ? "z-10" : ""
       } ${resizing ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"}`}
       {...attributes}
@@ -123,7 +123,7 @@ export function SortableClipBlock({
           style={{ background: palette.accent }}
         />
 
-        <p className="relative z-[1] truncate text-[11px] font-semibold leading-tight text-foreground/90">
+        <p className="relative z-[1] truncate text-[11px] font-semibold leading-tight text-foreground">
           {info?.title ?? clip.compositionId}
         </p>
         <div className="relative z-[1] flex items-center justify-between gap-1">
@@ -136,7 +136,7 @@ export function SortableClipBlock({
                 <span
                   key={e.id}
                   title={effectsById[e.effectId]?.title ?? e.effectId}
-                  className="rounded bg-foreground/10 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wider text-foreground/70"
+                  className="rounded bg-foreground/10 px-1 py-px text-[8px] font-bold uppercase leading-none tracking-wider text-foreground/85"
                 >
                   {(effectsById[e.effectId]?.title ?? e.effectId).slice(0, 4)}
                 </span>
@@ -178,6 +178,7 @@ export function SortableClipBlock({
         }}
         onPointerDown={(e) => e.stopPropagation()}
         title="Delete"
+        aria-label="Delete clip"
         className="absolute right-1.5 top-1.5 z-[2] size-5 rounded-md bg-foreground/10 text-[12px] leading-none text-foreground/70 opacity-0 transition-opacity hover:bg-foreground/20 hover:text-foreground group-hover:opacity-100"
       >
         ×

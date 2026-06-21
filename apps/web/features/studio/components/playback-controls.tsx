@@ -105,6 +105,7 @@ function ControlButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={title}
     >
       <HugeiconsIcon icon={icon} size={20} strokeWidth={2} />
     </Button>
