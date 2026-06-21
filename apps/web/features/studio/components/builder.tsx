@@ -117,6 +117,12 @@ export function Builder() {
   const selectedClipId = selection?.kind === "clip" ? selection.id : null;
   const isAudioSelected = selection?.kind === "audio";
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("content");
+  // A brief captured from the canvas agent launcher, handed to the agent panel
+  // (which opens and auto-sends it) and cleared once consumed.
+  const [pendingAgentPrompt, setPendingAgentPrompt] = useState<{
+    text: string;
+    mentions: string[];
+  } | null>(null);
 
   const totalDuration = projectDuration(project);
   const totalSeconds = totalDuration / project.fps;
@@ -322,6 +328,10 @@ export function Builder() {
                             }
                           : null
                       }
+                      initialPrompt={pendingAgentPrompt}
+                      onInitialPromptConsumed={() =>
+                        setPendingAgentPrompt(null)
+                      }
                       onClose={() =>
                         dispatch({ type: "TOGGLE_PANEL", panel: "agent" })
                       }
@@ -340,8 +350,12 @@ export function Builder() {
                   totalDuration={totalDuration}
                   hasClips={hasClips}
                   onOpenLibrary={() =>
-                    dispatch({ type: "TOGGLE_PANEL", panel: "library" })
+                    dispatch({ type: "OPEN_PANEL", panel: "library" })
                   }
+                  onStartAgent={(text, mentions) => {
+                    setPendingAgentPrompt({ text, mentions });
+                    dispatch({ type: "OPEN_PANEL", panel: "agent" });
+                  }}
                   playerRef={playerRef}
                 />
 
@@ -473,10 +487,10 @@ export function Builder() {
                     // Audio inspector — surfaces when the user clicks the
                     // audio track row in the timeline. Mutually exclusive
                     // with the clip inspector.
-                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto border-l border-border bg-background p-3">
+                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto bg-background p-3">
                       <div className="flex items-center justify-between px-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Project audio
+                        <p className="text-sm font-semibold text-foreground">
+                          Audio
                         </p>
                         <button
                           type="button"

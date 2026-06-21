@@ -51,10 +51,15 @@ const VISIBLE_COMPOSITIONS = compositions.filter(
   (c) => c.category !== "background",
 );
 
+// How many cards to show before the "Show more" cut-off (browsing only — an
+// active search always shows every match).
+const COLLAPSED_COUNT = 9;
+
 export function GalleryBrowser() {
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [expanded, setExpanded] = React.useState(false);
 
   // Which categories are actually populated, in CATEGORY_ORDER.
   const presentCategories = React.useMemo(() => {
@@ -144,11 +149,39 @@ export function GalleryBrowser() {
           No components match “{query}”.
         </p>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-          {items.map((info) => (
-            <GalleryCard key={info.id} info={info} />
-          ))}
-        </div>
+        (() => {
+          // A search shows every match; browsing collapses to the first rows
+          // with a fade + "Show more" so the section stays scannable.
+          const collapsible = !query && items.length > COLLAPSED_COUNT;
+          const collapsed = collapsible && !expanded;
+          const visible = collapsed ? items.slice(0, COLLAPSED_COUNT) : items;
+          return (
+            <div className="space-y-6">
+              <div className="relative">
+                <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+                  {visible.map((info) => (
+                    <GalleryCard key={info.id} info={info} />
+                  ))}
+                </div>
+                {collapsed && (
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-background via-background/85 to-transparent" />
+                )}
+              </div>
+              {collapsible && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => setExpanded((v) => !v)}
+                  >
+                    {expanded
+                      ? "Show less"
+                      : `Show ${items.length - COLLAPSED_COUNT} more`}
+                  </Button>
+                </div>
+              )}
+            </div>
+          );
+        })()
       )}
     </div>
   );

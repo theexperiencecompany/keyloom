@@ -51,6 +51,7 @@ export type StudioAction =
   | { type: "SELECT_AUDIO" }
   | { type: "CLEAR_SELECTION" }
   | { type: "TOGGLE_PANEL"; panel: StudioPanel }
+  | { type: "OPEN_PANEL"; panel: StudioPanel }
   | { type: "UPDATE_CLIP_STYLE"; clipId: string; patch: Partial<ClipStyle> }
   | { type: "RESET_CLIP_STYLE"; clipId: string }
   | { type: "SET_CLIP_FRAME"; clipId: string; frame: ClipFrame | null }
@@ -265,6 +266,8 @@ export function studioReducer(
         ...state,
         openPanel: state.openPanel === action.panel ? null : action.panel,
       };
+    case "OPEN_PANEL":
+      return { ...state, openPanel: action.panel };
     case "LOAD_PROJECT":
       return {
         ...state,

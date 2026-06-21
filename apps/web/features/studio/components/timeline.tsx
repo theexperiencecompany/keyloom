@@ -294,7 +294,7 @@ export function Timeline({
   const atMaxZoom = pxPerSecond >= MAX_PX_PER_SECOND - 0.01;
 
   return (
-    <div className="shrink-0 bg-[#eeeeee] dark:bg-[#1a1a1a]">
+    <div className="shrink-0 border-t border-border bg-background">
       <div className="flex items-center justify-between gap-3 px-4 py-2">
         <p className="text-xs font-medium text-muted-foreground">Timeline</p>
 
@@ -637,7 +637,7 @@ function AudioTrackRow({
             bottom: 0,
             cursor: "grab",
           }}
-          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600 px-3 py-2 text-white transition-shadow ${
+          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600 px-3 py-2 text-white ${
             selected
               ? "z-10 ring-2 ring-primary ring-offset-1 ring-offset-background"
               : ""

@@ -177,46 +177,21 @@ export function UploadPanel({
   }, [loading, missingKey, tracks.length]);
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-hidden border-r border-border bg-background">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-        <div>
-          <p className="text-sm font-medium text-foreground">Upload</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">Audio assets</p>
-        </div>
+    <aside className="flex h-full w-full flex-col overflow-hidden bg-background">
+      <div className="flex items-center justify-between px-4 pb-2 pt-3.5">
+        <p className="text-sm font-semibold text-foreground">Audio</p>
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           onClick={onClose}
-          className="size-6"
+          className="size-7 text-muted-foreground"
+          aria-label="Close"
         >
-          <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
 
-      {currentAudio && (
-        <div className="mx-3 mt-3 flex items-center gap-2 px-1">
-          <p
-            className="min-w-0 flex-1 truncate text-[12px] font-medium text-foreground"
-            title={currentAudio.title || currentAudio.src}
-          >
-            {currentAudio.title?.trim() || "Audio"}
-          </p>
-          <button
-            type="button"
-            onClick={onClear}
-            className="shrink-0 rounded p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-            title="Remove attached audio"
-            aria-label="Remove attached audio"
-          >
-            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-          </button>
-        </div>
-      )}
-
-      <div className="space-y-2 px-3 pb-2 pt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Audio
-        </p>
+      <div className="space-y-2 px-3 pt-1">
         <div className="relative">
           <HugeiconsIcon
             icon={Search01Icon}
@@ -248,7 +223,7 @@ export function UploadPanel({
           onClick={() => fileInputRef.current?.click()}
         >
           <HugeiconsIcon icon={Upload01Icon} className="size-4" />
-          Upload MP3
+          Upload an MP3
         </Button>
         <input
           ref={fileInputRef}
@@ -260,16 +235,40 @@ export function UploadPanel({
         />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-        <p className="sticky top-0 z-[1] bg-background pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      {currentAudio && (
+        <div className="mx-3 mt-3 flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+          <HugeiconsIcon
+            icon={MusicNote01Icon}
+            className="size-4 shrink-0 text-muted-foreground"
+          />
+          <p
+            className="min-w-0 flex-1 truncate text-[12px] font-medium text-foreground"
+            title={currentAudio.title || currentAudio.src}
+          >
+            {currentAudio.title?.trim() || "Audio"}
+          </p>
+          <button
+            type="button"
+            onClick={onClear}
+            className="shrink-0 rounded p-1 text-muted-foreground transition hover:text-foreground"
+            title="Remove attached audio"
+            aria-label="Remove attached audio"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </button>
+        </div>
+      )}
+
+      <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+        <p className="sticky top-0 z-[1] bg-background pb-1.5 text-[11px] font-medium text-muted-foreground">
           {debouncedQuery ? "Results" : "Popular tracks"}
         </p>
         {emptyMessage ? (
-          <p className="rounded-md border border-dashed border-border/60 px-3 py-4 text-center text-[11px] leading-relaxed text-muted-foreground">
+          <p className="px-1 py-4 text-center text-[11px] leading-relaxed text-muted-foreground">
             {emptyMessage}
           </p>
         ) : (
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {tracks.map((t) => (
               <TrackRow
                 key={t.id}
@@ -282,7 +281,7 @@ export function UploadPanel({
           </ul>
         )}
         {error && !missingKey && (
-          <p className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+          <p className="mt-3 rounded-md bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
             {error}
           </p>
         )}

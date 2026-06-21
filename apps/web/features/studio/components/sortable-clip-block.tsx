@@ -98,7 +98,7 @@ export function SortableClipBlock({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative shrink-0 select-none overflow-hidden rounded-md transition-shadow ${
+      className={`group relative shrink-0 select-none overflow-hidden rounded-md ${
         selected ? "z-10" : ""
       } ${resizing ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"}`}
       {...attributes}
@@ -146,7 +146,7 @@ export function SortableClipBlock({
       </div>
 
       {selected && (
-        <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-blue-500" />
+        <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-primary" />
       )}
 
       <ResizeHandle

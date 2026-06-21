@@ -113,7 +113,7 @@ export function Inspector({
   const durationSec = (clip.durationInFrames / fps).toFixed(1);
 
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-background">
+    <aside className="flex h-full min-h-0 w-full flex-col bg-background">
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground">
@@ -212,33 +212,28 @@ export function Inspector({
               </p>
             </div>
           )}
-          <div className="border-b px-5 py-4">
+          <div className="px-5 py-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Frame
             </p>
-            <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 p-1">
-              {(
-                [
-                  { value: null, label: "None" },
-                  { value: "phone", label: "Phone" },
-                  { value: "laptop", label: "Laptop" },
-                ] as const
-              ).map((opt) => {
-                const active = (clip.frame ?? null) === opt.value;
-                return (
-                  <Button
-                    key={opt.label}
-                    type="button"
-                    variant={active ? "secondary" : "ghost"}
-                    size="sm"
-                    className={`flex-1 ${active ? "shadow-sm" : "text-muted-foreground"}`}
-                    onClick={() => onSetFrame(opt.value)}
-                  >
-                    {opt.label}
-                  </Button>
-                );
-              })}
-            </div>
+            <Tabs
+              value={clip.frame ?? "none"}
+              onValueChange={(v) =>
+                onSetFrame(v === "none" ? null : (v as ClipFrame))
+              }
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="none" className="flex-1">
+                  None
+                </TabsTrigger>
+                <TabsTrigger value="phone" className="flex-1">
+                  Phone
+                </TabsTrigger>
+                <TabsTrigger value="laptop" className="flex-1">
+                  Laptop
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
             <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
               Render this clip inside a device mockup.
             </p>

@@ -13,11 +13,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Keyloom — Cinematic scenes for Remotion",
+    default: "Keyloom — Describe a video, the agent builds it",
     template: "%s — Keyloom",
   },
   description:
-    "A library of cinematic scenes for Remotion. No After Effects, no animation team — drop in, render, ship.",
+    "Keyloom turns a sentence into a finished motion-graphics video. The agent assembles cinematic scenes on a real timeline, then you export a Full-HD MP4. No After Effects, no animation team.",
 };
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
