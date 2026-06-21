@@ -6,6 +6,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "env": [
+        "APP_URL",
         "DATABASE_URL",
         "OPENAI_API_KEY",
         "COMPOSIO_API_KEY",

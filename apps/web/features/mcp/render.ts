@@ -4,6 +4,7 @@ import {
   renderMediaOnLambda,
 } from "@remotion/lambda/client";
 import { compositionsById } from "@workspace/compositions/registry";
+import { rewriteExternalImageUrls } from "@/features/studio/lib/proxy-external-images";
 import { isAgentVisible } from "@/lib/agent/catalog";
 import { getLambdaConfig } from "./config";
 import { buildDownloadUrl } from "./download-url";
@@ -38,10 +39,22 @@ export async function startRender(
 
   const { region, serveUrl, functionName } = getLambdaConfig();
 
-  const inputProps = {
+  const merged = {
     ...(info.defaultProps as Record<string, unknown>),
     ...props,
   };
+  // Parity with the studio Lambda route: external image URLs (avatars, photo
+  // bubbles, wallpapers, gallery photos) from CDNs that block Lambda IPs render
+  // blank unless proxied through our app. We can only proxy when a public app
+  // origin is configured — Lambda must be able to reach it. Without one, URLs
+  // pass through unchanged (fine for already-reachable hosts and bundled
+  // "images/..." assets).
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL)
+    ?.trim()
+    .replace(/\/$/, "");
+  const inputProps = appUrl
+    ? (rewriteExternalImageUrls(merged, appUrl) as Record<string, unknown>)
+    : merged;
   const fps = options.fps ?? info.fps;
   const durationInFrames = options.durationInFrames ?? info.durationInFrames;
   const scale = Math.min(2, Math.max(0.25, options.scale ?? 1));

@@ -134,6 +134,18 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
   title: "Message Bubbles",
   description:
     "An animated iMessage-style chat conversation with grouped bubble corners, tails, and spring-stacked rows.",
+  agentNotes:
+    "iMessage-style chat. Fill `messages` (array, ordered top→bottom). Each message: " +
+    "{ text, side, typingFrames, delay, time?, history?, image?, sound? }. " +
+    "side: 'right' = outgoing (you, blue), 'left' = incoming (the contact, gray). " +
+    "delay = frame the message starts (ascending across the array); typingFrames = how long it types before landing. " +
+    "history:true shows a message from frame 0 with NO animation (use for older context at the top); for history rows delay/typingFrames are ignored. " +
+    "time:'Today' (or a date/time) renders a divider ABOVE that message. " +
+    "PHOTO BUBBLE: to send an image, set `image` to a PUBLIC https image URL (.jpg/.png/.webp) or a bundled 'images/...' path and leave `text` empty — it renders as a photo bubble (text is ignored when image is set). " +
+    "For the iMessage attachment-picker animation before an outgoing photo, set showKeyboard:true, give that photo message a longer typingFrames (~120), and fill `galleryImages` (the picker grid the cursor browses before sending). " +
+    "galleryImages is an array of { name, url } objects (NOT bare strings), max 5 — e.g. [{ name: 'beach', url: 'https://…/beach.jpg' }]. The picker grid shows 6 tiles total: the photo being sent first, then your galleryImages, then gradient placeholders fill the rest. " +
+    "contactAvatar is an emoji or image URL; backgroundImage is the chat wallpaper. Keep image URLs public and reachable — the renderer proxies known image hosts for cloud rendering. " +
+    "EXAMPLE photo send: showKeyboard:true, galleryImages:[{name:'a',url:'https://…/a.jpg'},{name:'b',url:'https://…/b.jpg'}], and a message { side:'right', text:'', image:'https://…/a.jpg', typingFrames:120, delay:300 }.",
   durationInFrames: MESSAGE_BUBBLES_DURATION,
   fps: MESSAGE_BUBBLES_FPS,
   width: MESSAGE_BUBBLES_WIDTH,
