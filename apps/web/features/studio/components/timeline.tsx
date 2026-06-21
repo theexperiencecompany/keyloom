@@ -294,7 +294,7 @@ export function Timeline({
   const atMaxZoom = pxPerSecond >= MAX_PX_PER_SECOND - 0.01;
 
   return (
-    <div className="shrink-0 bg-[#eeeeee] dark:bg-[#1a1a1a]">
+    <div className="shrink-0 bg-[var(--studio-center)]">
       <div className="flex items-center justify-between gap-3 px-4 py-2">
         <p className="text-xs font-medium text-muted-foreground">Timeline</p>
 

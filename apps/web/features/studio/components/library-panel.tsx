@@ -52,7 +52,7 @@ export function LibraryPanel({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <aside className="flex h-full w-full flex-col overflow-y-auto scrollbar-thin border-r border-border bg-background">
+      <aside className="flex h-full w-full flex-col overflow-y-auto scrollbar-thin border-r border-border bg-[var(--studio-sidebar)]">
         <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-2">
           <TabButton
             active={tab === "components"}
@@ -358,7 +358,7 @@ function PreviewTooltipItem({
           side="right"
           sideOffset={12}
           hideArrow
-          className="block w-72 max-w-none overflow-hidden border border-border bg-background p-0 shadow-xl"
+          className="block w-72 max-w-none overflow-hidden border border-border bg-[var(--studio-sidebar)] p-0 shadow-xl"
         >
           <CompositionPreviewCard info={info} />
         </TooltipContent>

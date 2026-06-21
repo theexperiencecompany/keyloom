@@ -256,7 +256,7 @@ export function Builder() {
   // ----------------------------------------------------------------------
   return (
     <PlayerProvider playerRef={playerRef} version={playerVersion}>
-      <div className="flex h-screen flex-col bg-background text-foreground">
+      <div className="studio-shell flex h-screen flex-col bg-background text-foreground">
         <TopBar
           projectName={project.name}
           onRenameProject={(name) =>
@@ -520,7 +520,7 @@ export function Builder() {
                     // Audio inspector — surfaces when the user clicks the
                     // audio track row in the timeline. Mutually exclusive
                     // with the clip inspector.
-                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto scrollbar-thin border-l border-border bg-background p-3">
+                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto scrollbar-thin border-l border-border bg-[var(--studio-sidebar)] p-3">
                       <div className="flex items-center justify-between px-1">
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                           Project audio

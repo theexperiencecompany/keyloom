@@ -216,6 +216,22 @@ html:root.dark {
   --sidebar-primary: #00bbff;
 }
 
+/* Studio surface palette — single source of truth for the editor's region
+   colors. Scoped to the studio shell so it never leaks into the rest of the
+   app.
+     - sidebars (left rails + right inspector): the panel chrome
+     - center column (preview, playback, timeline): the canvas
+   Both modes are defined so the studio is correct whether the app is light or
+   dark (the editor forces dark, but this keeps it from flashing inverted). */
+.studio-shell {
+  --studio-sidebar: #ffffff;
+  --studio-center: #eeeeee;
+}
+.dark .studio-shell {
+  --studio-sidebar: #0c0c0c;
+  --studio-center: #171717;
+}
+
 /* iMessage-style chat bubbles (mirrors GAIA onboarding-revamp). The tail is
    a single ::before with a clip-path silhouette, so it composites correctly
    over any background (no matching background-color hack needed). */

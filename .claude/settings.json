@@ -57,7 +57,10 @@
       "Bash(curl -sL -o /dev/null -w 'final_status=%{http_code} bytes=%{size_download} type=%{content_type}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 60)",
       "WebFetch(domain:developer.spotify.com)",
       "Bash(echo \"pushed: $?\")",
-      "Bash(echo \"EXIT $?\")"
+      "Bash(echo \"EXIT $?\")",
+      "Bash(sed -i 's/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/tool-rail.tsx apps/web/features/studio/components/inspector.tsx apps/web/features/studio/components/library-panel.tsx)",
+      "Bash(sed -i 's/bg-background\\\\/95/bg-[var\\(--studio-sidebar\\)]/g; s/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/upload-panel.tsx)",
+      "Bash(sed -i 's/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/agent-panel.tsx)"
     ]
   }
 }

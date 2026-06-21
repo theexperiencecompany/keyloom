@@ -113,7 +113,7 @@ export function Inspector({
   const durationSec = (clip.durationInFrames / fps).toFixed(1);
 
   return (
-    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-background">
+    <aside className="flex h-full min-h-0 w-full flex-col border-l border-border bg-[var(--studio-sidebar)]">
       <div className="flex items-center justify-between gap-2 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground">
@@ -358,7 +358,7 @@ function EffectCard({
           type="button"
           onClick={onRemove}
           title="Remove"
-          className="rounded-md border border-border bg-background px-2 py-1 text-[10px] font-medium hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+          className="rounded-md border border-border bg-[var(--studio-sidebar)] px-2 py-1 text-[10px] font-medium hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
         >
           Remove
         </button>
@@ -377,7 +377,7 @@ function EffectCard({
           <span className="truncate text-[12px] font-medium text-foreground">
             {info.title}
           </span>
-          <span className="rounded-sm bg-background px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+          <span className="rounded-sm bg-[var(--studio-sidebar)] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
             {info.trigger}
           </span>
         </div>

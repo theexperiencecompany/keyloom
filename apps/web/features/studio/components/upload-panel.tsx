@@ -177,8 +177,8 @@ export function UploadPanel({
   }, [loading, missingKey, tracks.length]);
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-hidden border-r border-border bg-background">
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
+    <aside className="flex h-full w-full flex-col overflow-hidden border-r border-border bg-[var(--studio-sidebar)]">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-[var(--studio-sidebar)] px-4 py-3 backdrop-blur">
         <div>
           <p className="text-sm font-medium text-foreground">Upload</p>
           <p className="mt-0.5 text-xs text-muted-foreground">Audio assets</p>
@@ -261,7 +261,7 @@ export function UploadPanel({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin px-3 pb-3">
-        <p className="sticky top-0 z-[1] bg-background pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="sticky top-0 z-[1] bg-[var(--studio-sidebar)] pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           {debouncedQuery ? "Results" : "Popular tracks"}
         </p>
         {emptyMessage ? (

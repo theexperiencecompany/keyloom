@@ -105,7 +105,7 @@ export function TopBar({
   }
 
   return (
-    <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-border bg-[var(--studio-sidebar)] px-4">
       <input
         ref={fileInputRef}
         type="file"

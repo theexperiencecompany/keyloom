@@ -273,7 +273,7 @@ export function AgentPanel({
   }
 
   return (
-    <aside className="relative flex h-full w-full flex-col overflow-hidden border-r border-border bg-background">
+    <aside className="relative flex h-full w-full flex-col overflow-hidden border-r border-border bg-[var(--studio-sidebar)]">
       {/*
         Ambient hero — the wildflower-sunset artwork washes in at the top and
         melts into the dark panel. Only present on the empty state; the moment
@@ -297,7 +297,7 @@ export function AgentPanel({
       <div
         className={`relative z-10 flex items-center justify-between border-b px-4 py-3 ${
           messages.length === 0
-            ? "border-white/10 bg-background/30 backdrop-blur-md"
+            ? "border-white/10 bg-[var(--studio-sidebar)]/30 backdrop-blur-md"
             : "border-border"
         }`}
       >

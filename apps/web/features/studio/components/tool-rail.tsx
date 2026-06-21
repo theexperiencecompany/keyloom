@@ -18,7 +18,7 @@ type Props = {
 
 export function ToolRail({ openPanel, onToggle }: Props) {
   return (
-    <aside className="flex w-[72px] shrink-0 flex-col items-stretch gap-2 border-r border-border bg-background px-2 py-3">
+    <aside className="flex w-[72px] shrink-0 flex-col items-stretch gap-2 border-r border-border bg-[var(--studio-sidebar)] px-2 py-3">
       <ToolButton
         active={openPanel === "library"}
         onClick={() => onToggle("library")}
