@@ -42,6 +42,13 @@ export type Clip = {
 export type ProjectAudio = {
   /** URL to mp3: pixabay direct, proxied, or browser blob: URL from upload. */
   src: string;
+  /**
+   * Reachable https URL for the same audio when `src` is a browser-only
+   * `blob:` URL (uploaded mp3). Set by the studio after it hosts the upload
+   * via `/api/audio/upload`. Cloud (Lambda) renders swap `src` to this so the
+   * render can fetch the file; preview and in-browser export keep using `src`.
+   */
+  uploadUrl?: string;
   /** Display label in the inspector. */
   title?: string;
   /** Royalty attribution string if the source requires it. */

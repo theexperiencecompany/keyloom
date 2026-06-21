@@ -51,6 +51,8 @@ export function UploadPanel({
   // Single shared preview element — only one track may play at a time.
   const previewRef = useRef<HTMLAudioElement | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  // True while a just-uploaded mp3 is being hosted for cloud render.
+  const [uploading, setUploading] = useState(false);
 
   // Tear down the preview audio when the panel unmounts.
   useEffect(() => {
@@ -139,11 +141,10 @@ export function UploadPanel({
         `Upload is ${(file.size / 1024 / 1024).toFixed(1)} MB. Large files (>25 MB) may slow exports.`,
       );
     }
-    // NOTE: `blob:` URLs survive only within this browser session. They
-    // work for live preview and the in-browser MP4 export, but won't
-    // survive a page reload or be reachable from a CLI render. Users
-    // wanting persistent audio should pick a Pixabay track (URL stable)
-    // or host their MP3 themselves and paste the URL into the JSON.
+    // The `blob:` URL drives live preview and the in-browser MP4 export
+    // instantly. It's browser-only, though — a cloud (Lambda) render can't
+    // reach it — so we also host the file (below) and keep the reachable URL
+    // on `uploadUrl` for that path.
     const url = URL.createObjectURL(file);
     // Decode the file's duration via an off-screen <audio> element. The
     // duration is needed so the inspector's trim slider has a meaningful
@@ -165,6 +166,35 @@ export function UploadPanel({
     onSet(audio);
     // Allow re-selecting the same file later.
     e.target.value = "";
+
+    // Host the file so cloud renders can reach it. Best-effort: if it fails
+    // (e.g. Lambda/S3 not configured), preview and in-browser export still
+    // work — only the cloud render would miss this audio, which we flag.
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/audio/upload", {
+        method: "POST",
+        body: form,
+      });
+      const data = (await res.json().catch(() => null)) as {
+        url?: string;
+        error?: string;
+      } | null;
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error ?? `Upload failed (${res.status})`);
+      }
+      onSet({ ...audio, uploadUrl: data.url });
+    } catch (err) {
+      setError(
+        `Audio is ready for preview and in-browser export, but hosting it for cloud render failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    } finally {
+      setUploading(false);
+    }
   }
 
   const emptyMessage = useMemo(() => {
@@ -253,9 +283,10 @@ export function UploadPanel({
           size="sm"
           className="w-full justify-start gap-2"
           onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
         >
           <HugeiconsIcon icon={Upload01Icon} className="size-4" />
-          Upload MP3
+          {uploading ? "Hosting for cloud render…" : "Upload MP3"}
         </Button>
         <input
           ref={fileInputRef}

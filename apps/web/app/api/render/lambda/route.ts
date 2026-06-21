@@ -187,6 +187,13 @@ function resolveRender(
   }
 
   assertProject(body.project);
+  // Uploaded audio reaches us as a browser-only `blob:` src plus a hosted
+  // `uploadUrl` (see /api/audio/upload). Swap to the reachable URL before the
+  // blob guard so cloud renders can fetch the file.
+  const audio = body.project.audio;
+  if (audio?.src.startsWith("blob:") && audio.uploadUrl) {
+    audio.src = audio.uploadUrl;
+  }
   const blobPath = findBlobUrl(body.project);
   if (blobPath) {
     throw new Error(
