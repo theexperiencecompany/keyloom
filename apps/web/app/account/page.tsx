@@ -36,7 +36,7 @@ export default async function AccountPage({
     listApiKeys(user.id),
   ]);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://keyloom.app";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.keyloom.app";
 
   return (
     <AccountClient

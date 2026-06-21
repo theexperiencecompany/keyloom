@@ -8,7 +8,12 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import { useActionState, useState } from "react";
-import { createKeyAction, revokeKeyAction, upgradeAction } from "./actions";
+import {
+  createKeyAction,
+  refreshBillingAction,
+  revokeKeyAction,
+  upgradeAction,
+} from "./actions";
 
 type KeyRow = {
   id: string;
@@ -97,11 +102,23 @@ export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
               </div>
             </div>
             {subscription.plan === "free" ? (
-              <form action={upgradeAction}>
-                <Button type="submit" size="sm" className="w-full sm:w-auto">
-                  Upgrade to Pro
-                </Button>
-              </form>
+              <div className="flex flex-wrap items-center gap-2">
+                <form action={upgradeAction}>
+                  <Button type="submit" size="sm" className="w-full sm:w-auto">
+                    Upgrade to Pro
+                  </Button>
+                </form>
+                <form action={refreshBillingAction}>
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground"
+                  >
+                    Already paid? Refresh status
+                  </Button>
+                </form>
+              </div>
             ) : null}
           </div>
         ) : (
