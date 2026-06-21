@@ -65,7 +65,8 @@
       "Bash(sed -i 's/text-\\\\[11px\\\\] font-semibold uppercase tracking-wider/text-[11px] font-semibold uppercase tracking-wide/g' apps/web/features/studio/components/project-transition-control.tsx apps/web/features/studio/components/builder.tsx)",
       "Bash(echo \"tsc exit: $?\")",
       "Bash(echo \"tsc: $?\")",
-      "Bash(cd /home/sanku/work/aesthetic *)"
+      "Bash(cd /home/sanku/work/aesthetic *)",
+      "Bash(git pull *)"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components"

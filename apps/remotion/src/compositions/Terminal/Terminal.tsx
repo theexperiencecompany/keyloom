@@ -44,6 +44,11 @@ export type TerminalProps = {
 
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
+// The terminal window keeps its own dark surface regardless of the scene
+// backdrop — same as TypingSearch's pill always being white. The universal
+// "Background" control drives the scene behind the window, not the window fill.
+const WINDOW_BG = "#0b0b0f";
+
 export const Terminal: React.FC<TerminalProps> = ({
   title,
   prompt,
@@ -66,7 +71,9 @@ export const Terminal: React.FC<TerminalProps> = ({
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
   const s = resolveClipStyle(clipStyle, {
-    background: "#0b0b0f",
+    // Scene backdrop (behind the window). White by default to preserve the
+    // current look; now user-controllable via the universal Background control.
+    background: "#ffffff",
     color: "#f5f5f7",
     fontFamily:
       "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
@@ -101,7 +108,7 @@ export const Terminal: React.FC<TerminalProps> = ({
     <FitContent
       designWidth={TERMINAL_WIDTH}
       designHeight={TERMINAL_HEIGHT}
-      background="#ffffff"
+      background={s.background}
     >
       <AbsoluteFill
         style={{
@@ -117,7 +124,7 @@ export const Terminal: React.FC<TerminalProps> = ({
             width: "100%",
             maxWidth,
             borderRadius: cornerRadius,
-            background: s.background,
+            background: WINDOW_BG,
             boxShadow: showShadow
               ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
               : "none",
