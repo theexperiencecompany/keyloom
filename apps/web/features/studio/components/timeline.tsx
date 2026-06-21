@@ -294,7 +294,7 @@ export function Timeline({
   const atMaxZoom = pxPerSecond >= MAX_PX_PER_SECOND - 0.01;
 
   return (
-    <div className="shrink-0 bg-[#eeeeee] dark:bg-[#1a1a1a]">
+    <div className="shrink-0 border-t border-border bg-canvas">
       <div className="flex items-center justify-between gap-3 px-4 py-2">
         <p className="text-xs font-medium text-muted-foreground">Timeline</p>
 
@@ -637,21 +637,12 @@ function AudioTrackRow({
             bottom: 0,
             cursor: "grab",
           }}
-          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-gradient-to-b from-emerald-400 to-emerald-600 px-3 py-2 text-white transition-shadow ${
+          className={`group relative flex select-none flex-col justify-between overflow-hidden rounded-md bg-emerald-500 px-3 py-2 text-white ${
             selected
               ? "z-10 ring-2 ring-primary ring-offset-1 ring-offset-background"
               : ""
           }`}
         >
-          {/* Inner top highlight + outline — matches SortableClipBlock. */}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-md"
-            style={{
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
-            }}
-          />
-
           {/* Left trim handle */}
           <span
             data-audio-handle="left"
@@ -660,7 +651,7 @@ function AudioTrackRow({
             className="absolute inset-y-0 left-0 z-[2] bg-black/20 opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
           />
 
-          <p className="relative truncate text-[11px] font-semibold leading-tight drop-shadow-sm">
+          <p className="relative truncate text-[11px] font-semibold leading-tight">
             ♪ {label}
           </p>
           <p className="relative text-[10px] tabular-nums text-white/75">

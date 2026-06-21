@@ -28,7 +28,7 @@ export function PlaybackControls({
   onSkipToEnd,
 }: Props) {
   return (
-    <div className="flex shrink-0 items-center justify-center gap-3 bg-[#eeeeee] px-4 py-2 dark:bg-[#1a1a1a]">
+    <div className="flex shrink-0 items-center justify-center gap-3 bg-canvas px-4 py-2">
       <div className="flex items-center gap-1">
         <ControlButton
           onClick={onSkipToStart}

@@ -473,10 +473,10 @@ export function Builder() {
                     // Audio inspector — surfaces when the user clicks the
                     // audio track row in the timeline. Mutually exclusive
                     // with the clip inspector.
-                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto border-l border-border bg-background p-3">
+                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto bg-background p-3">
                       <div className="flex items-center justify-between px-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Project audio
+                        <p className="text-sm font-semibold text-foreground">
+                          Audio
                         </p>
                         <button
                           type="button"

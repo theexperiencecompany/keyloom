@@ -18,7 +18,7 @@ const SUGGESTIONS = [
 
 export function EmptyState({ onPick }: { onPick: (text: string) => void }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 px-1 text-center">
+    <div className="flex min-h-full flex-col items-center justify-center gap-6 px-1 py-6 text-center">
       <div className="flex flex-col items-center gap-3">
         <Image
           src="/logo.png"

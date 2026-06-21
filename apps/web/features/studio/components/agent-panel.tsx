@@ -273,7 +273,7 @@ export function AgentPanel({
   }
 
   return (
-    <aside className="relative flex h-full w-full flex-col overflow-hidden border-r border-border bg-background">
+    <aside className="relative flex h-full w-full flex-col overflow-hidden bg-background">
       {/*
         Ambient hero — the wildflower-sunset artwork washes in at the top and
         melts into the dark panel. Only present on the empty state; the moment
@@ -295,10 +295,8 @@ export function AgentPanel({
       ) : null}
 
       <div
-        className={`relative z-10 flex items-center justify-between border-b px-4 py-3 ${
-          messages.length === 0
-            ? "border-white/10 bg-background/30 backdrop-blur-md"
-            : "border-border"
+        className={`relative z-10 flex items-center justify-between px-4 pb-2 pt-3.5 ${
+          messages.length === 0 ? "backdrop-blur-sm" : ""
         }`}
       >
         <div className="flex items-center gap-2">
@@ -310,20 +308,16 @@ export function AgentPanel({
             height={24}
             className="size-6 shrink-0 object-contain"
           />
-          <div>
-            <p className="text-sm font-medium text-foreground">Agent</p>
-            <p className="text-[11px] text-muted-foreground">
-              Describe it — it builds the timeline
-            </p>
-          </div>
+          <p className="text-sm font-semibold text-foreground">Agent</p>
         </div>
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-sm"
           onClick={onClose}
-          className="size-6"
+          className="size-7 text-muted-foreground"
+          aria-label="Close"
         >
-          <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
         </Button>
       </div>
 

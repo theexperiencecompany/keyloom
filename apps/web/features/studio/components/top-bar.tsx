@@ -9,6 +9,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
+import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { useRef } from "react";
 import { BrandLink } from "@/components/brand-link";
 import { ProjectTransitionControl } from "./project-transition-control";
@@ -85,6 +86,9 @@ export function TopBar({
   onLoadProjectFile,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeFormat =
+    PROJECT_FORMATS.find((f) => f.width === width && f.height === height)?.id ??
+    "";
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -104,28 +108,30 @@ export function TopBar({
         </span>
       </div>
 
-      {/* Canvas format — centered segmented control (replaces the dropdown). */}
+      {/* Canvas format — centered segmented control, sharing the studio's one
+          tab look (shadcn Tabs) so it matches the inspector + library tabs. */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5">
-          {PROJECT_FORMATS.map((f) => {
-            const active = f.width === width && f.height === height;
-            return (
-              <Button
+        <Tabs
+          value={activeFormat}
+          onValueChange={(id) => {
+            const f = PROJECT_FORMATS.find((x) => x.id === id);
+            if (f) onChangeFormat(f.width, f.height);
+          }}
+        >
+          <TabsList className="h-8">
+            {PROJECT_FORMATS.map((f) => (
+              <TabsTrigger
                 key={f.id}
-                type="button"
-                variant={active ? "secondary" : "ghost"}
-                size="icon-sm"
+                value={f.id}
                 title={f.label}
                 aria-label={f.label}
-                aria-pressed={active}
-                onClick={() => onChangeFormat(f.width, f.height)}
-                className={active ? "shadow-sm" : "text-muted-foreground"}
+                className="px-2.5"
               >
                 <HugeiconsIcon icon={f.icon} className="size-4" />
-              </Button>
-            );
-          })}
-        </div>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       <div className="flex items-center gap-2">

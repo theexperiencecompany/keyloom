@@ -20,6 +20,7 @@ import {
 } from "@workspace/ui/components/accordion";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
+import { Tabs, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -50,113 +51,98 @@ export function LibraryPanel({
 
   const normalizedQuery = query.trim().toLowerCase();
 
+  const hint =
+    tab === "components"
+      ? "Click a scene to add it to the timeline."
+      : selectedClipId
+        ? "Click an effect to apply it to the selected clip."
+        : "Select a clip first, then add an effect.";
+
   return (
     <TooltipProvider delayDuration={300}>
-      <aside className="flex h-full w-full flex-col overflow-y-auto border-r border-border bg-background">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-          <div>
-            <p className="text-sm font-medium text-foreground">Library</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {tab === "components"
-                ? "Click to add a scene"
-                : selectedClipId
-                  ? "Click to apply to selected clip"
-                  : "Select a clip first"}
-            </p>
-          </div>
+      <aside className="flex h-full w-full flex-col overflow-hidden bg-background">
+        <div className="flex items-center justify-between px-4 pb-2 pt-3.5">
+          <p className="text-sm font-semibold text-foreground">Library</p>
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-sm"
             onClick={onClose}
-            className="size-6"
+            className="size-7 text-muted-foreground"
+            aria-label="Close"
           >
-            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+            <HugeiconsIcon icon={Cancel01Icon} className="size-4" />
           </Button>
         </div>
 
-        <div className="flex shrink-0 gap-1 border-b border-border px-3 py-2">
-          <TabButton
-            active={tab === "components"}
-            onClick={() => setTab("components")}
-          >
-            Components
-          </TabButton>
-          <TabButton
-            active={tab === "effects"}
-            onClick={() => setTab("effects")}
-          >
-            Effects
-          </TabButton>
-        </div>
+        <Tabs
+          value={tab}
+          onValueChange={(v) => setTab(v as Tab)}
+          className="flex min-h-0 flex-1 flex-col gap-0"
+        >
+          <div className="px-3">
+            <TabsList className="w-full">
+              <TabsTrigger value="components" className="flex-1">
+                Components
+              </TabsTrigger>
+              <TabsTrigger value="effects" className="flex-1">
+                Effects
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <div className="px-3 py-2">
-          <div className="relative">
-            <HugeiconsIcon
-              icon={Search01Icon}
-              className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                tab === "components"
-                  ? "Search components..."
-                  : "Search effects..."
-              }
-              className="h-8 rounded-md pl-8 text-xs"
-              style={{ paddingRight: query ? "2rem" : undefined }}
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none"
-                aria-label="Clear search"
-              >
-                <HugeiconsIcon
-                  icon={MultiplicationSignIcon}
-                  className="size-3"
-                />
-              </button>
+          <div className="px-3 pt-2">
+            <div className="relative">
+              <HugeiconsIcon
+                icon={Search01Icon}
+                className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={
+                  tab === "components"
+                    ? "Search components..."
+                    : "Search effects..."
+                }
+                className="h-8 rounded-md pl-8 text-xs"
+                style={{ paddingRight: query ? "2rem" : undefined }}
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none"
+                  aria-label="Clear search"
+                >
+                  <HugeiconsIcon
+                    icon={MultiplicationSignIcon}
+                    className="size-3"
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!normalizedQuery && (
+            <p className="px-4 pt-2 text-[11px] leading-relaxed text-muted-foreground">
+              {hint}
+            </p>
+          )}
+
+          <div className="min-h-0 flex-1 overflow-y-auto pt-1">
+            {tab === "components" ? (
+              <ComponentsList query={normalizedQuery} onAdd={onAdd} />
+            ) : (
+              <EffectsList
+                query={normalizedQuery}
+                onAddEffect={onAddEffect}
+                disabled={!selectedClipId}
+              />
             )}
           </div>
-        </div>
-
-        {tab === "components" ? (
-          <ComponentsList query={normalizedQuery} onAdd={onAdd} />
-        ) : (
-          <EffectsList
-            query={normalizedQuery}
-            onAddEffect={onAddEffect}
-            disabled={!selectedClipId}
-          />
-        )}
+        </Tabs>
       </aside>
     </TooltipProvider>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex-1 rounded-md px-3 py-1.5 text-[12px] font-medium transition-colors ${
-        active
-          ? "bg-accent text-foreground"
-          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

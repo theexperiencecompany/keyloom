@@ -98,26 +98,17 @@ export function SortableClipBlock({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative shrink-0 select-none overflow-hidden rounded-md transition-shadow ${
+      className={`group relative shrink-0 select-none overflow-hidden rounded-md ${
         selected ? "z-10" : ""
       } ${resizing ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"}`}
       {...attributes}
       {...listeners}
     >
-      {/* Gradient body — top lighter, bottom richer */}
+      {/* Flat solid body */}
       <div
-        className={`bg-gradient-to-b ${colorClass} flex h-14 flex-col justify-between px-3 py-2`}
+        className={`${colorClass} flex h-14 flex-col justify-between px-3 py-2`}
       >
-        {/* Inner top highlight + outline */}
-        <div
-          className="pointer-events-none absolute inset-0 rounded-md"
-          style={{
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
-          }}
-        />
-
-        <p className="truncate text-[11px] font-semibold leading-tight text-white drop-shadow-sm">
+        <p className="truncate text-[11px] font-semibold leading-tight text-white">
           {info?.title ?? clip.compositionId}
         </p>
         <div className="flex items-center justify-between gap-1">
@@ -146,7 +137,7 @@ export function SortableClipBlock({
       </div>
 
       {selected && (
-        <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-blue-500" />
+        <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-primary" />
       )}
 
       <ResizeHandle
