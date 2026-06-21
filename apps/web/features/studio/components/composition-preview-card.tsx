@@ -16,9 +16,9 @@ export function CompositionPreviewCard({ info }: { info: AnyCompositionInfo }) {
   if (!Component) return null;
 
   return (
-    <div className="w-72">
+    <div className="w-72 bg-popover text-popover-foreground">
       <div
-        className="w-full overflow-hidden"
+        className="w-full overflow-hidden bg-black"
         style={{ aspectRatio: `${info.width} / ${info.height}` }}
       >
         <Player
@@ -36,8 +36,10 @@ export function CompositionPreviewCard({ info }: { info: AnyCompositionInfo }) {
           acknowledgeRemotionLicense
         />
       </div>
-      <div className="px-3 py-2">
-        <p className="text-[11px] text-muted-foreground">{info.description}</p>
+      <div className="border-t border-border/60 px-3 py-2">
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          {info.description}
+        </p>
       </div>
     </div>
   );
