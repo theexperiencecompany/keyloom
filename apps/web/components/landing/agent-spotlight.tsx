@@ -6,14 +6,20 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
+import { type CardGradient, TimelineCard } from "./timeline-card";
 
-// Flat, illustrative mini-timeline — solid scene blocks matching the studio's
-// flat clip colors. Purely decorative; no live Remotion here.
-const SCENES = [
-  { label: "Title", className: "bg-violet-500", grow: "flex-[2]" },
-  { label: "Feature", className: "bg-sky-500", grow: "flex-[3]" },
-  { label: "Feature", className: "bg-emerald-500", grow: "flex-[3]" },
-  { label: "Outro", className: "bg-amber-500", grow: "flex-[2]" },
+// Illustrative mini-timeline — the same gradient clip cards as the studio
+// timeline. Purely decorative; no live Remotion here.
+const SCENES: {
+  label: string;
+  sublabel: string;
+  gradient: CardGradient;
+  grow: string;
+}[] = [
+  { label: "Title", sublabel: "3.0s", gradient: "violet", grow: "flex-[2]" },
+  { label: "Feature", sublabel: "5.0s", gradient: "sky", grow: "flex-[3]" },
+  { label: "Feature", sublabel: "5.0s", gradient: "emerald", grow: "flex-[3]" },
+  { label: "Outro", sublabel: "4.0s", gradient: "amber", grow: "flex-[2]" },
 ];
 
 export function AgentSpotlight() {
@@ -93,18 +99,22 @@ export function AgentSpotlight() {
             </p>
             <div className="flex gap-1.5">
               {SCENES.map((s) => (
-                <div
-                  key={s.label}
-                  className={`flex h-12 items-center justify-center rounded-md px-2 text-[11px] font-semibold text-white ${s.className} ${s.grow}`}
-                >
-                  {s.label}
-                </div>
+                <TimelineCard
+                  key={`${s.label}-${s.gradient}`}
+                  gradient={s.gradient}
+                  label={s.label}
+                  sublabel={s.sublabel}
+                  className={s.grow}
+                />
               ))}
             </div>
             <div className="mt-1.5 flex">
-              <div className="flex h-7 flex-1 items-center rounded-md bg-emerald-500/90 px-2.5 text-[10px] font-semibold text-white">
-                ♪ Upbeat track
-              </div>
+              <TimelineCard
+                gradient="emerald"
+                label="♪ Upbeat track"
+                height="h-8"
+                className="flex-1 justify-center"
+              />
             </div>
           </div>
         </div>

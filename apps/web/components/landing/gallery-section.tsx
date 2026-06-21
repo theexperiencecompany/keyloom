@@ -1,14 +1,5 @@
 import { GalleryMount } from "@/components/gallery/gallery-mount";
 
-const USE_CASES = [
-  "Product launches",
-  "Feature announcements",
-  "Social clips",
-  "Demos",
-  "Changelogs",
-  "Ads",
-];
-
 export function GallerySection() {
   return (
     <section
@@ -27,16 +18,6 @@ export function GallerySection() {
           pixel-accurate social cards. Every scene previews live and drops
           straight onto your timeline.
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {USE_CASES.map((u) => (
-            <span
-              key={u}
-              className="rounded-full bg-muted px-3 py-1 text-[12.5px] font-medium text-muted-foreground"
-            >
-              {u}
-            </span>
-          ))}
-        </div>
       </div>
 
       <GalleryMount />

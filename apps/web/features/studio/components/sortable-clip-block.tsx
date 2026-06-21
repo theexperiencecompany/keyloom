@@ -104,11 +104,20 @@ export function SortableClipBlock({
       {...attributes}
       {...listeners}
     >
-      {/* Flat solid body */}
+      {/* Gradient body — top lighter, bottom richer */}
       <div
-        className={`${colorClass} flex h-14 flex-col justify-between px-3 py-2`}
+        className={`bg-gradient-to-b ${colorClass} flex h-14 flex-col justify-between px-3 py-2`}
       >
-        <p className="truncate text-[11px] font-semibold leading-tight text-white">
+        {/* Inner top highlight + outline */}
+        <div
+          className="pointer-events-none absolute inset-0 rounded-md"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
+          }}
+        />
+
+        <p className="truncate text-[11px] font-semibold leading-tight text-white drop-shadow-sm">
           {info?.title ?? clip.compositionId}
         </p>
         <div className="flex items-center justify-between gap-1">
