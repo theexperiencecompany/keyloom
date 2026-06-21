@@ -1,15 +1,23 @@
 "use client";
 
 import {
+  ArrowDown01Icon,
   ComputerIcon,
   SmartPhone01Icon,
   SquareIcon,
   Tablet01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { SceneTransition } from "@workspace/compositions/transitions";
 import { Button } from "@workspace/ui/components/button";
-import { useRef } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
+import { useEffect, useRef, useState } from "react";
 import { BrandLink } from "@/components/brand-link";
 import { ProjectTransitionControl } from "./project-transition-control";
 
@@ -52,8 +60,8 @@ const PROJECT_FORMATS = [
 ] as const;
 
 type Props = {
-  clipCount: number;
-  totalSeconds: number;
+  projectName: string | undefined;
+  onRenameProject: (name: string) => void;
   exporting: boolean;
   canExport: boolean;
   canSave: boolean;
@@ -69,22 +77,25 @@ type Props = {
 };
 
 export function TopBar({
-  clipCount,
-  totalSeconds,
+  projectName,
+  onRenameProject,
   exporting,
   canExport,
   canSave,
-  fps,
   width,
   height,
   onChangeFormat,
   projectDefaultTransition,
+  fps,
   onUpdateProjectTransition,
   onExport,
   onSaveProject,
   onLoadProjectFile,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeFormat = PROJECT_FORMATS.find(
+    (f) => f.width === width && f.height === height,
+  );
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -94,72 +105,130 @@ export function TopBar({
   }
 
   return (
-    <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-dashed border-border bg-background/95 px-8 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="flex items-center gap-3">
+    <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {/* Left: identity (brand + editable title) and the File menu. */}
+      <div className="flex min-w-0 items-center gap-1">
         <BrandLink />
-        <span className="text-muted-foreground/50">·</span>
-        <span className="text-[12px] tabular-nums text-muted-foreground">
-          {clipCount} clip{clipCount === 1 ? "" : "s"} ·{" "}
-          {totalSeconds.toFixed(2)}s
-        </span>
+        <span className="mx-1 h-5 w-px shrink-0 bg-border" />
+        <EditableTitle name={projectName} onRename={onRenameProject} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1 px-2 text-muted-foreground"
+            >
+              File
+              <HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
+              Import project…
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onSaveProject} disabled={!canSave}>
+              Save project
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {/* Canvas format — centered segmented control (replaces the dropdown). */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="flex items-center gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5">
-          {PROJECT_FORMATS.map((f) => {
-            const active = f.width === width && f.height === height;
-            return (
-              <Button
-                key={f.id}
-                type="button"
-                variant={active ? "secondary" : "ghost"}
-                size="icon-sm"
-                title={f.label}
-                aria-label={f.label}
-                aria-pressed={active}
-                onClick={() => onChangeFormat(f.width, f.height)}
-                className={active ? "shadow-sm" : "text-muted-foreground"}
-              >
-                <HugeiconsIcon icon={f.icon} className="size-4" />
-              </Button>
-            );
-          })}
-        </div>
+      {/* Center: a single labelled format control (replaces the icon row). */}
+      <div className="justify-self-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-2">
+              {activeFormat && (
+                <HugeiconsIcon icon={activeFormat.icon} className="size-4" />
+              )}
+              <span className="text-[13px] tabular-nums">
+                {activeFormat?.id ?? `${width}×${height}`}
+              </span>
+              <HugeiconsIcon
+                icon={ArrowDown01Icon}
+                className="size-3.5 text-muted-foreground"
+              />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="w-52">
+            {PROJECT_FORMATS.map((f) => {
+              const active = f.width === width && f.height === height;
+              return (
+                <DropdownMenuItem
+                  key={f.id}
+                  onSelect={() => onChangeFormat(f.width, f.height)}
+                  className="gap-2"
+                >
+                  <HugeiconsIcon icon={f.icon} className="size-4" />
+                  <span className="flex-1">{f.label}</span>
+                  {active && (
+                    <HugeiconsIcon icon={Tick02Icon} className="size-3.5" />
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="application/json,.json"
-          className="hidden"
-          onChange={handleFileChange}
-        />
+      {/* Right: quiet motion control + the single primary CTA. */}
+      <div className="flex items-center justify-self-end gap-2">
         <ProjectTransitionControl
           transition={projectDefaultTransition}
           fps={fps}
           onChange={onUpdateProjectTransition}
         />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          Import
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onSaveProject}
-          disabled={!canSave}
-        >
-          Save
-        </Button>
+        <span className="h-5 w-px bg-border" />
         <Button size="sm" onClick={onExport} disabled={exporting || !canExport}>
           {exporting ? "Rendering…" : "Export"}
         </Button>
       </div>
     </header>
+  );
+}
+
+/**
+ * Inline-editable project title — the document focal point. Commits on blur or
+ * Enter; Escape reverts. Renders a placeholder when unnamed.
+ */
+function EditableTitle({
+  name,
+  onRename,
+}: {
+  name: string | undefined;
+  onRename: (name: string) => void;
+}) {
+  const [value, setValue] = useState(name ?? "");
+  useEffect(() => setValue(name ?? ""), [name]);
+
+  function commit() {
+    onRename(value.trim());
+  }
+
+  return (
+    <input
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.currentTarget.blur();
+        if (e.key === "Escape") {
+          setValue(name ?? "");
+          e.currentTarget.blur();
+        }
+      }}
+      placeholder="Untitled video"
+      spellCheck={false}
+      aria-label="Project name"
+      className="min-w-0 max-w-[220px] rounded-md bg-transparent px-2 py-1 text-sm font-medium text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 hover:bg-muted focus:bg-muted focus:ring-1 focus:ring-ring/40"
+    />
   );
 }

@@ -25,16 +25,16 @@ export function PreviewStage({
 }: Props) {
   if (!hasClips) {
     return (
-      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] dark:bg-[#1a1a1a]">
+      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] dark:bg-[#161618]">
         <EmptyStage onOpenLibrary={onOpenLibrary} />
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] p-8 dark:bg-[#1a1a1a]">
+    <div className="relative flex min-h-0 flex-1 items-center justify-center bg-[#eeeeee] p-10 dark:bg-[#161618]">
       <div
-        className="relative max-h-full max-w-full overflow-hidden bg-black shadow-sm ring-1 ring-border"
+        className="relative max-h-full max-w-full overflow-hidden rounded-md bg-black shadow-[0_4px_16px_-10px_rgba(0,0,0,0.5)] ring-1 ring-black/10 dark:ring-white/10"
         style={{
           aspectRatio: `${project.width} / ${project.height}`,
           height: "100%",

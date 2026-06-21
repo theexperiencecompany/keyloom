@@ -474,14 +474,7 @@ function ConnectIcon({ size, color }: { size: number; color: string }) {
         <rect x="5.4" y="1.4" width="9.2" height="11.6" rx="1.8" />
         <circle cx="10" cy="8.6" r="2.5" />
         <circle cx="10" cy="3.9" r="0.55" fill={color} stroke="none" />
-        <rect
-          x="1.4"
-          y="7"
-          width="5.4"
-          height="7.6"
-          rx="1.4"
-          fill="#1f1f1f"
-        />
+        <rect x="1.4" y="7" width="5.4" height="7.6" rx="1.4" fill="#1f1f1f" />
       </g>
     </svg>
   );

@@ -52,29 +52,8 @@ export function LibraryPanel({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <aside className="flex h-full w-full flex-col overflow-y-auto border-r border-border bg-background">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-          <div>
-            <p className="text-sm font-medium text-foreground">Library</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {tab === "components"
-                ? "Click to add a scene"
-                : selectedClipId
-                  ? "Click to apply to selected clip"
-                  : "Select a clip first"}
-            </p>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="size-6"
-          >
-            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-          </Button>
-        </div>
-
-        <div className="flex shrink-0 gap-1 border-b border-border px-3 py-2">
+      <aside className="flex h-full w-full flex-col overflow-y-auto scrollbar-thin border-r border-border bg-background">
+        <div className="flex shrink-0 items-center gap-1 border-b border-border px-3 py-2">
           <TabButton
             active={tab === "components"}
             onClick={() => setTab("components")}
@@ -87,6 +66,15 @@ export function LibraryPanel({
           >
             Effects
           </TabButton>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="ml-auto size-6 shrink-0"
+            title="Close"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
+          </Button>
         </div>
 
         <div className="px-3 py-2">
@@ -220,6 +208,7 @@ function ComponentsList({
         title="Text"
         items={textAnimations}
         onAdd={onAdd}
+        first
       />
       <AccordionSection
         value="templates"
@@ -308,19 +297,21 @@ function AccordionSection({
   title,
   items,
   onAdd,
+  first = false,
 }: {
   value: string;
   title: string;
   items: typeof compositions;
   onAdd: (id: string) => void;
+  first?: boolean;
 }) {
   if (items.length === 0) return null;
   return (
     <AccordionItem
       value={value}
-      className="border-border/60 data-open:bg-transparent"
+      className={`border-none data-open:bg-transparent ${first ? "" : "mt-5"}`}
     >
-      <AccordionTrigger className="px-1 py-2 text-xs hover:no-underline">
+      <AccordionTrigger className="px-1 pb-0.5 pt-1 text-[13px] font-semibold text-foreground hover:no-underline">
         {title}
       </AccordionTrigger>
       <AccordionContent className="px-0 pb-0">

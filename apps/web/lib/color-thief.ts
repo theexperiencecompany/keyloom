@@ -1,8 +1,4 @@
-import {
-  type BrowserSource,
-  getColorSync,
-  getPaletteSync,
-} from "colorthief";
+import { type BrowserSource, getColorSync, getPaletteSync } from "colorthief";
 
 /**
  * Dominant color + representative palette extracted from an image, as hex

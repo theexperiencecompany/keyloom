@@ -54,7 +54,10 @@
       "Bash(claude mcp *)",
       "Bash(curl -s -o /dev/null -w 'no-auth -> HTTP %{http_code}\\\\n' -X POST https://www.keyloom.app/api/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"curl\",\"version\":\"0\"}}}' --max-time 20)",
       "Bash(curl -s -o /dev/null -w 'status=%{http_code}\\\\nredirect=%{redirect_url}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 30)",
-      "Bash(curl -sL -o /dev/null -w 'final_status=%{http_code} bytes=%{size_download} type=%{content_type}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 60)"
+      "Bash(curl -sL -o /dev/null -w 'final_status=%{http_code} bytes=%{size_download} type=%{content_type}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 60)",
+      "WebFetch(domain:developer.spotify.com)",
+      "Bash(echo \"pushed: $?\")",
+      "Bash(echo \"EXIT $?\")"
     ]
   }
 }

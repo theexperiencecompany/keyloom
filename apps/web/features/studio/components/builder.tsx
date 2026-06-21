@@ -62,6 +62,26 @@ export function Builder() {
   const [state, dispatch] = useReducer(studioReducer, initialStudioState);
   const audioSearch = useAudioSearch();
 
+  // The studio is a dark-first editor (like CapCut / Premiere) — its light
+  // theme reads washed out. Force dark on <html> while the studio is mounted so
+  // panels AND portalled UI (dropdowns, modals, popovers in <body>) all render
+  // dark, then restore the user's theme on leave. ThemeToggle isn't reachable
+  // inside the studio, so nothing fights this.
+  useEffect(() => {
+    const root = document.documentElement;
+    const hadDark = root.classList.contains("dark");
+    const hadLight = root.classList.contains("light");
+    const prevColorScheme = root.style.colorScheme;
+    root.classList.add("dark");
+    root.classList.remove("light");
+    root.style.colorScheme = "dark";
+    return () => {
+      if (!hadDark) root.classList.remove("dark");
+      if (hadLight) root.classList.add("light");
+      root.style.colorScheme = prevColorScheme;
+    };
+  }, []);
+
   // Deep-link from the gallery: /studio?component=<id> opens the studio with
   // that composition added as the first clip (and selected, so the inspector
   // shows it). Strip the param afterwards so a refresh doesn't re-add it.
@@ -238,8 +258,10 @@ export function Builder() {
     <PlayerProvider playerRef={playerRef} version={playerVersion}>
       <div className="flex h-screen flex-col bg-background text-foreground">
         <TopBar
-          clipCount={project.clips.length}
-          totalSeconds={totalSeconds}
+          projectName={project.name}
+          onRenameProject={(name) =>
+            dispatch({ type: "SET_PROJECT_NAME", name })
+          }
           exporting={isExporting}
           canExport={hasClips}
           canSave={hasClips}
@@ -498,7 +520,7 @@ export function Builder() {
                     // Audio inspector — surfaces when the user clicks the
                     // audio track row in the timeline. Mutually exclusive
                     // with the clip inspector.
-                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto border-l border-border bg-background p-3">
+                    <aside className="flex h-full w-full flex-col gap-3 overflow-y-auto scrollbar-thin border-l border-border bg-background p-3">
                       <div className="flex items-center justify-between px-1">
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                           Project audio

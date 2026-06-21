@@ -329,7 +329,7 @@ export function AgentPanel({
 
       <div
         ref={scrollRef}
-        className="relative z-10 min-h-0 flex-1 overflow-y-auto px-4 py-4"
+        className="relative z-10 min-h-0 flex-1 overflow-y-auto scrollbar-thin px-4 py-4"
       >
         {messages.length === 0 ? (
           <EmptyState onPick={send} />

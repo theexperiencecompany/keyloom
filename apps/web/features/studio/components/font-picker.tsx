@@ -187,7 +187,7 @@ export function FontPicker({ value, onChange, placeholder }: Props) {
           </div>
         </div>
 
-        <div className="max-h-80 overflow-y-auto py-1">
+        <div className="max-h-80 overflow-y-auto scrollbar-thin py-1">
           {loading && results.length === 0 ? (
             <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
               Loading…

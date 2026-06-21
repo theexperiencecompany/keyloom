@@ -79,6 +79,8 @@ export type ProjectAudio = {
 };
 
 export type Project = {
+  /** User-facing project title, shown + editable in the studio top bar. */
+  name?: string;
   fps: number;
   width: number;
   height: number;

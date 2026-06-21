@@ -27,6 +27,15 @@ import {
 } from "../compositions/MessagePopup/icon-presets";
 import type { PrimitiveField } from "../schema";
 
+// Shared control styling for the editor panels. We KEEP the app's pill radius
+// (rounded-3xl) so fields stay consistent with the rounded buttons (Export
+// etc.) — the polish here is a defined resting border and a tighter focus
+// ring, not a different shape.
+export const FIELD_CONTROL =
+  "border-border bg-input/40 text-[13px] focus-visible:ring-2 focus-visible:ring-ring/40";
+
+export const FIELD_LABEL = "text-[11px] font-medium text-muted-foreground";
+
 type Props = {
   field: PrimitiveField;
   value: unknown;
@@ -59,7 +68,10 @@ export function PrimitiveControl({
             // `field-sizing-content` (in our base Textarea class) lets the
             // box grow with the value. Cap min-h so a single-line entry
             // looks like an Input rather than a giant pad.
-            className="min-h-9 resize-none px-3 py-1.5 text-sm"
+            className={cn(
+              FIELD_CONTROL,
+              "min-h-9 resize-none px-3 py-1.5 leading-snug",
+            )}
             onChange={(e) => onChange(normalizeNewlines(e.target.value))}
           />
         </Wrapper>
@@ -72,6 +84,7 @@ export function PrimitiveControl({
             id={field.key}
             value={(value as string) ?? ""}
             rows={field.rows ?? 3}
+            className={cn(FIELD_CONTROL, "px-3 py-2")}
             onChange={(e) => onChange(normalizeNewlines(e.target.value))}
           />
         </Wrapper>
@@ -86,6 +99,7 @@ export function PrimitiveControl({
             value={(value as number) ?? 0}
             min={field.min}
             max={field.max}
+            className={FIELD_CONTROL}
             onChange={(e) => onChange(Number(e.target.value))}
           />
         </Wrapper>
@@ -158,13 +172,16 @@ export function PrimitiveControl({
 
     case "switch":
       return (
-        <Wrapper htmlFor={field.key} label={field.label}>
+        <div className="flex items-center justify-between gap-3 py-0.5">
+          <Label htmlFor={field.key} className={FIELD_LABEL}>
+            {field.label}
+          </Label>
           <Switch
             id={field.key}
             checked={Boolean(value)}
             onCheckedChange={(v) => onChange(v)}
           />
-        </Wrapper>
+        </div>
       );
 
     case "select": {
@@ -172,7 +189,7 @@ export function PrimitiveControl({
       return (
         <Wrapper htmlFor={field.key} label={field.label}>
           <Select value={current} onValueChange={(v) => onChange(v)}>
-            <SelectTrigger id={field.key}>
+            <SelectTrigger id={field.key} className={FIELD_CONTROL}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -248,7 +265,7 @@ function Wrapper({
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={htmlFor} className="text-[12px]">
+      <Label htmlFor={htmlFor} className={FIELD_LABEL}>
         {label}
       </Label>
       {children}
@@ -278,28 +295,56 @@ function ImageControl({
     reader.readAsDataURL(file);
   }
 
+  const isInlineData = value.startsWith("data:") || value.startsWith("blob:");
+
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      {hasImage ? (
+        // Framed media well: the preview IS the control. Hover reveals
+        // Replace / Clear over a flat scrim (no gradient).
+        <div className="group relative overflow-hidden rounded-2xl border border-border bg-muted/30">
+          {/* eslint-disable-next-line @remotion/warn-native-media-tag -- editor preview, not rendered video */}
+          <img
+            src={value}
+            alt="Selected"
+            className="block h-32 w-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
+            <label className="cursor-pointer rounded-md bg-white/15 px-2.5 py-1 text-[12px] font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25">
+              Replace
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="rounded-md bg-white/15 px-2.5 py-1 text-[12px] font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Empty: a quiet upload affordance.
         <label
-          className="flex h-9 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-muted/40 px-3 text-[12px] font-medium text-foreground transition-colors hover:bg-muted"
+          className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border border-border bg-muted/20 text-center transition-colors hover:bg-muted/40"
           title="Upload an image"
         >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="17 8 12 3 7 8" />
-            <line x1="12" y1="3" x2="12" y2="15" />
-          </svg>
-          Upload
+          <HugeiconsIcon
+            icon={Upload04Icon}
+            size={17}
+            className="text-muted-foreground"
+          />
+          <span className="text-[12px] font-medium text-foreground">
+            Upload image
+          </span>
+          <span className="text-[10.5px] text-muted-foreground">
+            PNG or JPG · or paste a URL below
+          </span>
           <input
             type="file"
             accept="image/*"
@@ -307,28 +352,14 @@ function ImageControl({
             onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
           />
         </label>
-        {hasImage ? (
-          <Button variant="outline" size="sm" onClick={() => onChange("")}>
-            Clear
-          </Button>
-        ) : null}
-      </div>
+      )}
       <Input
         id={id}
-        value={value.startsWith("data:") ? "" : value}
-        placeholder={placeholder ?? "Or paste an image URL"}
+        value={isInlineData ? "" : value}
+        placeholder={placeholder ?? "Paste an image URL"}
+        className={FIELD_CONTROL}
         onChange={(e) => onChange(e.target.value)}
       />
-      {hasImage ? (
-        <div className="overflow-hidden rounded-md border border-border bg-background">
-          {/* eslint-disable-next-line @remotion/warn-native-media-tag -- editor preview, not rendered video */}
-          <img
-            src={value}
-            alt="Selected image preview"
-            className="block h-28 w-full object-cover"
-          />
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -624,7 +655,7 @@ function ColorControl({
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="font-mono"
+        className={cn(FIELD_CONTROL, "font-mono")}
         spellCheck={false}
       />
     </div>
