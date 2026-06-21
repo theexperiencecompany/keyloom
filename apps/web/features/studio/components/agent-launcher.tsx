@@ -43,6 +43,7 @@ export function AgentLauncher({ onSubmit, onBrowse }: Props) {
           mentionsRef.current = ids;
         }}
         placeholder="Describe a video to build…"
+        surfaceClassName="bg-background shadow-sm"
       />
       <p className="mt-3 text-center text-[12px] text-muted-foreground">
         <kbd className="rounded bg-muted px-1 py-0.5 font-sans text-[11px] text-muted-foreground">

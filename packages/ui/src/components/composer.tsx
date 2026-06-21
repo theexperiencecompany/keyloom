@@ -46,6 +46,9 @@ export interface ComposerProps {
   value?: string;
   /** Additional className for the container */
   className?: string;
+  /** Overrides the inner input surface (e.g. a solid background on a recessed
+   *  canvas). Defaults to the subtle `bg-muted/40` used inside panels. */
+  surfaceClassName?: string;
   /**
    * Whether the composer is in a loading/busy state. The send button turns
    * into a stop button and `onStop` fires instead of `onSubmit`.
@@ -110,6 +113,7 @@ export const Composer: FC<ComposerProps> = ({
   defaultValue = "",
   value,
   className,
+  surfaceClassName,
   isLoading = false,
   onStop,
   mentionItems,
@@ -317,7 +321,12 @@ export const Composer: FC<ComposerProps> = ({
 
   return (
     <div className={cn("relative w-full", className)}>
-      <div className="relative rounded-3xl border border-border bg-muted/40 px-1 pt-1 pb-2 focus-within:border-ring/60">
+      <div
+        className={cn(
+          "relative rounded-3xl border border-border bg-muted/40 px-1 pt-1 pb-2 focus-within:border-ring/60",
+          surfaceClassName,
+        )}
+      >
         <Popover open={menuOpen}>
           <PopoverAnchor asChild>
             <form onSubmit={handleSubmit}>
