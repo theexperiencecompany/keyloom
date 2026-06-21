@@ -80,15 +80,25 @@ export type ActiveDodoSubscription = {
 };
 
 /**
- * Asks Dodo directly whether this user currently has an active/trialing
- * subscription. Used to reconcile account state on page load WITHOUT waiting for
- * a webhook (verify-on-return). Matches STRICTLY by the keyloom_user_id we stamp
- * into checkout metadata at `createProCheckout` time.
+ * Asks Dodo directly whether this user currently has an active subscription.
+ * Used to reconcile account state on checkout return WITHOUT waiting for a
+ * webhook (verify-on-return).
  *
- * We deliberately do NOT fall back to matching the customer email: emails are
- * not unique to a keyloom account (shared/test emails, re-used addresses) and
- * an email-based match would let one subscription upgrade unrelated accounts to
- * Pro. Identity comes only from the id we control.
+ * Matching is two-tier:
+ *   1. STRICT — the `keyloom_user_id` we stamp into checkout metadata. This is
+ *      the secure path, but Dodo does NOT reliably copy checkout-session
+ *      metadata onto the resulting *subscription* object (the checkout
+ *      `metadata` field is documented as payment-level, and `subscription_data`
+ *      has no metadata field), so the id is frequently absent here.
+ *   2. EMAIL FALLBACK — match the customer email, but ONLY for subscriptions
+ *      that are NOT tagged for some *other* keyloom user. Without this a real
+ *      payment leaves the account on Free whenever Dodo drops the metadata.
+ *
+ * The email fallback is safe because `reconcileProFromDodo` only runs when the
+ * user is returning from their OWN checkout (`?upgrade=success`) — never on
+ * routine loads — so it can't sweep an unrelated subscription onto a stranger.
+ * Dodo's status enum is pending | active | on_hold | cancelled | failed |
+ * expired (there is no "trialing"; trials report as active).
  */
 export async function findActiveDodoSubscription(opts: {
   userId: string;
@@ -102,20 +112,37 @@ export async function findActiveDodoSubscription(opts: {
     data?: DodoSubscription[];
   };
   const items = res.items ?? res.data ?? [];
-  const mine = items.filter(
+  const active = items.filter((s) => s.status === "active");
+
+  const wantEmail = opts.email.trim().toLowerCase();
+  // 1) Strict identity: the id we control, when Dodo propagated it.
+  let match = active.find(
     (s) => !!opts.userId && s.metadata?.keyloom_user_id === opts.userId,
   );
-  const active = mine.find(
-    (s) => s.status === "active" || s.status === "trialing",
-  );
-  if (!active) return null;
+  // 2) Email fallback — only untagged subscriptions, so we never hijack one
+  //    Dodo explicitly tagged for a different keyloom account.
+  if (!match && wantEmail) {
+    match = active.find(
+      (s) =>
+        !s.metadata?.keyloom_user_id &&
+        s.customer?.email?.trim().toLowerCase() === wantEmail,
+    );
+  }
 
-  const rawEnd = active.next_billing_date ?? active.current_period_end;
+  if (process.env.NODE_ENV !== "production" || process.env.DODO_DEBUG) {
+    console.warn(
+      `[billing] findActiveDodoSubscription: ${items.length} total, ${active.length} active, matched=${match ? (match.metadata?.keyloom_user_id ? "by-id" : "by-email") : "none"}`,
+    );
+  }
+
+  if (!match) return null;
+
+  const rawEnd = match.next_billing_date ?? match.current_period_end;
   const end = rawEnd ? new Date(rawEnd) : undefined;
   return {
-    subscriptionId: active.subscription_id ?? active.id ?? "",
-    customerId: active.customer?.customer_id,
-    status: active.status ?? "active",
+    subscriptionId: match.subscription_id ?? match.id ?? "",
+    customerId: match.customer?.customer_id,
+    status: match.status ?? "active",
     periodEnd: end && !Number.isNaN(end.getTime()) ? end : undefined,
   };
 }

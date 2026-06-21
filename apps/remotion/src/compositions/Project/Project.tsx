@@ -4,9 +4,7 @@ import { TransitionSeries } from "@remotion/transitions";
 import {
   AbsoluteFill,
   Audio as Html5Audio,
-  interpolate,
   Sequence,
-  useCurrentFrame,
   useRemotionEnvironment,
   useVideoConfig,
 } from "remotion";
@@ -136,11 +134,6 @@ export const ProjectComposition: React.FC<Project> = ({
               content
             );
 
-          // Camera life — subtle Ken Burns on every non-locked clip.
-          // Skipped for brand-locked scenes (authentic apps shouldn't
-          // drift) and very short clips (<1s feels jittery, not alive).
-          const enableCameraLife = !isLocked && clip.durationInFrames >= 30;
-
           const sequence = (
             <TransitionSeries.Sequence
               key={`seq-${clip.id}`}
@@ -150,16 +143,7 @@ export const ProjectComposition: React.FC<Project> = ({
                 effects={clip.effects}
                 clipDurationInFrames={clip.durationInFrames}
               >
-                {enableCameraLife ? (
-                  <CameraLifeWrap
-                    durationInFrames={clip.durationInFrames}
-                    clipIndex={index}
-                  >
-                    {inner}
-                  </CameraLifeWrap>
-                ) : (
-                  inner
-                )}
+                {inner}
               </EffectsWrap>
             </TransitionSeries.Sequence>
           );
@@ -297,58 +281,6 @@ function MissingClip({ compositionId }: { compositionId: string }) {
       <div style={{ fontSize: 22, opacity: 0.6 }}>
         No component registered for id &ldquo;{compositionId}&rdquo;.
       </div>
-    </AbsoluteFill>
-  );
-}
-
-/**
- * Subtle Ken Burns wrapper applied to every non-locked clip. Animates
- * a slow scale (1.00 → 1.05) and a small pan over the clip's full
- * duration so static scenes feel alive without crossing into "look,
- * I'm zooming!" territory. Direction alternates per clip so multiple
- * scenes back-to-back don't drift in the same direction.
- *
- * Caveats:
- *   - Skipped for brand-locked scenes (Tweet, Slack, etc.) — they
- *     should render exactly as the real app does.
- *   - Skipped for very short clips (<1s) where the motion reads as
- *     jitter rather than life.
- *   - Uses `transform-origin: center center` so the pan + scale feel
- *     balanced regardless of clip aspect.
- */
-function CameraLifeWrap({
-  durationInFrames,
-  clipIndex,
-  children,
-}: {
-  durationInFrames: number;
-  clipIndex: number;
-  children: React.ReactNode;
-}) {
-  const frame = useCurrentFrame();
-  // Alternate direction per clip: even → drift right + down, odd → left + up.
-  const dirX = clipIndex % 2 === 0 ? 1 : -1;
-  const dirY = clipIndex % 2 === 0 ? 0.4 : -0.4;
-  // 5% scale shift, 1% pan shift — both barely perceptible per second
-  // but cumulative over the clip.
-  const scale = interpolate(frame, [0, durationInFrames], [1, 1.05], {
-    extrapolateRight: "clamp",
-  });
-  const panX = interpolate(frame, [0, durationInFrames], [0, dirX], {
-    extrapolateRight: "clamp",
-  });
-  const panY = interpolate(frame, [0, durationInFrames], [0, dirY], {
-    extrapolateRight: "clamp",
-  });
-  return (
-    <AbsoluteFill
-      style={{
-        transform: `translate(${panX}%, ${panY}%) scale(${scale})`,
-        transformOrigin: "center center",
-        willChange: "transform",
-      }}
-    >
-      {children}
     </AbsoluteFill>
   );
 }

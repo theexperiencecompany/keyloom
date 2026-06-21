@@ -8,7 +8,7 @@ import { compositionsById } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import type React from "react";
 import { useRef, useState } from "react";
-import { colorForCompositionId } from "../lib/clip-colors";
+import { paletteForCompositionId } from "../lib/clip-colors";
 
 const MIN_DURATION_FRAMES = 15;
 
@@ -44,7 +44,7 @@ export function SortableClipBlock({
 
   const seconds = clip.durationInFrames / fps;
   const widthPx = Math.max(2, bodyWidthPx);
-  const colorClass = colorForCompositionId(clip.compositionId);
+  const palette = paletteForCompositionId(clip.compositionId);
 
   const {
     attributes,
@@ -98,30 +98,36 @@ export function SortableClipBlock({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group relative shrink-0 select-none overflow-hidden rounded-md transition-shadow ${
+      className={`group relative shrink-0 select-none overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/60 ${
         selected ? "z-10" : ""
       } ${resizing ? "cursor-ew-resize" : "cursor-grab active:cursor-grabbing"}`}
       {...attributes}
       {...listeners}
     >
-      {/* Gradient body — top lighter, bottom richer */}
+      {/* Flat tinted body with a same-hue hairline border. */}
       <div
-        className={`bg-gradient-to-b ${colorClass} flex h-14 flex-col justify-between px-3 py-2`}
+        className="flex h-14 flex-col justify-between pl-[14px] pr-2.5 py-2 transition-colors"
+        style={{
+          background: palette.surface,
+          boxShadow: `inset 0 0 0 1px ${palette.border}`,
+        }}
       >
-        {/* Inner top highlight + outline */}
-        <div
-          className="pointer-events-none absolute inset-0 rounded-md"
-          style={{
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.32), inset 0 0 0 1px rgba(255,255,255,0.10)",
-          }}
+        {/* Hover lift: a slightly stronger fill, behind the text. No shadow. */}
+        <span
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+          style={{ background: palette.surfaceHover }}
+        />
+        {/* Solid accent rail down the left edge — the only saturated element. */}
+        <span
+          className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-[3px]"
+          style={{ background: palette.accent }}
         />
 
-        <p className="truncate text-[11px] font-semibold leading-tight text-white drop-shadow-sm">
+        <p className="relative z-[1] truncate text-[11px] font-semibold leading-tight text-foreground">
           {info?.title ?? clip.compositionId}
         </p>
-        <div className="flex items-center justify-between gap-1">
-          <p className="text-[10px] tabular-nums text-white/75">
+        <div className="relative z-[1] flex items-center justify-between gap-1">
+          <p className="text-[10px] tabular-nums text-muted-foreground">
             {seconds.toFixed(2)}s
           </p>
           {clip.effects && clip.effects.length > 0 && (
@@ -130,13 +136,13 @@ export function SortableClipBlock({
                 <span
                   key={e.id}
                   title={effectsById[e.effectId]?.title ?? e.effectId}
-                  className="rounded-sm bg-black/30 px-1 py-px text-[8px] font-semibold uppercase leading-none tracking-wider text-white/90 backdrop-blur-sm"
+                  className="rounded bg-foreground/10 px-1 py-px text-[8px] font-bold uppercase leading-none tracking-wider text-foreground/85"
                 >
                   {(effectsById[e.effectId]?.title ?? e.effectId).slice(0, 4)}
                 </span>
               ))}
               {clip.effects.length > 3 && (
-                <span className="rounded-sm bg-black/30 px-1 py-px text-[8px] font-semibold leading-none text-white/90">
+                <span className="rounded bg-foreground/10 px-1 py-px text-[8px] font-semibold leading-none text-foreground/70">
                   +{clip.effects.length - 3}
                 </span>
               )}
@@ -146,7 +152,10 @@ export function SortableClipBlock({
       </div>
 
       {selected && (
-        <div className="pointer-events-none absolute inset-0 z-20 rounded-md ring-2 ring-inset ring-blue-500" />
+        <div
+          className="pointer-events-none absolute inset-0 z-20 rounded-lg"
+          style={{ boxShadow: `inset 0 0 0 2px ${palette.accent}` }}
+        />
       )}
 
       <ResizeHandle
@@ -169,7 +178,8 @@ export function SortableClipBlock({
         }}
         onPointerDown={(e) => e.stopPropagation()}
         title="Delete"
-        className="absolute right-2 top-1 size-5 rounded-full bg-black/30 text-[12px] leading-none text-white/80 opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/50 hover:text-white group-hover:opacity-100"
+        aria-label="Delete clip"
+        className="absolute right-1.5 top-1.5 z-[2] size-5 rounded-md bg-foreground/10 text-[12px] leading-none text-foreground/70 opacity-0 transition-opacity hover:bg-foreground/20 hover:text-foreground group-hover:opacity-100"
       >
         ×
       </Button>
@@ -197,7 +207,7 @@ function ResizeHandle({
       }`}
     >
       <span
-        className={`h-6 w-[3px] rounded-full bg-white/90 transition-opacity ${
+        className={`h-6 w-[3px] rounded-full bg-foreground/60 transition-opacity ${
           active ? "opacity-100" : "opacity-0 group-hover:opacity-90"
         }`}
       />

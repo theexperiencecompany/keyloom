@@ -83,7 +83,7 @@ export function TransitionSection({
           <button
             type="button"
             onClick={() => onChange(undefined)}
-            className="text-[10px] font-medium text-muted-foreground hover:text-foreground"
+            className="rounded-md px-2 py-1 text-[11px] font-medium text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             Reset to project default
           </button>

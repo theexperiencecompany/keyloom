@@ -3,7 +3,12 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createApiKey, ensureAccount, revokeApiKey } from "@/lib/account";
+import {
+  createApiKey,
+  ensureAccount,
+  reconcileProFromDodo,
+  revokeApiKey,
+} from "@/lib/account";
 import { createProCheckout } from "@/lib/billing";
 
 export type CreateKeyState = {
@@ -34,6 +39,20 @@ export async function revokeKeyAction(formData: FormData): Promise<void> {
   const { user } = await withAuth({ ensureSignedIn: true });
   const keyId = String(formData.get("keyId") ?? "");
   if (keyId) await revokeApiKey(user.id, keyId);
+  revalidatePath("/account");
+}
+
+/**
+ * Self-service recovery: re-checks Dodo for an active subscription and upgrades
+ * the account if one is found. For users whose payment went through but whose
+ * account is still on Free (e.g. the activation webhook never reached prod, or
+ * Dodo didn't propagate the checkout metadata). Safe to click anytime — it
+ * never downgrades and no-ops when already Pro.
+ */
+export async function refreshBillingAction(_formData: FormData): Promise<void> {
+  const { user } = await withAuth({ ensureSignedIn: true });
+  await ensureAccount(user.id, user.email);
+  await reconcileProFromDodo(user.id, user.email);
   revalidatePath("/account");
 }
 

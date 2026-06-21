@@ -16,14 +16,12 @@ import { githubStarButtonInfo } from "./compositions/GitHubStarButton/meta";
 import { imageSceneInfo } from "./compositions/ImageScene/meta";
 import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
 import { instagramPostInfo } from "./compositions/InstagramPost/meta";
-import { laptopFrameInfo } from "./compositions/LaptopFrame/meta";
 import { lineChartInfo } from "./compositions/LineChart/meta";
 import { lockScreenMessageInfo } from "./compositions/LockScreenMessage/meta";
 import { logoCloudInfo } from "./compositions/LogoCloud/meta";
 import { messageBubblesInfo } from "./compositions/MessageBubbles/meta";
 import { messagePopupInfo } from "./compositions/MessagePopup/meta";
 import { perspectiveMarqueeInfo } from "./compositions/PerspectiveMarquee/meta";
-import { phoneFrameInfo } from "./compositions/PhoneFrame/meta";
 import { pieChartInfo } from "./compositions/PieChart/meta";
 import { pricingCardInfo } from "./compositions/PricingCard/meta";
 import { qrCodeInfo } from "./compositions/QrCode/meta";
@@ -68,8 +66,6 @@ export const compositions: AnyCompositionInfo[] = [
   discordMessagesInfo,
   instagramMessagesInfo,
   messagePopupInfo,
-  phoneFrameInfo,
-  laptopFrameInfo,
   textInfo,
   textMagicMoveInfo,
   textMorphInfo,

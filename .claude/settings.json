@@ -54,7 +54,21 @@
       "Bash(claude mcp *)",
       "Bash(curl -s -o /dev/null -w 'no-auth -> HTTP %{http_code}\\\\n' -X POST https://www.keyloom.app/api/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"curl\",\"version\":\"0\"}}}' --max-time 20)",
       "Bash(curl -s -o /dev/null -w 'status=%{http_code}\\\\nredirect=%{redirect_url}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 30)",
-      "Bash(curl -sL -o /dev/null -w 'final_status=%{http_code} bytes=%{size_download} type=%{content_type}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 60)"
+      "Bash(curl -sL -o /dev/null -w 'final_status=%{http_code} bytes=%{size_download} type=%{content_type}\\\\n' http://localhost:3000/api/r/mkm4gcdvnz?b=remotionlambda-apsouth1-xw4x51f1cu --max-time 60)",
+      "WebFetch(domain:developer.spotify.com)",
+      "Bash(echo \"pushed: $?\")",
+      "Bash(echo \"EXIT $?\")",
+      "Bash(sed -i 's/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/tool-rail.tsx apps/web/features/studio/components/inspector.tsx apps/web/features/studio/components/library-panel.tsx)",
+      "Bash(sed -i 's/bg-background\\\\/95/bg-[var\\(--studio-sidebar\\)]/g; s/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/upload-panel.tsx)",
+      "Bash(sed -i 's/\\\\bbg-background\\\\b/bg-[var\\(--studio-sidebar\\)]/g' apps/web/features/studio/components/agent-panel.tsx)",
+      "Bash(sed -i 's/text-\\\\[10px\\\\] font-semibold uppercase tracking-wider/text-[11px] font-semibold uppercase tracking-wide/g' apps/web/features/studio/components/upload-panel.tsx)",
+      "Bash(sed -i 's/text-\\\\[11px\\\\] font-semibold uppercase tracking-wider/text-[11px] font-semibold uppercase tracking-wide/g' apps/web/features/studio/components/project-transition-control.tsx apps/web/features/studio/components/builder.tsx)",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(echo \"tsc: $?\")",
+      "Bash(cd /home/sanku/work/aesthetic *)"
+    ],
+    "additionalDirectories": [
+      "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components"
     ]
   }
 }

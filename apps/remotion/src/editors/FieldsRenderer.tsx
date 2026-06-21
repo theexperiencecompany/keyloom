@@ -20,11 +20,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "@workspace/ui/components/tabs";
+import { cn } from "@workspace/ui/lib/utils";
 import { compositions, compositionsById } from "../registry";
 import type { Field, SectionField } from "../schema";
 import { ChatEditor } from "./ChatEditor";
 import { ImageListEditor, type ImageListItem } from "./ImageListEditor";
-import { PrimitiveControl } from "./primitives";
+import { FIELD_CONTROL, FIELD_LABEL, PrimitiveControl } from "./primitives";
 import { ScenarioEditor } from "./ScenarioEditor";
 import {
   type TerminalLineItem,
@@ -65,7 +66,7 @@ export function FieldsRenderer({
     <div className={`flex min-h-0 flex-col ${hasChatField ? "h-full" : ""}`}>
       {flatFields.length > 0 && (
         <div
-          className={`shrink-0 space-y-4 ${compact ? "px-3 py-3" : "px-5 py-5"} ${
+          className={`shrink-0 space-y-3.5 ${compact ? "px-3 py-3" : "px-4 py-4"} ${
             hasChatField || hasScenarioField || sectionFields.length > 0
               ? "border-b border-border"
               : ""
@@ -384,11 +385,11 @@ function CompositionPicker({
 
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={fieldKey} className="text-[12px]">
+      <Label htmlFor={fieldKey} className={FIELD_LABEL}>
         {label}
       </Label>
       <Select value={current} onValueChange={onChange}>
-        <SelectTrigger id={fieldKey}>
+        <SelectTrigger id={fieldKey} className={cn(FIELD_CONTROL)}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
