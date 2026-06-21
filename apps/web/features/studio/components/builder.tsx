@@ -117,6 +117,12 @@ export function Builder() {
   const selectedClipId = selection?.kind === "clip" ? selection.id : null;
   const isAudioSelected = selection?.kind === "audio";
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("content");
+  // A brief captured from the canvas agent launcher, handed to the agent panel
+  // (which opens and auto-sends it) and cleared once consumed.
+  const [pendingAgentPrompt, setPendingAgentPrompt] = useState<{
+    text: string;
+    mentions: string[];
+  } | null>(null);
 
   const totalDuration = projectDuration(project);
   const totalSeconds = totalDuration / project.fps;
@@ -322,6 +328,10 @@ export function Builder() {
                             }
                           : null
                       }
+                      initialPrompt={pendingAgentPrompt}
+                      onInitialPromptConsumed={() =>
+                        setPendingAgentPrompt(null)
+                      }
                       onClose={() =>
                         dispatch({ type: "TOGGLE_PANEL", panel: "agent" })
                       }
@@ -340,8 +350,12 @@ export function Builder() {
                   totalDuration={totalDuration}
                   hasClips={hasClips}
                   onOpenLibrary={() =>
-                    dispatch({ type: "TOGGLE_PANEL", panel: "library" })
+                    dispatch({ type: "OPEN_PANEL", panel: "library" })
                   }
+                  onStartAgent={(text, mentions) => {
+                    setPendingAgentPrompt({ text, mentions });
+                    dispatch({ type: "OPEN_PANEL", panel: "agent" });
+                  }}
                   playerRef={playerRef}
                 />
 

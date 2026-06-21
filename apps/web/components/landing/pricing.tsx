@@ -86,11 +86,9 @@ export function Pricing() {
             <h3 className="text-lg font-semibold text-foreground">Pro</h3>
             <div className="mt-3 flex items-baseline gap-1.5">
               <span className="text-4xl font-semibold tracking-tight text-foreground">
-                Pro
+                $10
               </span>
-              <span className="text-sm text-muted-foreground">
-                billed monthly
-              </span>
+              <span className="text-sm text-muted-foreground">/ month</span>
             </div>
             <p className="mt-2 text-[14px] text-muted-foreground">
               For teams shipping videos every week.

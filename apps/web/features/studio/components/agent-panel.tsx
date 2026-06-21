@@ -26,6 +26,11 @@ type Props = {
   /** The clip currently selected in the timeline/inspector, if any. Lets the
    *  agent target it directly when the user @mentions its composition. */
   selectedClip?: { id: string; compositionId: string } | null;
+  /** A brief handed in from the studio's agent launcher — auto-sent once on
+   *  mount so the user's first sentence goes straight to the agent. */
+  initialPrompt?: { text: string; mentions: string[] } | null;
+  /** Called after `initialPrompt` has been sent, so the parent can clear it. */
+  onInitialPromptConsumed?: () => void;
 };
 
 // Cap on how many times the SDK will auto-continue per user message.
@@ -51,6 +56,8 @@ export function AgentPanel({
   dispatch,
   onClose,
   selectedClip,
+  initialPrompt,
+  onInitialPromptConsumed,
 }: Props) {
   // Keep the latest project in a ref so onToolCall (closed over at mount)
   // always sees current clips/ids instead of a stale snapshot. Assigned during
@@ -271,6 +278,19 @@ export function AgentPanel({
     mentionsRef.current = [];
     setInput("");
   }
+
+  // Auto-send a brief handed in from the studio's agent launcher — exactly
+  // once, on mount. `send` is hoisted, so referencing it here is safe.
+  const initialConsumedRef = useRef(false);
+  useEffect(() => {
+    if (!initialPrompt || initialConsumedRef.current) return;
+    initialConsumedRef.current = true;
+    mentionsRef.current = initialPrompt.mentions ?? [];
+    void send(initialPrompt.text);
+    onInitialPromptConsumed?.();
+    // Only react to the first non-null prompt; deps intentionally minimal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt]);
 
   return (
     <aside className="relative flex h-full w-full flex-col overflow-hidden bg-background">

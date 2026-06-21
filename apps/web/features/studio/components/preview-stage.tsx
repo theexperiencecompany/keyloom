@@ -3,8 +3,8 @@
 import { Player, type PlayerRef } from "@remotion/player";
 import { ProjectComposition } from "@workspace/compositions/compositions/Project/Project";
 import type { Project } from "@workspace/compositions/project";
-import { Button } from "@workspace/ui/components/button";
 import type { Ref } from "react";
+import { AgentLauncher } from "./agent-launcher";
 
 type Props = {
   project: Project;
@@ -12,6 +12,8 @@ type Props = {
   totalDuration: number;
   hasClips: boolean;
   onOpenLibrary: () => void;
+  /** Hands a brief to the agent (opens the agent panel + sends it). */
+  onStartAgent: (text: string, mentions: string[]) => void;
   playerRef?: Ref<PlayerRef>;
 };
 
@@ -21,12 +23,13 @@ export function PreviewStage({
   totalDuration,
   hasClips,
   onOpenLibrary,
+  onStartAgent,
   playerRef,
 }: Props) {
   if (!hasClips) {
     return (
-      <div className="relative flex min-h-0 flex-1 items-center justify-center bg-canvas">
-        <EmptyStage onOpenLibrary={onOpenLibrary} />
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-canvas">
+        <AgentLauncher onSubmit={onStartAgent} onBrowse={onOpenLibrary} />
       </div>
     );
   }
@@ -56,41 +59,6 @@ export function PreviewStage({
           numberOfSharedAudioTags={12}
           acknowledgeRemotionLicense
         />
-      </div>
-    </div>
-  );
-}
-
-function EmptyStage({ onOpenLibrary }: { onOpenLibrary: () => void }) {
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted/50">
-          <svg
-            viewBox="0 0 24 24"
-            className="size-4 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <title>Play</title>
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="text-[13px] font-medium text-foreground/80">
-            No clips yet
-          </p>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">
-            Add a scene from the library to get started.
-          </p>
-        </div>
-        <Button size="sm" onClick={onOpenLibrary} className="mt-1">
-          Add scene
-        </Button>
       </div>
     </div>
   );
