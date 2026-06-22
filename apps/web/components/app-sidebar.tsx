@@ -12,6 +12,7 @@ import {
   LibrariesIcon,
   Logout02Icon,
   Moon02Icon,
+  PlugSocketIcon,
   Settings01Icon,
   Sun03Icon,
   UnfoldMoreIcon,
@@ -92,6 +93,10 @@ const SECTIONS: NavSection[] = [
         badge: "BETA",
       },
     ],
+  },
+  {
+    label: "Developers",
+    items: [{ label: "MCP", href: "/mcp", icon: PlugSocketIcon }],
   },
   {
     label: "Support",

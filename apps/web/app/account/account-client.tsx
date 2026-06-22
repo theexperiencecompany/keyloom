@@ -1,12 +1,5 @@
 "use client";
 
-import {
-  Copy01Icon,
-  Delete02Icon,
-  PlusSignIcon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -17,74 +10,45 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { useActionState, useState } from "react";
-import {
-  createKeyAction,
-  refreshBillingAction,
-  revokeKeyAction,
-  upgradeAction,
-} from "./actions";
-
-type KeyRow = {
-  id: string;
-  name: string;
-  prefix: string;
-  createdAt: string;
-};
+import { refreshBillingAction, upgradeAction } from "./actions";
 
 type Props = {
   email: string;
-  mcpUrl: string;
+  name: string;
+  avatarUrl?: string | null;
   subscription: {
     plan: string;
     status: string;
     rendersUsed: number;
     renderQuota: number;
   } | null;
-  keys: KeyRow[];
 };
 
-function CopyButton({
-  value,
-  label = "Copy",
+function ProfileAvatar({
+  src,
+  fallback,
 }: {
-  value: string;
-  label?: string;
+  src?: string | null;
+  fallback: string;
 }) {
-  const [copied, setCopied] = useState(false);
+  if (src) {
+    // External WorkOS avatar — plain <img> avoids next/image remote config.
+    return (
+      <img
+        src={src}
+        alt=""
+        className="size-14 shrink-0 rounded-full object-cover"
+      />
+    );
+  }
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={async () => {
-        await navigator.clipboard.writeText(value);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }}
-    >
-      <HugeiconsIcon icon={copied ? Tick02Icon : Copy01Icon} size={14} />
-      {copied ? "Copied" : label}
-    </Button>
+    <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
+      {fallback}
+    </div>
   );
 }
 
-export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
-  const [state, formAction, pending] = useActionState(createKeyAction, {});
-
-  const connectorSnippet = JSON.stringify(
-    {
-      mcpServers: {
-        "keyloom-video": {
-          url: mcpUrl,
-          headers: { Authorization: "Bearer kl_live_…" },
-        },
-      },
-    },
-    null,
-    2,
-  );
-
+export function AccountClient({ email, name, avatarUrl, subscription }: Props) {
   const isPro = subscription && subscription.plan !== "free";
   const usagePct = subscription
     ? Math.min(
@@ -95,13 +59,37 @@ export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
         ),
       )
     : 0;
+  const initial = (name || email || "?").slice(0, 1).toUpperCase();
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
-        <p className="text-sm text-muted-foreground">{email}</p>
+      <header className="flex items-center gap-4">
+        <ProfileAvatar src={avatarUrl} fallback={initial} />
+        <div className="flex min-w-0 flex-col">
+          <h1 className="truncate text-2xl font-semibold tracking-tight">
+            {name || email}
+          </h1>
+          <p className="truncate text-sm text-muted-foreground">{email}</p>
+        </div>
       </header>
+
+      {/* Profile */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Your account details.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Name</span>
+            <span className="font-medium">{name || "—"}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Email</span>
+            <span className="font-medium">{email}</span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Plan / usage */}
       <Card>
@@ -155,99 +143,6 @@ export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
             </div>
           </CardContent>
         ) : null}
-      </Card>
-
-      {/* Connect */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Connect in Claude / Cursor</CardTitle>
-          <CardDescription>
-            Add this remote MCP server, using one of your API keys as the bearer
-            token.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <code className="flex-1 truncate rounded-md bg-muted px-3 py-2 font-mono text-xs">
-              {mcpUrl}
-            </code>
-            <CopyButton value={mcpUrl} label="Copy URL" />
-          </div>
-          <pre className="overflow-x-auto rounded-md border border-border bg-muted/50 p-4 font-mono text-[11px] leading-relaxed text-muted-foreground">
-            {connectorSnippet}
-          </pre>
-        </CardContent>
-      </Card>
-
-      {/* API keys */}
-      <Card>
-        <CardHeader>
-          <CardTitle>API keys</CardTitle>
-          <CardDescription>
-            Use a key as the bearer token when connecting the MCP server.
-          </CardDescription>
-          <CardAction>
-            <form action={formAction}>
-              <Button type="submit" size="sm" disabled={pending}>
-                <HugeiconsIcon icon={PlusSignIcon} size={14} />
-                {pending ? "Creating…" : "New key"}
-              </Button>
-            </form>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {state.error ? (
-            <p className="text-xs text-destructive">{state.error}</p>
-          ) : null}
-
-          {state.fullKey ? (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-              <p className="mb-2 text-xs font-medium">
-                Copy this key now — it won't be shown again.
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 truncate rounded bg-background px-2 py-1 font-mono text-xs">
-                  {state.fullKey}
-                </code>
-                <CopyButton value={state.fullKey} />
-              </div>
-            </div>
-          ) : null}
-
-          {keys.length === 0 ? (
-            <p className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
-              No keys yet. Create one to connect.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {keys.map((k) => (
-                <li
-                  key={k.id}
-                  className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <code className="font-mono text-xs">{k.prefix}…</code>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(k.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <form action={revokeKeyAction}>
-                    <input type="hidden" name="keyId" value={k.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <HugeiconsIcon icon={Delete02Icon} size={14} />
-                      Revoke
-                    </Button>
-                  </form>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
       </Card>
     </div>
   );
