@@ -89,26 +89,22 @@ export function parseProjectJson(text: string): ParseResult {
 
     // Legacy migration: projects saved before the universal ClipStyle change
     // stored these on `clip.props`. Move them onto `clip.style` so the
-    // current compositions actually consume them. Locked comps keep their
-    // own internal `backgroundColor` prop, so don't migrate those.
-    const isLocked = info?.brandMode === "locked";
+    // current compositions actually consume them.
     let mergedStyle: ClipStyle | undefined = explicitStyle;
-    if (!isLocked) {
-      const candidates: Array<keyof ClipStyle> = [
-        "backgroundColor",
-        "textColor",
-        "fontFamily",
-        "accentColor",
-      ];
-      for (const key of candidates) {
-        const fromProps = propsObj[key];
-        if (
-          typeof fromProps === "string" &&
-          fromProps !== "" &&
-          !mergedStyle?.[key]
-        ) {
-          mergedStyle = { ...(mergedStyle ?? {}), [key]: fromProps };
-        }
+    const candidates: Array<keyof ClipStyle> = [
+      "backgroundColor",
+      "textColor",
+      "fontFamily",
+      "accentColor",
+    ];
+    for (const key of candidates) {
+      const fromProps = propsObj[key];
+      if (
+        typeof fromProps === "string" &&
+        fromProps !== "" &&
+        !mergedStyle?.[key]
+      ) {
+        mergedStyle = { ...(mergedStyle ?? {}), [key]: fromProps };
       }
     }
 

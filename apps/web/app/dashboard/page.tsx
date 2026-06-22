@@ -10,7 +10,7 @@ export default function DashboardPage() {
           own version.
         </p>
       </div>
-      <ComponentGallery showEdit stickyOffsetClass="top-12" />
+      <ComponentGallery stickyOffsetClass="top-12" />
     </div>
   );
 }

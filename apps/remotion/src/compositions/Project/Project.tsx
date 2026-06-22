@@ -63,13 +63,11 @@ export const ProjectComposition: React.FC<Project> = ({
 
           const Component = componentsById[clip.compositionId];
           const info = compositionsById[clip.compositionId];
-          const isLocked = info?.brandMode === "locked";
 
           // Optional background-scene backdrop (Inspector → Style → Background
-          // → Scene). Locked compositions never receive clipStyle, so they
-          // can't carry a backdrop. When a valid scene is set, the clip's own
-          // background is forced transparent so the backdrop shows through.
-          const backdropId = isLocked ? undefined : clip.style?.backgroundScene;
+          // → Scene). When a valid scene is set, the clip's own background is
+          // forced transparent so the backdrop shows through.
+          const backdropId = clip.style?.backgroundScene;
           const BackdropComponent = backdropId
             ? componentsById[backdropId]
             : undefined;
@@ -78,26 +76,19 @@ export const ProjectComposition: React.FC<Project> = ({
             : undefined;
           const hasBackdrop = Boolean(BackdropComponent && backdropInfo);
 
-          // Curated theme — unlike free-form clipStyle, themes also apply
-          // to locked compositions (each theme is a hand-built skin). Only
-          // forward ids the composition actually declares.
+          // Curated theme — only forward ids the composition actually declares.
           const themeId = clip.style?.theme;
           const themeProps =
             themeId && info?.themes?.some((t) => t.id === themeId)
               ? { clipTheme: themeId }
               : {};
 
-          // The clip's resolved universal style (undefined for brand-locked
-          // comps). When a Background Scene is set, the clip's own background
-          // goes transparent so the scene shows through.
-          const resolvedClipStyle = isLocked
-            ? undefined
-            : hasBackdrop
-              ? { ...clip.style, backgroundColor: "transparent" }
-              : clip.style;
-          const contentStyle = isLocked
-            ? themeProps
-            : { clipStyle: resolvedClipStyle, ...themeProps };
+          // The clip's resolved universal style. When a Background Scene is set,
+          // the clip's own background goes transparent so the scene shows through.
+          const resolvedClipStyle = hasBackdrop
+            ? { ...clip.style, backgroundColor: "transparent" }
+            : clip.style;
+          const contentStyle = { clipStyle: resolvedClipStyle, ...themeProps };
 
           // Optional device mockup (Inspector → Frame). Render the clip's
           // composition INSIDE PhoneFrame / LaptopFrame. The clip's style rides

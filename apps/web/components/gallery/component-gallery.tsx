@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Cancel01Icon,
-  PencilEdit02Icon,
-  PlayIcon,
-  Search01Icon,
-} from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   compositionModulePath,
@@ -19,14 +14,11 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import * as React from "react";
-import { forkPayload } from "@/lib/fork";
-import { createUserComponent } from "@/lib/user-components";
 
 // The ONE component gallery — used by both the landing page and the dashboard.
-// `showEdit` adds the "Edit" (fork) action for signed-in surfaces; the public
-// landing page passes it false and only offers "Open in studio".
+// Clicking a card opens it in the editor (/component/[id]/edit).
 
 const LivePreview = dynamic(
   () => import("./live-preview").then((m) => m.LivePreview),
@@ -56,19 +48,14 @@ const PREVIEW_W = 1080;
 const PREVIEW_H = 1350;
 
 export function ComponentGallery({
-  showEdit = false,
   stickyOffsetClass = "top-0",
 }: {
-  /** Show the "Edit" (fork) action — only for signed-in surfaces. */
-  showEdit?: boolean;
   /** Tailwind top-* offset so the sticky filter bar sits under the page header. */
   stickyOffsetClass?: string;
 }) {
-  const router = useRouter();
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
-  const [forking, setForking] = React.useState<string | null>(null);
 
   const presentCategories = React.useMemo(() => {
     const seen = new Set(VISIBLE.map((c) => c.category));
@@ -86,22 +73,6 @@ export function ComponentGallery({
       );
     });
   }, [filter, query]);
-
-  const openInStudio = (info: AnyCompositionInfo) => {
-    router.push(`/studio?component=${info.id}`);
-  };
-
-  const editComponent = async (info: AnyCompositionInfo) => {
-    if (!showEdit || forking) return;
-    const payload = forkPayload(info.id);
-    if (!payload) return;
-    setForking(info.id);
-    const created = await createUserComponent(payload);
-    setForking(null);
-    if (created) {
-      router.push(`/component/${encodeURIComponent(created.id)}/edit`);
-    }
-  };
 
   return (
     <div>
@@ -179,14 +150,7 @@ export function ComponentGallery({
       ) : (
         <div className="grid grid-cols-2 items-start gap-x-5 gap-y-8 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((info) => (
-            <GalleryCard
-              key={info.id}
-              info={info}
-              showEdit={showEdit}
-              forking={forking === info.id}
-              onOpen={() => openInStudio(info)}
-              onEdit={() => editComponent(info)}
-            />
+            <GalleryCard key={info.id} info={info} />
           ))}
         </div>
       )}
@@ -219,20 +183,8 @@ function CategoryTab({
   );
 }
 
-function GalleryCard({
-  info,
-  showEdit,
-  forking,
-  onOpen,
-  onEdit,
-}: {
-  info: AnyCompositionInfo;
-  showEdit: boolean;
-  forking: boolean;
-  onOpen: () => void;
-  onEdit: () => void;
-}) {
-  const ref = React.useRef<HTMLDivElement | null>(null);
+function GalleryCard({ info }: { info: AnyCompositionInfo }) {
+  const ref = React.useRef<HTMLAnchorElement | null>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
     const el = ref.current;
@@ -251,7 +203,12 @@ function GalleryCard({
   }, []);
 
   return (
-    <div ref={ref} className="group block">
+    <Link
+      ref={ref}
+      href={`/component/${info.id}/edit`}
+      prefetch={false}
+      className="group block"
+    >
       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]">
         <div className="absolute inset-0">
           {visible ? (
@@ -268,24 +225,6 @@ function GalleryCard({
             <div className="h-full w-full bg-muted/40" />
           )}
         </div>
-
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[1px] transition-opacity duration-150 group-hover:opacity-100">
-          <Button size="sm" onClick={onOpen}>
-            <HugeiconsIcon icon={PlayIcon} size={14} />
-            Open in studio
-          </Button>
-          {showEdit ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={onEdit}
-              disabled={forking}
-            >
-              <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
-              {forking ? "Forking…" : "Edit"}
-            </Button>
-          ) : null}
-        </div>
       </div>
 
       <div className="px-0.5 pt-3">
@@ -296,6 +235,6 @@ function GalleryCard({
           {CATEGORY_LABELS[info.category]}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }

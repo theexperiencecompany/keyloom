@@ -222,7 +222,7 @@ export const tools = {
         title: info.title,
         description: info.description,
         category: info.category,
-        brandLocked: info.brandMode === "locked",
+        brandLocked: false,
         defaultDurationFrames: info.durationInFrames,
         // Optional agent-facing guidance — written by hand in meta.ts
         // for high-impact scenes. When present, it tells the agent

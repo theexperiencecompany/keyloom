@@ -15,6 +15,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AbsoluteFill, Img } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { proxyExternalImg } from "../../proxy-image";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type TweetCardProps = {
@@ -41,6 +42,18 @@ export const TweetCard: React.FC<TweetCardProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { width, height } = useCanvasLayout();
+
+  // The compose card has a fixed internal layout (1480×~760); scale it to the
+  // canvas so it fills the width and never overflows / gets cut off on any
+  // aspect ratio.
+  const CARD_W = 1480;
+  const CARD_H = 760;
+  const cardScale = Math.min(
+    (width - 96) / CARD_W,
+    (height - 96) / CARD_H,
+    1.4,
+  );
 
   const s = resolveClipStyle(clipStyle, {
     background: theme === "dark" ? "#000000" : "#ffffff",
@@ -121,7 +134,7 @@ export const TweetCard: React.FC<TweetCardProps> = ({
     >
       <div
         style={{
-          width: 1480,
+          width: CARD_W,
           background: cardBg,
           color: cardText,
           borderRadius: 32,
@@ -130,6 +143,9 @@ export const TweetCard: React.FC<TweetCardProps> = ({
             ? "0 40px 100px rgba(0,0,0,0.5)"
             : "0 36px 100px rgba(15,16,20,0.10), 0 6px 16px rgba(15,16,20,0.05)",
           padding: 56,
+          transform: `scale(${cardScale})`,
+          transformOrigin: "center",
+          flexShrink: 0,
         }}
       >
         <div style={{ display: "flex", alignItems: "flex-start", gap: 28 }}>
