@@ -109,6 +109,7 @@
     "remotion": "4.0.459",
     "schema-dts": "^2.0.0",
     "string-similarity": "^4.0.4",
+    "sucrase": "^3.35.1",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "4.0.0",
     "tinycolor2": "^1.6.0",

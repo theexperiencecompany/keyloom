@@ -20,6 +20,7 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { takeStashedStudioProject } from "@/lib/fork";
 import { useAudioSearch } from "../hooks/use-audio-search";
 import { useExportRender } from "../hooks/use-export-render";
 import { usePlayerControls } from "../hooks/use-player-controls";
@@ -89,6 +90,15 @@ export function Builder() {
   useEffect(() => {
     if (didInitFromParam.current) return;
     didInitFromParam.current = true;
+    // A forked component handed off from the dashboard ("Edit"/"Open in
+    // studio" on a fork) is stashed in localStorage because its source code is
+    // too large for a URL param. Loading it replaces the whole project.
+    const stashed = takeStashedStudioProject();
+    if (stashed) {
+      dispatch({ type: "LOAD_PROJECT", project: stashed });
+      window.history.replaceState(null, "", "/studio");
+      return;
+    }
     const id = new URLSearchParams(window.location.search).get("component");
     if (id && compositionsById[id]) {
       dispatch({ type: "ADD_CLIP", compositionId: id });

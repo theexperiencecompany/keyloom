@@ -8,26 +8,20 @@ export const TWEET_CARD_HEIGHT = 1080;
 
 export const tweetCardDefaultProps: TweetCardProps = {
   displayName: "sanku",
-  handle: "@sankalpa_02",
   avatarUrl: "https://avatars.githubusercontent.com/sankalpaacharya?s=200",
-  verified: "yes",
-  text: "Oh boy, we have a lot to talk about today.",
-  timestamp: "10:30 PM · Mar 15, 2025",
-  replies: 248,
-  retweets: 1924,
-  likes: 18432,
-  views: 412000,
-  theme: "light",
+  text: "just shipped something new 🚀",
+  audience: "Everyone",
+  theme: "dark",
 };
 
 export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
   id: "TweetCard",
   category: "social",
   agentNotes:
-    "Authentic single-tweet card with avatar, handle, text, like/retweet row. Use for 'someone said this about us' beats, Twitter announcements, or quote-tweet style reveals. Keep tweet text under 240 chars.",
-  title: "Tweet Card",
+    "Authentic X / Twitter compose box: avatar, audience pill, 'What's happening?' field, reply-scope line, the media toolbar, and a Post button. The tweet text types itself out and the Post button lights up and gets 'clicked'. Use for 'we just posted this' / announcement beats. Keep text under ~240 chars.",
+  title: "Tweet Composer",
   description:
-    "An animated X / Twitter post card. Customize the author, copy, theme, and engagement counts.",
+    "An animated X / Twitter compose box. The tweet text types out and the Post button activates and is pressed.",
   durationInFrames: TWEET_CARD_DURATION,
   fps: TWEET_CARD_FPS,
   width: TWEET_CARD_WIDTH,
@@ -35,23 +29,9 @@ export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
   defaultProps: tweetCardDefaultProps,
   fields: [
     { kind: "text", key: "displayName", label: "Display name" },
-    { kind: "text", key: "handle", label: "Handle" },
     { kind: "text", key: "avatarUrl", label: "Avatar URL" },
-    {
-      kind: "select",
-      key: "verified",
-      label: "Verified",
-      options: [
-        { value: "yes", label: "Verified" },
-        { value: "no", label: "Not verified" },
-      ],
-    },
     { kind: "textarea", key: "text", label: "Tweet text", rows: 3 },
-    { kind: "text", key: "timestamp", label: "Timestamp" },
-    { kind: "number", key: "replies", label: "Replies", min: 0 },
-    { kind: "number", key: "retweets", label: "Retweets", min: 0 },
-    { kind: "number", key: "likes", label: "Likes", min: 0 },
-    { kind: "number", key: "views", label: "Views", min: 0 },
+    { kind: "text", key: "audience", label: "Audience" },
     {
       kind: "select",
       key: "theme",

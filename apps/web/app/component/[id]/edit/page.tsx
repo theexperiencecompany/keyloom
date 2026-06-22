@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditorView } from "./EditorView";
+import { ForkEditorView } from "./ForkEditorView";
 
 // Render editor pages ON DEMAND instead of statically prerendering all 79
 // compositions at build time. It's an interactive client editor (zero SEO
@@ -35,7 +36,16 @@ export default async function EditorPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeURIComponent(rawId);
+
+  // Forked ("custom:") components live in the user's client-side library, not
+  // the static registry — hand off to the client editor which loads + edits
+  // them (Player + props + agent). It renders its own header.
+  if (id.startsWith("custom:")) {
+    return <ForkEditorView id={id} />;
+  }
+
   const composition = compositionsById[id];
   if (!composition) notFound();
 

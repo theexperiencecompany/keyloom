@@ -9,6 +9,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { componentsById } from "../../components";
+import { DynamicComposition } from "../../dynamic/DynamicComposition";
 import { EffectsWrap } from "../../effects/EffectsWrap";
 import {
   type Project,
@@ -23,6 +24,7 @@ export const ProjectComposition: React.FC<Project> = ({
   clips,
   defaultTransition,
   audio,
+  customComponents,
   ...rest
 }) => {
   const { width, height } = useVideoConfig();
@@ -52,6 +54,14 @@ export const ProjectComposition: React.FC<Project> = ({
     >
       <TransitionSeries>
         {clips.flatMap((clip, index) => {
+          // Forked components ("custom:" ids) aren't in the static registry —
+          // they're transpiled from source at render time. They behave like
+          // non-locked compositions (receive clipStyle, no curated themes).
+          const isCustom = clip.compositionId.startsWith("custom:");
+          const custom = isCustom
+            ? customComponents?.[clip.compositionId]
+            : undefined;
+
           const Component = componentsById[clip.compositionId];
           const info = compositionsById[clip.compositionId];
           const isLocked = info?.brandMode === "locked";
@@ -103,7 +113,21 @@ export const ProjectComposition: React.FC<Project> = ({
                 ? componentsById.LaptopFrame
                 : null;
 
-          const content = !Component ? (
+          const content = isCustom ? (
+            custom ? (
+              <DynamicComposition
+                key={`c-${clip.id}`}
+                code={custom.code}
+                exportName={custom.exportName ?? custom.baseId}
+                componentProps={{ ...clip.props, ...contentStyle }}
+              />
+            ) : (
+              <MissingClip
+                key={`c-${clip.id}`}
+                compositionId={clip.compositionId}
+              />
+            )
+          ) : !Component ? (
             <MissingClip
               key={`c-${clip.id}`}
               compositionId={clip.compositionId}

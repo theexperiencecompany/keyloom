@@ -56,7 +56,12 @@ export function parseProjectJson(text: string): ParseResult {
     if (!c.props || typeof c.props !== "object") {
       return { ok: false, error: `clips[${i}].props must be an object.` };
     }
-    if (!compositionsById[c.compositionId]) {
+    // `custom:` ids are user-forked components resolved from
+    // `customComponents`, not the static registry — don't warn on them.
+    if (
+      !c.compositionId.startsWith("custom:") &&
+      !compositionsById[c.compositionId]
+    ) {
       warnings.push(
         `Unknown compositionId "${c.compositionId}" at clips[${i}] — clip kept but will render as Missing scene.`,
       );
@@ -127,6 +132,10 @@ export function parseProjectJson(text: string): ParseResult {
       : undefined;
 
   const audio = parseAudio(obj.audio, warnings);
+  const customComponents = parseCustomComponents(
+    obj.customComponents,
+    warnings,
+  );
 
   return {
     ok: true,
@@ -138,8 +147,48 @@ export function parseProjectJson(text: string): ParseResult {
       clips: validClips,
       ...(defaultTransition ? { defaultTransition } : {}),
       ...(audio ? { audio } : {}),
+      ...(customComponents ? { customComponents } : {}),
     },
   };
+}
+
+/**
+ * Parse the `customComponents` map (user-forked compositions). Each entry must
+ * carry a non-empty `code` string and a `baseId`; malformed entries are
+ * dropped with a warning rather than failing the whole load.
+ */
+function parseCustomComponents(
+  raw: unknown,
+  warnings: string[],
+): Project["customComponents"] | undefined {
+  if (!raw) return undefined;
+  if (typeof raw !== "object") {
+    warnings.push("`customComponents` must be an object — ignored.");
+    return undefined;
+  }
+  const out: NonNullable<Project["customComponents"]> = {};
+  for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+    const v = value as Record<string, unknown> | null;
+    if (!v || typeof v !== "object") {
+      warnings.push(`customComponents["${id}"] is not an object — dropped.`);
+      continue;
+    }
+    if (typeof v.code !== "string" || v.code.length === 0) {
+      warnings.push(`customComponents["${id}"].code missing — dropped.`);
+      continue;
+    }
+    if (typeof v.baseId !== "string" || v.baseId.length === 0) {
+      warnings.push(`customComponents["${id}"].baseId missing — dropped.`);
+      continue;
+    }
+    out[id] = {
+      baseId: v.baseId,
+      name: typeof v.name === "string" ? v.name : v.baseId,
+      code: v.code,
+      ...(typeof v.exportName === "string" ? { exportName: v.exportName } : {}),
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function parseAudio(raw: unknown, warnings: string[]): ProjectAudio | null {
