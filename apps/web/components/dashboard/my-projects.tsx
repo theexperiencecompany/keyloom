@@ -150,7 +150,7 @@ function EmptyState() {
         </p>
       </div>
       <Button asChild>
-        <Link href="/dashboard">Browse components</Link>
+        <Link href="/components">Browse components</Link>
       </Button>
     </div>
   );

@@ -12,7 +12,7 @@ import {
   startForkRender,
   startRender,
 } from "@/features/mcp/render";
-import { consumeRender } from "@/lib/account";
+import { consumeRender, getSubscription } from "@/lib/account";
 import { authenticateApiKey } from "@/lib/api-keys";
 
 export const maxDuration = 60;
@@ -29,11 +29,31 @@ const errorText = (message: string): ToolResult => ({
   content: [{ type: "text", text: message }],
 });
 
+// MCP is a Pro feature. The website editor stays free; using the tools over MCP
+// (Claude Code / Cursor) requires an active paid plan.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.keyloom.app")
+  .trim()
+  .replace(/\/$/, "");
+const PRO_REQUIRED = `MCP access is a Pro feature. Upgrade to Pro at ${APP_URL}/account to use the Keyloom MCP tools. (Editing components on the website stays free.)`;
+
+async function isProUser(userId: string): Promise<boolean> {
+  const sub = await getSubscription(userId);
+  return (
+    !!sub &&
+    sub.plan !== "free" &&
+    (sub.status === "active" || sub.status === "trialing")
+  );
+}
+
 const baseHandler = createMcpHandler(
   (server) => {
     // Cast registerTool through unknown: the SDK's Zod generic inference can
     // exceed TypeScript's instantiation depth. The SDK still validates inputs
     // against inputSchema at runtime. (Same workaround as the stdio server.)
+    const userIdOf = (extra: {
+      authInfo?: { extra?: Record<string, unknown> };
+    }): string => String(extra.authInfo?.extra?.userId ?? "");
+
     const register = (
       name: string,
       config: { title: string; description: string; inputSchema: ZodRawShape },
@@ -42,18 +62,24 @@ const baseHandler = createMcpHandler(
         extra: { authInfo?: { extra?: Record<string, unknown> } },
       ) => Promise<ToolResult>,
     ) => {
+      // Gate EVERY tool behind Pro — the MCP surface is paid.
+      const gated = async (
+        args: Record<string, unknown>,
+        extra: { authInfo?: { extra?: Record<string, unknown> } },
+      ): Promise<ToolResult> => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        if (!(await isProUser(userId))) return errorText(PRO_REQUIRED);
+        return handler(args, extra);
+      };
       (
         server.registerTool as unknown as (
           n: string,
           c: unknown,
-          h: typeof handler,
+          h: typeof gated,
         ) => void
-      )(name, config, handler);
+      )(name, config, gated);
     };
-
-    const userIdOf = (extra: {
-      authInfo?: { extra?: Record<string, unknown> };
-    }): string => String(extra.authInfo?.extra?.userId ?? "");
 
     register(
       "list_components",

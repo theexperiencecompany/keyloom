@@ -67,15 +67,15 @@ type NavSection = {
 const SECTIONS: NavSection[] = [
   {
     items: [
-      { label: "Components", href: "/dashboard", icon: LibrariesIcon },
+      { label: "Components", href: "/components", icon: LibrariesIcon },
       {
         label: "My Projects",
-        href: "/dashboard/projects",
+        href: "/components/projects",
         icon: FolderLibraryIcon,
       },
       {
         label: "Collections",
-        href: "/dashboard/collections",
+        href: "/components/collections",
         icon: Folder01Icon,
       },
     ],
@@ -117,10 +117,10 @@ const SECTIONS: NavSection[] = [
 export function AppSidebar() {
   const pathname = usePathname();
 
-  // Exact match for "/" and "/dashboard" so they don't both light up on
-  // nested routes like /dashboard/projects; prefix match for the rest.
+  // Exact match for "/" and "/components" so they don't both light up on
+  // nested routes like /components/projects; prefix match for the rest.
   const isActive = (href: string) =>
-    href === "/" || href === "/dashboard"
+    href === "/" || href === "/components"
       ? pathname === href
       : pathname.startsWith(href);
 

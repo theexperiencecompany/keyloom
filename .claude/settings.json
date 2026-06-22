@@ -73,7 +73,8 @@
       "Bash(curl -sL -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0 Safari/537.36\" --max-time 30 https://www.usefastlane.ai/llms-full.txt -o /tmp/fastlane-llms.txt)",
       "Bash(bunx shadcn@latest add card badge)",
       "Bash(perl -0pi -e 's/brandLocked:\\\\s*[A-Za-z_]+\\\\.brandMode === \"locked\"/brandLocked: false/g' lib/agent/catalog.ts lib/agent/tools.ts features/mcp/components.ts)",
-      "Bash(perl -0pi -e 's/const locked = c\\\\.brandMode === \"locked\" \\\\? \" \\\\[brand-locked\\\\]\" : \"\";/const locked = \"\";/g' lib/agent/catalog.ts)"
+      "Bash(perl -0pi -e 's/const locked = c\\\\.brandMode === \"locked\" \\\\? \" \\\\[brand-locked\\\\]\" : \"\";/const locked = \"\";/g' lib/agent/catalog.ts)",
+      "Bash(perl -pi -e 's{/dashboard}{/components}g' components/app-sidebar.tsx \"app/component/[id]/edit/fork-editor-view.tsx\" components/dashboard/my-projects.tsx)"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components"

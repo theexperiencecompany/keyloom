@@ -136,7 +136,7 @@ export function ForkEditorView({ id }: { id: string }) {
           This forked component isn’t in your library on this browser.
         </p>
         <Button asChild>
-          <Link href="/dashboard/projects">Back to My Projects</Link>
+          <Link href="/components/projects">Back to My Projects</Link>
         </Button>
       </div>
     );
@@ -146,7 +146,7 @@ export function ForkEditorView({ id }: { id: string }) {
     <div className="studio-shell flex h-screen flex-col bg-background text-foreground">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
         <Link
-          href="/dashboard/projects"
+          href="/components/projects"
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
