@@ -40,7 +40,7 @@ export async function createComponent(
   userId: string,
   input: CreateComponentInput,
 ): Promise<UserComponentRow> {
-  const rows = await db
+  const [row] = await db
     .insert(userComponents)
     .values({
       userId,
@@ -50,8 +50,8 @@ export async function createComponent(
       exportName: input.exportName ?? null,
     })
     .returning();
-  // biome-ignore lint/style/noNonNullAssertion: insert().returning() yields the row
-  return rows[0]!;
+  if (!row) throw new Error("Failed to create component");
+  return row;
 }
 
 export async function updateComponent(
