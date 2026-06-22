@@ -14,5 +14,12 @@ export const config = {
   // All page routes EXCEPT API routes, Next internals, and static files
   // (anything with a dot). Keeps the API-key-gated /api/mcp + webhooks
   // untouched while covering every page the provider mounts on.
-  matcher: ["/((?!api/|_next/|.*\\..*).*)"],
+  //
+  // `/api/components` is the exception: it uses session `withAuth()` (not an
+  // API key), so it MUST be covered by the middleware or WorkOS throws.
+  matcher: [
+    "/((?!api/|_next/|.*\\..*).*)",
+    "/api/components",
+    "/api/components/:path*",
+  ],
 };

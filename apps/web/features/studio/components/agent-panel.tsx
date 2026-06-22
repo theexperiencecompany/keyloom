@@ -1,23 +1,16 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { Cancel01Icon, RefreshIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import type { Project } from "@workspace/compositions/project";
 import { compositions } from "@workspace/compositions/registry";
-import { Button } from "@workspace/ui/components/button";
-import { Composer, type MentionItem } from "@workspace/ui/components/composer";
-import { WaveSpinner } from "@workspace/ui/components/wave-spinner";
+import type { MentionItem } from "@workspace/ui/components/composer";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "ai";
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AgentChat } from "@/components/agent/agent-chat";
 import { isAgentVisible } from "@/lib/agent/catalog";
 import type { StudioAction } from "../state/reducer";
 import { runClientTool } from "./agent-panel/client-tools";
 import { EmptyState } from "./agent-panel/empty-state";
-import { humanizeAgentError } from "./agent-panel/error";
-import { MessageBubble } from "./agent-panel/message-bubble";
-import { ThinkingPhrase } from "./agent-panel/thinking-phrase";
 
 type Props = {
   project: Project;
@@ -163,7 +156,6 @@ export function AgentPanel({
   });
 
   const [input, setInput] = useState("");
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const lastMessage = messages[messages.length - 1];
   const lastIsAssistant = lastMessage?.role === "assistant";
@@ -239,11 +231,6 @@ export function AgentPanel({
 
   const isBusy = busy && !forceIdle && !error;
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, status]);
-
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -273,154 +260,28 @@ export function AgentPanel({
   }
 
   return (
-    <aside className="relative flex h-full w-full flex-col overflow-hidden border-r border-border bg-[var(--studio-sidebar)]">
-      {/*
-        Ambient hero — the wildflower-sunset artwork washes in at the top and
-        melts into the dark panel. Only present on the empty state; the moment
-        the user sends a brief and the conversation begins, it unmounts so the
-        chat reads clean.
-      */}
-      {messages.length === 0 ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-72 bg-cover bg-center opacity-[0.55]"
-          style={{
-            backgroundImage: "url(/background.png)",
-            maskImage:
-              "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 45%, transparent 100%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 45%, transparent 100%)",
-          }}
-        />
-      ) : null}
-
-      <div
-        className={`relative z-10 flex items-center justify-between border-b px-4 py-3 ${
-          messages.length === 0
-            ? "border-white/10 bg-[var(--studio-sidebar)]/30 backdrop-blur-md"
-            : "border-border"
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt=""
-            aria-hidden
-            width={24}
-            height={24}
-            className="size-6 shrink-0 object-contain"
-          />
-          <div>
-            <p className="text-sm font-medium text-foreground">Agent</p>
-            <p className="text-[11px] text-muted-foreground">
-              Describe it — it builds the timeline
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="size-6"
-          title="Close"
-          aria-label="Close agent panel"
-        >
-          <HugeiconsIcon icon={Cancel01Icon} className="size-3.5" />
-        </Button>
-      </div>
-
-      <div
-        ref={scrollRef}
-        className="relative z-10 min-h-0 flex-1 overflow-y-auto scrollbar-thin px-4 py-4"
-      >
-        {messages.length === 0 ? (
-          <EmptyState onPick={send} />
-        ) : (
-          <ul className="space-y-3">
-            {messages.map((m, i) => {
-              const isLast = i === messages.length - 1;
-              return (
-                <MessageBubble
-                  key={m.id}
-                  message={m}
-                  isStreaming={
-                    status === "streaming" && isLast && m.role === "assistant"
-                  }
-                />
-              );
-            })}
-            {/*
-              ONE persistent activity indicator. Lives at the bottom of
-              the list and stays visible the entire time the chat is
-              busy — never flickers or moves position. Phrase pool
-              switches based on whether an assistant message has started
-              forming yet.
-            */}
-            {isBusy ? (
-              <li
-                className="flex items-center gap-2.5 py-1"
-                role="status"
-                aria-live="polite"
-              >
-                <WaveSpinner
-                  size="md"
-                  pattern="line"
-                  dotShape="circle"
-                  animation="horizontal"
-                  color="primary"
-                />
-                <ThinkingPhrase
-                  pool={
-                    lastMessage?.role === "assistant" ? "working" : "planning"
-                  }
-                />
-              </li>
-            ) : null}
-            {error ? (
-              <li
-                role="alert"
-                className="flex flex-col gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-[12px] text-destructive"
-              >
-                <span className="font-medium">Agent error</span>
-                <span className="whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed opacity-90">
-                  {humanizeAgentError(error)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => regenerate()}
-                  className="h-7 self-start"
-                >
-                  <HugeiconsIcon icon={RefreshIcon} className="size-3" />
-                  Retry
-                </Button>
-              </li>
-            ) : null}
-          </ul>
-        )}
-      </div>
-
-      <div className="border-t border-border p-3">
-        <Composer
-          value={input}
-          onChange={setInput}
-          onSubmit={send}
-          onStop={() => stop()}
-          mentionItems={mentionItems}
-          onMentionsChange={(ids) => {
-            mentionsRef.current = ids;
-          }}
-          isLoading={isBusy && input.trim().length === 0}
-          placeholder={
-            isBusy
-              ? "Compose your next message — Stop to send now…"
-              : "Describe the video you want…"
-          }
-        />
-        <p className="mt-2 text-[10px] text-muted-foreground/70">
-          Enter to send · Shift+Enter for newline
-        </p>
-      </div>
-    </aside>
+    <AgentChat
+      messages={messages}
+      isBusy={isBusy}
+      streaming={status === "streaming"}
+      error={error}
+      input={input}
+      onInputChange={setInput}
+      onSend={send}
+      onStop={() => stop()}
+      onRegenerate={() => regenerate()}
+      onClose={onClose}
+      subtitle="Describe it — it builds the timeline"
+      placeholder={
+        isBusy
+          ? "Compose your next message — Stop to send now…"
+          : "Describe the video you want…"
+      }
+      emptyState={<EmptyState onPick={send} />}
+      mentionItems={mentionItems}
+      onMentionsChange={(ids) => {
+        mentionsRef.current = ids;
+      }}
+    />
   );
 }
