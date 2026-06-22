@@ -1,5 +1,5 @@
 import { withAuth } from "@workos-inc/authkit-nextjs";
-import { ensureAccount } from "@/lib/account";
+import { ensureUserRow } from "@/lib/account";
 import { createComponent, listComponents } from "@/lib/components";
 
 export async function GET() {
@@ -29,9 +29,9 @@ export async function POST(req: Request) {
     return new Response("name, baseId and code are required", { status: 400 });
   }
 
-  // The user may not have an account row yet (FK target) — provision the free
-  // tier first, same as the render guard does.
-  await ensureAccount(user.id, user.email);
+  // Forking only needs the FK target row — one round-trip, not the full
+  // subscription provisioning.
+  await ensureUserRow(user.id, user.email);
 
   const row = await createComponent(user.id, {
     name: body.name,
