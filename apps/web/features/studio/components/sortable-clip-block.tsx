@@ -23,6 +23,8 @@ type Props = {
   bodyWidthPx: number;
   /** Timeline scale; passed in so the resize math tracks the current zoom. */
   framesPerPx: number;
+  /** Forked components aren't in the registry — the caller resolves their name. */
+  displayName?: string;
   selected: boolean;
   onSelect: () => void;
   onDelete: () => void;
@@ -34,6 +36,7 @@ export function SortableClipBlock({
   fps,
   bodyWidthPx,
   framesPerPx,
+  displayName,
   selected,
   onSelect,
   onDelete,
@@ -124,7 +127,7 @@ export function SortableClipBlock({
         />
 
         <p className="relative z-[1] truncate text-[11px] font-semibold leading-tight text-foreground">
-          {info?.title ?? clip.compositionId}
+          {info?.title ?? displayName ?? clip.compositionId}
         </p>
         <div className="relative z-[1] flex items-center justify-between gap-1">
           <p className="text-[10px] tabular-nums text-muted-foreground">

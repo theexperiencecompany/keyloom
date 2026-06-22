@@ -43,6 +43,7 @@ export function ForkEditorView({ id }: { id: string }) {
   );
   const [code, setCode] = React.useState("");
   const [props, setProps] = React.useState<Record<string, unknown>>({});
+  const [name, setName] = React.useState("");
 
   // Load the fork from the DB after mount.
   React.useEffect(() => {
@@ -52,6 +53,7 @@ export function ForkEditorView({ id }: { id: string }) {
       setFork(f);
       if (f) {
         setCode(f.code);
+        setName(f.name);
         const base = compositionsById[f.baseId];
         setProps(
           structuredClone(base?.defaultProps ?? {}) as Record<string, unknown>,
@@ -62,6 +64,17 @@ export function ForkEditorView({ id }: { id: string }) {
       active = false;
     };
   }, [id]);
+
+  // Rename the fork — persists on blur / Enter, never to an empty name.
+  const commitName = () => {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === fork?.name) {
+      setName(fork?.name ?? "");
+      return;
+    }
+    setFork((prev) => (prev ? { ...prev, name: trimmed } : prev));
+    void updateUserComponent(id, { name: trimmed });
+  };
 
   const applyCode = React.useCallback(
     (next: string) => {
@@ -139,7 +152,20 @@ export function ForkEditorView({ id }: { id: string }) {
           <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
           My Projects
         </Link>
-        <h1 className="text-sm font-medium">{fork.name}</h1>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={commitName}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+            if (e.key === "Escape") {
+              setName(fork.name);
+              e.currentTarget.blur();
+            }
+          }}
+          aria-label="Component name"
+          className="max-w-[260px] truncate rounded-md border border-transparent bg-transparent px-2 py-1 text-center text-sm font-medium outline-none hover:border-border focus:border-border focus:bg-background"
+        />
         <div className="w-[90px]" />
       </header>
 
