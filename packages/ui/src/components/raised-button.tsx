@@ -5,7 +5,7 @@ import {
   getContrastColor,
   getLuminance,
   parseColor,
-} from "@workspace/ui/lib/utils/colorUtils";
+} from "@workspace/ui/lib/utils/color-utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 import * as React from "react";

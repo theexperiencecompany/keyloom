@@ -4,8 +4,8 @@ import { compositionsById } from "@workspace/compositions/registry";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { EditorView } from "./EditorView";
-import { ForkEditorView } from "./ForkEditorView";
+import { EditorView } from "./editor-view";
+import { ForkEditorView } from "./fork-editor-view";
 
 // Render editor pages ON DEMAND instead of statically prerendering all 79
 // compositions at build time. It's an interactive client editor (zero SEO
