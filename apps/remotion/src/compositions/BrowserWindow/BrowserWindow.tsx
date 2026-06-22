@@ -16,11 +16,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
-import { BROWSER_WINDOW_HEIGHT, BROWSER_WINDOW_WIDTH } from "./meta";
 
 // Remotion's bundle server only serves public/ assets through staticFile() —
 // literal "/foo.png" strings fail with 404 inside `remotion render`. Resolve
@@ -48,9 +47,8 @@ const FRAMES_PER_CHAR = 3;
 const PAGE_FADE_DELAY = 14;
 const PAGE_FADE_DURATION = 26;
 
-const WINDOW_WIDTH = 1700;
-const WINDOW_HEIGHT = 960;
-const TITLE_BAR_HEIGHT = 86;
+// The window's natural aspect ratio (was 1700×960 in the original design).
+const WINDOW_ASPECT = 1700 / 960;
 
 export const BrowserWindow: React.FC<BrowserWindowProps> = ({
   url,
@@ -60,6 +58,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vw, vh, vmin } = useCanvasLayout();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -110,75 +109,81 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
     },
   );
 
+  // Fit the window into the canvas (minus padding) while keeping its natural
+  // aspect ratio, so it reflows to fill any orientation instead of shrinking.
+  const pad = vmin(5.5);
+  const availW = vw(100) - pad * 2;
+  const availH = vh(100) - pad * 2;
+  const windowW = Math.min(availW, availH * WINDOW_ASPECT);
+  const windowH = windowW / WINDOW_ASPECT;
+  // Chrome scales with the window so it stays proportional in every aspect.
+  const chrome = windowH * 0.09;
+
   return (
-    <FitContent
-      designWidth={BROWSER_WINDOW_WIDTH}
-      designHeight={BROWSER_WINDOW_HEIGHT}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: pad,
+      }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          fontFamily: s.fontFamily,
+          width: windowW,
+          height: windowH,
+          background: "#ffffff",
+          borderRadius: windowH * 0.019,
+          overflow: "hidden",
+          boxShadow:
+            "0 40px 100px rgba(15,16,20,0.18), 0 8px 24px rgba(15,16,20,0.08)",
+          border: "1px solid rgba(15,16,20,0.06)",
+          opacity: windowEnter,
+          transform: `translate3d(0, ${snap((1 - windowEnter) * 28)}px, 0) scale(${0.97 + windowEnter * 0.03})`,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 60,
+          flexDirection: "column",
         }}
       >
+        <TitleBar
+          url={visibleUrl}
+          isTyping={isTyping}
+          caretVisible={caretBlink}
+          barHeight={chrome}
+        />
         <div
           style={{
-            width: WINDOW_WIDTH,
-            height: WINDOW_HEIGHT,
-            background: "#ffffff",
-            borderRadius: 18,
+            flex: 1,
+            background: pageBackgroundColor,
+            position: "relative",
             overflow: "hidden",
-            boxShadow:
-              "0 40px 100px rgba(15,16,20,0.18), 0 8px 24px rgba(15,16,20,0.08)",
-            border: "1px solid rgba(15,16,20,0.06)",
-            opacity: windowEnter,
-            transform: `translate3d(0, ${snap((1 - windowEnter) * 28)}px, 0) scale(${0.97 + windowEnter * 0.03})`,
-            display: "flex",
-            flexDirection: "column",
           }}
         >
-          <TitleBar
-            url={visibleUrl}
-            isTyping={isTyping}
-            caretVisible={caretBlink}
-          />
           <div
             style={{
-              flex: 1,
-              background: pageBackgroundColor,
-              position: "relative",
-              overflow: "hidden",
+              position: "absolute",
+              inset: 0,
+              opacity: pageOpacity,
+              transform: `translate3d(0, ${snap(pageLift)}px, 0)`,
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: pageOpacity,
-                transform: `translate3d(0, ${snap(pageLift)}px, 0)`,
-              }}
-            >
-              {pageImageUrl.trim() ? (
-                <Img
-                  src={resolveAsset(pageImageUrl)}
-                  crossOrigin="anonymous"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              ) : null}
-            </div>
+            {pageImageUrl.trim() ? (
+              <Img
+                src={resolveAsset(pageImageUrl)}
+                crossOrigin="anonymous"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            ) : null}
           </div>
         </div>
-      </AbsoluteFill>
-    </FitContent>
+      </div>
+    </AbsoluteFill>
   );
 };
 
@@ -186,56 +191,65 @@ function TitleBar({
   url,
   isTyping,
   caretVisible,
+  barHeight,
 }: {
   url: string;
   isTyping: boolean;
   caretVisible: boolean;
+  barHeight: number;
 }) {
+  // Everything inside scales off the bar height (was 86px in the original
+  // 1700×960 design), so the chrome stays proportional at any canvas size.
+  const u = barHeight / 86;
   return (
     <div
       style={{
-        height: TITLE_BAR_HEIGHT,
+        height: barHeight,
         background: "#f4f4f5",
         borderBottom: "1px solid rgba(15,16,20,0.08)",
         display: "flex",
         alignItems: "center",
-        gap: 18,
-        padding: "0 22px",
+        gap: 18 * u,
+        padding: `0 ${22 * u}px`,
         flexShrink: 0,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <TrafficLight color="#ff5f57" />
-        <TrafficLight color="#febc2e" />
-        <TrafficLight color="#28c840" />
+      <div style={{ display: "flex", alignItems: "center", gap: 10 * u }}>
+        <TrafficLight color="#ff5f57" size={16 * u} />
+        <TrafficLight color="#febc2e" size={16 * u} />
+        <TrafficLight color="#28c840" size={16 * u} />
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <NavButton icon={ArrowLeft02Icon} />
-        <NavButton icon={ArrowRight02Icon} />
-        <NavButton icon={RefreshIcon} />
+      <div style={{ display: "flex", alignItems: "center", gap: 6 * u }}>
+        <NavButton icon={ArrowLeft02Icon} u={u} />
+        <NavButton icon={ArrowRight02Icon} u={u} />
+        <NavButton icon={RefreshIcon} u={u} />
       </div>
 
       <div
         style={{
           flex: 1,
-          height: 48,
+          height: 48 * u,
           background: "#ffffff",
           border: "1px solid rgba(15,16,20,0.10)",
-          borderRadius: 12,
+          borderRadius: 12 * u,
           display: "flex",
           alignItems: "center",
-          gap: 12,
-          padding: "0 18px",
+          gap: 12 * u,
+          padding: `0 ${18 * u}px`,
         }}
       >
-        <HugeiconsIcon icon={LockIcon} size={18} color="rgba(15,16,20,0.55)" />
+        <HugeiconsIcon
+          icon={LockIcon}
+          size={18 * u}
+          color="rgba(15,16,20,0.55)"
+        />
         <div
           style={{
             flex: 1,
             display: "flex",
             alignItems: "center",
-            fontSize: 22,
+            fontSize: 22 * u,
             color: "#0f1014",
             letterSpacing: "-0.005em",
             fontWeight: 400,
@@ -249,9 +263,9 @@ function TitleBar({
             <span
               style={{
                 display: "inline-block",
-                width: 2,
-                height: 26,
-                marginLeft: 3,
+                width: 2 * u,
+                height: 26 * u,
+                marginLeft: 3 * u,
                 background: "#0f1014",
                 opacity: caretVisible ? 1 : 0,
                 borderRadius: 1,
@@ -264,12 +278,12 @@ function TitleBar({
   );
 }
 
-function TrafficLight({ color }: { color: string }) {
+function TrafficLight({ color, size }: { color: string; size: number }) {
   return (
     <div
       style={{
-        width: 16,
-        height: 16,
+        width: size,
+        height: size,
         borderRadius: "50%",
         background: color,
       }}
@@ -280,22 +294,24 @@ function TrafficLight({ color }: { color: string }) {
 function NavButton({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon,
+  u,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
+  u: number;
 }) {
   return (
     <div
       style={{
-        width: 36,
-        height: 36,
-        borderRadius: 8,
+        width: 36 * u,
+        height: 36 * u,
+        borderRadius: 8 * u,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <HugeiconsIcon icon={icon} size={20} color="rgba(15,16,20,0.55)" />
+      <HugeiconsIcon icon={icon} size={20 * u} color="rgba(15,16,20,0.55)" />
     </div>
   );
 }

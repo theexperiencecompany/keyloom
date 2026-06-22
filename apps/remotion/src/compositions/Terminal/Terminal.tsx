@@ -7,10 +7,9 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
-import { TERMINAL_HEIGHT, TERMINAL_WIDTH } from "./meta";
 
 export type TerminalLineKind = "command" | "output" | "comment" | "success";
 
@@ -70,6 +69,10 @@ export const Terminal: React.FC<TerminalProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vw, vh, vmin } = useCanvasLayout();
+  // Design canvas was 1920×1080 (min side 1080). Convert authored px → relative
+  // so the terminal window reflows to any aspect instead of uniformly shrinking.
+  const r = (px: number) => vmin((px / 1080) * 100);
   const s = resolveClipStyle(clipStyle, {
     // Scene backdrop (behind the window). White by default to preserve the
     // current look; now user-controllable via the universal Background control.
@@ -104,89 +107,91 @@ export const Terminal: React.FC<TerminalProps> = ({
     config: { damping: 18, stiffness: 130, mass: 0.7 },
   });
 
+  // The window was width:100% capped at `maxWidth` inside a 96px gutter. Size it
+  // relative to the canvas (capped at the scaled maxWidth) and center it so it
+  // fits portrait AND landscape without overflowing.
+  const windowWidth = Math.min(vw(88), vh(160), r(maxWidth));
+
   return (
-    <FitContent
-      designWidth={TERMINAL_WIDTH}
-      designHeight={TERMINAL_HEIGHT}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: vmin(6),
+        fontFamily: s.fontFamily,
+      }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 96,
-          fontFamily: s.fontFamily,
+          width: windowWidth,
+          borderRadius: r(cornerRadius),
+          background: WINDOW_BG,
+          boxShadow: showShadow
+            ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
+            : "none",
+          border: "1px solid rgba(255,255,255,0.08)",
+          overflow: "hidden",
+          opacity: windowReveal,
+          transform: `translate3d(0, ${snap((1 - windowReveal) * 24)}px, 0) scale(${0.97 + windowReveal * 0.03})`,
         }}
       >
+        <TerminalChrome style={chromeStyle} title={title} r={r} />
         <div
           style={{
-            width: "100%",
-            maxWidth,
-            borderRadius: cornerRadius,
-            background: WINDOW_BG,
-            boxShadow: showShadow
-              ? "0 30px 80px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
-              : "none",
-            border: "1px solid rgba(255,255,255,0.08)",
-            overflow: "hidden",
-            opacity: windowReveal,
-            transform: `translate3d(0, ${snap((1 - windowReveal) * 24)}px, 0) scale(${0.97 + windowReveal * 0.03})`,
+            padding: `${r(paddingY)}px ${r(paddingX)}px`,
+            fontSize: r(fontSize),
+            lineHeight: 1.55,
+            color: s.color,
+            minHeight: r(320),
           }}
         >
-          <TerminalChrome style={chromeStyle} title={title} />
-          <div
-            style={{
-              padding: `${paddingY}px ${paddingX}px`,
-              fontSize,
-              lineHeight: 1.55,
-              color: s.color,
-              minHeight: 320,
-            }}
-          >
-            {lines.map((line, i) => (
-              <TerminalRow
-                key={i}
-                line={line}
-                prompt={prompt}
-                startFrame={lineStarts[i] ?? 0}
-                frame={frame}
-                framesPerChar={framesPerChar}
-                accent={s.accent}
-                gap={lineGap}
-                color={kindColors[line.kind]}
-                cursorStyle={cursorStyle}
-              />
-            ))}
-          </div>
+          {lines.map((line, i) => (
+            <TerminalRow
+              key={i}
+              line={line}
+              prompt={prompt}
+              startFrame={lineStarts[i] ?? 0}
+              frame={frame}
+              framesPerChar={framesPerChar}
+              accent={s.accent}
+              gap={r(lineGap)}
+              color={kindColors[line.kind]}
+              cursorStyle={cursorStyle}
+              r={r}
+            />
+          ))}
         </div>
-      </AbsoluteFill>
-    </FitContent>
+      </div>
+    </AbsoluteFill>
   );
 };
 
 function TerminalChrome({
   style,
   title,
+  r,
 }: {
   style: TerminalChromeStyle;
   title: string;
+  r: (px: number) => number;
 }) {
   if (style === "none") return null;
   return (
     <div
       style={{
-        height: 44,
+        height: r(44),
         display: "flex",
         alignItems: "center",
-        padding: "0 16px",
+        padding: `0 ${r(16)}px`,
         background:
           "linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
         borderBottom: "1px solid rgba(255,255,255,0.06)",
         position: "relative",
       }}
     >
-      <ChromeButtons style={style} />
+      <ChromeButtons style={style} r={r} />
       <div
         style={{
           position: "absolute",
@@ -194,7 +199,7 @@ function TerminalChrome({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 14,
+          fontSize: r(14),
           fontFamily:
             "-apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, sans-serif",
           fontWeight: 500,
@@ -209,22 +214,28 @@ function TerminalChrome({
   );
 }
 
-function ChromeButtons({ style }: { style: TerminalChromeStyle }) {
+function ChromeButtons({
+  style,
+  r,
+}: {
+  style: TerminalChromeStyle;
+  r: (px: number) => number;
+}) {
   if (style === "mac") {
     return (
-      <div style={{ display: "flex", gap: 8 }}>
-        <Dot color="#ff5f57" />
-        <Dot color="#febc2e" />
-        <Dot color="#28c840" />
+      <div style={{ display: "flex", gap: r(8) }}>
+        <Dot color="#ff5f57" r={r} />
+        <Dot color="#febc2e" r={r} />
+        <Dot color="#28c840" r={r} />
       </div>
     );
   }
   if (style === "linux") {
     return (
-      <div style={{ display: "flex", gap: 8 }}>
-        <Dot color="#888" />
-        <Dot color="#aaa" />
-        <Dot color="#ccc" />
+      <div style={{ display: "flex", gap: r(8) }}>
+        <Dot color="#888" r={r} />
+        <Dot color="#aaa" r={r} />
+        <Dot color="#ccc" r={r} />
       </div>
     );
   }
@@ -234,10 +245,10 @@ function ChromeButtons({ style }: { style: TerminalChromeStyle }) {
       style={{
         marginLeft: "auto",
         display: "flex",
-        gap: 12,
+        gap: r(12),
         color: "rgba(245,245,247,0.55)",
         fontFamily: "Segoe UI, sans-serif",
-        fontSize: 14,
+        fontSize: r(14),
       }}
     >
       <span>—</span>
@@ -247,12 +258,12 @@ function ChromeButtons({ style }: { style: TerminalChromeStyle }) {
   );
 }
 
-function Dot({ color }: { color: string }) {
+function Dot({ color, r }: { color: string; r: (px: number) => number }) {
   return (
     <span
       style={{
-        width: 13,
-        height: 13,
+        width: r(13),
+        height: r(13),
         borderRadius: "50%",
         background: color,
         boxShadow: "inset 0 0 0 0.5px rgba(0,0,0,0.18)",
@@ -271,6 +282,7 @@ function TerminalRow({
   gap,
   color,
   cursorStyle,
+  r,
 }: {
   line: TerminalLine;
   prompt: string;
@@ -281,6 +293,7 @@ function TerminalRow({
   gap: number;
   color: string;
   cursorStyle: TerminalCursorStyle;
+  r: (px: number) => number;
 }) {
   const elapsed = Math.max(0, frame - startFrame);
   const charsVisible =
@@ -308,7 +321,7 @@ function TerminalRow({
             ? "none"
             : `translate3d(0, ${snap((1 - fadeIn) * 4)}px, 0)`,
         display: "flex",
-        gap: 14,
+        gap: r(14),
         alignItems: "baseline",
       }}
     >

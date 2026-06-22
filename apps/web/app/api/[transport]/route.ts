@@ -170,11 +170,11 @@ const baseHandler = createMcpHandler(
     // agent can turn a component into exactly what the user needs.
 
     register(
-      "fork_component",
+      "copy_component",
       {
-        title: "Fork a component to edit",
+        title: "Copy a component to make your own",
         description:
-          "Copy a built-in component (by its id from list_components) into an editable, user-owned version. Returns the new component's id + current code. Edit it with update_component_code, then render it with render_component.",
+          "Copy a built-in component (by its id from list_components) into your own editable version. Returns the new component's id + current code. Change it with edit_component, then make a video with render_component.",
         inputSchema: {
           componentId: z.string(),
           name: z.string().optional(),
@@ -197,11 +197,11 @@ const baseHandler = createMcpHandler(
     );
 
     register(
-      "list_user_components",
+      "list_my_components",
       {
-        title: "List your forked components",
+        title: "List your components",
         description:
-          "List the components you've forked (your editable copies) — id, name, what they were forked from, and last edit time.",
+          "List the components you've made (your editable copies) — id, name, what they were copied from, and last edit time.",
         inputSchema: {},
       },
       async (_args, extra) => {
@@ -212,11 +212,11 @@ const baseHandler = createMcpHandler(
     );
 
     register(
-      "get_component_code",
+      "view_component",
       {
-        title: "Read a component's source",
+        title: "View a component's source",
         description:
-          "Get the full TSX source of a component — one of your forks (by its id) or a built-in (so you can see how it's written before forking). Read this before update_component_code.",
+          "Get the full source of a component — one of your own copies (by its id) or a built-in (to see how it's built before copying). View this before edit_component.",
         inputSchema: { id: z.string() },
       },
       async (args, extra) => {
@@ -230,11 +230,11 @@ const baseHandler = createMcpHandler(
     );
 
     register(
-      "update_component_code",
+      "edit_component",
       {
-        title: "Rewrite a forked component's code",
+        title: "Edit one of your components",
         description:
-          "Replace a forked component's full TSX source. Pass the COMPLETE file. It's validated (transpiled) before saving — on failure you get the error back so you can fix it and retry. Only works on forks (fork_component first).",
+          "Change one of your components by replacing its full source. Pass the COMPLETE file. It's validated before saving — on failure you get the error back so you can fix it and retry. Only works on your own copies (copy_component first).",
         inputSchema: { id: z.string(), code: z.string() },
       },
       async (args, extra) => {

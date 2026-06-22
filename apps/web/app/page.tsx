@@ -3,7 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
 import { DocsHeader } from "@/components/docs-header";
-import { GalleryMount } from "@/components/gallery/gallery-mount";
+import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
@@ -31,7 +31,7 @@ export default function LandingPage() {
           </Button>
         </div>
 
-        <GalleryMount />
+        <ComponentGallery stickyOffsetClass="top-14" />
       </main>
 
       <SiteFooter />

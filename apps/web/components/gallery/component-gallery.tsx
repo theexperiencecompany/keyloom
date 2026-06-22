@@ -1,6 +1,11 @@
 "use client";
 
-import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import {
+  Cancel01Icon,
+  PencilEdit02Icon,
+  PlayIcon,
+  Search01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   compositionModulePath,
@@ -14,21 +19,20 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
+import { forkPayload } from "@/lib/fork";
+import { createUserComponent } from "@/lib/user-components";
 
-// Remotion lives behind this dynamic import, so @remotion/player and the
-// composition components are never part of the homepage's initial bundle. A
-// preview is mounted only while its card is in the viewport (see GalleryCard),
-// so the page only ever runs a handful of composition chunks at a time — never
-// all 73 (bundle-dynamic-imports + rendering-content-visibility, Vercel React).
+// The ONE component gallery — used by both the landing page and the dashboard.
+// `showEdit` adds the "Edit" (fork) action for signed-in surfaces; the public
+// landing page passes it false and only offers "Open in studio".
+
 const LivePreview = dynamic(
   () => import("./live-preview").then((m) => m.LivePreview),
   { ssr: false },
 );
 
-// Public-facing labels for the internal category ids. Order here is the order
-// the tabs render in; only categories that actually have items are shown.
 const CATEGORY_LABELS: Record<CompositionCategory, string> = {
   text: "Text",
   social: "Social Media",
@@ -40,31 +44,40 @@ const CATEGORY_LABELS: Record<CompositionCategory, string> = {
   media: "Media",
   background: "Backgrounds",
 };
-
 const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
-
 type Filter = "all" | CompositionCategory;
 
-// Background compositions are studio-only backdrops, not standalone products —
-// keep them out of the gallery. They stay fully available inside the editor.
-const VISIBLE_COMPOSITIONS = compositions.filter(
-  (c) => c.category !== "background",
+const VISIBLE = compositions.filter(
+  (c) => !c.hideFromAgent && c.category !== "background",
 );
 
-export function GalleryBrowser() {
+// Tall 4:5 portrait preview frame — responsive components reflow to fill it.
+const PREVIEW_W = 1080;
+const PREVIEW_H = 1350;
+
+export function ComponentGallery({
+  showEdit = false,
+  stickyOffsetClass = "top-0",
+}: {
+  /** Show the "Edit" (fork) action — only for signed-in surfaces. */
+  showEdit?: boolean;
+  /** Tailwind top-* offset so the sticky filter bar sits under the page header. */
+  stickyOffsetClass?: string;
+}) {
+  const router = useRouter();
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [forking, setForking] = React.useState<string | null>(null);
 
-  // Which categories are actually populated, in CATEGORY_ORDER.
   const presentCategories = React.useMemo(() => {
-    const seen = new Set(VISIBLE_COMPOSITIONS.map((c) => c.category));
+    const seen = new Set(VISIBLE.map((c) => c.category));
     return CATEGORY_ORDER.filter((c) => seen.has(c));
   }, []);
 
   const items = React.useMemo(() => {
     const q = query.trim().toLowerCase();
-    return VISIBLE_COMPOSITIONS.filter((c) => {
+    return VISIBLE.filter((c) => {
       if (filter !== "all" && c.category !== filter) return false;
       if (!q) return true;
       return (
@@ -74,10 +87,30 @@ export function GalleryBrowser() {
     });
   }, [filter, query]);
 
+  const openInStudio = (info: AnyCompositionInfo) => {
+    router.push(`/studio?component=${info.id}`);
+  };
+
+  const editComponent = async (info: AnyCompositionInfo) => {
+    if (!showEdit || forking) return;
+    const payload = forkPayload(info.id);
+    if (!payload) return;
+    setForking(info.id);
+    const created = await createUserComponent(payload);
+    setForking(null);
+    if (created) {
+      router.push(`/component/${encodeURIComponent(created.id)}/edit`);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Filter bar: search + category tabs */}
-      <div className="sticky top-14 z-30 -mx-5 border-b border-dashed border-border bg-background/95 px-5 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10">
+    <div>
+      <div
+        className={cn(
+          "sticky z-20 -mx-5 mb-8 border-b border-border bg-background/95 px-5 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10",
+          stickyOffsetClass,
+        )}
+      >
         <div className="flex items-center gap-2">
           {searchOpen ? (
             <div className="flex flex-1 items-center gap-2">
@@ -144,9 +177,16 @@ export function GalleryBrowser() {
           No components match “{query}”.
         </p>
       ) : (
-        <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-2 items-start gap-x-5 gap-y-8 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((info) => (
-            <GalleryCard key={info.id} info={info} />
+            <GalleryCard
+              key={info.id}
+              info={info}
+              showEdit={showEdit}
+              forking={forking === info.id}
+              onOpen={() => openInStudio(info)}
+              onEdit={() => editComponent(info)}
+            />
           ))}
         </div>
       )}
@@ -179,13 +219,20 @@ function CategoryTab({
   );
 }
 
-function GalleryCard({ info }: { info: AnyCompositionInfo }) {
-  // Mount the live preview the first time the card nears the viewport, then keep
-  // it mounted for good. This defers Remotion off the initial load (cards below
-  // the fold don't compile/mount until you scroll to them) WITHOUT re-blanking:
-  // once a preview has loaded, scrolling away and back leaves it in place instead
-  // of tearing it down and reloading. Same idea as <img loading="lazy">.
-  const ref = React.useRef<HTMLAnchorElement | null>(null);
+function GalleryCard({
+  info,
+  showEdit,
+  forking,
+  onOpen,
+  onEdit,
+}: {
+  info: AnyCompositionInfo;
+  showEdit: boolean;
+  forking: boolean;
+  onOpen: () => void;
+  onEdit: () => void;
+}) {
+  const ref = React.useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
     const el = ref.current;
@@ -194,7 +241,7 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
       ([entry]) => {
         if (entry?.isIntersecting) {
           setVisible(true);
-          io.disconnect(); // loaded once — never tear it back down
+          io.disconnect();
         }
       },
       { rootMargin: "200px" },
@@ -203,47 +250,44 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
     return () => io.disconnect();
   }, []);
 
-  // The tile takes the composition's own aspect ratio, so the preview fills it
-  // edge-to-edge: nothing is cropped off and there are no letterbox gutters (no
-  // "black stripe" from the tile background showing through). Cards in a row may
-  // differ in height as a result — that's the trade for showing each scene whole.
-  const compAspect = info.width / info.height;
-
   return (
-    <Link
-      ref={ref}
-      // Clicking a component opens it in the full Studio (more features than the
-      // standalone editor) with that composition added as the first clip.
-      href={`/studio?component=${info.id}`}
-      // No prefetch: the studio is a heavy route; hover-prefetching every card
-      // would kick off its compile. Click still works.
-      prefetch={false}
-      className="group block"
-    >
-      {/* Media tile: borderless, big radius, subtle ring. The tile matches the
-          composition's aspect ratio, so the preview fills it edge-to-edge with
-          no crop and no letterbox gutters. */}
-      <div
-        className="relative overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]"
-        style={{ aspectRatio: `${compAspect}` }}
-      >
+    <div ref={ref} className="group block">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border/50 transition-all duration-200 group-hover:ring-border group-hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)]">
         <div className="absolute inset-0">
           {visible ? (
             <LivePreview
               modulePath={compositionModulePath(info)}
               id={info.id}
-              defaultProps={info.defaultProps}
+              defaultProps={info.defaultProps as Record<string, unknown>}
               durationInFrames={info.durationInFrames}
               fps={info.fps}
-              width={info.width}
-              height={info.height}
+              width={PREVIEW_W}
+              height={PREVIEW_H}
             />
           ) : (
-            // Off-screen placeholder — no Remotion mounted.
             <div className="h-full w-full bg-muted/40" />
           )}
         </div>
+
+        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/45 opacity-0 backdrop-blur-[1px] transition-opacity duration-150 group-hover:opacity-100">
+          <Button size="sm" onClick={onOpen}>
+            <HugeiconsIcon icon={PlayIcon} size={14} />
+            Open in studio
+          </Button>
+          {showEdit ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={onEdit}
+              disabled={forking}
+            >
+              <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
+              {forking ? "Forking…" : "Edit"}
+            </Button>
+          ) : null}
+        </div>
       </div>
+
       <div className="px-0.5 pt-3">
         <h3 className="truncate text-[15px] font-semibold leading-tight text-foreground">
           {info.title}
@@ -252,6 +296,6 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
           {CATEGORY_LABELS[info.category]}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }

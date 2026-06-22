@@ -7,10 +7,9 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
-import { TYPING_COMPOSER_HEIGHT, TYPING_COMPOSER_WIDTH } from "./meta";
 
 export type TypingComposerProps = {
   query: string;
@@ -26,29 +25,6 @@ const CURSOR_TRAVEL = 30;
 const CLICK_FEEDBACK = 10;
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
-// GAIA pixel values × SCALE. Same proportions as the real composer, sized
-// for the 1920×1080 keyloom canvas.
-const SCALE = 2;
-
-const BAR_WIDTH = 640 * SCALE;
-const RADIUS_3XL = 24 * SCALE;
-const PAD_1 = 4 * SCALE;
-const PAD_2 = 8 * SCALE;
-const PAD_3 = 12 * SCALE;
-const GAP_2 = 8 * SCALE;
-const ML_2 = 8 * SCALE;
-
-const TEXTAREA_MIN_HEIGHT = 52 * SCALE;
-const TEXTAREA_LINE_HEIGHT_PX = 24 * SCALE;
-const TEXTAREA_FONT_SIZE = 16 * SCALE;
-const TEXTAREA_PAD_Y = 10 * SCALE;
-
-const BTN_SIZE = 36 * SCALE;
-
-const PLUS_ICON = 23 * SCALE;
-const TOOLS_ICON = 22 * SCALE;
-const SEND_ICON = 22 * SCALE;
-
 // GAIA color tokens.
 const ZINC_800 = "#27272a";
 const ZINC_700 = "#3f3f46";
@@ -62,12 +38,36 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
-  // Layout math is authored at the fixed design size; FitContent scales the
-  // whole composition to the canvas, so use the design dims here (not the
-  // live canvas dims) or centering/cursor targets drift when the format
-  // changes.
-  const width = TYPING_COMPOSER_WIDTH;
-  const height = TYPING_COMPOSER_HEIGHT;
+  const { width, height, vw, vh, vmin } = useCanvasLayout();
+  // The composer was authored against a 1920×1080 canvas at SCALE=2 (so its
+  // GAIA tokens land at 2×). Convert those design px → canvas-relative units so
+  // the whole bar reflows to any aspect instead of uniformly shrinking. The
+  // cursor-fly-in target is recomputed from these same relative sizes below, so
+  // the click still lands on the send button in every format.
+  const r = (px: number) => vmin((px / 1080) * 100);
+
+  const RADIUS_3XL = r(24 * 2);
+  const PAD_1 = r(4 * 2);
+  const PAD_2 = r(8 * 2);
+  const PAD_3 = r(12 * 2);
+  const GAP_2 = r(8 * 2);
+  const ML_2 = r(8 * 2);
+  const TEXTAREA_MIN_HEIGHT = r(52 * 2);
+  const TEXTAREA_LINE_HEIGHT_PX = r(24 * 2);
+  const TEXTAREA_FONT_SIZE = r(16 * 2);
+  const TEXTAREA_PAD_Y = r(10 * 2);
+  const BTN_SIZE = r(36 * 2);
+  const PLUS_ICON = r(23 * 2);
+  const TOOLS_ICON = r(22 * 2);
+  const SEND_ICON = r(22 * 2);
+  const CARET_WIDTH = r(2 * 2);
+  const CARET_MARGIN = r(3 * 2);
+  const RING_BORDER = r(2 * 2);
+
+  // The bar was a fixed ~1280px box centered on a 1920-wide canvas. Size it
+  // relative to the canvas and cap it so it fits portrait AND landscape.
+  const BAR_WIDTH = Math.min(vw(86), vh(150), r(640 * 2));
+
   const s = resolveClipStyle(clipStyle, {
     background: "#111111",
     color: "#ffffff",
@@ -164,166 +164,161 @@ export const TypingComposer: React.FC<TypingComposerProps> = ({
   const sendIconColor = hasText ? "#000000" : ZINC_400;
 
   return (
-    <FitContent
-      designWidth={TYPING_COMPOSER_WIDTH}
-      designHeight={TYPING_COMPOSER_HEIGHT}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        fontFamily: s.fontFamily,
+      }}
     >
-      <AbsoluteFill
+      {/* searchbar — bg-zinc-800 rounded-3xl px-1 pt-1 pb-2 */}
+      <div
         style={{
-          fontFamily: s.fontFamily,
+          position: "absolute",
+          left: barLeft,
+          top: barTop,
+          width: BAR_WIDTH,
+          minHeight: barHeight,
+          background: ZINC_800,
+          borderRadius: RADIUS_3XL,
+          paddingLeft: PAD_1,
+          paddingRight: PAD_1,
+          paddingTop: PAD_1,
+          paddingBottom: PAD_2,
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+          opacity: barProgress,
+          transform: `translate3d(0, ${snap((1 - barProgress) * 22)}px, 0) scale(${0.97 + barProgress * 0.03})`,
         }}
       >
-        {/* searchbar — bg-zinc-800 rounded-3xl px-1 pt-1 pb-2 */}
+        {/* HeroUI Textarea (size=lg) — inputWrapper px-3 with extra body padding */}
         <div
           style={{
-            position: "absolute",
-            left: barLeft,
-            top: barTop,
-            width: BAR_WIDTH,
-            minHeight: barHeight,
-            background: ZINC_800,
-            borderRadius: RADIUS_3XL,
-            paddingLeft: PAD_1,
-            paddingRight: PAD_1,
-            paddingTop: PAD_1,
-            paddingBottom: PAD_2,
-            boxSizing: "border-box",
             display: "flex",
-            flexDirection: "column",
-            opacity: barProgress,
-            transform: `translate3d(0, ${snap((1 - barProgress) * 22)}px, 0) scale(${0.97 + barProgress * 0.03})`,
+            alignItems: renderedLineCount > 1 ? "flex-start" : "center",
+            paddingLeft: PAD_3,
+            paddingRight: PAD_3,
+            minHeight: TEXTAREA_MIN_HEIGHT,
+            boxSizing: "border-box",
           }}
         >
-          {/* HeroUI Textarea (size=lg) — inputWrapper px-3 with extra body padding */}
           <div
             style={{
-              display: "flex",
-              alignItems: renderedLineCount > 1 ? "flex-start" : "center",
-              paddingLeft: PAD_3,
-              paddingRight: PAD_3,
-              minHeight: TEXTAREA_MIN_HEIGHT,
-              boxSizing: "border-box",
+              flex: 1,
+              fontSize: TEXTAREA_FONT_SIZE,
+              lineHeight: `${TEXTAREA_LINE_HEIGHT_PX}px`,
+              fontWeight: 300,
+              color: "#ffffff",
+              letterSpacing: "-0.005em",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              minWidth: 0,
+              paddingTop: TEXTAREA_PAD_Y,
+              paddingBottom: TEXTAREA_PAD_Y,
             }}
           >
-            <div
-              style={{
-                flex: 1,
-                fontSize: TEXTAREA_FONT_SIZE,
-                lineHeight: `${TEXTAREA_LINE_HEIGHT_PX}px`,
-                fontWeight: 300,
-                color: "#ffffff",
-                letterSpacing: "-0.005em",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                minWidth: 0,
-                paddingTop: TEXTAREA_PAD_Y,
-                paddingBottom: TEXTAREA_PAD_Y,
-              }}
-            >
-              {!hasText ? (
-                <span style={{ color: PLACEHOLDER_COLOR, fontWeight: 300 }}>
-                  {placeholder}
+            {!hasText ? (
+              <span style={{ color: PLACEHOLDER_COLOR, fontWeight: 300 }}>
+                {placeholder}
+              </span>
+            ) : (
+              lines.map((line, i) => (
+                <span key={i} style={{ display: "block" }}>
+                  {line}
+                  {i === lines.length - 1 ? (
+                    <span
+                      style={{
+                        display: "inline-block",
+                        width: CARET_WIDTH,
+                        height: TEXTAREA_FONT_SIZE,
+                        marginLeft: CARET_MARGIN,
+                        verticalAlign: "text-bottom",
+                        background: "#ffffff",
+                        opacity: caretBlink ? 1 : 0,
+                        borderRadius: 1,
+                      }}
+                    />
+                  ) : null}
                 </span>
-              ) : (
-                lines.map((line, i) => (
-                  <span key={i} style={{ display: "block" }}>
-                    {line}
-                    {i === lines.length - 1 ? (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: 2 * SCALE,
-                          height: TEXTAREA_FONT_SIZE,
-                          marginLeft: 3 * SCALE,
-                          verticalAlign: "text-bottom",
-                          background: "#ffffff",
-                          opacity: caretBlink ? 1 : 0,
-                          borderRadius: 1,
-                        }}
-                      />
-                    ) : null}
-                  </span>
-                ))
-              )}
-            </div>
+              ))
+            )}
           </div>
+        </div>
 
-          {/* ComposerToolbar — flex justify-between px-2 pt-1 */}
+        {/* ComposerToolbar — flex justify-between px-2 pt-1 */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingLeft: PAD_2,
+            paddingRight: PAD_2,
+            paddingTop: PAD_1,
+          }}
+        >
+          {/* ComposerLeft — flex gap-2 */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              paddingLeft: PAD_2,
-              paddingRight: PAD_2,
-              paddingTop: PAD_1,
+              gap: GAP_2,
             }}
           >
-            {/* ComposerLeft — flex gap-2 */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: GAP_2,
-              }}
-            >
-              <RoundButton size={BTN_SIZE} bg={ZINC_700}>
-                <PlusSignSolid size={PLUS_ICON} color={ZINC_400} />
-              </RoundButton>
-              <RoundButton size={BTN_SIZE} bg={ZINC_700}>
-                <ToolsSolid size={TOOLS_ICON} color={ZINC_400} />
-              </RoundButton>
-            </div>
+            <RoundButton size={BTN_SIZE} bg={ZINC_700}>
+              <PlusSignSolid size={PLUS_ICON} color={ZINC_400} />
+            </RoundButton>
+            <RoundButton size={BTN_SIZE} bg={ZINC_700}>
+              <ToolsSolid size={TOOLS_ICON} color={ZINC_400} />
+            </RoundButton>
+          </div>
 
-            {/* ComposerRight — ml-2 gap-2 */}
+          {/* ComposerRight — ml-2 gap-2 */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginLeft: ML_2,
+              gap: GAP_2,
+              position: "relative",
+            }}
+          >
             <div
               style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: BTN_SIZE,
+                height: BTN_SIZE,
+                borderRadius: "50%",
+                border: `${RING_BORDER}px solid ${accentColor}`,
+                transform: `scale(${ringScale})`,
+                opacity: ringOpacity,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              style={{
+                width: BTN_SIZE,
+                height: BTN_SIZE,
+                minWidth: BTN_SIZE,
+                minHeight: BTN_SIZE,
+                maxWidth: BTN_SIZE,
+                borderRadius: "50%",
+                background: sendBg,
                 display: "flex",
                 alignItems: "center",
-                marginLeft: ML_2,
-                gap: GAP_2,
-                position: "relative",
+                justifyContent: "center",
+                transform: `scale(${sendScale})`,
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: BTN_SIZE,
-                  height: BTN_SIZE,
-                  borderRadius: "50%",
-                  border: `${2 * SCALE}px solid ${accentColor}`,
-                  transform: `scale(${ringScale})`,
-                  opacity: ringOpacity,
-                  pointerEvents: "none",
-                }}
-              />
-              <div
-                style={{
-                  width: BTN_SIZE,
-                  height: BTN_SIZE,
-                  minWidth: BTN_SIZE,
-                  minHeight: BTN_SIZE,
-                  maxWidth: BTN_SIZE,
-                  borderRadius: "50%",
-                  background: sendBg,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transform: `scale(${sendScale})`,
-                }}
-              >
-                <ArrowUp02Solid size={SEND_ICON} color={sendIconColor} />
-              </div>
+              <ArrowUp02Solid size={SEND_ICON} color={sendIconColor} />
             </div>
           </div>
         </div>
+      </div>
 
-        {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
-      </AbsoluteFill>
-    </FitContent>
+      {cursorVisible && <MouseCursor x={cursorX} y={cursorY} size={r(88)} />}
+    </AbsoluteFill>
   );
 };
 
@@ -423,16 +418,18 @@ function ArrowUp02Solid({ size, color }: { size: number; color: string }) {
   );
 }
 
-function MouseCursor({ x, y }: { x: number; y: number }) {
+function MouseCursor({ x, y, size }: { x: number; y: number; size: number }) {
+  // The pointer tip sits at ~(16,10) within the 88-unit artboard; keep the same
+  // fractional offset so the tip lands on the target at any cursor size.
   return (
     <svg
       viewBox="0 0 24 24"
-      width={88}
-      height={88}
+      width={size}
+      height={size}
       style={{
         position: "absolute",
-        left: x - 16,
-        top: y - 10,
+        left: x - size * (16 / 88),
+        top: y - size * (10 / 88),
         filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.5))",
         pointerEvents: "none",
       }}

@@ -4,9 +4,19 @@ import {
   Copy01Icon,
   Delete02Icon,
   PlusSignIcon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@workspace/ui/components/card";
 import { useActionState, useState } from "react";
 import {
   createKeyAction,
@@ -53,7 +63,7 @@ function CopyButton({
         setTimeout(() => setCopied(false), 1500);
       }}
     >
-      <HugeiconsIcon icon={Copy01Icon} size={14} />
+      <HugeiconsIcon icon={copied ? Tick02Icon : Copy01Icon} size={14} />
       {copied ? "Copied" : label}
     </Button>
   );
@@ -75,139 +85,170 @@ export function AccountClient({ email, mcpUrl, subscription, keys }: Props) {
     2,
   );
 
+  const isPro = subscription && subscription.plan !== "free";
+  const usagePct = subscription
+    ? Math.min(
+        100,
+        Math.round(
+          (subscription.rendersUsed / Math.max(1, subscription.renderQuota)) *
+            100,
+        ),
+      )
+    : 0;
+
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-6">
-      <header>
-        <h1 className="text-xl font-semibold">Your keyloom MCP</h1>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-10">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
         <p className="text-sm text-muted-foreground">{email}</p>
       </header>
 
       {/* Plan / usage */}
-      <section className="rounded-xl border border-border p-4">
-        <h2 className="mb-2 text-sm font-medium">Plan</h2>
-        {subscription ? (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between text-sm">
-              <div>
-                <span className="font-medium capitalize">
-                  {subscription.plan}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  ({subscription.status})
-                </span>
-              </div>
-              <div className="text-muted-foreground">
-                {subscription.rendersUsed}/{subscription.renderQuota} renders
-                used
-              </div>
-            </div>
-            {subscription.plan === "free" ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <form action={upgradeAction}>
-                  <Button type="submit" size="sm" className="w-full sm:w-auto">
-                    Upgrade to Pro
-                  </Button>
-                </form>
-                <form action={refreshBillingAction}>
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground"
-                  >
-                    Already paid? Refresh status
-                  </Button>
-                </form>
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Plan
+            {subscription ? (
+              <Badge variant={isPro ? "default" : "secondary"}>
+                {isPro ? "Pro" : "Free"}
+              </Badge>
             ) : null}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No subscription yet.</p>
-        )}
-      </section>
+          </CardTitle>
+          <CardDescription>
+            {subscription
+              ? `Status: ${subscription.status}`
+              : "No subscription yet."}
+          </CardDescription>
+          {subscription?.plan === "free" ? (
+            <CardAction className="flex flex-wrap items-center gap-2">
+              <form action={upgradeAction}>
+                <Button type="submit" size="sm">
+                  Upgrade to Pro
+                </Button>
+              </form>
+              <form action={refreshBillingAction}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground"
+                >
+                  Already paid? Refresh
+                </Button>
+              </form>
+            </CardAction>
+          ) : null}
+        </CardHeader>
+        {subscription ? (
+          <CardContent className="flex flex-col gap-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Renders used</span>
+              <span className="font-medium tabular-nums">
+                {subscription.rendersUsed} / {subscription.renderQuota}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${usagePct}%` }}
+              />
+            </div>
+          </CardContent>
+        ) : null}
+      </Card>
 
       {/* Connect */}
-      <section className="rounded-xl border border-border p-4">
-        <h2 className="mb-2 text-sm font-medium">Connect in Claude / Cursor</h2>
-        <p className="mb-2 text-xs text-muted-foreground">
-          Add this remote MCP server, using one of your API keys as the bearer
-          token.
-        </p>
-        <div className="flex items-center gap-2">
-          <code className="flex-1 truncate rounded-md bg-muted px-2 py-1 text-xs">
-            {mcpUrl}
-          </code>
-          <CopyButton value={mcpUrl} label="Copy URL" />
-        </div>
-        <pre className="mt-2 overflow-x-auto rounded-md bg-muted p-3 text-[11px] leading-relaxed">
-          {connectorSnippet}
-        </pre>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Connect in Claude / Cursor</CardTitle>
+          <CardDescription>
+            Add this remote MCP server, using one of your API keys as the bearer
+            token.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded-md bg-muted px-3 py-2 font-mono text-xs">
+              {mcpUrl}
+            </code>
+            <CopyButton value={mcpUrl} label="Copy URL" />
+          </div>
+          <pre className="overflow-x-auto rounded-md border border-border bg-muted/50 p-4 font-mono text-[11px] leading-relaxed text-muted-foreground">
+            {connectorSnippet}
+          </pre>
+        </CardContent>
+      </Card>
 
       {/* API keys */}
-      <section className="rounded-xl border border-border p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-medium">API keys</h2>
-          <form action={formAction}>
-            <Button type="submit" size="sm" disabled={pending}>
-              <HugeiconsIcon icon={PlusSignIcon} size={14} />
-              {pending ? "Creating…" : "New key"}
-            </Button>
-          </form>
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>API keys</CardTitle>
+          <CardDescription>
+            Use a key as the bearer token when connecting the MCP server.
+          </CardDescription>
+          <CardAction>
+            <form action={formAction}>
+              <Button type="submit" size="sm" disabled={pending}>
+                <HugeiconsIcon icon={PlusSignIcon} size={14} />
+                {pending ? "Creating…" : "New key"}
+              </Button>
+            </form>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {state.error ? (
+            <p className="text-xs text-destructive">{state.error}</p>
+          ) : null}
 
-        {state.error ? (
-          <p className="mb-3 text-xs text-destructive">{state.error}</p>
-        ) : null}
-
-        {state.fullKey ? (
-          <div className="mb-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-            <p className="mb-1 text-xs font-medium">
-              Copy this key now — it won't be shown again.
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 truncate rounded bg-background px-2 py-1 text-xs">
-                {state.fullKey}
-              </code>
-              <CopyButton value={state.fullKey} />
+          {state.fullKey ? (
+            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
+              <p className="mb-2 text-xs font-medium">
+                Copy this key now — it won't be shown again.
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 truncate rounded bg-background px-2 py-1 font-mono text-xs">
+                  {state.fullKey}
+                </code>
+                <CopyButton value={state.fullKey} />
+              </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {keys.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            No keys yet. Create one to connect.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {keys.map((k) => (
-              <li
-                key={k.id}
-                className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm"
-              >
-                <div>
-                  <code className="text-xs">{k.prefix}…</code>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {new Date(k.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <form action={revokeKeyAction}>
-                  <input type="hidden" name="keyId" value={k.id} />
-                  <Button
-                    type="submit"
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive"
-                  >
-                    <HugeiconsIcon icon={Delete02Icon} size={14} />
-                    Revoke
-                  </Button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {keys.length === 0 ? (
+            <p className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
+              No keys yet. Create one to connect.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {keys.map((k) => (
+                <li
+                  key={k.id}
+                  className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+                >
+                  <div className="flex items-center gap-3">
+                    <code className="font-mono text-xs">{k.prefix}…</code>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(k.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <form action={revokeKeyAction}>
+                    <input type="hidden" name="keyId" value={k.id} />
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <HugeiconsIcon icon={Delete02Icon} size={14} />
+                      Revoke
+                    </Button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

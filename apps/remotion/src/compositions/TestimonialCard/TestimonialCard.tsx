@@ -1,9 +1,9 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type TestimonialCardProps = {
@@ -32,6 +32,10 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vw, vh, vmin } = useCanvasLayout();
+  // Design canvas was 1280×720 (min side 720). Convert authored px → relative
+  // so the card reflows to any aspect instead of uniformly shrinking.
+  const r = (px: number) => vmin((px / 720) * 100);
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
     background: "#f7f7f9",
@@ -61,121 +65,124 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
     config: { damping: 12, stiffness: 160, mass: 0.6 },
   });
 
+  // The card was a fixed 880px box centered on the 1280-wide design. Size it
+  // relative to the canvas and cap it, so it fits portrait and landscape.
+  const cardWidth = Math.min(vw(88), vh(110), r(880));
+  const padX = r(56);
+
   return (
-    <FitContent designWidth={1280} designHeight={720} background={bg}>
-      <AbsoluteFill
+    <AbsoluteFill
+      style={{
+        background: bg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily,
+        padding: vmin(5),
+      }}
+    >
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily,
+          width: cardWidth,
+          background: cardBg,
+          border: `1px solid ${border}`,
+          borderRadius: r(32),
+          padding: `${r(56)}px ${padX}px ${r(48)}px`,
+          position: "relative",
+          boxShadow: isDark
+            ? "0 30px 80px rgba(0,0,0,0.45)"
+            : "0 30px 80px rgba(15,16,20,0.08)",
+          opacity: cardPop,
+          transform: `translate3d(0, ${snap((1 - cardPop) * 24)}px, 0) scale(${0.95 + cardPop * 0.05})`,
         }}
       >
         <div
           style={{
-            width: 880,
-            background: cardBg,
-            border: `1px solid ${border}`,
-            borderRadius: 32,
-            padding: "56px 56px 48px",
-            position: "relative",
-            boxShadow: isDark
-              ? "0 30px 80px rgba(0,0,0,0.45)"
-              : "0 30px 80px rgba(15,16,20,0.08)",
-            opacity: cardPop,
-            transform: `translate3d(0, ${snap((1 - cardPop) * 24)}px, 0) scale(${0.95 + cardPop * 0.05})`,
+            position: "absolute",
+            top: r(14),
+            left: r(36),
+            fontSize: r(180),
+            lineHeight: 1,
+            color: accent,
+            fontFamily: "Georgia, serif",
+            fontWeight: 800,
+            opacity: markPop * 0.18,
+            transform: `scale(${0.4 + markPop * 0.6})`,
+            transformOrigin: "top left",
           }}
         >
-          <div
+          “
+        </div>
+
+        <RevealItem frame={frame - D_QUOTE} fps={fps}>
+          <p
             style={{
-              position: "absolute",
-              top: 14,
-              left: 36,
-              fontSize: 180,
-              lineHeight: 1,
-              color: accent,
-              fontFamily: "Georgia, serif",
-              fontWeight: 800,
-              opacity: markPop * 0.18,
-              transform: `scale(${0.4 + markPop * 0.6})`,
-              transformOrigin: "top left",
+              fontSize: r(30),
+              color: text,
+              fontWeight: 500,
+              lineHeight: 1.4,
+              letterSpacing: "-0.01em",
+              margin: 0,
+              marginTop: r(24),
+              position: "relative",
+              zIndex: 1,
             }}
           >
-            “
-          </div>
+            {quote}
+          </p>
+        </RevealItem>
 
-          <RevealItem frame={frame - D_QUOTE} fps={fps}>
-            <p
+        <RevealItem frame={frame - D_AVATAR} fps={fps}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: r(16),
+              marginTop: r(36),
+            }}
+          >
+            <Img
+              src={proxyExternalImg(avatarUrl)}
+              crossOrigin="anonymous"
+              alt={name}
               style={{
-                fontSize: 30,
-                color: text,
-                fontWeight: 500,
-                lineHeight: 1.4,
-                letterSpacing: "-0.01em",
-                margin: 0,
-                marginTop: 24,
-                position: "relative",
-                zIndex: 1,
+                width: r(68),
+                height: r(68),
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: `2px solid ${border}`,
+                flexShrink: 0,
               }}
-            >
-              {quote}
-            </p>
-          </RevealItem>
-
-          <RevealItem frame={frame - D_AVATAR} fps={fps}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 16,
-                marginTop: 36,
-              }}
-            >
-              <Img
-                src={proxyExternalImg(avatarUrl)}
-                crossOrigin="anonymous"
-                alt={name}
-                width={68}
-                height={68}
+            />
+            <div>
+              <div
                 style={{
-                  width: 68,
-                  height: 68,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: `2px solid ${border}`,
-                  flexShrink: 0,
+                  fontSize: r(22),
+                  fontWeight: 700,
+                  color: text,
+                  letterSpacing: "-0.005em",
                 }}
-              />
-              <div>
-                <div
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 700,
-                    color: text,
-                    letterSpacing: "-0.005em",
-                  }}
-                >
-                  {name}
-                </div>
-                <div
-                  style={{
-                    fontSize: 18,
-                    color: muted,
-                    fontWeight: 400,
-                    marginTop: 2,
-                  }}
-                >
-                  {role}
-                  {company ? (
-                    <span style={{ color: accent }}> · {company}</span>
-                  ) : null}
-                </div>
+              >
+                {name}
+              </div>
+              <div
+                style={{
+                  fontSize: r(18),
+                  color: muted,
+                  fontWeight: 400,
+                  marginTop: r(2),
+                }}
+              >
+                {role}
+                {company ? (
+                  <span style={{ color: accent }}> · {company}</span>
+                ) : null}
               </div>
             </div>
-          </RevealItem>
-        </div>
-      </AbsoluteFill>
-    </FitContent>
+          </div>
+        </RevealItem>
+      </div>
+    </AbsoluteFill>
   );
 };
 

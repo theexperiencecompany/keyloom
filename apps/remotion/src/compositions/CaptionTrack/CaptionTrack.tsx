@@ -1,9 +1,8 @@
 "use client";
 import { AbsoluteFill, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
-import { CAPTION_TRACK_HEIGHT, CAPTION_TRACK_WIDTH } from "./meta";
 
 export type CaptionTrackProps = {
   text: string;
@@ -18,6 +17,7 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vmin } = useCanvasLayout();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -49,38 +49,34 @@ export const CaptionTrack: React.FC<CaptionTrackProps> = ({
   const word = wordIndex >= 0 ? (words[wordIndex] ?? "") : "";
 
   return (
-    <FitContent
-      designWidth={CAPTION_TRACK_WIDTH}
-      designHeight={CAPTION_TRACK_HEIGHT}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7)}px`,
+        fontFamily: s.fontFamily,
+      }}
     >
-      <AbsoluteFill
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          fontFamily: s.fontFamily,
-        }}
-      >
-        {word && (
-          <span
-            style={{
-              fontSize: 132,
-              fontWeight: 700,
-              letterSpacing: "-0.045em",
-              lineHeight: 1.05,
-              color: s.color,
-              textAlign: "center",
-              transform: `scale(${0.7 + wordPop * 0.3})`,
-              opacity: wordPop,
-              display: "inline-block",
-            }}
-          >
-            {word}
-          </span>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+      {word && (
+        <span
+          style={{
+            fontSize: vmin(12),
+            fontWeight: 700,
+            letterSpacing: "-0.045em",
+            lineHeight: 1.05,
+            color: s.color,
+            textAlign: "center",
+            maxWidth: "16em",
+            transform: `scale(${0.7 + wordPop * 0.3})`,
+            opacity: wordPop,
+            display: "inline-block",
+          }}
+        >
+          {word}
+        </span>
+      )}
+    </AbsoluteFill>
   );
 };

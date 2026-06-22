@@ -1,6 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -26,6 +26,7 @@ export const TitleType: React.FC<TitleTypeProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { vmin } = useCanvasLayout();
   const s = resolveTitleStyle(clipStyle);
   useFontReady(s.fontFamily);
   const elapsed = Math.max(0, frame - HEADLINE_START);
@@ -53,64 +54,61 @@ export const TitleType: React.FC<TitleTypeProps> = ({
     : true;
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7)}px`,
+        textAlign: "center",
+      }}
     >
-      <AbsoluteFill
+      <h1
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          textAlign: "center",
+          fontSize: vmin(12),
+          fontWeight: 700,
+          letterSpacing: "-0.045em",
+          lineHeight: 1.05,
+          margin: 0,
+          maxWidth: "16em",
+          whiteSpace: "pre-wrap",
         }}
       >
-        <h1
+        {headline.slice(0, visibleChars)}
+        <span
+          aria-hidden
           style={{
-            fontSize: 132,
-            fontWeight: 700,
-            letterSpacing: "-0.045em",
-            lineHeight: 1.05,
-            margin: 0,
-            whiteSpace: "pre-wrap",
+            display: "inline-block",
+            width: "0.06em",
+            height: "0.95em",
+            marginLeft: "0.08em",
+            verticalAlign: "-0.12em",
+            background: s.color,
+            opacity: cursorOn ? 1 : 0,
+          }}
+        />
+      </h1>
+
+      {subtitle.trim() && (
+        <p
+          style={{
+            fontSize: vmin(3.5),
+            fontWeight: 400,
+            letterSpacing: "-0.012em",
+            margin: `${vmin(3)}px 0 0`,
+            maxWidth: "40em",
+            color: getSubtitleColor(s.color),
+            opacity: subtitleProgress,
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
           }}
         >
-          {headline.slice(0, visibleChars)}
-          <span
-            aria-hidden
-            style={{
-              display: "inline-block",
-              width: "0.06em",
-              height: "0.95em",
-              marginLeft: "0.08em",
-              verticalAlign: "-0.12em",
-              background: s.color,
-              opacity: cursorOn ? 1 : 0,
-            }}
-          />
-        </h1>
-
-        {subtitle.trim() && (
-          <p
-            style={{
-              fontSize: 38,
-              fontWeight: 400,
-              letterSpacing: "-0.012em",
-              margin: "32px 0 0",
-              color: getSubtitleColor(s.color),
-              opacity: subtitleProgress,
-              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+          {subtitle}
+        </p>
+      )}
+    </AbsoluteFill>
   );
 };

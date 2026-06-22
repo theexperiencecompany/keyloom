@@ -1,8 +1,8 @@
 "use client";
 import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type PerspectiveMarqueeProps = {
@@ -31,12 +31,18 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
   perspective,
   rotateY,
   rotateX,
-  fontSize,
+  fontSize: fontSizeProp,
   fontWeight,
   textTransform,
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { vmin } = useCanvasLayout();
+  // The font size prop is authored against the 1080-tall design canvas. Scale
+  // it relative to the live canvas so the type reflows instead of being a fixed
+  // px size that only shrinks via FitContent. Everything derived from it
+  // (item widths, gap, row height, scroll offset) stays proportional.
+  const fontSize = vmin((fontSizeProp / 1080) * 100);
   const s = resolveClipStyle(clipStyle, {
     background: "#050505",
     color: "#fafafa",
@@ -77,82 +83,81 @@ export const PerspectiveMarquee: React.FC<PerspectiveMarqueeProps> = ({
     }
   }
 
-  const offset = (frame * speedPxPerFrame) % cycleWidth;
+  // Scroll speed and perspective are also authored in design px; scale them to
+  // the canvas so the motion and 3D depth match the now-relative type size.
+  const speed = vmin((speedPxPerFrame / 1080) * 100);
+  const perspectivePx = vmin((perspective / 1080) * 100);
+  const offset = (frame * speed) % cycleWidth;
   const totalWidth = cycleWidth * copies;
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        perspective: `${perspectivePx}px`,
+      }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          overflow: "hidden",
+          width: "100%",
+          height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          perspective: `${perspective}px`,
+          transformStyle: "preserve-3d",
         }}
       >
         <div
           style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
             transformStyle: "preserve-3d",
+            whiteSpace: "nowrap",
+            fontSize,
+            fontWeight,
+            letterSpacing: "-0.025em",
+            textTransform,
+            lineHeight: 1,
+            position: "relative",
+            width: totalWidth,
+            height: fontSize * 1.4,
           }}
         >
-          <div
-            style={{
-              transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-              transformStyle: "preserve-3d",
-              whiteSpace: "nowrap",
-              fontSize,
-              fontWeight,
-              letterSpacing: "-0.025em",
-              textTransform,
-              lineHeight: 1,
-              position: "relative",
-              width: totalWidth,
-              height: fontSize * 1.4,
-            }}
-          >
-            {cycle.map((item, i) => {
-              const rawX = positions[i]! - offset;
-              const wrapped = ((rawX % totalWidth) + totalWidth) % totalWidth;
-              return (
-                <span
-                  key={item.key}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    transform: `translate3d(${snap(wrapped)}px, 0, 0)`,
-                    display: "inline-block",
-                  }}
-                >
-                  {item.text}
-                </span>
-              );
-            })}
-          </div>
+          {cycle.map((item, i) => {
+            const rawX = positions[i]! - offset;
+            const wrapped = ((rawX % totalWidth) + totalWidth) % totalWidth;
+            return (
+              <span
+                key={item.key}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  transform: `translate3d(${snap(wrapped)}px, 0, 0)`,
+                  display: "inline-block",
+                }}
+              >
+                {item.text}
+              </span>
+            );
+          })}
         </div>
+      </div>
 
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            background: `linear-gradient(90deg, ${s.background} 0%, ${s.background}cc 12%, transparent 36%, transparent 64%, ${s.background}cc 88%, ${s.background} 100%)`,
-          }}
-        />
-      </AbsoluteFill>
-    </FitContent>
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: `linear-gradient(90deg, ${s.background} 0%, ${s.background}cc 12%, transparent 36%, transparent 64%, ${s.background}cc 88%, ${s.background} 100%)`,
+        }}
+      />
+    </AbsoluteFill>
   );
 };
