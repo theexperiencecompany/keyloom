@@ -81,16 +81,28 @@ function GalleryCard({
   onOpen: () => void;
   onEdit: () => void;
 }) {
-  const [hovered, setHovered] = React.useState(false);
+  // Mount the heavy Player only while the card is near/in the viewport, so all
+  // ~73 components animate as you scroll without ever mounting them all at once.
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [inView, setInView] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setInView(entry?.isIntersecting ?? false),
+      { rootMargin: "300px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   return (
     <div
+      ref={ref}
       className="group overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
-        {hovered ? (
+        {inView ? (
           <LivePreview
             modulePath={compositionModulePath(info)}
             id={info.id}
