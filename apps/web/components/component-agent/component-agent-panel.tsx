@@ -31,6 +31,12 @@ export function ComponentAgentPanel({
   const codeRef = React.useRef(code);
   codeRef.current = code;
 
+  // Bounds the self-fix loop: after a tool call we only auto-continue to let
+  // the model FIX a compile error, never after a successful edit. Reset on each
+  // user message.
+  const autoContinue = React.useRef(0);
+  const MAX_AUTO_CONTINUE = 3;
+
   const {
     messages,
     sendMessage,
@@ -41,7 +47,24 @@ export function ComponentAgentPanel({
     regenerate,
   } = useChat({
     transport,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    sendAutomaticallyWhen: (args) => {
+      if (!lastAssistantMessageIsCompleteWithToolCalls(args)) return false;
+      const last = args.messages[args.messages.length - 1];
+      if (!last || last.role !== "assistant") return false;
+      // A successful edit is terminal — stop so the agent doesn't loop
+      // re-editing the component forever.
+      const succeeded = last.parts.some(
+        (p) =>
+          p.type === "tool-updateComponentCode" &&
+          (p as { output?: { ok?: boolean } }).output?.ok === true,
+      );
+      if (succeeded) return false;
+      // The tool errored (or no edit yet) — allow a bounded number of
+      // continuations so the model can correct the compile error.
+      if (autoContinue.current >= MAX_AUTO_CONTINUE) return false;
+      autoContinue.current += 1;
+      return true;
+    },
     onToolCall: async ({ toolCall }) => {
       if (toolCall.toolName !== "updateComponentCode") return;
       const next = (toolCall.input as { code?: string }).code ?? "";
@@ -70,6 +93,7 @@ export function ComponentAgentPanel({
     const value = text.trim();
     if (!value) return;
     if (isBusy) await stop();
+    autoContinue.current = 0;
     sendMessage({ text: value }, { body: { code: codeRef.current, baseId } });
     setInput("");
   };
