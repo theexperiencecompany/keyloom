@@ -1,7 +1,17 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { type ZodRawShape, z } from "zod";
 import { getComponentSchema, listComponents } from "@/features/mcp/components";
-import { getRenderStatus, startRender } from "@/features/mcp/render";
+import {
+  forkComponent,
+  listUserForks,
+  readComponentCode,
+  writeComponentCode,
+} from "@/features/mcp/components-edit";
+import {
+  getRenderStatus,
+  startForkRender,
+  startRender,
+} from "@/features/mcp/render";
 import { consumeRender } from "@/lib/account";
 import { authenticateApiKey } from "@/lib/api-keys";
 
@@ -94,15 +104,19 @@ const baseHandler = createMcpHandler(
           return errorText(claim.reason ?? "Render not allowed.");
         }
         try {
-          const started = await startRender(
-            String(args.componentId ?? ""),
-            (args.props as Record<string, unknown> | undefined) ?? {},
-            {
-              fps: args.fps as number | undefined,
-              durationInFrames: args.durationInFrames as number | undefined,
-              scale: args.scale as number | undefined,
-            },
-          );
+          const componentId = String(args.componentId ?? "");
+          const props =
+            (args.props as Record<string, unknown> | undefined) ?? {};
+          const options = {
+            fps: args.fps as number | undefined,
+            durationInFrames: args.durationInFrames as number | undefined,
+            scale: args.scale as number | undefined,
+          };
+          // A forked component (one of the user's edits) renders through the
+          // "Project" composition; a built-in renders directly. Try fork first.
+          const started =
+            (await startForkRender(userId, componentId, props, options)) ??
+            (await startRender(componentId, props, options));
           return jsonText({
             ...started,
             status: "rendering",
@@ -148,6 +162,92 @@ const baseHandler = createMcpHandler(
         } catch (err) {
           return errorText(err instanceof Error ? err.message : String(err));
         }
+      },
+    );
+
+    // ── Fork & edit ──────────────────────────────────────────────────────
+    // Copy a built-in component, read its code, and rewrite it — so an external
+    // agent can turn a component into exactly what the user needs.
+
+    register(
+      "fork_component",
+      {
+        title: "Fork a component to edit",
+        description:
+          "Copy a built-in component (by its id from list_components) into an editable, user-owned version. Returns the new component's id + current code. Edit it with update_component_code, then render it with render_component.",
+        inputSchema: {
+          componentId: z.string(),
+          name: z.string().optional(),
+        },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const forked = await forkComponent(
+          userId,
+          String(args.componentId ?? ""),
+          args.name as string | undefined,
+        );
+        return forked
+          ? jsonText(forked)
+          : errorText(
+              `Unknown component "${args.componentId}". Call list_components for valid ids.`,
+            );
+      },
+    );
+
+    register(
+      "list_user_components",
+      {
+        title: "List your forked components",
+        description:
+          "List the components you've forked (your editable copies) — id, name, what they were forked from, and last edit time.",
+        inputSchema: {},
+      },
+      async (_args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        return jsonText(await listUserForks(userId));
+      },
+    );
+
+    register(
+      "get_component_code",
+      {
+        title: "Read a component's source",
+        description:
+          "Get the full TSX source of a component — one of your forks (by its id) or a built-in (so you can see how it's written before forking). Read this before update_component_code.",
+        inputSchema: { id: z.string() },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const result = await readComponentCode(userId, String(args.id ?? ""));
+        return result
+          ? jsonText(result)
+          : errorText(`No component "${args.id}".`);
+      },
+    );
+
+    register(
+      "update_component_code",
+      {
+        title: "Rewrite a forked component's code",
+        description:
+          "Replace a forked component's full TSX source. Pass the COMPLETE file. It's validated (transpiled) before saving — on failure you get the error back so you can fix it and retry. Only works on forks (fork_component first).",
+        inputSchema: { id: z.string(), code: z.string() },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const result = await writeComponentCode(
+          userId,
+          String(args.id ?? ""),
+          String(args.code ?? ""),
+        );
+        return result.ok
+          ? jsonText({ ok: true, id: result.id })
+          : errorText(result.error);
       },
     );
   },
