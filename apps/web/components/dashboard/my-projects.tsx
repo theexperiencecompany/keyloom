@@ -8,6 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -17,6 +18,12 @@ import {
   removeUserComponent,
   type UserComponent,
 } from "@/lib/user-components";
+
+// Heavy Remotion preview, mounted only on hover (one card at a time).
+const ForkPreview = dynamic(
+  () => import("./fork-preview").then((m) => m.ForkPreview),
+  { ssr: false },
+);
 
 export function MyProjects() {
   const router = useRouter();
@@ -59,45 +66,71 @@ export function MyProjects() {
       {items === null ? null : items.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((fork) => (
-            <div
+            <ForkCard
               key={fork.id}
-              className="flex flex-col justify-between gap-3 rounded-xl border border-border bg-card p-4"
-            >
-              <div className="min-w-0">
-                <h3 className="truncate text-sm font-medium">{fork.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Forked from {fork.baseId} ·{" "}
-                  {new Date(fork.updatedAt).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" className="flex-1" onClick={() => edit(fork)}>
-                  <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
-                  Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => openInStudio(fork)}
-                  title="Use in a video"
-                >
-                  <HugeiconsIcon icon={PlayIcon} size={14} />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => remove(fork.id)}
-                  aria-label="Delete"
-                >
-                  <HugeiconsIcon icon={Delete02Icon} size={14} />
-                </Button>
-              </div>
-            </div>
+              fork={fork}
+              onEdit={() => edit(fork)}
+              onUse={() => openInStudio(fork)}
+              onDelete={() => remove(fork.id)}
+            />
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function ForkCard({
+  fork,
+  onEdit,
+  onUse,
+  onDelete,
+}: {
+  fork: UserComponent;
+  onEdit: () => void;
+  onUse: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="group overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
+      <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
+        <ForkPreview fork={fork} />
+      </div>
+
+      <div className="space-y-2.5 p-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium">{fork.name}</h3>
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            Forked from {fork.baseId} ·{" "}
+            {new Date(fork.updatedAt).toLocaleDateString()}
+          </p>
+        </div>
+
+        <div className="flex gap-2">
+          <Button size="sm" className="flex-1" onClick={onEdit}>
+            <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onUse}
+            title="Use in a video"
+          >
+            <HugeiconsIcon icon={PlayIcon} size={14} />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onDelete}
+            aria-label="Delete"
+          >
+            <HugeiconsIcon icon={Delete02Icon} size={14} />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
