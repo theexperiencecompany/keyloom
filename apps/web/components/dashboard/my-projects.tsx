@@ -22,9 +22,14 @@ export function MyProjects() {
   const router = useRouter();
   const [items, setItems] = React.useState<UserComponent[] | null>(null);
 
-  // localStorage is client-only — load after mount to avoid hydration mismatch.
   React.useEffect(() => {
-    setItems(listUserComponents());
+    let active = true;
+    listUserComponents().then((rows) => {
+      if (active) setItems(rows);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const edit = (fork: UserComponent) => {
@@ -36,9 +41,9 @@ export function MyProjects() {
     router.push("/studio");
   };
 
-  const remove = (id: string) => {
-    removeUserComponent(id);
-    setItems(listUserComponents());
+  const remove = async (id: string) => {
+    setItems((prev) => prev?.filter((c) => c.id !== id) ?? prev);
+    await removeUserComponent(id);
   };
 
   return (

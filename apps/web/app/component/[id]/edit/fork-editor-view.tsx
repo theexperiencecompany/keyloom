@@ -18,8 +18,8 @@ import { ComponentAgentPanel } from "@/components/component-agent/component-agen
 import { useForceDarkTheme } from "@/features/studio/hooks/use-force-dark-theme";
 import {
   getUserComponent,
-  saveUserComponent,
   type UserComponent,
+  updateUserComponent,
 } from "@/lib/user-components";
 
 const EditorPreview = dynamic(
@@ -44,28 +44,35 @@ export function ForkEditorView({ id }: { id: string }) {
   const [code, setCode] = React.useState("");
   const [props, setProps] = React.useState<Record<string, unknown>>({});
 
-  // localStorage is client-only — load after mount.
+  // Load the fork from the DB after mount.
   React.useEffect(() => {
-    const f = getUserComponent(id);
-    setFork(f ?? null);
-    if (f) {
-      setCode(f.code);
-      const base = compositionsById[f.baseId];
-      setProps(
-        structuredClone(base?.defaultProps ?? {}) as Record<string, unknown>,
-      );
-    }
+    let active = true;
+    getUserComponent(id).then((f) => {
+      if (!active) return;
+      setFork(f);
+      if (f) {
+        setCode(f.code);
+        const base = compositionsById[f.baseId];
+        setProps(
+          structuredClone(base?.defaultProps ?? {}) as Record<string, unknown>,
+        );
+      }
+    });
+    return () => {
+      active = false;
+    };
   }, [id]);
 
-  const applyCode = React.useCallback((next: string) => {
-    setCode(next);
-    setFork((prev) => {
-      if (!prev) return prev;
-      const updated = { ...prev, code: next, updatedAt: Date.now() };
-      saveUserComponent(updated);
-      return updated;
-    });
-  }, []);
+  const applyCode = React.useCallback(
+    (next: string) => {
+      setCode(next);
+      setFork((prev) => (prev ? { ...prev, code: next } : prev));
+      // Persist to the DB (fire-and-forget — the editor state is the source of
+      // truth while open).
+      void updateUserComponent(id, { code: next });
+    },
+    [id],
+  );
 
   const base = fork ? compositionsById[fork.baseId] : undefined;
 
@@ -147,7 +154,7 @@ export function ForkEditorView({ id }: { id: string }) {
           <ComponentAgentPanel
             code={code}
             baseId={fork.baseId}
-            exportName={fork.exportName}
+            exportName={fork.exportName ?? undefined}
             onApply={applyCode}
           />
         </ResizablePanel>

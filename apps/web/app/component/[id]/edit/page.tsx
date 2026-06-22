@@ -3,7 +3,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { compositionsById } from "@workspace/compositions/registry";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { EditorView } from "./editor-view";
 import { ForkEditorView } from "./fork-editor-view";
 
@@ -39,15 +38,14 @@ export default async function EditorPage({
   const { id: rawId } = await params;
   const id = decodeURIComponent(rawId);
 
-  // Forked ("custom:") components live in the user's client-side library, not
-  // the static registry — hand off to the client editor which loads + edits
-  // them (Player + props + agent). It renders its own header.
-  if (id.startsWith("custom:")) {
+  // Anything not in the static registry is treated as a user-forked component:
+  // hand off to the client editor, which loads it from the DB (Player + props
+  // + agent) and shows a not-found state if it doesn't exist. It renders its
+  // own header.
+  const composition = compositionsById[id];
+  if (!composition) {
     return <ForkEditorView id={id} />;
   }
-
-  const composition = compositionsById[id];
-  if (!composition) notFound();
 
   // Strip non-serializable fields (calculateMetadata is a function)
   // before passing to the "use client" EditorView.

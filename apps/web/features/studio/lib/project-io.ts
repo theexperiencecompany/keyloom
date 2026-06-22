@@ -41,6 +41,11 @@ export function parseProjectJson(text: string): ParseResult {
     return { ok: false, error: "Missing or invalid `clips` array." };
 
   const warnings: string[] = [];
+  // Parse forked components first so the clip loop can recognize their ids.
+  const customComponents = parseCustomComponents(
+    obj.customComponents,
+    warnings,
+  );
   const validClips = [];
   for (let i = 0; i < clips.length; i++) {
     const c = clips[i] as Record<string, unknown> | null;
@@ -56,10 +61,10 @@ export function parseProjectJson(text: string): ParseResult {
     if (!c.props || typeof c.props !== "object") {
       return { ok: false, error: `clips[${i}].props must be an object.` };
     }
-    // `custom:` ids are user-forked components resolved from
-    // `customComponents`, not the static registry — don't warn on them.
+    // Forked components are resolved from `customComponents`, not the static
+    // registry — don't warn on them.
     if (
-      !c.compositionId.startsWith("custom:") &&
+      !customComponents?.[c.compositionId] &&
       !compositionsById[c.compositionId]
     ) {
       warnings.push(
@@ -132,10 +137,6 @@ export function parseProjectJson(text: string): ParseResult {
       : undefined;
 
   const audio = parseAudio(obj.audio, warnings);
-  const customComponents = parseCustomComponents(
-    obj.customComponents,
-    warnings,
-  );
 
   return {
     ok: true,

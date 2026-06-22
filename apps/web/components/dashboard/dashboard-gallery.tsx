@@ -11,8 +11,8 @@ import { Button } from "@workspace/ui/components/button";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { createFork } from "@/lib/fork";
-import { saveUserComponent } from "@/lib/user-components";
+import { forkPayload } from "@/lib/fork";
+import { createUserComponent } from "@/lib/user-components";
 
 // Heavy Remotion preview, mounted only on hover (one card at a time) so the
 // dashboard never loads dozens of Players at once.
@@ -32,11 +32,17 @@ export function DashboardGallery() {
     router.push(`/studio?component=${info.id}`);
   };
 
-  const editComponent = (info: AnyCompositionInfo) => {
-    const fork = createFork(info.id);
-    if (!fork) return;
-    saveUserComponent(fork);
-    router.push(`/component/${encodeURIComponent(fork.id)}/edit`);
+  const [forking, setForking] = React.useState<string | null>(null);
+
+  const editComponent = async (info: AnyCompositionInfo) => {
+    if (forking) return;
+    const payload = forkPayload(info.id);
+    if (!payload) return;
+    setForking(info.id);
+    const created = await createUserComponent(payload);
+    setForking(null);
+    if (created)
+      router.push(`/component/${encodeURIComponent(created.id)}/edit`);
   };
 
   return (
@@ -54,6 +60,7 @@ export function DashboardGallery() {
           <GalleryCard
             key={info.id}
             info={info}
+            editing={forking === info.id}
             onOpen={() => openInStudio(info)}
             onEdit={() => editComponent(info)}
           />
@@ -65,10 +72,12 @@ export function DashboardGallery() {
 
 function GalleryCard({
   info,
+  editing,
   onOpen,
   onEdit,
 }: {
   info: AnyCompositionInfo;
+  editing: boolean;
   onOpen: () => void;
   onEdit: () => void;
 }) {
@@ -123,9 +132,10 @@ function GalleryCard({
             variant="outline"
             className="flex-1"
             onClick={onEdit}
+            disabled={editing}
           >
             <HugeiconsIcon icon={PencilEdit02Icon} size={14} />
-            Edit
+            {editing ? "Forking…" : "Edit"}
           </Button>
         </div>
       </div>

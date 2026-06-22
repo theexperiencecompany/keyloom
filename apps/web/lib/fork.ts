@@ -6,36 +6,29 @@
 import type { Project } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import { compositionSources } from "./generated-sources";
-import type { UserComponent } from "./user-components";
+import type { NewUserComponent, UserComponent } from "./user-components";
 
-function randomId(): string {
+function clipId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID().slice(0, 8);
   }
   return Math.random().toString(36).slice(2, 10);
 }
 
-export function makeForkId(): string {
-  return `custom:${randomId()}`;
-}
-
 /**
- * Create an editable fork of a built-in composition by copying its source.
- * Returns null if the base id is unknown or has no captured source.
+ * Build the payload for a new fork of a built-in composition by copying its
+ * source. The server assigns the id; returns null if the base id is unknown or
+ * has no captured source. Persist via `createUserComponent`.
  */
-export function createFork(baseId: string): UserComponent | null {
+export function forkPayload(baseId: string): NewUserComponent | null {
   const source = compositionSources[baseId]?.component;
   const info = compositionsById[baseId];
   if (!source || !info) return null;
-  const now = Date.now();
   return {
-    id: makeForkId(),
     baseId,
     name: `${info.title} (copy)`,
     code: source,
     exportName: baseId,
-    createdAt: now,
-    updatedAt: now,
   };
 }
 
@@ -49,7 +42,7 @@ export function forkToProject(fork: UserComponent): Project {
     height: info?.height ?? 1080,
     clips: [
       {
-        id: randomId(),
+        id: clipId(),
         compositionId: fork.id,
         props: { ...((info?.defaultProps as Record<string, unknown>) ?? {}) },
         durationInFrames: info?.durationInFrames ?? 150,

@@ -54,13 +54,12 @@ export const ProjectComposition: React.FC<Project> = ({
     >
       <TransitionSeries>
         {clips.flatMap((clip, index) => {
-          // Forked components ("custom:" ids) aren't in the static registry —
-          // they're transpiled from source at render time. They behave like
-          // non-locked compositions (receive clipStyle, no curated themes).
-          const isCustom = clip.compositionId.startsWith("custom:");
-          const custom = isCustom
-            ? customComponents?.[clip.compositionId]
-            : undefined;
+          // Forked components live in the project's `customComponents` map
+          // (keyed by clip.compositionId), not the static registry — they're
+          // transpiled from source at render time. They behave like non-locked
+          // compositions (receive clipStyle, no curated themes).
+          const custom = customComponents?.[clip.compositionId];
+          const isCustom = Boolean(custom);
 
           const Component = componentsById[clip.compositionId];
           const info = compositionsById[clip.compositionId];
