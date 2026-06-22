@@ -7,16 +7,15 @@ import { type Project, projectDuration } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import { Button } from "@workspace/ui/components/button";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@workspace/ui/components/tabs";
-import { Textarea } from "@workspace/ui/components/textarea";
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@workspace/ui/components/resizable";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
 import { ComponentAgentPanel } from "@/components/component-agent/component-agent-panel";
+import { useForceDarkTheme } from "@/features/studio/hooks/use-force-dark-theme";
 import {
   getUserComponent,
   saveUserComponent,
@@ -36,6 +35,9 @@ const EditorPreview = dynamic(
 );
 
 export function ForkEditorView({ id }: { id: string }) {
+  // Same dark editor surface as the studio.
+  useForceDarkTheme();
+
   const [fork, setFork] = React.useState<UserComponent | null | undefined>(
     undefined,
   );
@@ -121,8 +123,8 @@ export function ForkEditorView({ id }: { id: string }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col lg:h-screen">
-      <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
+    <div className="studio-shell flex h-screen flex-col bg-background text-foreground">
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
         <Link
           href="/dashboard/projects"
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -134,66 +136,64 @@ export function ForkEditorView({ id }: { id: string }) {
         <div className="w-[90px]" />
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_1fr_400px]">
-        {/* Props panel */}
-        <aside className="flex flex-col overflow-y-auto border-b border-border lg:border-b-0 lg:border-r">
-          <div className="border-b border-border px-4 py-2 text-[11px] font-medium text-muted-foreground">
-            Properties
-          </div>
-          <FieldsRenderer
-            fields={base?.fields ?? []}
-            value={props}
-            onChange={setProps}
+      <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
+        {/* Agent (left) — same chat UI as the studio agent */}
+        <ResizablePanel
+          id="ce-agent"
+          defaultSize="360px"
+          minSize="300px"
+          maxSize="560px"
+        >
+          <ComponentAgentPanel
+            code={code}
+            baseId={fork.baseId}
+            exportName={fork.exportName}
+            onApply={applyCode}
           />
-        </aside>
+        </ResizablePanel>
 
-        {/* Preview */}
-        <div className="flex items-center justify-center bg-muted/20 p-4 lg:min-h-0">
-          <div
-            className="max-h-full w-full max-w-[1200px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
-            style={{ aspectRatio: `${project.width} / ${project.height}` }}
-          >
-            <EditorPreview
-              project={project}
-              totalDuration={totalDuration}
-              width={project.width}
-              height={project.height}
-            />
-          </div>
-        </div>
+        <ResizableHandle withHandle />
 
-        {/* Code + Agent */}
-        <aside className="flex min-h-0 flex-col border-t border-border lg:border-t-0 lg:border-l">
-          <Tabs defaultValue="agent" className="flex min-h-0 flex-1 flex-col">
-            <div className="px-3 pt-3">
-              <TabsList className="w-full">
-                <TabsTrigger value="agent" className="flex-1">
-                  Agent
-                </TabsTrigger>
-                <TabsTrigger value="code" className="flex-1">
-                  Code
-                </TabsTrigger>
-              </TabsList>
+        {/* Preview (center) */}
+        <ResizablePanel id="ce-preview" minSize="400px">
+          <div className="flex h-full items-center justify-center bg-muted/20 p-4">
+            <div
+              className="max-h-full w-full max-w-[1200px] overflow-hidden rounded-lg border border-border bg-background shadow-sm"
+              style={{ aspectRatio: `${project.width} / ${project.height}` }}
+            >
+              <EditorPreview
+                project={project}
+                totalDuration={totalDuration}
+                width={project.width}
+                height={project.height}
+              />
             </div>
-            <TabsContent value="agent" className="min-h-0 flex-1">
-              <ComponentAgentPanel
-                code={code}
-                baseId={fork.baseId}
-                exportName={fork.exportName}
-                onApply={applyCode}
+          </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Properties (right) — same edit panel as the studio inspector */}
+        <ResizablePanel
+          id="ce-props"
+          defaultSize="320px"
+          minSize="260px"
+          maxSize="520px"
+        >
+          <aside className="flex h-full flex-col overflow-hidden bg-card">
+            <div className="border-b border-border px-4 py-2 text-[11px] font-medium text-muted-foreground">
+              Properties
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <FieldsRenderer
+                fields={base?.fields ?? []}
+                value={props}
+                onChange={setProps}
               />
-            </TabsContent>
-            <TabsContent value="code" className="min-h-0 flex-1 p-3">
-              <Textarea
-                value={code}
-                onChange={(e) => applyCode(e.target.value)}
-                spellCheck={false}
-                className="h-full resize-none font-mono text-xs leading-relaxed"
-              />
-            </TabsContent>
-          </Tabs>
-        </aside>
-      </div>
+            </div>
+          </aside>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
