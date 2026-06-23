@@ -82,7 +82,9 @@
       "Bash(ls images *)",
       "Bash(find . -maxdepth 3 -type d \\\\\\( -iname \"*wallpaper*\" -o -iname \"*background*\" -o -iname \"*media*\" -o -iname \"*cover*\" \\\\\\))",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/components)",
-      "Bash(bunx shadcn@latest add navigation-menu)"
+      "Bash(bunx shadcn@latest add navigation-menu)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(echo \"exit $?\")"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components",

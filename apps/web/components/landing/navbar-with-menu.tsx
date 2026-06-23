@@ -44,12 +44,9 @@ export type NavMenuSection = {
 function AuthCta() {
   const { user, loading } = useAuth();
 
-  const blue =
-    "border-blue-600/50 bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600";
-
   if (loading) {
     return (
-      <RaisedButton size="sm" className={blue} disabled>
+      <RaisedButton size="sm" disabled>
         Create
       </RaisedButton>
     );
@@ -58,7 +55,6 @@ function AuthCta() {
   return (
     <RaisedButton
       size="sm"
-      className={blue}
       onClick={() => {
         window.location.href = user ? "/studio" : "/api/auth/signin";
       }}
