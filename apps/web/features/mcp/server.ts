@@ -173,7 +173,7 @@ registerTool(
   {
     title: "Render a multi-component video (timeline)",
     description:
-      "Stitch SEVERAL components into ONE video — the same as building a timeline in the studio. Pass an ordered `clips` array; each clip is a component (by id) with its props, an optional durationInFrames (defaults to the component's natural length), an optional Style override, and an optional transition into it. Clips play back-to-back with transitions. Renders the 'Project' composition on Lambda and waits. Returns a time-limited download URL; pass outFile to also save the MP4. Use list_components / get_component_schema first to fill each clip's props.",
+      "Stitch SEVERAL components into ONE video — the same as building a timeline in the studio. Pass an ordered `clips` array; each clip is a component (by id) with its props, an optional durationInFrames (defaults to the component's natural length), an optional Style override, and an optional transition into it. By default a gentle ~0.37s fade plays between every clip (a clip's own `transition` overrides it). Renders the 'Project' composition on Lambda and waits. Returns a time-limited download URL; pass outFile to also save the MP4. Use list_components / get_component_schema first to fill each clip's props.",
     inputSchema: {
       clips: z
         .array(

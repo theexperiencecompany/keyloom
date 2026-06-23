@@ -234,12 +234,19 @@ function buildProject(
     };
   });
 
+  const fps = options.fps ?? DEFAULT_PROJECT.fps;
   return {
-    fps: options.fps ?? DEFAULT_PROJECT.fps,
+    fps,
     width: options.width ?? DEFAULT_PROJECT.width,
     height: options.height ?? DEFAULT_PROJECT.height,
     clips: builtClips,
-    defaultTransition: DEFAULT_PROJECT.defaultTransition,
+    // Hard-coded gentle fade between every component (~0.37s). The first clip
+    // ignores transitions; a clip's own `transition` still overrides this.
+    defaultTransition: {
+      kind: "fade",
+      durationInFrames: Math.round(0.37 * fps),
+      timing: { kind: "linear" },
+    },
   };
 }
 
