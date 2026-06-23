@@ -3,6 +3,7 @@ import {
   compositionsById,
 } from "@workspace/compositions/registry";
 import { isAgentVisible } from "@/lib/agent/catalog";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 import type { McpComponentSchema, McpComponentSummary } from "./types";
 
 /**
@@ -22,12 +23,16 @@ export function getComponentSchema(id: string): McpComponentSchema | null {
   if (!isAgentVisible(id)) return null;
   const info = compositionsById[id];
   if (!info) return null;
+  // Report the RESOLVED metadata for the default props (runs calculateMetadata),
+  // so content-driven compositions show their real default length/dimensions
+  // instead of the short static registry fallback.
+  const meta = resolveCompositionMeta(info);
   return {
     ...toSummary(info),
-    fps: info.fps,
-    width: info.width,
-    height: info.height,
-    durationInFrames: info.durationInFrames,
+    fps: meta.fps,
+    width: meta.width,
+    height: meta.height,
+    durationInFrames: meta.durationInFrames,
     agentNotes: info.agentNotes,
     fields: info.fields,
     defaultProps: info.defaultProps as Record<string, unknown>,

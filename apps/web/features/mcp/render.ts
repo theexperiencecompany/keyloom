@@ -64,8 +64,13 @@ export async function startRender(
   const inputProps = appUrl
     ? (rewriteExternalImageUrls(merged, appUrl) as Record<string, unknown>)
     : merged;
-  const fps = options.fps ?? info.fps;
-  const durationInFrames = options.durationInFrames ?? info.durationInFrames;
+  // Resolve the REAL metadata for these props (runs the composition's
+  // calculateMetadata, e.g. KenBurns/MessageBubbles grow their timeline) — so a
+  // content-driven composition reports/renders its full length, not the short
+  // static registry fallback.
+  const meta = resolveCompositionMeta(info, merged);
+  const fps = options.fps ?? meta.fps;
+  const durationInFrames = options.durationInFrames ?? meta.durationInFrames;
   const scale = Math.min(2, Math.max(0.25, options.scale ?? 1));
   const bitrateKbps = options.videoBitrateKbps ?? 8000;
 
@@ -78,8 +83,12 @@ export async function startRender(
     codec: "h264",
     imageFormat: "jpeg",
     x264Preset: "fast",
-    forceFps: fps,
-    forceDurationInFrames: durationInFrames,
+    // Only FORCE fps/duration when the caller explicitly overrides them.
+    // Otherwise leave them unset so Lambda uses the composition's own resolved
+    // metadata (calculateMetadata) — forcing the static fallback is what clamped
+    // Halo AI to 3s instead of its real ~6s.
+    forceFps: options.fps,
+    forceDurationInFrames: options.durationInFrames,
     scale,
     videoBitrate: `${bitrateKbps}k`,
     privacy: "private",
@@ -92,8 +101,8 @@ export async function startRender(
     bucketName,
     durationInFrames,
     fps,
-    width: info.width,
-    height: info.height,
+    width: meta.width,
+    height: meta.height,
   };
 }
 
