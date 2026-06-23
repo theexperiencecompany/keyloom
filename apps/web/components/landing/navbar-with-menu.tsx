@@ -56,7 +56,7 @@ function AuthCta() {
     <RaisedButton
       size="sm"
       onClick={() => {
-        window.location.href = user ? "/studio" : "/api/auth/signin";
+        window.location.href = user ? "/components" : "/api/auth/signin";
       }}
     >
       {user ? "Create" : "Login"}

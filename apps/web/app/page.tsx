@@ -3,10 +3,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import Image from "next/image";
 import Link from "next/link";
+import GradualBlur from "@/components/GradualBlur";
 import { ComponentShowcase } from "@/components/landing/component-showcase";
+import { HeroReelBadges } from "@/components/landing/hero-reel-badges";
 import NavbarMenuFull from "@/components/landing/navbar-menu";
 import { PhoneMockup } from "@/components/landing/phone-mockup";
 import { ViralSection } from "@/components/landing/viral-section";
+import { WhyKeyloom } from "@/components/landing/why-keyloom";
 import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
@@ -44,7 +47,7 @@ export default function LandingPage() {
             />
             Instagram
           </span>{" "}
-          — right from your browser.
+          right from your browser.
         </p>
         <div className="mt-9 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
           <Button asChild size="lg" className="w-full sm:w-auto">
@@ -69,16 +72,30 @@ export default function LandingPage() {
             aria-hidden
             className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(closest-side,rgba(59,130,246,0.28),transparent)] blur-2xl"
           />
+          {/* Floating platform stat badges around the phone. */}
+          <HeroReelBadges />
           {/* Plain <video>, not a Remotion component. Autoplays muted + looped. */}
           <PhoneMockup videoSrc="/landing/wolfofwallstreet.mp4" fit="cover" />
         </div>
       </main>
+
+      <WhyKeyloom />
 
       <ComponentShowcase />
 
       <ViralSection />
 
       <SiteFooter />
+
+      {/* Fixed gradual blur fading the very bottom of the viewport. */}
+      <GradualBlur
+        target="page"
+        position="bottom"
+        height="5rem"
+        strength={1}
+        divCount={5}
+        curve="bezier"
+      />
     </div>
   );
 }
