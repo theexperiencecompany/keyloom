@@ -66,7 +66,8 @@
       "Bash(echo \"tsc exit: $?\")",
       "Bash(echo \"tsc: $?\")",
       "Bash(cd /home/sanku/work/aesthetic *)",
-      "Bash(git pull *)"
+      "Bash(git pull *)",
+      "Bash(wait)"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components"

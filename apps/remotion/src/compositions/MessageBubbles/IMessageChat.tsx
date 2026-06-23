@@ -101,6 +101,8 @@ export type IMessageChatProps = {
   designWidth?: number;
   /** Extra gallery photos for the attachment picker (besides the sent one). */
   galleryImages?: { name: string; url: string }[];
+  /** Overlay a "Made with Halo AI" badge on outgoing photo bubbles. */
+  imageWatermark?: boolean;
   /**
    * Universal Style overrides forwarded from the (now unlocked) MessageBubbles
    * composition. Each maps to the one clean slot in the iMessage layout:
@@ -138,6 +140,7 @@ export function IMessageChat({
   keyboardOpen = 1,
   designWidth,
   galleryImages,
+  imageWatermark = false,
   clipBackground,
   clipColor,
   clipFontFamily,
@@ -620,6 +623,7 @@ export function IMessageChat({
                                 src={m.image}
                                 from={group.from}
                                 tail={isLast}
+                                watermark={imageWatermark && isMe}
                               />
                             )}
                           </BubbleReveal>

@@ -121,6 +121,8 @@ export type MessageBubblesProps = {
    * gradient placeholders. Each is `{ name, url }` (static path or http URL).
    */
   galleryImages?: { name: string; url: string }[];
+  /** Overlay a "Made with Halo AI" badge on outgoing photo bubbles. */
+  showImageWatermark?: boolean;
   /** Universal Style — sheet background, received text, font, sent accent. */
   clipStyle?: ClipStyle;
 };
@@ -368,6 +370,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
   theme = "dark",
   showKeyboard = false,
   galleryImages,
+  showImageWatermark = false,
   clipStyle,
 }) => {
   // Load Apple's SF Pro Display so the chat renders in the real iMessage font
@@ -573,6 +576,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           keyboardOpen={keyboardOpen}
           designWidth={PHONE_DESIGN_WIDTH}
           galleryImages={galleryImages}
+          imageWatermark={showImageWatermark}
           clipBackground={s.background}
           clipColor={s.color}
           clipFontFamily={s.fontFamily}
