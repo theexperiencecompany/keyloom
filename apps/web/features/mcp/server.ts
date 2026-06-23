@@ -96,7 +96,7 @@ registerTool(
   {
     title: "Render a component to video",
     description:
-      "Render one component to an MP4 with the given props (merged over the component's defaults). Renders on Lambda and waits for completion. Returns a time-limited download URL; pass outFile (absolute path) to also save the MP4 to disk.",
+      "Render one component to an MP4 with the given props (merged over the component's defaults). Renders on Lambda and waits for completion. By default it uses the component's natural dimensions; pass width AND height to render at a custom aspect ratio (e.g. 1080×1920 for 9:16, 1920×1080 for 16:9, 1080×1080 for 1:1). Returns a time-limited download URL; pass outFile (absolute path) to also save the MP4 to disk.",
     inputSchema: {
       componentId: z.string().describe("Component id from list_components."),
       props: z
@@ -107,6 +107,22 @@ registerTool(
         ),
       fps: z.number().int().positive().optional(),
       durationInFrames: z.number().int().positive().optional(),
+      width: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe(
+          "Canvas width in px. Pass with height to force an aspect ratio.",
+        ),
+      height: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe(
+          "Canvas height in px. Pass with width to force an aspect ratio.",
+        ),
       scale: z
         .number()
         .positive()
@@ -120,16 +136,31 @@ registerTool(
   },
   async (args) => {
     try {
-      const result = await renderComponent(
-        String(args.componentId ?? ""),
-        (args.props as Record<string, unknown> | undefined) ?? {},
-        {
-          fps: args.fps as number | undefined,
-          durationInFrames: args.durationInFrames as number | undefined,
-          scale: args.scale as number | undefined,
-          outFile: args.outFile as string | undefined,
-        },
-      );
+      const componentId = String(args.componentId ?? "");
+      const props = (args.props as Record<string, unknown> | undefined) ?? {};
+      const width = args.width as number | undefined;
+      const height = args.height as number | undefined;
+      const fps = args.fps as number | undefined;
+      const durationInFrames = args.durationInFrames as number | undefined;
+      const scale = args.scale as number | undefined;
+      const outFile = args.outFile as string | undefined;
+
+      // Custom dimensions → render the component inside a one-clip Project (the
+      // only Lambda path that can force an arbitrary canvas size/aspect).
+      if (width || height) {
+        const result = await renderProject(
+          [{ componentId, props, durationInFrames }],
+          { fps, width, height, scale, outFile },
+        );
+        return jsonText({ ...result, compositionId: componentId });
+      }
+
+      const result = await renderComponent(componentId, props, {
+        fps,
+        durationInFrames,
+        scale,
+        outFile,
+      });
       return jsonText(result);
     } catch (err) {
       return errorText(err instanceof Error ? err.message : String(err));

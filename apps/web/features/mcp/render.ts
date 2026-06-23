@@ -199,7 +199,7 @@ function buildProject(
     throw new Error("Provide at least one clip in `clips`.");
   }
   const builtClips: Clip[] = clips.map((c, i) => {
-    const compositionId = String(c.compositionId ?? "");
+    const compositionId = String(c.componentId ?? "");
     if (!isAgentVisible(compositionId)) {
       throw new Error(
         `Unknown component "${compositionId}" in clips[${i}]. Call list_components for valid ids.`,

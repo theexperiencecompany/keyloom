@@ -53,7 +53,7 @@ export type RenderComponentResult = {
 /** One clip in a multi-component project render (`render_project`). */
 export type ProjectClipInput = {
   /** Component id from `list_components`. */
-  compositionId: string;
+  componentId: string;
   /** Props for this clip, merged over the component's defaults. */
   props?: Record<string, unknown>;
   /** How long this clip plays. Defaults to the component's natural length. */
