@@ -1,13 +1,10 @@
 "use client";
 
 import {
-  Book02Icon,
   CreditCardIcon,
-  DiscordIcon,
-  FireIcon,
+  Film01Icon,
   Folder01Icon,
   FolderLibraryIcon,
-  Github01Icon,
   Image02Icon,
   LibrariesIcon,
   Logout02Icon,
@@ -17,7 +14,6 @@ import {
   Sun03Icon,
   UnfoldMoreIcon,
   UserCircleIcon,
-  UserGroupIcon,
   VideoReplayIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -75,7 +71,7 @@ const SECTIONS: NavSection[] = [
         icon: FolderLibraryIcon,
       },
       {
-        label: "Collections",
+        label: "Posts",
         href: "/components/collections",
         icon: Folder01Icon,
       },
@@ -85,37 +81,13 @@ const SECTIONS: NavSection[] = [
     label: "Create",
     items: [
       { label: "Studio", href: "/studio", icon: VideoReplayIcon },
-      { label: "Templates", href: "/templates", icon: Image02Icon },
-      {
-        label: "Trending",
-        href: "/trending",
-        icon: FireIcon,
-        badge: "BETA",
-      },
+      { label: "Memes", href: "/memes", icon: Image02Icon },
+      { label: "Motions", href: "/motions", icon: Film01Icon },
     ],
   },
   {
-    label: "Developers",
+    label: "Integration",
     items: [{ label: "MCP", href: "/mcp", icon: PlugSocketIcon }],
-  },
-  {
-    label: "Support",
-    items: [
-      { label: "Docs", href: "/docs", icon: Book02Icon },
-      { label: "Creators", href: "/creators", icon: UserGroupIcon },
-      {
-        label: "GitHub",
-        href: "https://github.com/theexperiencecompany/keyloom",
-        icon: Github01Icon,
-        external: true,
-      },
-      {
-        label: "Discord",
-        href: "https://discord.gg/keyloom",
-        icon: DiscordIcon,
-        external: true,
-      },
-    ],
   },
 ];
 

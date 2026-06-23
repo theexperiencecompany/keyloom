@@ -26,6 +26,28 @@ type KeyRow = {
   createdAt: string;
 };
 
+// Mirrors the tools registered in features/mcp/server.ts.
+const TOOLS = [
+  {
+    name: "list_components",
+    title: "List video components",
+    description:
+      "Lists every component you can fill and render — id, title, description, category, and brand-lock status. Call this first to discover ids.",
+  },
+  {
+    name: "get_component_schema",
+    title: "Get a component's field schema",
+    description:
+      "Returns one component's editing contract: fields, default props, agent notes, and natural dimensions (fps / width / height / duration).",
+  },
+  {
+    name: "render_component",
+    title: "Render a component to video",
+    description:
+      "Renders a component to MP4 with your props (merged over defaults) on Lambda, then returns a time-limited download URL.",
+  },
+] as const;
+
 type Props = {
   mcpUrl: string;
   isPro: boolean;
@@ -120,6 +142,36 @@ export function McpClient({ mcpUrl, isPro, keys }: Props) {
           <pre className="overflow-x-auto rounded-md border border-border bg-muted/50 p-4 font-mono text-[11px] leading-relaxed text-muted-foreground">
             {connectorSnippet}
           </pre>
+        </CardContent>
+      </Card>
+
+      {/* Available tools */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Available tools</CardTitle>
+          <CardDescription>
+            What your MCP client can call once connected.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="flex flex-col gap-3">
+            {TOOLS.map((tool) => (
+              <li
+                key={tool.name}
+                className="rounded-md border border-border px-3 py-3"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                    {tool.name}
+                  </code>
+                  <span className="text-sm font-medium">{tool.title}</span>
+                </div>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                  {tool.description}
+                </p>
+              </li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
 
