@@ -50,6 +50,32 @@ export type RenderComponentResult = {
   height: number;
 };
 
+/** One clip in a multi-component project render (`render_project`). */
+export type ProjectClipInput = {
+  /** Component id from `list_components`. */
+  compositionId: string;
+  /** Props for this clip, merged over the component's defaults. */
+  props?: Record<string, unknown>;
+  /** How long this clip plays. Defaults to the component's natural length. */
+  durationInFrames?: number;
+  /** Universal Style overrides (background / color / fontFamily / accent). */
+  style?: Record<string, unknown>;
+  /** How this clip enters from the previous one (e.g. { kind, durationInFrames }). */
+  transition?: Record<string, unknown>;
+};
+
+/** Render knobs for `render_project` (a stitched multi-clip video). */
+export type RenderProjectOptions = {
+  fps?: number;
+  width?: number;
+  height?: number;
+  /** Resolution multiplier, clamped to [0.25, 2]. */
+  scale?: number;
+  videoBitrateKbps?: number;
+  /** Absolute path; when set, the finished MP4 is also downloaded here. */
+  outFile?: string;
+};
+
 /** Handle returned by `startRender` — pass renderId + bucketName to
  *  `getRenderStatus` to poll. */
 export type StartRenderResult = {

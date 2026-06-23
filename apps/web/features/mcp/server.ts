@@ -1,11 +1,12 @@
 /**
  * Keyloom MCP server — the thin "face" over the feature logic in this folder.
  *
- * It exposes three deterministic tools (no LLM in the server; the MCP client's
+ * It exposes four deterministic tools (no LLM in the server; the MCP client's
  * model does the field-filling):
  *   - list_components       — what you can render
  *   - get_component_schema  — a component's fields + defaults + dimensions
  *   - render_component      — fill props → render on Lambda → get an MP4 URL
+ *   - render_project        — stitch MANY components into one video (a timeline)
  *
  * Run it over stdio (env is loaded from apps/web/.env.local by bun):
  *   bun run features/mcp/server.ts
@@ -15,7 +16,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { type ZodRawShape, z } from "zod";
 import { getComponentSchema, listComponents } from "./components";
-import { renderComponent } from "./render";
+import { renderComponent, renderProject } from "./render";
+import type { ProjectClipInput } from "./types";
 
 const server = new McpServer({ name: "keyloom-video", version: "0.1.0" });
 
@@ -124,6 +126,97 @@ registerTool(
         {
           fps: args.fps as number | undefined,
           durationInFrames: args.durationInFrames as number | undefined,
+          scale: args.scale as number | undefined,
+          outFile: args.outFile as string | undefined,
+        },
+      );
+      return jsonText(result);
+    } catch (err) {
+      return errorText(err instanceof Error ? err.message : String(err));
+    }
+  },
+);
+
+registerTool(
+  "render_project",
+  {
+    title: "Render a multi-component video (timeline)",
+    description:
+      "Stitch SEVERAL components into ONE video — the same as building a timeline in the studio. Pass an ordered `clips` array; each clip is a component (by id) with its props, an optional durationInFrames (defaults to the component's natural length), an optional Style override, and an optional transition into it. Clips play back-to-back with transitions. Renders the 'Project' composition on Lambda and waits. Returns a time-limited download URL; pass outFile to also save the MP4. Use list_components / get_component_schema first to fill each clip's props.",
+    inputSchema: {
+      clips: z
+        .array(
+          z.object({
+            componentId: z
+              .string()
+              .describe("Component id from list_components."),
+            props: z
+              .record(z.string(), z.unknown())
+              .optional()
+              .describe(
+                "Props for this clip, merged over the component's defaults.",
+              ),
+            durationInFrames: z
+              .number()
+              .int()
+              .positive()
+              .optional()
+              .describe(
+                "Clip length; defaults to the component's natural length.",
+              ),
+            style: z
+              .record(z.string(), z.unknown())
+              .optional()
+              .describe(
+                "Universal Style overrides (background/color/fontFamily/accent).",
+              ),
+            transition: z
+              .record(z.string(), z.unknown())
+              .optional()
+              .describe(
+                "How this clip enters, e.g. { kind: 'fade', durationInFrames: 8 }. Ignored on the first clip.",
+              ),
+          }),
+        )
+        .min(1)
+        .describe("Ordered clips to stitch into one video."),
+      fps: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Project fps (default 60)."),
+      width: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Project width (default 1920)."),
+      height: z
+        .number()
+        .int()
+        .positive()
+        .optional()
+        .describe("Project height (default 1080)."),
+      scale: z
+        .number()
+        .positive()
+        .optional()
+        .describe("Resolution multiplier, 0.25–2 (default 1)."),
+      outFile: z
+        .string()
+        .optional()
+        .describe("Absolute path to also save the MP4 to."),
+    },
+  },
+  async (args) => {
+    try {
+      const result = await renderProject(
+        (args.clips as ProjectClipInput[] | undefined) ?? [],
+        {
+          fps: args.fps as number | undefined,
+          width: args.width as number | undefined,
+          height: args.height as number | undefined,
           scale: args.scale as number | undefined,
           outFile: args.outFile as string | undefined,
         },
