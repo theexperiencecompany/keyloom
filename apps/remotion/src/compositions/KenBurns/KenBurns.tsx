@@ -192,6 +192,24 @@ const PromptScreen: React.FC<{
   const caretOn =
     localP < typeEnd && Math.floor(localP / (0.5 * fps)) % 2 === 0;
 
+  // Drive the keyboard key-pop in sync with the typing: the key for the most
+  // recently typed character pops on screen (like MessageBubbles' keyboard).
+  // Non-letter keys (digits/symbols) simply don't pop on the letter layout.
+  const POP_HOLD = Math.max(1, Math.round(0.13 * fps));
+  const POP_RISE = Math.max(1, Math.round(0.04 * fps));
+  let pressedKey: string | null = null;
+  let pressT = 0;
+  if (typed > 0 && localP <= typeEnd + POP_HOLD) {
+    const lastIdx = Math.min(typed, promptText.length) - 1;
+    const landed = typeStart + ((lastIdx + 1) / promptText.length) * typeFrames;
+    const elapsed = localP - landed;
+    if (elapsed >= 0 && elapsed < POP_HOLD) {
+      const ch = promptText[lastIdx] ?? "";
+      pressedKey = ch === " " ? " " : ch.toLowerCase();
+      pressT = elapsed < POP_RISE ? elapsed / POP_RISE : 1;
+    }
+  }
+
   // Once typing finishes: the send button presses, then the image is replaced
   // by the Halo AI "Generating…" card.
   const pressDur = 0.16 * fps;
@@ -433,6 +451,8 @@ const PromptScreen: React.FC<{
                 <Keyboard
                   theme="dark"
                   width={KB_PANEL}
+                  pressedKey={pressedKey}
+                  pressT={pressT}
                   fontFamily={SF_PRO_STACK}
                 />
               </div>
