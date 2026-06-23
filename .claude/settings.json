@@ -74,10 +74,19 @@
       "Bash(bunx shadcn@latest add card badge)",
       "Bash(perl -0pi -e 's/brandLocked:\\\\s*[A-Za-z_]+\\\\.brandMode === \"locked\"/brandLocked: false/g' lib/agent/catalog.ts lib/agent/tools.ts features/mcp/components.ts)",
       "Bash(perl -0pi -e 's/const locked = c\\\\.brandMode === \"locked\" \\\\? \" \\\\[brand-locked\\\\]\" : \"\";/const locked = \"\";/g' lib/agent/catalog.ts)",
-      "Bash(perl -pi -e 's{/dashboard}{/components}g' components/app-sidebar.tsx \"app/component/[id]/edit/fork-editor-view.tsx\" components/dashboard/my-projects.tsx)"
+      "Bash(perl -pi -e 's{/dashboard}{/components}g' components/app-sidebar.tsx \"app/component/[id]/edit/fork-editor-view.tsx\" components/dashboard/my-projects.tsx)",
+      "Bash(git -C /home/sanku/work/aesthetic diff --stat)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/components)",
+      "Bash(ls apps/web/components/creators; echo \"===\"; sed -n '1,60p' apps/web/components/creators/*.tsx 2>/dev/null | head -80; echo \"=== public avatars ===\"; ls apps/web/public/images/logos 2>/dev/null | head; ls apps/web/public/images 2>/dev/null | head)",
+      "Bash(curl -s -o /tmp/comp.html -w \"%{http_code}\" http://localhost:3000/components)",
+      "Bash(ls images *)",
+      "Bash(find . -maxdepth 3 -type d \\\\\\( -iname \"*wallpaper*\" -o -iname \"*background*\" -o -iname \"*media*\" -o -iname \"*cover*\" \\\\\\))",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/components)",
+      "Bash(bunx shadcn@latest add navigation-menu)"
     ],
     "additionalDirectories": [
-      "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components"
+      "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components",
+      "/home/sanku/work/aesthetic/apps/web/components/creators"
     ]
   }
 }

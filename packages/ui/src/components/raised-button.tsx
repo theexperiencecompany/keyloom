@@ -7,19 +7,18 @@ import {
   parseColor,
 } from "@workspace/ui/lib/utils/color-utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
 import * as React from "react";
 
 const buttonVariants = cva(
-  "relative inline-flex cursor-pointer items-center justify-center gap-2 border border-primary/50 bg-primary text-sm font-medium whitespace-nowrap text-primary-foreground subpixel-antialiased shadow-md transition-all transition-transform duration-200 before:absolute before:inset-0 before:border-t before:border-white/40 before:bg-gradient-to-b before:from-white/20 before:to-transparent hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-500 dark:text-white",
+  "inline-flex items-center justify-center dark:bg-zinc-500 dark:text-white whitespace-nowrap text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative bg-primary text-primary-foreground hover:bg-primary/90 border border-primary/50 shadow-md before:absolute before:inset-0 before:border-t before:border-white/40 before:bg-gradient-to-b before:from-white/20 before:to-transparent cursor-pointer transition-transform duration-200 active:scale-[0.96] subpixel-antialiased gap-2",
   {
     variants: {
       variant: {
         default: "",
       },
       size: {
-        default: "h-10 rounded-xl px-4 py-2 before:rounded-xl",
-        sm: "h-9 rounded-lg px-3 before:rounded-xl",
+        default: "h-10 px-4 py-2 rounded-xl before:rounded-xl",
+        sm: "h-9 rounded-lg px-3 before:rounded-lg",
         lg: "h-11 rounded-lg px-8 before:rounded-lg",
         icon: "h-10 w-10",
       },
@@ -35,15 +34,11 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   color?: string;
-  asChild?: boolean;
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    { className, variant, size, color, asChild = false, style = {}, ...props },
-    ref,
-  ) => {
-    const Comp = asChild ? Slot.Root : "button";
+  ({ className, variant, size, color, style = {}, ...props }, ref) => {
+    const Comp = "button";
 
     const dynamicStyles = React.useMemo(() => {
       if (!color) return {};
@@ -82,7 +77,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const computedClassName = cn(
       buttonVariants({ variant, size, className }),
       color &&
-        "overflow-hidden before:border-[color:var(--border)] before:from-[color:var(--gradient)] hover:bg-[color:var(--hover-bg)] hover:opacity-80",
+        "hover:bg-[color:var(--hover-bg)] before:border-[color:var(--border)] before:from-[color:var(--gradient)] hover:opacity-80 overflow-hidden",
     );
 
     return (

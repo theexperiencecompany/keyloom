@@ -78,7 +78,7 @@ export function ComponentGallery({
     <div>
       <div
         className={cn(
-          "sticky z-20 -mx-5 mb-8 border-b border-border bg-background/95 px-5 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-8 sm:px-8 lg:-mx-10 lg:px-10",
+          "sticky z-20 mx-1 mb-8 mt-3 rounded-full border border-border bg-background/80 px-2.5 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/70",
           stickyOffsetClass,
         )}
       >

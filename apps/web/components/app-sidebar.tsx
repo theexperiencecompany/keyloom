@@ -132,7 +132,7 @@ export function AppSidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="p-3">
+        <SidebarHeader className="h-12 justify-center border-b border-border px-3 group-data-[collapsible=icon]:px-2">
           <Link
             href="/"
             className="flex items-center gap-2 px-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
@@ -151,7 +151,7 @@ export function AppSidebar() {
           </Link>
         </SidebarHeader>
 
-        <SidebarContent className="gap-1">
+        <SidebarContent className="gap-1 pt-5">
           {SECTIONS.map((section, i) => (
             <React.Fragment key={section.label ?? `section-${i}`}>
               {i > 0 && (
