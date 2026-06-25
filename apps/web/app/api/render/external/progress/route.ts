@@ -32,8 +32,13 @@ function filenameFromKey(key: string | null, fallback: string): string {
 }
 
 function firstErrorMessage(errors: unknown): string {
-  if (!Array.isArray(errors) || errors.length === 0) return "Lambda render failed.";
-  const first = errors[0] as { message?: string; name?: string; stack?: string };
+  if (!Array.isArray(errors) || errors.length === 0)
+    return "Lambda render failed.";
+  const first = errors[0] as {
+    message?: string;
+    name?: string;
+    stack?: string;
+  };
   return first.message ?? first.stack ?? first.name ?? "Lambda render failed.";
 }
 

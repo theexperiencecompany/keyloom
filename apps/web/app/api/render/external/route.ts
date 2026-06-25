@@ -2,11 +2,11 @@ import type { AwsRegion } from "@remotion/lambda/client";
 import { renderMediaOnLambda } from "@remotion/lambda/client";
 import type { Project } from "@workspace/compositions/project";
 import { NextResponse } from "next/server";
-import { consumeRender } from "@/lib/account";
-import { authenticateApiKey } from "@/lib/api-keys";
 import type { ExportOptions } from "@/features/studio/lib/export-options";
 import { prepareProjectForExport } from "@/features/studio/lib/prepare-export-project";
 import { rewriteExternalImageUrls } from "@/features/studio/lib/proxy-external-images";
+import { consumeRender } from "@/lib/account";
+import { authenticateApiKey } from "@/lib/api-keys";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,7 +131,11 @@ export async function POST(request: Request) {
     // we claim one render against quota; accounts without a subscription row are
     // allowed through so a valid key "just works" in development.
     const consume = await consumeRender(auth.user.id);
-    if (!consume.ok && consume.reason && !/no subscription/i.test(consume.reason)) {
+    if (
+      !consume.ok &&
+      consume.reason &&
+      !/no subscription/i.test(consume.reason)
+    ) {
       return NextResponse.json({ error: consume.reason }, { status: 402 });
     }
 
@@ -141,8 +145,7 @@ export async function POST(request: Request) {
         typeof body.options?.bitrate === "number"
           ? body.options.bitrate
           : 8_000_000,
-      scale:
-        typeof body.options?.scale === "number" ? body.options.scale : 1,
+      scale: typeof body.options?.scale === "number" ? body.options.scale : 1,
       keyframeIntervalSec:
         typeof body.options?.keyframeIntervalSec === "number"
           ? body.options.keyframeIntervalSec
