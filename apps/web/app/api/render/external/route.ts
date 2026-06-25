@@ -1,6 +1,6 @@
 import type { AwsRegion } from "@remotion/lambda/client";
 import { renderMediaOnLambda } from "@remotion/lambda/client";
-import type { Project } from "@workspace/compositions/project";
+import { type Project, projectDuration } from "@workspace/compositions/project";
 import { NextResponse } from "next/server";
 import type { ExportOptions } from "@/features/studio/lib/export-options";
 import { prepareProjectForExport } from "@/features/studio/lib/prepare-export-project";
@@ -160,9 +160,29 @@ export async function POST(request: Request) {
       serveUrl,
       functionName,
       concurrencyPerLambda,
-      framesPerLambda,
+      framesPerLambda: minFramesPerLambda,
       maxRetries,
     } = lambdaConfig();
+
+    // Remotion hard-caps a render at 200 Lambda functions (frameCount /
+    // framesPerLambda). A small fixed framesPerLambda (e.g. 20) blows past that
+    // on longer videos — 4290 frames / 20 = 215 → "Too many functions". Derive
+    // the render's frame count from the project (scaled for forceFps) and grow
+    // the chunk size so we stay under the cap, never below the configured floor.
+    const MAX_LAMBDA_FUNCTIONS = 190;
+    const baseFrames = projectDuration(project);
+    const frameCount =
+      options.fps && project.fps && options.fps !== project.fps
+        ? Math.round(baseFrames * (options.fps / project.fps))
+        : baseFrames;
+    const framesPerLambda =
+      frameCount > 0
+        ? Math.max(
+            minFramesPerLambda,
+            Math.ceil(frameCount / MAX_LAMBDA_FUNCTIONS),
+          )
+        : minFramesPerLambda;
+
     const filename = filenameForNow();
 
     const inputProps = rewriteExternalImageUrls(
