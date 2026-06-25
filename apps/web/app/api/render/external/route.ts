@@ -4,7 +4,10 @@ import type { Project } from "@workspace/compositions/project";
 import { NextResponse } from "next/server";
 import type { ExportOptions } from "@/features/studio/lib/export-options";
 import { prepareProjectForExport } from "@/features/studio/lib/prepare-export-project";
-import { rewriteExternalImageUrls } from "@/features/studio/lib/proxy-external-images";
+import {
+  resolveRelativeImageUrls,
+  rewriteExternalImageUrls,
+} from "@/features/studio/lib/proxy-external-images";
 import { consumeRender } from "@/lib/account";
 import { authenticateApiKey } from "@/lib/api-keys";
 
@@ -99,6 +102,36 @@ function proxyBaseUrl(request: Request): string {
   return new URL(request.url).origin;
 }
 
+/**
+ * Origin to resolve a caller's RELATIVE image paths against (so e.g. HaloAI can
+ * keep sending `components/prank/image1.png` and it still renders on Lambda).
+ * Priority: explicit `assetBaseUrl` in the request body → `EXTERNAL_ASSET_BASE_URL`
+ * env → the request's `Origin`/`Referer` header. Returns null when none resolve,
+ * in which case relative paths are left as-is.
+ */
+function assetBaseUrl(
+  request: Request,
+  explicit: string | undefined,
+): string | null {
+  const fromBody = explicit?.trim();
+  if (fromBody && /^https?:\/\//i.test(fromBody)) {
+    return fromBody.replace(/\/$/, "");
+  }
+  const fromEnv = env("EXTERNAL_ASSET_BASE_URL");
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  const origin = request.headers.get("origin")?.trim();
+  if (origin && /^https?:\/\//i.test(origin)) return origin.replace(/\/$/, "");
+  const referer = request.headers.get("referer")?.trim();
+  if (referer) {
+    try {
+      return new URL(referer).origin;
+    } catch {
+      // ignore malformed referer
+    }
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     const auth = await authenticateApiKey(bearer(request));
@@ -112,6 +145,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       project?: unknown;
       options?: Partial<ExportOptions>;
+      /** Absolute origin to resolve relative image paths against (optional). */
+      assetBaseUrl?: string;
     };
 
     assertProject(body.project);
@@ -195,8 +230,16 @@ export async function POST(request: Request) {
 
     const filename = filenameForNow();
 
+    // 1) make the caller's relative image paths absolute (so Lambda doesn't try
+    //    to find them in the render site bundle), then 2) proxy absolute
+    //    external image URLs through our server for Lambda to fetch.
+    const assetBase = assetBaseUrl(request, body.assetBaseUrl);
+    const prepared = prepareProjectForExport(project, options);
+    const absolutized = assetBase
+      ? resolveRelativeImageUrls(prepared, assetBase)
+      : prepared;
     const inputProps = rewriteExternalImageUrls(
-      prepareProjectForExport(project, options),
+      absolutized,
       proxyBaseUrl(request),
     ) as unknown as Record<string, unknown>;
 
