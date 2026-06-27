@@ -24,9 +24,14 @@ export type MemeCaption = {
   color: string;
   /** Stroke (outline) width in canvas pixels. 0 = none. */
   stroke: number;
+  /** Horizontal center of the text, as a fraction of canvas width (0.5 = center). */
+  xFraction: number;
   /** Vertical position of the first line, as a fraction of canvas height. */
   yFraction: number;
 };
+
+/** Axis-aligned box in canvas pixels — used to hit-test the draggable caption. */
+export type Rect = { x: number; y: number; w: number; h: number };
 
 export type MemeFrameInput = {
   background: HTMLImageElement | null;
@@ -91,7 +96,7 @@ function wrapLines(
 export function drawMemeFrame(
   ctx: CanvasRenderingContext2D,
   input: MemeFrameInput,
-) {
+): { captionRect: Rect | null } {
   const { width: W, height: H } = ctx.canvas;
   const { background, video, videoWidth, videoHeight, transform, caption } =
     input;
@@ -118,6 +123,7 @@ export function drawMemeFrame(
   }
 
   // 3. caption
+  let captionRect: Rect | null = null;
   const text = caption.text.trim();
   if (text) {
     ctx.font = `${caption.fontWeight} ${caption.fontSize}px ${caption.fontFamily}`;
@@ -128,10 +134,13 @@ export function drawMemeFrame(
     const maxWidth = W * 0.9;
     const lines = wrapLines(ctx, text, maxWidth);
     const lineHeight = caption.fontSize * 1.2;
-    let y = H * caption.yFraction;
-    const x = W / 2;
+    const top = H * caption.yFraction;
+    const x = W * caption.xFraction;
 
+    let widest = 0;
+    let y = top;
     for (const line of lines) {
+      widest = Math.max(widest, ctx.measureText(line).width);
       if (caption.stroke > 0) {
         ctx.lineWidth = caption.stroke;
         ctx.strokeStyle = "#000";
@@ -141,5 +150,14 @@ export function drawMemeFrame(
       ctx.fillText(line, x, y);
       y += lineHeight;
     }
+
+    captionRect = {
+      x: x - widest / 2,
+      y: top,
+      w: widest,
+      h: lines.length * lineHeight,
+    };
   }
+
+  return { captionRect };
 }

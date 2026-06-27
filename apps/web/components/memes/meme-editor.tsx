@@ -29,7 +29,7 @@ import {
   memeTemplates,
 } from "@/lib/memes";
 import { downloadBlob, recordCanvas, webmToMp4 } from "./meme-export";
-import { drawMemeFrame, type MemeCaption } from "./meme-render";
+import { drawMemeFrame, type MemeCaption, type Rect } from "./meme-render";
 
 // Memes always export 9:16, regardless of a template's native size. The subject
 // clip is composited into this frame over the chosen background.
@@ -84,6 +84,7 @@ export function MemeEditor() {
     fontSize: 64,
     color: "#ffffff",
     stroke: 6,
+    xFraction: 0.5,
     yFraction: 0.08,
   });
 
@@ -91,6 +92,8 @@ export function MemeEditor() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const baseScaleRef = useRef(1);
+  // Caption bounding box in canvas px from the last render — for drag hit-testing.
+  const captionRectRef = useRef<Rect | null>(null);
   const paramsRef = useRef<Params>({
     template,
     bgImg,
@@ -146,7 +149,7 @@ export function MemeEditor() {
     const x = (W - drawW) / 2 + p.offset.x;
     const y = (H - drawH) / 2 + p.offset.y;
 
-    drawMemeFrame(ctx, {
+    const { captionRect } = drawMemeFrame(ctx, {
       background: p.bgImg,
       video,
       videoWidth: vw,
@@ -154,6 +157,7 @@ export function MemeEditor() {
       transform: { x, y, scale },
       caption: p.caption,
     });
+    captionRectRef.current = captionRect;
   }, []);
 
   // Continuous preview loop — reflects drag, zoom, text and the playing clip.
@@ -173,19 +177,39 @@ export function MemeEditor() {
     setZoom(100);
   }, []);
 
-  // Drag-to-reposition the subject.
+  // Drag-to-reposition. A drag that starts on the caption moves the text;
+  // anywhere else moves the subject video.
   const dragRef = useRef<{
+    mode: "caption" | "video";
     startX: number;
     startY: number;
-    base: Offset;
+    baseOffset: Offset;
+    baseCaption: { x: number; y: number };
   } | null>(null);
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (exporting) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const factor = canvas.width / rect.width;
+    const px = (e.clientX - rect.left) * factor;
+    const py = (e.clientY - rect.top) * factor;
+    const cap = captionRectRef.current;
+    const onCaption =
+      !!cap &&
+      px >= cap.x &&
+      px <= cap.x + cap.w &&
+      py >= cap.y &&
+      py <= cap.y + cap.h;
     canvas.setPointerCapture(e.pointerId);
-    dragRef.current = { startX: e.clientX, startY: e.clientY, base: offset };
+    dragRef.current = {
+      mode: onCaption ? "caption" : "video",
+      startX: e.clientX,
+      startY: e.clientY,
+      baseOffset: offset,
+      baseCaption: { x: caption.xFraction, y: caption.yFraction },
+    };
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -194,10 +218,17 @@ export function MemeEditor() {
     if (!drag || !canvas) return;
     const rect = canvas.getBoundingClientRect();
     const factor = canvas.width / rect.width;
-    setOffset({
-      x: drag.base.x + (e.clientX - drag.startX) * factor,
-      y: drag.base.y + (e.clientY - drag.startY) * factor,
-    });
+    const dx = (e.clientX - drag.startX) * factor;
+    const dy = (e.clientY - drag.startY) * factor;
+    if (drag.mode === "caption") {
+      const clamp = (n: number) => Math.min(1, Math.max(0, n));
+      patch({
+        xFraction: clamp(drag.baseCaption.x + dx / canvas.width),
+        yFraction: clamp(drag.baseCaption.y + dy / canvas.height),
+      });
+    } else {
+      setOffset({ x: drag.baseOffset.x + dx, y: drag.baseOffset.y + dy });
+    }
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
