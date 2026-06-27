@@ -15,14 +15,15 @@ The **logic, types, and data live here**; `server.ts` is just the thin MCP
 | `types.ts` | Shared data types (component summary/schema, render options/result). |
 | `config.ts` | Reads the Lambda env config (region / serve URL / function name). |
 | `components.ts` | `listComponents()` + `getComponentSchema(id)` from the registry. |
-| `render.ts` | `renderComponent(id, props, opts)` — Lambda render + poll + presign + optional download. |
-| `server.ts` | The MCP stdio server exposing the three tools. |
+| `render.ts` | `renderComponent(id, props, opts)` / `renderProject(clips, opts)` — Lambda render + poll + presign + optional download. |
+| `server.ts` | The MCP stdio server exposing the four tools. |
 
 ## Tools
 
 - **`list_components`** → every renderable component (`id`, `title`, `description`, `category`, `brandLocked`).
 - **`get_component_schema(componentId)`** → that component's `fields`, `defaultProps`, `agentNotes`, and natural dimensions. Read this before rendering.
-- **`render_component(componentId, props?, fps?, durationInFrames?, scale?, outFile?)`** → renders on Lambda, waits, returns a presigned MP4 `url` (and a local `outFile` path when requested).
+- **`render_component(componentId, props?, fps?, durationInFrames?, scale?, outFile?)`** → renders ONE component on Lambda, waits, returns a presigned MP4 `url` (and a local `outFile` path when requested).
+- **`render_project(clips, fps?, width?, height?, scale?, outFile?)`** → stitches SEVERAL components into one video (a timeline). Each clip is `{ componentId, props?, durationInFrames?, style?, transition? }`; clips play back-to-back with transitions. Renders the `Project` composition on Lambda — the same path the studio export uses.
 
 ## Running
 

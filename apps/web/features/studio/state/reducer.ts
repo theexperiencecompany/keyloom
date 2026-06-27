@@ -10,6 +10,7 @@ import {
 } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import type { SceneTransition } from "@workspace/compositions/transitions";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 
 export type StudioPanel = "library" | "agent" | "upload" | null;
 
@@ -84,11 +85,21 @@ export function studioReducer(
     case "ADD_CLIP": {
       const info = compositionsById[action.compositionId];
       if (!info) return state;
+      const props = structuredClone(info.defaultProps) as Record<
+        string,
+        unknown
+      >;
+      // Size the new clip to its CONTENT, not the static fallback: a composition
+      // with calculateMetadata (e.g. KenBurns/MessageBubbles) grows its timeline
+      // to fit its props, so a fresh clip must start at that resolved length —
+      // otherwise it's clamped to the short registry default and the tail
+      // (later images / messages) is cut off.
+      const { durationInFrames } = resolveCompositionMeta(info, props);
       const clip: Clip = {
         id: makeClipId(),
         compositionId: info.id,
-        props: structuredClone(info.defaultProps) as Record<string, unknown>,
-        durationInFrames: info.durationInFrames,
+        props,
+        durationInFrames,
       };
       return {
         ...state,
@@ -115,9 +126,18 @@ export function studioReducer(
       return { ...state, project: { ...state.project, clips } };
     }
     case "UPDATE_CLIP_PROPS": {
-      const clips = state.project.clips.map((c) =>
-        c.id === action.clipId ? { ...c, props: action.props } : c,
-      );
+      const clips = state.project.clips.map((c) => {
+        if (c.id !== action.clipId) return c;
+        const info = compositionsById[c.compositionId];
+        // Re-fit the clip length to the new props for content-driven
+        // compositions (those with calculateMetadata, e.g. KenBurns grows with
+        // image count / loops). Static compositions keep their current length
+        // so a manual resize isn't clobbered on every edit.
+        const durationInFrames = info?.calculateMetadata
+          ? resolveCompositionMeta(info, action.props).durationInFrames
+          : c.durationInFrames;
+        return { ...c, props: action.props, durationInFrames };
+      });
       return { ...state, project: { ...state.project, clips } };
     }
     case "UPDATE_CLIP_DURATION": {

@@ -239,9 +239,24 @@ export async function POST(request: Request) {
       serveUrl,
       functionName,
       concurrencyPerLambda,
-      framesPerLambda,
+      framesPerLambda: minFramesPerLambda,
       maxRetries,
     } = lambdaConfig();
+
+    // Remotion hard-caps a render at 200 Lambda functions (frameCount /
+    // framesPerLambda). A small fixed framesPerLambda (e.g. 20) blows past that
+    // on longer videos — 4290 frames / 20 = 215 → "Too many functions". Scale
+    // the chunk size up with the frame count so we stay under the cap (with
+    // margin), while never dropping below the configured floor for short clips.
+    const MAX_LAMBDA_FUNCTIONS = 190;
+    const framesPerLambda =
+      typeof forceDurationInFrames === "number" && forceDurationInFrames > 0
+        ? Math.max(
+            minFramesPerLambda,
+            Math.ceil(forceDurationInFrames / MAX_LAMBDA_FUNCTIONS),
+          )
+        : minFramesPerLambda;
+
     const filename = filenameForNow();
 
     const result = await renderMediaOnLambda({

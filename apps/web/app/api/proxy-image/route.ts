@@ -62,6 +62,10 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
+        // Lambda renders the composition's <Img crossOrigin="anonymous">, which
+        // requires the response to be CORS-readable; without this the image
+        // fails to load / taints the canvas.
+        "Access-Control-Allow-Origin": "*",
       },
     });
   } catch (err) {

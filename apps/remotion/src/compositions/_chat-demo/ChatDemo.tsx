@@ -1,5 +1,7 @@
 "use client";
 
+import { ViewOffSlashIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useId, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -953,10 +955,13 @@ export function ImageBubble({
   src,
   from,
   tail,
+  watermark = false,
 }: {
   src: string;
   from: "me" | "them";
   tail: boolean;
+  /** Overlay a "Made with Halo AI" badge along the bottom of the photo. */
+  watermark?: boolean;
 }) {
   const isMe = from === "me";
   const resolved = asset(src) ?? src;
@@ -988,7 +993,14 @@ export function ImageBubble({
   const clipId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
 
   return (
-    <div style={{ width: boxW, height: H }}>
+    <div
+      style={{
+        width: boxW,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: isMe ? "flex-end" : "flex-start",
+      }}
+    >
       <svg
         width="0"
         height="0"
@@ -1015,6 +1027,24 @@ export function ImageBubble({
           filter: "drop-shadow(0 1px 1.5px rgba(0,0,0,0.22))",
         }}
       />
+      {watermark && (
+        // Caption row BELOW the photo, like "Made with Halo AI" on AI videos.
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            paddingLeft: bx + 2,
+            paddingTop: 5,
+            color: "#8e8e93",
+          }}
+        >
+          <HugeiconsIcon icon={ViewOffSlashIcon} size={14} color="#8e8e93" />
+          <span style={{ fontSize: 12, fontWeight: 400 }}>
+            Made with Halo AI
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,15 +3,24 @@ import {
   presignUrl,
   renderMediaOnLambda,
 } from "@remotion/lambda/client";
+import {
+  type Clip,
+  DEFAULT_PROJECT,
+  type Project,
+  projectDuration,
+} from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import { rewriteExternalImageUrls } from "@/features/studio/lib/proxy-external-images";
 import { isAgentVisible } from "@/lib/agent/catalog";
 import { getComponent } from "@/lib/components";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 import { getLambdaConfig } from "./config";
 import { buildDownloadUrl } from "./download-url";
 import type {
+  ProjectClipInput,
   RenderComponentOptions,
   RenderComponentResult,
+  RenderProjectOptions,
   RenderStatus,
   StartRenderResult,
 } from "./types";
@@ -56,8 +65,13 @@ export async function startRender(
   const inputProps = appUrl
     ? (rewriteExternalImageUrls(merged, appUrl) as Record<string, unknown>)
     : merged;
-  const fps = options.fps ?? info.fps;
-  const durationInFrames = options.durationInFrames ?? info.durationInFrames;
+  // Resolve the REAL metadata for these props (runs the composition's
+  // calculateMetadata, e.g. KenBurns/MessageBubbles grow their timeline) — so a
+  // content-driven composition reports/renders its full length, not the short
+  // static registry fallback.
+  const meta = resolveCompositionMeta(info, merged);
+  const fps = options.fps ?? meta.fps;
+  const durationInFrames = options.durationInFrames ?? meta.durationInFrames;
   const scale = Math.min(2, Math.max(0.25, options.scale ?? 1));
   const bitrateKbps = options.videoBitrateKbps ?? 8000;
 
@@ -70,8 +84,12 @@ export async function startRender(
     codec: "h264",
     imageFormat: "jpeg",
     x264Preset: "fast",
-    forceFps: fps,
-    forceDurationInFrames: durationInFrames,
+    // Only FORCE fps/duration when the caller explicitly overrides them.
+    // Otherwise leave them unset so Lambda uses the composition's own resolved
+    // metadata (calculateMetadata) — forcing the static fallback is what clamped
+    // Halo AI to 3s instead of its real ~6s.
+    forceFps: options.fps,
+    forceDurationInFrames: options.durationInFrames,
     scale,
     videoBitrate: `${bitrateKbps}k`,
     privacy: "private",
@@ -84,8 +102,8 @@ export async function startRender(
     bucketName,
     durationInFrames,
     fps,
-    width: info.width,
-    height: info.height,
+    width: meta.width,
+    height: meta.height,
   };
 }
 
@@ -251,6 +269,153 @@ export async function renderComponent(
     compositionId,
     url: status.url ?? "",
     filename: status.filename ?? `${compositionId}.mp4`,
+    outFile,
+    durationInFrames: started.durationInFrames,
+    fps: started.fps,
+    width: started.width,
+    height: started.height,
+  };
+}
+
+/**
+ * Builds the studio `Project` from a list of clip inputs: validates each
+ * component, merges props over its defaults, and fills each clip's duration
+ * from the component's resolved metadata when not given. Mirrors how the studio
+ * stitches the "Project" composition.
+ */
+function buildProject(
+  clips: ProjectClipInput[],
+  options: RenderProjectOptions,
+): Project {
+  if (!Array.isArray(clips) || clips.length === 0) {
+    throw new Error("Provide at least one clip in `clips`.");
+  }
+  const builtClips: Clip[] = clips.map((c, i) => {
+    const compositionId = String(c.componentId ?? "");
+    if (!isAgentVisible(compositionId)) {
+      throw new Error(
+        `Unknown component "${compositionId}" in clips[${i}]. Call list_components for valid ids.`,
+      );
+    }
+    const info = compositionsById[compositionId];
+    if (!info) throw new Error(`Unknown component "${compositionId}".`);
+    const props = {
+      ...(info.defaultProps as Record<string, unknown>),
+      ...(c.props ?? {}),
+    };
+    const durationInFrames =
+      typeof c.durationInFrames === "number" && c.durationInFrames > 0
+        ? Math.round(c.durationInFrames)
+        : resolveCompositionMeta(info, props).durationInFrames;
+    return {
+      id: `clip-${i}`,
+      compositionId,
+      props,
+      durationInFrames,
+      style: c.style as Clip["style"],
+      transition: c.transition as Clip["transition"],
+    };
+  });
+
+  const fps = options.fps ?? DEFAULT_PROJECT.fps;
+  return {
+    fps,
+    width: options.width ?? DEFAULT_PROJECT.width,
+    height: options.height ?? DEFAULT_PROJECT.height,
+    clips: builtClips,
+    // Hard-coded gentle fade between every component (~0.37s). The first clip
+    // ignores transitions; a clip's own `transition` still overrides this.
+    defaultTransition: {
+      kind: "fade",
+      durationInFrames: Math.round(0.37 * fps),
+      timing: { kind: "linear" },
+    },
+  };
+}
+
+/**
+ * Kicks off a Lambda render of a multi-clip PROJECT (the studio timeline) — the
+ * "Project" composition stitches the clips together with transitions, exactly
+ * like the studio export. Returns a handle to poll via `getRenderStatus`.
+ */
+export async function startProjectRender(
+  clips: ProjectClipInput[],
+  options: RenderProjectOptions = {},
+): Promise<StartRenderResult> {
+  const project = buildProject(clips, options);
+  const { region, serveUrl, functionName } = getLambdaConfig();
+
+  // Same image-proxy parity as single-component renders (CDNs that block
+  // Lambda IPs render blank otherwise).
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL)
+    ?.trim()
+    .replace(/\/$/, "");
+  const inputProps = (appUrl
+    ? rewriteExternalImageUrls(project, appUrl)
+    : project) as unknown as Record<string, unknown>;
+
+  const scale = Math.min(2, Math.max(0.25, options.scale ?? 1));
+  const bitrateKbps = options.videoBitrateKbps ?? 8000;
+
+  const { renderId, bucketName } = await renderMediaOnLambda({
+    region,
+    functionName,
+    serveUrl,
+    composition: "Project",
+    inputProps,
+    codec: "h264",
+    imageFormat: "jpeg",
+    x264Preset: "fast",
+    forceFps: project.fps,
+    // Total duration is derived from the clips by the Project composition's
+    // calculateMetadata on Lambda — don't force it.
+    scale,
+    videoBitrate: `${bitrateKbps}k`,
+    privacy: "private",
+    maxRetries: 2,
+  });
+
+  return {
+    compositionId: "Project",
+    renderId,
+    bucketName,
+    durationInFrames: projectDuration(project),
+    fps: project.fps,
+    width: project.width,
+    height: project.height,
+  };
+}
+
+/**
+ * Blocking multi-clip project render — kicks off and waits for completion,
+ * optionally saving the MP4 to `outFile`. Used by the stdio MCP server.
+ */
+export async function renderProject(
+  clips: ProjectClipInput[],
+  options: RenderProjectOptions = {},
+): Promise<RenderComponentResult> {
+  const started = await startProjectRender(clips, options);
+
+  const begun = Date.now();
+  let status = await getRenderStatus(started.renderId, started.bucketName);
+  while (!status.done) {
+    if (Date.now() - begun > MAX_POLL_MS) {
+      throw new Error("Lambda render timed out after 8 minutes.");
+    }
+    await sleep(POLL_INTERVAL_MS);
+    status = await getRenderStatus(started.renderId, started.bucketName);
+  }
+
+  let outFile: string | undefined;
+  if (options.outFile && status.url) {
+    await downloadToFile(status.url, options.outFile);
+    outFile = options.outFile;
+  }
+
+  return {
+    compositionId: "Project",
+    url: status.url ?? "",
+    filename: status.filename ?? "project.mp4",
     outFile,
     durationInFrames: started.durationInFrames,
     fps: started.fps,

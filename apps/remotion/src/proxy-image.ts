@@ -69,6 +69,14 @@ function proxyExternal(src: string | undefined | null, prefix: string): string {
 }
 
 export function proxyExternalImg(src: string | undefined | null): string {
+  // During a CLI / Lambda render the page is served from Remotion's static
+  // bundle (on Lambda, an S3 site). A same-origin "/api/img/<base64>" proxy
+  // path would resolve against that bundle origin and 404
+  // (…s3….amazonaws.com/api/img/…). The render endpoints already rewrite
+  // external images to an absolute "/api/proxy-image?url=…" URL the headless
+  // Chromium can fetch directly, so pass through untouched here — same guard
+  // `proxyExternalAudio` uses.
+  if (isInsideRemotionBundle()) return src ?? "";
   return proxyExternal(src, IMG_PROXY_PREFIX);
 }
 

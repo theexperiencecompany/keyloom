@@ -126,6 +126,7 @@ export const messageBubblesDefaultProps: MessageBubblesProps = {
   theme: "dark",
   showKeyboard: true,
   galleryImages: [],
+  showImageWatermark: true,
 };
 
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
@@ -182,6 +183,11 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
       max: 5,
     },
     { kind: "switch", key: "showKeyboard", label: "Keyboard (typing)" },
+    {
+      kind: "switch",
+      key: "showImageWatermark",
+      label: 'Photo watermark ("Made with Halo AI")',
+    },
     {
       kind: "select",
       key: "theme",

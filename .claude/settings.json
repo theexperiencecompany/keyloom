@@ -93,11 +93,19 @@
       "Bash(curl -s --max-time 60 http://localhost:3000/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 60 http://localhost:3000/)",
       "Bash(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,display_aspect_ratio -of default=noprint_wrappers=1 apps/web/public/landing/wolfofwallstreet.mp4)",
-      "Bash(npx biome *)"
+      "Bash(npx biome *)",
+      "Bash(wait)",
+      "Bash(cd /home/sanku/work/aesthetic/apps/web; echo \"=== lambda project render route ===\"; sed -n '1,120p' app/api/render/lambda/route.ts 2>/dev/null | grep -n \"composition\\\\|Project\\\\|renderMediaOnLambda\\\\|inputProps\\\\|forceDuration\\\\|forceFps\\\\|calculateMetadata\\\\|clips\" ; echo \"=== Project composition registration / calculateMetadata ===\"; grep -rn \"id=\\\\\"Project\\\\\"\\\\|id='Project'\\\\|calculateMetadata\\\\|defaultProps\" apps/../apps/remotion/src/Root.tsx apps/../apps/remotion/src/index.ts 2>/dev/null | head; find /home/sanku/work/aesthetic/apps/remotion/src -maxdepth 2 -name \"Root*.tsx\" -o -maxdepth 2 -name \"index.ts\" | head)",
+      "Read(//home/sanku/work/aesthetic/apps/remotion/src/**)",
+      "Bash(cd /home/sanku/work/aesthetic/apps/web; grep -rn \"id:\" ../remotion/src/compositions/Text/meta.ts | head -1; grep -n \"defaultProps\" ../remotion/src/compositions/Text/meta.ts; sed -n '/textDefaultProps/,/};/p' ../remotion/src/compositions/Text/meta.ts | head -20)",
+      "Bash(gh auth *)",
+      "Bash(npx vercel *)",
+      "Bash(NODE_OPTIONS=\"--max-old-space-size=6144\" bun run --cwd apps/web build)"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components",
-      "/home/sanku/work/aesthetic/apps/web/components/creators"
+      "/home/sanku/work/aesthetic/apps/web/components/creators",
+      "/home/sanku/work/remotion/src/compositions/Text"
     ]
   }
 }
