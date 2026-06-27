@@ -102,7 +102,8 @@
       "Bash(gh auth *)",
       "Bash(npx vercel *)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=6144\" bun run --cwd apps/web build)",
-      "Bash(echo \"merge commit exit $?\")"
+      "Bash(echo \"merge commit exit $?\")",
+      "Bash(echo \"EXIT_GREP=$?\")"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components",

@@ -3,9 +3,17 @@
 import {
   Copy01Icon,
   Delete02Icon,
+  EyeIcon,
+  FolderLibraryIcon,
+  Menu01Icon,
+  PencilEdit02Icon,
+  PlayCircleIcon,
   PlusSignIcon,
+  RefreshIcon,
+  Search01Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -26,27 +34,95 @@ type KeyRow = {
   createdAt: string;
 };
 
-// Mirrors the tools registered in features/mcp/server.ts.
-const TOOLS = [
+// Mirrors the tools registered in app/api/[transport]/route.ts.
+type Tool = {
+  name: string;
+  title: string;
+  description: string;
+  icon: IconSvgElement;
+  args: string[];
+};
+
+const TOOL_GROUPS: { label: string; blurb: string; tools: Tool[] }[] = [
   {
-    name: "list_components",
-    title: "List video components",
-    description:
-      "Lists every component you can fill and render — id, title, description, category, and brand-lock status. Call this first to discover ids.",
+    label: "Discover & render",
+    blurb: "Browse the built-in library and turn a component into an MP4.",
+    tools: [
+      {
+        name: "list_components",
+        title: "List video components",
+        description:
+          "Lists every component you can fill and render — id, title, description, category, and brand-lock status. Call this first to discover ids.",
+        icon: Menu01Icon,
+        args: [],
+      },
+      {
+        name: "get_component_schema",
+        title: "Get a component's field schema",
+        description:
+          "Returns one component's editing contract: fields, default props, agent notes, and natural dimensions (fps / width / height / duration).",
+        icon: Search01Icon,
+        args: ["componentId"],
+      },
+      {
+        name: "render_component",
+        title: "Render a component to video",
+        description:
+          "Starts an MP4 render with your props (merged over defaults). Returns a renderId + bucketName to poll. Counts one render against your plan quota.",
+        icon: PlayCircleIcon,
+        args: ["componentId", "props?", "fps?", "durationInFrames?", "scale?"],
+      },
+      {
+        name: "get_render_status",
+        title: "Check a render's status",
+        description:
+          "Polls a render you started. Returns { done, progress }, plus a downloadable url + filename once it's finished.",
+        icon: RefreshIcon,
+        args: ["renderId", "bucketName"],
+      },
+    ],
   },
   {
-    name: "get_component_schema",
-    title: "Get a component's field schema",
-    description:
-      "Returns one component's editing contract: fields, default props, agent notes, and natural dimensions (fps / width / height / duration).",
+    label: "Fork & edit",
+    blurb: "Copy a built-in into your own editable version and rewrite it.",
+    tools: [
+      {
+        name: "copy_component",
+        title: "Copy a component to make your own",
+        description:
+          "Forks a built-in into your own editable version. Returns the new component's id + current code — then change it with edit_component.",
+        icon: Copy01Icon,
+        args: ["componentId", "name?"],
+      },
+      {
+        name: "list_my_components",
+        title: "List your components",
+        description:
+          "Lists the components you've made — id, name, what they were copied from, and last edit time.",
+        icon: FolderLibraryIcon,
+        args: [],
+      },
+      {
+        name: "view_component",
+        title: "View a component's source",
+        description:
+          "Gets the full source of any component — one of your copies or a built-in — so you can read it before editing.",
+        icon: EyeIcon,
+        args: ["id"],
+      },
+      {
+        name: "edit_component",
+        title: "Edit one of your components",
+        description:
+          "Replaces the full source of one of your copies. It's validated before saving, so a bad edit comes back with the error to fix and retry.",
+        icon: PencilEdit02Icon,
+        args: ["id", "code"],
+      },
+    ],
   },
-  {
-    name: "render_component",
-    title: "Render a component to video",
-    description:
-      "Renders a component to MP4 with your props (merged over defaults) on Lambda, then returns a time-limited download URL.",
-  },
-] as const;
+];
+
+const TOOL_COUNT = TOOL_GROUPS.reduce((n, g) => n + g.tools.length, 0);
 
 type Props = {
   mcpUrl: string;
@@ -152,26 +228,66 @@ export function McpClient({ mcpUrl, isPro, keys }: Props) {
           <CardDescription>
             What your MCP client can call once connected.
           </CardDescription>
+          <CardAction>
+            <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {TOOL_COUNT} tools
+            </span>
+          </CardAction>
         </CardHeader>
-        <CardContent>
-          <ul className="flex flex-col gap-3">
-            {TOOLS.map((tool) => (
-              <li
-                key={tool.name}
-                className="rounded-md border border-border px-3 py-3"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-                    {tool.name}
-                  </code>
-                  <span className="text-sm font-medium">{tool.title}</span>
-                </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                  {tool.description}
+        <CardContent className="flex max-h-80 flex-col gap-6 overflow-y-auto pr-1">
+          {TOOL_GROUPS.map((group) => (
+            <div key={group.label} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-0.5">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </h3>
+                <p className="text-xs text-muted-foreground/70">
+                  {group.blurb}
                 </p>
-              </li>
-            ))}
-          </ul>
+              </div>
+              <ul className="flex flex-col gap-2">
+                {group.tools.map((tool) => (
+                  <li
+                    key={tool.name}
+                    className="group flex gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-muted/40"
+                  >
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                      <HugeiconsIcon icon={tool.icon} size={18} />
+                    </div>
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                          {tool.name}
+                        </code>
+                        <span className="text-sm font-medium">
+                          {tool.title}
+                        </span>
+                      </div>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        {tool.description}
+                      </p>
+                      {tool.args.length > 0 ? (
+                        <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                          {tool.args.map((arg) => (
+                            <code
+                              key={arg}
+                              className="rounded border border-border/60 bg-muted/50 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                            >
+                              {arg}
+                            </code>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground/60">
+                          No arguments
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </CardContent>
       </Card>
 

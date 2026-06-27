@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeft01Icon,
   Download01Icon,
   ImageAdd02Icon,
   PauseIcon,
@@ -35,14 +36,20 @@ import {
   type MemeBackground,
   type MemeTemplate,
   memeBackgrounds,
-  memeTemplates,
 } from "@/lib/memes";
-import { downloadBlob, recordCanvas, webmToMp4 } from "./meme-export";
+import {
+  downloadBlob,
+  encodePlaythroughToMp4,
+  isFastExportSupported,
+  recordCanvas,
+  webmToMp4,
+} from "./meme-export";
 
 // Memes always export 9:16, regardless of a template's native size. The Stage is
 // authored at this resolution and CSS-scaled down to fit the screen.
 const OUTPUT_WIDTH = 1080;
 const OUTPUT_HEIGHT = 1920;
+const EXPORT_FPS = 30;
 
 const FONTS = [
   { value: "Impact", label: "Impact" },
@@ -95,10 +102,13 @@ function coverCrop(img: HTMLImageElement) {
   return { x: (iw - cw) / 2, y: (ih - ch) / 2, width: cw, height: ch };
 }
 
-export function MemeEditor() {
-  const [template, setTemplate] = useState<MemeTemplate>(
-    memeTemplates[0] as MemeTemplate,
-  );
+export function MemeEditor({
+  template,
+  onBack,
+}: {
+  template: MemeTemplate;
+  onBack: () => void;
+}) {
   const [background, setBackground] = useState<MemeBackground | null>(
     memeBackgrounds[0] ?? null,
   );
@@ -336,8 +346,36 @@ export function MemeEditor() {
     const prevPaused = videoEl.paused;
     const withAudio = !!template.hasAudio;
     setExporting(true);
-    setStatus("Recording…");
+
+    // Preferred path: fast WebCodecs capture of one playthrough. Skipped when
+    // the clip has audio (this path is video-only) or the browser lacks the
+    // frame-callback/WebCodecs APIs — both fall through to MediaRecorder.
+    const canEncode = isFastExportSupported() && !withAudio;
+
     try {
+      if (canEncode) {
+        setStatus("Encoding…");
+        videoEl.loop = false;
+        videoEl.muted = true;
+        const mp4 = await encodePlaythroughToMp4({
+          video: videoEl,
+          canvas,
+          width: OUTPUT_WIDTH,
+          height: OUTPUT_HEIGHT,
+          fps: EXPORT_FPS,
+          // Composite the just-presented video frame onto the Konva canvas.
+          drawFrame: () => layer.draw(),
+          onProgress: (f) => setStatus(`Encoding… ${Math.round(f * 100)}%`),
+        });
+        if (mp4) {
+          downloadBlob(mp4, `${template.id}-meme.mp4`);
+          setStatus("Downloaded ✓");
+          return;
+        }
+        // mp4 === null → fast path unavailable here; fall back below.
+      }
+
+      setStatus("Recording…");
       videoEl.loop = false;
       videoEl.muted = !withAudio;
       const webm = await recordCanvas({
@@ -370,6 +408,12 @@ export function MemeEditor() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
       {/* Preview */}
       <div className="flex flex-col items-center gap-4">
+        <div className="w-full">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
+            Templates
+          </Button>
+        </div>
         <div
           ref={wrapRef}
           className="relative flex h-[70vh] w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/30 p-4"
@@ -499,27 +543,6 @@ export function MemeEditor() {
 
       {/* Inspector */}
       <div className="flex flex-col gap-6">
-        <section className="space-y-2">
-          <Label>Template</Label>
-          <div className="flex flex-wrap gap-2">
-            {memeTemplates.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTemplate(t)}
-                className={cn(
-                  "rounded-md border px-3 py-1.5 text-sm transition-colors",
-                  t.id === template.id
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:bg-muted",
-                )}
-              >
-                {t.title}
-              </button>
-            ))}
-          </div>
-        </section>
-
         <section className="space-y-2">
           <Label>Background</Label>
           <div className="grid grid-cols-3 gap-2">

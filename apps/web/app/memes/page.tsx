@@ -1,4 +1,4 @@
-import { MemeEditor } from "@/components/memes/meme-editor";
+import { MemeStudio } from "@/components/memes/meme-studio";
 
 export default function MemesPage() {
   return (
@@ -10,7 +10,7 @@ export default function MemesPage() {
           and download the MP4.
         </p>
       </div>
-      <MemeEditor />
+      <MemeStudio />
     </div>
   );
 }
