@@ -15,6 +15,18 @@ const CDN = (
   process.env.NEXT_PUBLIC_MEME_CDN ?? "https://cdn.yoursite.com"
 ).replace(/\/$/, "");
 
+// By default we serve assets through our same-origin proxy (/api/meme-asset) so
+// the export canvas never taints — works even when the CDN sends no CORS headers
+// (e.g. the r2.dev managed URL). Once you serve the bucket from a custom domain
+// with a CORS policy, set NEXT_PUBLIC_MEME_DIRECT=1 to skip the proxy hop.
+const DIRECT = process.env.NEXT_PUBLIC_MEME_DIRECT === "1";
+
+/** Build the URL the browser loads for a meme asset at `path` (no leading /). */
+export function memeAsset(path: string): string {
+  const direct = `${CDN}/${path.replace(/^\//, "")}`;
+  return DIRECT ? direct : `/api/meme-asset?u=${encodeURIComponent(direct)}`;
+}
+
 export type MemeTemplate = {
   id: string;
   title: string;
@@ -33,27 +45,23 @@ export type MemeBackground = {
   src: string;
 };
 
-/** Replace these with your real uploads. ids must be unique + stable. */
+/** Replace/extend with your real uploads. ids must be unique + stable. */
 export const memeTemplates: MemeTemplate[] = [
   {
-    id: "trump-spiderman",
-    title: "Trump",
-    src: `${CDN}/memes/templates/trump-spiderman.webm`,
-    width: 1080,
-    height: 1920,
-    hasAudio: true,
+    id: "aww",
+    title: "Aww",
+    src: memeAsset("memes/aww_transparent.webm"),
+    // native size of the clip — used only for default framing math; the meme
+    // output is always 9:16 (see OUTPUT_WIDTH/HEIGHT in the editor).
+    width: 1354,
+    height: 1080,
+    hasAudio: false,
   },
 ];
 
-export const memeBackgrounds: MemeBackground[] = [
-  {
-    id: "office",
-    title: "Office",
-    src: `${CDN}/memes/backgrounds/office.jpg`,
-  },
-  {
-    id: "city",
-    title: "City",
-    src: `${CDN}/memes/backgrounds/city.jpg`,
-  },
-];
+/**
+ * Curated backgrounds. Empty for now — none uploaded yet, so the editor shows
+ * just the "Upload" tile and users bring their own. Add CDN-hosted entries here
+ * once you upload some.
+ */
+export const memeBackgrounds: MemeBackground[] = [];
