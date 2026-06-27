@@ -31,6 +31,11 @@ import {
 import { downloadBlob, recordCanvas, webmToMp4 } from "./meme-export";
 import { drawMemeFrame, type MemeCaption } from "./meme-render";
 
+// Memes always export 9:16, regardless of a template's native size. The subject
+// clip is composited into this frame over the chosen background.
+const OUTPUT_WIDTH = 1080;
+const OUTPUT_HEIGHT = 1920;
+
 const FONTS = [
   { value: "Impact, sans-serif", label: "Impact" },
   { value: "Arial, sans-serif", label: "Arial" },
@@ -118,7 +123,9 @@ export function MemeEditor() {
     if (!canvas || !video) return;
     const vw = video.videoWidth || template.width;
     const vh = video.videoHeight || template.height;
-    baseScaleRef.current = Math.max(canvas.width / vw, canvas.height / vh);
+    // contain: show the whole subject inside the 9:16 frame by default; the user
+    // can zoom in to crop. (For a native 9:16 clip, contain === cover.)
+    baseScaleRef.current = Math.min(canvas.width / vw, canvas.height / vh);
   }, [template.width, template.height]);
 
   const render = useCallback(() => {
@@ -282,8 +289,8 @@ export function MemeEditor() {
         <div className="relative flex w-full justify-center rounded-xl border border-border bg-muted/30 p-4">
           <canvas
             ref={canvasRef}
-            width={template.width}
-            height={template.height}
+            width={OUTPUT_WIDTH}
+            height={OUTPUT_HEIGHT}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}

@@ -93,7 +93,8 @@
       "Bash(curl -s --max-time 60 http://localhost:3000/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 60 http://localhost:3000/)",
       "Bash(ffprobe -v error -select_streams v:0 -show_entries stream=width,height,display_aspect_ratio -of default=noprint_wrappers=1 apps/web/public/landing/wolfofwallstreet.mp4)",
-      "Bash(npx biome *)"
+      "Bash(npx biome *)",
+      "Bash(echo \"commit exit $?\")"
     ],
     "additionalDirectories": [
       "/home/sanku/work/aesthetic/.claude/skills/apple-human-interface-skills/skills/components/packages/ui/src/components",
