@@ -3,7 +3,7 @@ import { measureText } from "@remotion/layout-utils";
 import { useEffect, useMemo, useState } from "react";
 import { AbsoluteFill, Easing } from "remotion";
 import type { ClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import { resolveTitleStyle, snap, snapZero } from "../title-shared";
@@ -188,7 +188,7 @@ function Word({
 
 export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
   phrases,
-  fontSize,
+  fontSize: fontSizeProp,
   speed,
   clipStyle,
 }) => {
@@ -196,6 +196,12 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
   // out over fewer frames. meta's duration divides by the same factor so the
   // clip length tracks it.
   const frame = useDesignFrame() * normalizeSpeed(speed);
+  const { vmin } = useCanvasLayout();
+  // The authored `fontSize` was a px value against a 1080-min-side design;
+  // reflow it relative to the actual canvas so the line scales per orientation.
+  const fontSize = vmin((fontSizeProp / 1080) * 100);
+  const shift = vmin((SHIFT / 1080) * 100);
+  const introShift = vmin((INTRO_SHIFT / 1080) * 100);
   const s = resolveTitleStyle(clipStyle);
   useFontReady(s.fontFamily);
   const fontSettled = useFontSettled(s.fontFamily);
@@ -252,7 +258,7 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
             key={`x-${i}`}
             text={box.text}
             cx={box.cx}
-            dy={-exit * SHIFT}
+            dy={-exit * shift}
             opacity={1 - exit}
             blur={exit * 8}
           />,
@@ -267,7 +273,7 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
           key={`e-${j}`}
           text={box.text}
           cx={box.cx}
-          dy={(1 - enter) * SHIFT}
+          dy={(1 - enter) * shift}
           opacity={enter}
           blur={(1 - enter) * 8}
         />,
@@ -289,7 +295,7 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
           key={`s-${i}`}
           text={box.text}
           cx={box.cx}
-          dy={(1 - introP) * INTRO_SHIFT}
+          dy={(1 - introP) * introShift}
           opacity={introP}
           blur={(1 - introP) * 6}
         />
@@ -298,35 +304,30 @@ export const TextMagicMove: React.FC<TextMagicMoveProps> = ({
   }
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7.4)}px`,
+      }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
+          position: "relative",
+          width: "100%",
+          height: 0,
+          fontSize,
+          fontWeight: FONT_WEIGHT,
+          letterSpacing: LETTER_SPACING,
+          lineHeight: 1,
         }}
       >
-        <div
-          style={{
-            position: "relative",
-            width: "100%",
-            height: 0,
-            fontSize,
-            fontWeight: FONT_WEIGHT,
-            letterSpacing: LETTER_SPACING,
-            lineHeight: 1,
-          }}
-        >
-          {words}
-        </div>
-      </AbsoluteFill>
-    </FitContent>
+        {words}
+      </div>
+    </AbsoluteFill>
   );
 };

@@ -41,6 +41,11 @@ export function parseProjectJson(text: string): ParseResult {
     return { ok: false, error: "Missing or invalid `clips` array." };
 
   const warnings: string[] = [];
+  // Parse forked components first so the clip loop can recognize their ids.
+  const customComponents = parseCustomComponents(
+    obj.customComponents,
+    warnings,
+  );
   const validClips = [];
   for (let i = 0; i < clips.length; i++) {
     const c = clips[i] as Record<string, unknown> | null;
@@ -56,7 +61,12 @@ export function parseProjectJson(text: string): ParseResult {
     if (!c.props || typeof c.props !== "object") {
       return { ok: false, error: `clips[${i}].props must be an object.` };
     }
-    if (!compositionsById[c.compositionId]) {
+    // Forked components are resolved from `customComponents`, not the static
+    // registry — don't warn on them.
+    if (
+      !customComponents?.[c.compositionId] &&
+      !compositionsById[c.compositionId]
+    ) {
       warnings.push(
         `Unknown compositionId "${c.compositionId}" at clips[${i}] — clip kept but will render as Missing scene.`,
       );
@@ -79,26 +89,22 @@ export function parseProjectJson(text: string): ParseResult {
 
     // Legacy migration: projects saved before the universal ClipStyle change
     // stored these on `clip.props`. Move them onto `clip.style` so the
-    // current compositions actually consume them. Locked comps keep their
-    // own internal `backgroundColor` prop, so don't migrate those.
-    const isLocked = info?.brandMode === "locked";
+    // current compositions actually consume them.
     let mergedStyle: ClipStyle | undefined = explicitStyle;
-    if (!isLocked) {
-      const candidates: Array<keyof ClipStyle> = [
-        "backgroundColor",
-        "textColor",
-        "fontFamily",
-        "accentColor",
-      ];
-      for (const key of candidates) {
-        const fromProps = propsObj[key];
-        if (
-          typeof fromProps === "string" &&
-          fromProps !== "" &&
-          !mergedStyle?.[key]
-        ) {
-          mergedStyle = { ...(mergedStyle ?? {}), [key]: fromProps };
-        }
+    const candidates: Array<keyof ClipStyle> = [
+      "backgroundColor",
+      "textColor",
+      "fontFamily",
+      "accentColor",
+    ];
+    for (const key of candidates) {
+      const fromProps = propsObj[key];
+      if (
+        typeof fromProps === "string" &&
+        fromProps !== "" &&
+        !mergedStyle?.[key]
+      ) {
+        mergedStyle = { ...(mergedStyle ?? {}), [key]: fromProps };
       }
     }
 
@@ -138,8 +144,48 @@ export function parseProjectJson(text: string): ParseResult {
       clips: validClips,
       ...(defaultTransition ? { defaultTransition } : {}),
       ...(audio ? { audio } : {}),
+      ...(customComponents ? { customComponents } : {}),
     },
   };
+}
+
+/**
+ * Parse the `customComponents` map (user-forked compositions). Each entry must
+ * carry a non-empty `code` string and a `baseId`; malformed entries are
+ * dropped with a warning rather than failing the whole load.
+ */
+function parseCustomComponents(
+  raw: unknown,
+  warnings: string[],
+): Project["customComponents"] | undefined {
+  if (!raw) return undefined;
+  if (typeof raw !== "object") {
+    warnings.push("`customComponents` must be an object — ignored.");
+    return undefined;
+  }
+  const out: NonNullable<Project["customComponents"]> = {};
+  for (const [id, value] of Object.entries(raw as Record<string, unknown>)) {
+    const v = value as Record<string, unknown> | null;
+    if (!v || typeof v !== "object") {
+      warnings.push(`customComponents["${id}"] is not an object — dropped.`);
+      continue;
+    }
+    if (typeof v.code !== "string" || v.code.length === 0) {
+      warnings.push(`customComponents["${id}"].code missing — dropped.`);
+      continue;
+    }
+    if (typeof v.baseId !== "string" || v.baseId.length === 0) {
+      warnings.push(`customComponents["${id}"].baseId missing — dropped.`);
+      continue;
+    }
+    out[id] = {
+      baseId: v.baseId,
+      name: typeof v.name === "string" ? v.name : v.baseId,
+      code: v.code,
+      ...(typeof v.exportName === "string" ? { exportName: v.exportName } : {}),
+    };
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 function parseAudio(raw: unknown, warnings: string[]): ProjectAudio | null {

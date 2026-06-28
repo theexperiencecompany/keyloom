@@ -1,9 +1,9 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type LogoItem = {
@@ -30,6 +30,7 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vw, vh, vmin, isPortrait } = useCanvasLayout();
   const isDark = theme === "dark";
   const s = resolveClipStyle(clipStyle, {
     background: "#f7f7f9",
@@ -50,56 +51,63 @@ export const LogoCloud: React.FC<LogoCloudProps> = ({
     config: { damping: 16, stiffness: 130, mass: 0.7 },
   });
 
+  // Reflow the grid: a wide row of logos in landscape/square, a narrower
+  // multi-row stack in portrait so logos stay legible instead of crushing.
+  const maxCols = isPortrait ? 2 : 5;
+  const cols = Math.max(1, Math.min(logos.length, maxCols));
+
   return (
-    <FitContent designWidth={1280} designHeight={720} background={bg}>
-      <AbsoluteFill
+    <AbsoluteFill
+      style={{
+        background: bg,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(11)}px`,
+        fontFamily,
+      }}
+    >
+      <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          fontFamily,
+          fontSize: vmin(3),
+          letterSpacing: "0.18em",
+          color: muted,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          marginBottom: vmin(7.8),
+          opacity: headlinePop,
+          transform: `translate3d(0, ${snap((1 - headlinePop) * vmin(1.7))}px, 0)`,
         }}
       >
-        <div
-          style={{
-            fontSize: 22,
-            letterSpacing: "0.18em",
-            color: muted,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            marginBottom: 56,
-            opacity: headlinePop,
-            transform: `translate3d(0, ${snap((1 - headlinePop) * 12)}px, 0)`,
-          }}
-        >
-          {headline}
-        </div>
+        {headline}
+      </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${Math.min(logos.length, 5)}, minmax(0, 1fr))`,
-            gap: 56,
-            alignItems: "center",
-            justifyItems: "center",
-            width: "100%",
-            maxWidth: 1100,
-          }}
-        >
-          {logos.map((logo, i) => (
-            <LogoItemView
-              key={i}
-              logo={logo}
-              frame={frame - (D_LOGOS_START + i * STAGGER)}
-              fps={fps}
-              color={text}
-            />
-          ))}
-        </div>
-      </AbsoluteFill>
-    </FitContent>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+          gap: vmin(7.8),
+          alignItems: "center",
+          justifyItems: "center",
+          width: "100%",
+          maxWidth: vw(86),
+        }}
+      >
+        {logos.map((logo, i) => (
+          <LogoItemView
+            key={i}
+            logo={logo}
+            frame={frame - (D_LOGOS_START + i * STAGGER)}
+            fps={fps}
+            color={text}
+            maxW={Math.min(vw(14), vh(25))}
+            maxH={vmin(8.3)}
+            fontSize={vmin(3.9)}
+          />
+        ))}
+      </div>
+    </AbsoluteFill>
   );
 };
 
@@ -108,11 +116,17 @@ function LogoItemView({
   frame,
   fps,
   color,
+  maxW,
+  maxH,
+  fontSize,
 }: {
   logo: LogoItem;
   frame: number;
   fps: number;
   color: string;
+  maxW: number;
+  maxH: number;
+  fontSize: number;
 }) {
   const reveal = spring({
     frame,
@@ -127,8 +141,8 @@ function LogoItemView({
         crossOrigin="anonymous"
         alt={logo.name}
         style={{
-          maxWidth: 180,
-          maxHeight: 60,
+          maxWidth: maxW,
+          maxHeight: maxH,
           objectFit: "contain",
           opacity: reveal * 0.85,
           transform: `translate3d(0, ${snap((1 - reveal) * 14)}px, 0) scale(${0.94 + reveal * 0.06})`,
@@ -141,7 +155,7 @@ function LogoItemView({
   return (
     <div
       style={{
-        fontSize: 28,
+        fontSize,
         fontWeight: 700,
         color,
         letterSpacing: "-0.01em",

@@ -9,8 +9,8 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { proxyExternalImg } from "../../proxy-image";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type CardRevealProps = {
@@ -200,8 +200,12 @@ export const CardReveal: React.FC<CardRevealProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
-  const width = 1920;
-  const height = 1080;
+  // Use the real canvas dimensions: every geometry value below (cx, unit,
+  // ballD, cardW, groundY, the contact shadow, confetti origin, etc.) is
+  // already derived from width/height/unit, so feeding the actual canvas size
+  // makes the whole physics scene REFLOW to any aspect ratio. The animation
+  // timing/spring math is untouched.
+  const { width, height } = useCanvasLayout();
 
   const s = resolveClipStyle(clipStyle, {
     background: "#0E0E12",
@@ -322,141 +326,136 @@ export const CardReveal: React.FC<CardRevealProps> = ({
   const showFront = Math.cos(angleRad) < 0; // past 90° → image side faces us
 
   return (
-    <FitContent
-      designWidth={width}
-      designHeight={height}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        fontFamily: s.fontFamily,
+        overflow: "hidden",
+      }}
     >
-      <AbsoluteFill
+      {/* Contact shadow on the floor — tightens + darkens as the ball lands. */}
+      <div
         style={{
-          fontFamily: s.fontFamily,
-          overflow: "hidden",
+          position: "absolute",
+          left: cx,
+          top: groundY,
+          width: shadowW,
+          height: shadowW * 0.26,
+          transform: "translate(-50%, -50%)",
+          borderRadius: "50%",
+          background: "#000000",
+          opacity: shadowOpacity,
+          filter: `blur(${unit * 0.012}px)`,
+        }}
+      />
+
+      {/* Impact ripples — one per floor contact. */}
+      <Ripple
+        frame={frame}
+        start={Math.round(DROP_END * IMPACTS[0]!)}
+        cx={cx}
+        y={groundY}
+        maxR={ballD * 1.7}
+        color={s.accent}
+      />
+      <Ripple
+        frame={frame}
+        start={Math.round(DROP_END * IMPACTS[1]!)}
+        cx={cx}
+        y={groundY}
+        maxR={ballD * 1.1}
+        color={s.accent}
+      />
+
+      {/* Ball → square → flip. One flat element; the flip is a 2D scaleX so it
+          rasterizes correctly in every export path. */}
+      <div
+        style={{
+          position: "absolute",
+          left: cx,
+          top: centerY,
+          transform: `translate(-50%, -50%) scaleX(${sx * flipScaleX}) scaleY(${sy})`,
         }}
       >
-        {/* Contact shadow on the floor — tightens + darkens as the ball lands. */}
         <div
           style={{
-            position: "absolute",
-            left: cx,
-            top: groundY,
-            width: shadowW,
-            height: shadowW * 0.26,
-            transform: "translate(-50%, -50%)",
-            borderRadius: "50%",
-            background: "#000000",
-            opacity: shadowOpacity,
-            filter: `blur(${unit * 0.012}px)`,
+            width: w,
+            height: h,
+            borderRadius: r,
+            overflow: "hidden",
+            background: "#ffffff",
+            boxShadow: faceShadow,
+            transform: `scale(${popScale})`,
           }}
-        />
+        >
+          {showFront &&
+            (resolved ? (
+              <Img
+                src={resolved}
+                crossOrigin="anonymous"
+                alt=""
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#e9e9ee",
+                  color: "#9aa0aa",
+                  fontSize: unit * 0.03,
+                  fontWeight: 500,
+                }}
+              >
+                Upload an image
+              </div>
+            ))}
+        </div>
+      </div>
 
-        {/* Impact ripples — one per floor contact. */}
-        <Ripple
-          frame={frame}
-          start={Math.round(DROP_END * IMPACTS[0]!)}
-          cx={cx}
-          y={groundY}
-          maxR={ballD * 1.7}
-          color={s.accent}
-        />
-        <Ripple
-          frame={frame}
-          start={Math.round(DROP_END * IMPACTS[1]!)}
-          cx={cx}
-          y={groundY}
-          maxR={ballD * 1.1}
-          color={s.accent}
-        />
-
-        {/* Ball → square → flip. One flat element; the flip is a 2D scaleX so it
-          rasterizes correctly in every export path. */}
+      {/* Accent focus-frame — snaps around the square on reveal (flat stroke). */}
+      {frameIn > 0.01 && (
         <div
           style={{
             position: "absolute",
             left: cx,
             top: centerY,
-            transform: `translate(-50%, -50%) scaleX(${sx * flipScaleX}) scaleY(${sy})`,
+            width: cardW + framePad * 2,
+            height: cardH + framePad * 2,
+            transform: `translate(-50%, -50%) scale(${frameScale})`,
+            border: `${Math.max(2, unit * 0.004)}px solid ${s.accent}`,
+            borderRadius: cardR + framePad,
+            opacity: frameIn,
+          }}
+        />
+      )}
+
+      {/* Confetti blast. */}
+      <Confetti frame={frame} cx={cx} cy={centerY} accent={s.accent} />
+
+      {/* Caption */}
+      {caption.trim() && (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: groundY + unit * 0.06,
+            textAlign: "center",
+            color: s.color,
+            fontSize: Math.round(unit * 0.04),
+            fontWeight: 600,
+            letterSpacing: "-0.01em",
+            opacity: capIn,
+            transform: `translateY(${(1 - capIn) * 16}px)`,
           }}
         >
-          <div
-            style={{
-              width: w,
-              height: h,
-              borderRadius: r,
-              overflow: "hidden",
-              background: "#ffffff",
-              boxShadow: faceShadow,
-              transform: `scale(${popScale})`,
-            }}
-          >
-            {showFront &&
-              (resolved ? (
-                <Img
-                  src={resolved}
-                  crossOrigin="anonymous"
-                  alt=""
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#e9e9ee",
-                    color: "#9aa0aa",
-                    fontSize: unit * 0.03,
-                    fontWeight: 500,
-                  }}
-                >
-                  Upload an image
-                </div>
-              ))}
-          </div>
+          {caption}
         </div>
-
-        {/* Accent focus-frame — snaps around the square on reveal (flat stroke). */}
-        {frameIn > 0.01 && (
-          <div
-            style={{
-              position: "absolute",
-              left: cx,
-              top: centerY,
-              width: cardW + framePad * 2,
-              height: cardH + framePad * 2,
-              transform: `translate(-50%, -50%) scale(${frameScale})`,
-              border: `${Math.max(2, unit * 0.004)}px solid ${s.accent}`,
-              borderRadius: cardR + framePad,
-              opacity: frameIn,
-            }}
-          />
-        )}
-
-        {/* Confetti blast. */}
-        <Confetti frame={frame} cx={cx} cy={centerY} accent={s.accent} />
-
-        {/* Caption */}
-        {caption.trim() && (
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: groundY + unit * 0.06,
-              textAlign: "center",
-              color: s.color,
-              fontSize: Math.round(unit * 0.04),
-              fontWeight: 600,
-              letterSpacing: "-0.01em",
-              opacity: capIn,
-              transform: `translateY(${(1 - capIn) * 16}px)`,
-            }}
-          >
-            {caption}
-          </div>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+      )}
+    </AbsoluteFill>
   );
 };

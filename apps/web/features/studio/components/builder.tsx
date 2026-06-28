@@ -5,7 +5,6 @@ import { type Project, projectDuration } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import { resolveTransition } from "@workspace/compositions/transitions";
 import {
-  type Layout,
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -22,8 +21,11 @@ import {
 import { toast } from "sonner";
 import { useAudioSearch } from "../hooks/use-audio-search";
 import { useExportRender } from "../hooks/use-export-render";
+import { useForceDarkTheme } from "../hooks/use-force-dark-theme";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { useProjectIO } from "../hooks/use-project-io";
+import { useStudioInit } from "../hooks/use-studio-init";
+import { useStudioLayout } from "../hooks/use-studio-layout";
 import type { ExportOptions } from "../lib/export-options";
 import { extractTintColor } from "../lib/image-tint";
 import {
@@ -62,78 +64,11 @@ export function Builder() {
   const [state, dispatch] = useReducer(studioReducer, initialStudioState);
   const audioSearch = useAudioSearch();
 
-  // The studio is a dark-first editor (like CapCut / Premiere) — its light
-  // theme reads washed out. Force dark on <html> while the studio is mounted so
-  // panels AND portalled UI (dropdowns, modals, popovers in <body>) all render
-  // dark, then restore the user's theme on leave. ThemeToggle isn't reachable
-  // inside the studio, so nothing fights this.
-  useEffect(() => {
-    const root = document.documentElement;
-    const hadDark = root.classList.contains("dark");
-    const hadLight = root.classList.contains("light");
-    const prevColorScheme = root.style.colorScheme;
-    root.classList.add("dark");
-    root.classList.remove("light");
-    root.style.colorScheme = "dark";
-    return () => {
-      if (!hadDark) root.classList.remove("dark");
-      if (hadLight) root.classList.add("light");
-      root.style.colorScheme = prevColorScheme;
-    };
-  }, []);
+  // Studio-shell concerns extracted into hooks (see ../hooks):
+  useForceDarkTheme();
+  useStudioInit(dispatch);
+  const { layout, layoutKey, handleLayoutChanged } = useStudioLayout();
 
-  // Deep-link from the gallery: /studio?component=<id> opens the studio with
-  // that composition added as the first clip (and selected, so the inspector
-  // shows it). Strip the param afterwards so a refresh doesn't re-add it.
-  const didInitFromParam = useRef(false);
-  useEffect(() => {
-    if (didInitFromParam.current) return;
-    didInitFromParam.current = true;
-    const id = new URLSearchParams(window.location.search).get("component");
-    if (id && compositionsById[id]) {
-      dispatch({ type: "ADD_CLIP", compositionId: id });
-      window.history.replaceState(null, "", "/studio");
-    }
-  }, []);
-  // Bump the version key when changing default sizes so old persisted
-  // layouts don't pin panels at sizes that no longer make sense.
-  const LAYOUT_STORAGE_KEY = "studio-layout-v4";
-  // The persisted layout MUST NOT be read during the initial render: the
-  // server has no access to localStorage and renders panels at their default
-  // sizes, so reading it on the client's first render produces a hydration
-  // mismatch. Start undefined (matching the server), then load the stored
-  // layout after mount and remount the panel group via `layoutKey` so the
-  // restored sizes actually take effect.
-  const [layout, setLayout] = useState<Layout | undefined>(undefined);
-  const [layoutKey, setLayoutKey] = useState("initial");
-  // Gate persistence until the stored layout has been restored, so a
-  // layout-change event fired during the initial default-sized mount can't
-  // overwrite the saved layout before we've had a chance to read it back.
-  const layoutLoadedRef = useRef(false);
-  useEffect(() => {
-    try {
-      // One-time cleanup of older versions so stale narrow layouts don't
-      // linger silently in the user's storage.
-      window.localStorage.removeItem("studio-layout-v1");
-      window.localStorage.removeItem("studio-layout-v2");
-      window.localStorage.removeItem("studio-layout-v3");
-      const raw = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
-      if (raw) setLayout(JSON.parse(raw) as Layout);
-    } catch {
-      // localStorage may be disabled (private mode / quota); silent fallback.
-    }
-    layoutLoadedRef.current = true;
-    setLayoutKey("loaded");
-  }, []);
-  const handleLayoutChanged = useCallback((next: Layout) => {
-    if (!layoutLoadedRef.current) return;
-    setLayout(next);
-    try {
-      window.localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // localStorage may be disabled (private mode / quota); silent fallback.
-    }
-  }, []);
   const { project, selection, openPanel } = state;
   const selectedClipId = selection?.kind === "clip" ? selection.id : null;
   const isAudioSelected = selection?.kind === "audio";

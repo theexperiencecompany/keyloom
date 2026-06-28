@@ -41,6 +41,7 @@ import { TextMagicMove } from "./compositions/TextMagicMove/TextMagicMove";
 import { TextMorph } from "./compositions/TextMorph/TextMorph";
 import { TikTokCaption } from "./compositions/TikTokCaption/TikTokCaption";
 import { TweetCard } from "./compositions/TweetCard/TweetCard";
+import { TweetPost } from "./compositions/TweetPost/TweetPost";
 import { TwitterFollow } from "./compositions/TwitterFollow/TwitterFollow";
 import { TypingComposer } from "./compositions/TypingComposer/TypingComposer";
 import { TypingSearch } from "./compositions/TypingSearch/TypingSearch";
@@ -60,6 +61,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   StatCounter,
   SpotifyPlayer,
   TweetCard,
+  TweetPost,
   CursorWalkthrough,
   BrowserWindow,
   CaptionTrack,

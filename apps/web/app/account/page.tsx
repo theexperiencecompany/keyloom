@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import {
   ensureAccount,
   getSubscription,
-  listApiKeys,
   reconcileProFromDodo,
 } from "@/lib/account";
 import { AccountClient } from "./account-client";
@@ -31,17 +30,17 @@ export default async function AccountPage({
     await reconcileProFromDodo(user.id, user.email);
   }
 
-  const [subscription, keys] = await Promise.all([
-    getSubscription(user.id),
-    listApiKeys(user.id),
-  ]);
+  const subscription = await getSubscription(user.id);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.keyloom.app";
+  const name = user.firstName
+    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+    : "";
 
   return (
     <AccountClient
       email={user.email}
-      mcpUrl={`${appUrl}/api/mcp`}
+      name={name}
+      avatarUrl={user.profilePictureUrl}
       subscription={
         subscription
           ? {
@@ -52,12 +51,6 @@ export default async function AccountPage({
             }
           : null
       }
-      keys={keys.map((k) => ({
-        id: k.id,
-        name: k.name,
-        prefix: k.prefix,
-        createdAt: k.createdAt.toISOString(),
-      }))}
     />
   );
 }

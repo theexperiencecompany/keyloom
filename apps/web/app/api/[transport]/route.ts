@@ -1,8 +1,18 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { type ZodRawShape, z } from "zod";
 import { getComponentSchema, listComponents } from "@/features/mcp/components";
-import { getRenderStatus, startRender } from "@/features/mcp/render";
-import { consumeRender } from "@/lib/account";
+import {
+  forkComponent,
+  listUserForks,
+  readComponentCode,
+  writeComponentCode,
+} from "@/features/mcp/components-edit";
+import {
+  getRenderStatus,
+  startForkRender,
+  startRender,
+} from "@/features/mcp/render";
+import { consumeRender, getSubscription } from "@/lib/account";
 import { authenticateApiKey } from "@/lib/api-keys";
 
 export const maxDuration = 60;
@@ -19,11 +29,31 @@ const errorText = (message: string): ToolResult => ({
   content: [{ type: "text", text: message }],
 });
 
+// MCP is a Pro feature. The website editor stays free; using the tools over MCP
+// (Claude Code / Cursor) requires an active paid plan.
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.keyloom.app")
+  .trim()
+  .replace(/\/$/, "");
+const PRO_REQUIRED = `MCP access is a Pro feature. Upgrade to Pro at ${APP_URL}/account to use the Keyloom MCP tools. (Editing components on the website stays free.)`;
+
+async function isProUser(userId: string): Promise<boolean> {
+  const sub = await getSubscription(userId);
+  return (
+    !!sub &&
+    sub.plan !== "free" &&
+    (sub.status === "active" || sub.status === "trialing")
+  );
+}
+
 const baseHandler = createMcpHandler(
   (server) => {
     // Cast registerTool through unknown: the SDK's Zod generic inference can
     // exceed TypeScript's instantiation depth. The SDK still validates inputs
     // against inputSchema at runtime. (Same workaround as the stdio server.)
+    const userIdOf = (extra: {
+      authInfo?: { extra?: Record<string, unknown> };
+    }): string => String(extra.authInfo?.extra?.userId ?? "");
+
     const register = (
       name: string,
       config: { title: string; description: string; inputSchema: ZodRawShape },
@@ -32,18 +62,24 @@ const baseHandler = createMcpHandler(
         extra: { authInfo?: { extra?: Record<string, unknown> } },
       ) => Promise<ToolResult>,
     ) => {
+      // Gate EVERY tool behind Pro — the MCP surface is paid.
+      const gated = async (
+        args: Record<string, unknown>,
+        extra: { authInfo?: { extra?: Record<string, unknown> } },
+      ): Promise<ToolResult> => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        if (!(await isProUser(userId))) return errorText(PRO_REQUIRED);
+        return handler(args, extra);
+      };
       (
         server.registerTool as unknown as (
           n: string,
           c: unknown,
-          h: typeof handler,
+          h: typeof gated,
         ) => void
-      )(name, config, handler);
+      )(name, config, gated);
     };
-
-    const userIdOf = (extra: {
-      authInfo?: { extra?: Record<string, unknown> };
-    }): string => String(extra.authInfo?.extra?.userId ?? "");
 
     register(
       "list_components",
@@ -94,15 +130,19 @@ const baseHandler = createMcpHandler(
           return errorText(claim.reason ?? "Render not allowed.");
         }
         try {
-          const started = await startRender(
-            String(args.componentId ?? ""),
-            (args.props as Record<string, unknown> | undefined) ?? {},
-            {
-              fps: args.fps as number | undefined,
-              durationInFrames: args.durationInFrames as number | undefined,
-              scale: args.scale as number | undefined,
-            },
-          );
+          const componentId = String(args.componentId ?? "");
+          const props =
+            (args.props as Record<string, unknown> | undefined) ?? {};
+          const options = {
+            fps: args.fps as number | undefined,
+            durationInFrames: args.durationInFrames as number | undefined,
+            scale: args.scale as number | undefined,
+          };
+          // A forked component (one of the user's edits) renders through the
+          // "Project" composition; a built-in renders directly. Try fork first.
+          const started =
+            (await startForkRender(userId, componentId, props, options)) ??
+            (await startRender(componentId, props, options));
           return jsonText({
             ...started,
             status: "rendering",
@@ -148,6 +188,92 @@ const baseHandler = createMcpHandler(
         } catch (err) {
           return errorText(err instanceof Error ? err.message : String(err));
         }
+      },
+    );
+
+    // ── Fork & edit ──────────────────────────────────────────────────────
+    // Copy a built-in component, read its code, and rewrite it — so an external
+    // agent can turn a component into exactly what the user needs.
+
+    register(
+      "copy_component",
+      {
+        title: "Copy a component to make your own",
+        description:
+          "Copy a built-in component (by its id from list_components) into your own editable version. Returns the new component's id + current code. Change it with edit_component, then make a video with render_component.",
+        inputSchema: {
+          componentId: z.string(),
+          name: z.string().optional(),
+        },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const forked = await forkComponent(
+          userId,
+          String(args.componentId ?? ""),
+          args.name as string | undefined,
+        );
+        return forked
+          ? jsonText(forked)
+          : errorText(
+              `Unknown component "${args.componentId}". Call list_components for valid ids.`,
+            );
+      },
+    );
+
+    register(
+      "list_my_components",
+      {
+        title: "List your components",
+        description:
+          "List the components you've made (your editable copies) — id, name, what they were copied from, and last edit time.",
+        inputSchema: {},
+      },
+      async (_args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        return jsonText(await listUserForks(userId));
+      },
+    );
+
+    register(
+      "view_component",
+      {
+        title: "View a component's source",
+        description:
+          "Get the full source of a component — one of your own copies (by its id) or a built-in (to see how it's built before copying). View this before edit_component.",
+        inputSchema: { id: z.string() },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const result = await readComponentCode(userId, String(args.id ?? ""));
+        return result
+          ? jsonText(result)
+          : errorText(`No component "${args.id}".`);
+      },
+    );
+
+    register(
+      "edit_component",
+      {
+        title: "Edit one of your components",
+        description:
+          "Change one of your components by replacing its full source. Pass the COMPLETE file. It's validated before saving — on failure you get the error back so you can fix it and retry. Only works on your own copies (copy_component first).",
+        inputSchema: { id: z.string(), code: z.string() },
+      },
+      async (args, extra) => {
+        const userId = userIdOf(extra);
+        if (!userId) return errorText("Unauthenticated.");
+        const result = await writeComponentCode(
+          userId,
+          String(args.id ?? ""),
+          String(args.code ?? ""),
+        );
+        return result.ok
+          ? jsonText({ ok: true, id: result.id })
+          : errorText(result.error);
       },
     );
   },

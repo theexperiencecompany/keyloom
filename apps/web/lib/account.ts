@@ -14,6 +14,18 @@ import {
 /** Free-tier defaults applied on first sign-in (before any Dodo subscription). */
 const FREE_PLAN = { plan: "free", renderQuota: 3 } as const;
 
+/**
+ * Ensure just the `users` row exists — a single round-trip. Use for paths that
+ * only need the FK target (e.g. saving a forked component), not the full
+ * subscription provisioning that `ensureAccount` does.
+ */
+export async function ensureUserRow(
+  userId: string,
+  email: string,
+): Promise<void> {
+  await db.insert(users).values({ id: userId, email }).onConflictDoNothing();
+}
+
 /** Upsert the signed-in WorkOS user, and ensure they have a subscription row
  *  (free tier on first sight). Idempotent — safe to call on every sign-in. */
 export async function ensureAccount(

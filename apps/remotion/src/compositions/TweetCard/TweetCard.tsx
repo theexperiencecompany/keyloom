@@ -1,74 +1,66 @@
 "use client";
 import {
-  Analytics01Icon,
-  BubbleChatIcon,
-  FavouriteIcon,
-  MoreHorizontalCircle01Icon,
-  RepeatIcon,
-  Share08Icon,
+  AiImageIcon,
+  ArrowDown01Icon,
+  Calendar03Icon,
+  CheckListIcon,
+  EarthIcon,
+  Flag02Icon,
+  Gif02Icon,
+  Image02Icon,
+  Location01Icon,
+  SmileIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  staticFile,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { proxyExternalImg } from "../../proxy-image";
-import { SmartAudio } from "../../smart-audio";
-import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type TweetCardProps = {
   displayName: string;
-  handle: string;
   avatarUrl: string;
-  verified: "yes" | "no";
   text: string;
-  timestamp: string;
-  replies: number;
-  retweets: number;
-  likes: number;
-  views: number;
+  audience: string;
   theme: "light" | "dark";
   clipStyle?: ClipStyle;
 };
 
 const CARD_ENTER_END = 18;
-const TYPE_START = 14;
+const TYPE_START = 22;
 const FRAMES_PER_CHAR = 2;
+const PRESS_GAP = 16;
+const PRESS_DURATION = 12;
 
 export const TweetCard: React.FC<TweetCardProps> = ({
   displayName,
-  handle,
   avatarUrl,
-  verified,
   text,
-  timestamp,
-  replies,
-  retweets,
-  likes,
-  views,
+  audience,
   theme,
   clipStyle,
 }) => {
   const frame = useDesignFrame();
-  const { fps } = useVideoConfig();
+  const { width, height } = useCanvasLayout();
+
+  // The compose card has a fixed internal layout (1480×~760); scale it to the
+  // canvas so it fills the width and never overflows / gets cut off on any
+  // aspect ratio.
+  const CARD_W = 1480;
+  const CARD_H = 760;
+  const cardScale = Math.min(
+    (width - 96) / CARD_W,
+    (height - 96) / CARD_H,
+    1.4,
+  );
 
   const s = resolveClipStyle(clipStyle, {
-    background: "#ffffff",
-    color: "#0f1419",
+    background: theme === "dark" ? "#000000" : "#ffffff",
+    color: theme === "dark" ? "#e7e9ea" : "#0f1419",
     fontFamily:
       "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif",
     accent: "#1d9bf0",
-  });
-
-  const enter = spring({
-    frame,
-    fps,
-    config: { damping: 16, stiffness: 110, mass: 0.7 },
   });
 
   const typingDuration = text.length * FRAMES_PER_CHAR;
@@ -81,18 +73,53 @@ export const TweetCard: React.FC<TweetCardProps> = ({
           Math.floor((frame - TYPE_START) / FRAMES_PER_CHAR),
         );
   const visibleText = text.slice(0, charsTyped);
+  const hasText = charsTyped > 0;
   const isTyping = frame >= TYPE_START && frame < typingEnd;
-  const caretBlink =
-    isTyping && Math.floor((frame - TYPE_START) / 12) % 2 === 0;
+  // Caret blinks before typing starts and while idle; solid while typing.
+  const caretBlink = isTyping ? true : Math.floor(frame / 16) % 2 === 0;
+  const showCaret = frame >= CARD_ENTER_END && frame < typingEnd + 8;
 
-  const showAfterCard = frame >= CARD_ENTER_END;
+  // "Hit Post" click — a brief scale dip after typing completes.
+  const pressStart = typingEnd + PRESS_GAP;
+  const pressT =
+    frame < pressStart ? 0 : Math.min(1, (frame - pressStart) / PRESS_DURATION);
+  const postScale = 1 - Math.sin(pressT * Math.PI) * 0.12;
+  const posted = frame >= pressStart + PRESS_DURATION;
 
   const isDark = theme === "dark";
   const cardBg = isDark ? "#000000" : "#ffffff";
   const cardText = isDark ? "#e7e9ea" : s.color;
-  const muted = isDark ? "#71767b" : "#536471";
+  const placeholder = isDark ? "#71767b" : "#536471";
   const divider = isDark ? "#2f3336" : "#eff3f4";
-  const cardBorder = isDark ? "#2f3336" : "#eff3f4";
+  const pillBorder = isDark ? "#36393b" : "#cfd9de";
+  const accent = s.accent;
+
+  // Post button: dimmed pill until there is text, then solid + bold.
+  const postBg = hasText
+    ? isDark
+      ? "#eff3f4"
+      : accent
+    : isDark
+      ? "#22282b"
+      : "#9bd1f9";
+  const postColor = hasText
+    ? isDark
+      ? "#0f1419"
+      : "#ffffff"
+    : isDark
+      ? "#6b7174"
+      : "#ffffff";
+
+  const toolbarIcons = [
+    Image02Icon,
+    Gif02Icon,
+    AiImageIcon,
+    CheckListIcon,
+    SmileIcon,
+    Calendar03Icon,
+    Location01Icon,
+    Flag02Icon,
+  ];
 
   return (
     <AbsoluteFill
@@ -102,106 +129,98 @@ export const TweetCard: React.FC<TweetCardProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 60,
+        padding: 80,
       }}
     >
-      <SmartAudio
-        src={staticFile("sounds/message_bubble/message.mp3")}
-        volume={0.85}
-      />
       <div
         style={{
-          width: 1560,
+          width: CARD_W,
           background: cardBg,
           color: cardText,
-          borderRadius: 36,
-          border: `1px solid ${cardBorder}`,
+          borderRadius: 32,
+          border: `1px solid ${divider}`,
           boxShadow: isDark
             ? "0 40px 100px rgba(0,0,0,0.5)"
             : "0 36px 100px rgba(15,16,20,0.10), 0 6px 16px rgba(15,16,20,0.05)",
-          padding: 60,
-          opacity: enter,
-          transform: `translate3d(0, ${snap((1 - enter) * 32)}px, 0) scale(${0.96 + enter * 0.04})`,
+          padding: 56,
+          transform: `scale(${cardScale})`,
+          transformOrigin: "center",
+          flexShrink: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 28 }}>
           <Avatar url={avatarUrl} initial={displayName.slice(0, 1)} />
-          <div style={{ flex: 1, minWidth: 0 }}>
+
+          <div style={{ flex: 1, minWidth: 0, paddingTop: 4 }}>
+            {/* Audience pill */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                color: accent,
+                fontSize: 28,
+                fontWeight: 700,
+                border: `1px solid ${pillBorder}`,
+                borderRadius: 999,
+                padding: "8px 18px",
+              }}
+            >
+              <span>{audience}</span>
+              <HugeiconsIcon icon={ArrowDown01Icon} size={26} color={accent} />
+            </div>
+
+            {/* Compose area */}
+            <div
+              style={{
+                fontSize: 60,
+                fontWeight: 400,
+                lineHeight: 1.3,
+                letterSpacing: "-0.01em",
+                margin: "30px 0 0",
+                minHeight: 80,
+                color: hasText ? cardText : placeholder,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {hasText ? visibleText : "What’s happening?"}
+              {showCaret && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 4,
+                    height: 62,
+                    marginLeft: hasText ? 6 : 2,
+                    background: accent,
+                    opacity: caretBlink ? 1 : 0,
+                    verticalAlign: "text-bottom",
+                    borderRadius: 2,
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Everyone can reply */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
-                fontSize: 42,
+                gap: 12,
+                marginTop: 30,
+                color: accent,
+                fontSize: 30,
                 fontWeight: 700,
-                letterSpacing: "-0.012em",
-                lineHeight: 1.1,
               }}
             >
-              <span>{displayName}</span>
-              {verified === "yes" && (
-                <VerifiedBadge size={40} color={s.accent} />
-              )}
-            </div>
-            <div style={{ fontSize: 30, color: muted, marginTop: 4 }}>
-              {handle}
+              <HugeiconsIcon icon={EarthIcon} size={32} color={accent} />
+              <span>Everyone can reply</span>
             </div>
           </div>
-          <HugeiconsIcon
-            icon={MoreHorizontalCircle01Icon}
-            size={36}
-            color={muted}
-          />
         </div>
 
-        <p
-          style={{
-            fontSize: 52,
-            fontWeight: 400,
-            lineHeight: 1.32,
-            letterSpacing: "-0.012em",
-            margin: "36px 0 0",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-            minHeight: 70,
-          }}
-        >
-          {visibleText}
-          {isTyping && (
-            <span
-              style={{
-                display: "inline-block",
-                width: 4,
-                height: 56,
-                marginLeft: 6,
-                background: cardText,
-                opacity: caretBlink ? 1 : 0,
-                verticalAlign: "text-bottom",
-                borderRadius: 1,
-              }}
-            />
-          )}
-        </p>
-
-        {timestamp.trim() && (
-          <div
-            style={{
-              fontSize: 28,
-              color: muted,
-              marginTop: 36,
-              opacity: showAfterCard ? 1 : 0,
-            }}
-          >
-            {timestamp}
-          </div>
-        )}
-
         <div
-          style={{
-            height: 1,
-            background: divider,
-            margin: "32px 0",
-          }}
+          style={{ height: 1, background: divider, margin: "40px 0 28px" }}
         />
 
         <div
@@ -209,35 +228,41 @@ export const TweetCard: React.FC<TweetCardProps> = ({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            color: muted,
           }}
         >
-          <Stat icon={BubbleChatIcon} value={replies} color={muted} />
-          <Stat icon={RepeatIcon} value={retweets} color={muted} />
-          <Stat icon={FavouriteIcon} value={likes} color={muted} />
-          <Stat icon={Analytics01Icon} value={views} color={muted} />
-          <Stat icon={Share08Icon} value={null} color={muted} />
+          <div style={{ display: "flex", alignItems: "center", gap: 34 }}>
+            {toolbarIcons.map((icon, i) => (
+              <HugeiconsIcon
+                // eslint-disable-next-line react/no-array-index-key
+                key={i}
+                icon={icon}
+                size={40}
+                color={accent}
+              />
+            ))}
+          </div>
+
+          <div
+            style={{
+              background: postBg,
+              color: postColor,
+              fontSize: 34,
+              fontWeight: 700,
+              borderRadius: 999,
+              padding: "18px 46px",
+              transform: `scale(${postScale})`,
+              transformOrigin: "center",
+              boxShadow:
+                posted && isDark ? "0 0 0 6px rgba(239,243,244,0.12)" : "none",
+            }}
+          >
+            Post
+          </div>
         </div>
       </div>
     </AbsoluteFill>
   );
 };
-
-function VerifiedBadge({ size, color }: { size: number; color: string }) {
-  return (
-    <svg
-      viewBox="0 0 22 22"
-      width={size}
-      height={size}
-      style={{ flexShrink: 0 }}
-    >
-      <path
-        fill={color}
-        d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z"
-      />
-    </svg>
-  );
-}
 
 function Avatar({ url, initial }: { url: string; initial: string }) {
   if (url.trim()) {
@@ -245,11 +270,11 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
       <Img
         src={proxyExternalImg(url)}
         crossOrigin="anonymous"
-        width={108}
-        height={108}
+        width={92}
+        height={92}
         style={{
-          width: 108,
-          height: 108,
+          width: 92,
+          height: 92,
           borderRadius: "50%",
           flexShrink: 0,
           objectFit: "cover",
@@ -260,15 +285,15 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
   return (
     <div
       style={{
-        width: 108,
-        height: 108,
+        width: 92,
+        height: 92,
         borderRadius: "50%",
         background: "linear-gradient(135deg, #1d9bf0 0%, #4f46e5 100%)",
         color: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontSize: 44,
+        fontSize: 40,
         fontWeight: 700,
         flexShrink: 0,
       }}
@@ -276,38 +301,4 @@ function Avatar({ url, initial }: { url: string; initial: string }) {
       {initial.toUpperCase() || "?"}
     </div>
   );
-}
-
-function Stat({
-  icon,
-  value,
-  color,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any;
-  value: number | null;
-  color: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        fontSize: 28,
-        fontWeight: 500,
-        color,
-      }}
-    >
-      <HugeiconsIcon icon={icon} size={36} color={color} />
-      {value !== null && <span>{formatCount(value)}</span>}
-    </div>
-  );
-}
-
-function formatCount(n: number): string {
-  if (n < 1000) return String(n);
-  if (n < 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  if (n < 1_000_000) return Math.round(n / 1000) + "K";
-  return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
 }

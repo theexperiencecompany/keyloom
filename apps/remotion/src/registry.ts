@@ -40,6 +40,7 @@ import { textMagicMoveInfo } from "./compositions/TextMagicMove/meta";
 import { textMorphInfo } from "./compositions/TextMorph/meta";
 import { tikTokCaptionInfo } from "./compositions/TikTokCaption/meta";
 import { tweetCardInfo } from "./compositions/TweetCard/meta";
+import { tweetPostInfo } from "./compositions/TweetPost/meta";
 import { twitterFollowInfo } from "./compositions/TwitterFollow/meta";
 import { typingComposerInfo } from "./compositions/TypingComposer/meta";
 import { typingSearchInfo } from "./compositions/TypingSearch/meta";
@@ -57,6 +58,7 @@ export const compositions: AnyCompositionInfo[] = [
   statCounterInfo,
   spotifyPlayerInfo,
   tweetCardInfo,
+  tweetPostInfo,
   twitterFollowInfo,
   instagramPostInfo,
   messageBubblesInfo,

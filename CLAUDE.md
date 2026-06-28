@@ -34,7 +34,7 @@ Always run `bun run tsc --noEmit` (or `bun run --cwd <package> tsc --noEmit`) af
 ## Universal Clip Style — every composition exposes the same 4 controls
 
 Every clip in the Studio gets a "Style" section in the Inspector with **four
-universal controls** that work on any non-locked composition:
+universal controls** that work on any composition that wires up the clip style:
 
 - Background color
 - Text color
@@ -54,8 +54,9 @@ shared infrastructure, not by individual `meta.ts` files.
   every clip. The Studio reducer's `UPDATE_CLIP_STYLE` / `RESET_CLIP_STYLE`
   actions write here.
 - **`apps/remotion/src/compositions/Project/Project.tsx`** — forwards
-  `clip.style` to the rendered component as a `clipStyle` prop, **only for
-  non-locked compositions**. Locked compositions never receive the prop.
+  `clip.style` to the rendered component as a `clipStyle` prop. A composition
+  only reacts to it if it declares `clipStyle?: ClipStyle` and calls
+  `resolveClipStyle`; one that ignores the prop simply keeps its own look.
 
 ### How to wire a new composition
 
@@ -99,36 +100,35 @@ export const Foo: React.FC<FooProps> = ({ /* ... */, clipStyle }) => {
 4. The first argument to `resolveClipStyle` is `clipStyle` (the override);
    the second is the composition's natural defaults. Don't swap them.
 
-### Brand-locked compositions (impersonators)
+### Impersonators (brand-mimicking compositions)
 
-Compositions that mimic real apps **opt out** of universal styling so they
-keep their authentic look. Mark them with `brandMode: "locked"` in `meta.ts`:
+> **Note:** the old `brandMode: "locked"` opt-out has been **removed**. Every
+> composition — including impersonators that mimic real apps (Tweet, WhatsApp,
+> Slack, Discord, iMessage, etc.) — now wires up the universal clip style like
+> any other.
 
-```ts
-export const tweetCardInfo: CompositionInfo<TweetCardProps> = {
-  // ...
-  brandMode: "locked",
-};
+To keep an authentic look while still opting into universal styling, pass the
+brand's real colors/fonts as the **defaults** to `resolveClipStyle`:
+
+```tsx
+const s = resolveClipStyle(clipStyle, {
+  background: "#ffffff",   // the app's authentic look as the *default*
+  color: "#0f1419",
+  fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+  accent: "#1d9bf0",       // Twitter blue, WhatsApp green, etc.
+});
 ```
 
-A locked composition:
-
-- Does **not** declare a `clipStyle?: ClipStyle` prop.
-- Does **not** import `clip-style.ts`.
-- Hardcodes its authentic colors/fonts (Twitter blue, WhatsApp green, etc.).
-
-The Studio's Inspector hides the Style section for locked compositions, and
-`Project.tsx` does not forward the `clipStyle` prop to them. Currently
-locked: `TweetCard`, `TwitterFollow`, `WhatsAppMessages`, `SlackMessages`,
-`DiscordMessages`, `MessageBubbles`, `MessagePopup`.
+The composition then looks authentic out of the box, but the user can still
+override any of the four controls. For multiple hand-built skins (iMessage vs.
+Liquid Glass), declare `themes` (see below) instead of hardcoding.
 
 ### Curated themes (`meta.themes`)
 
-Separate from the four free-form controls, any composition — **including
-brand-locked ones** — can declare curated, named skins via `themes` in its
-`meta.ts`. A theme is a hand-built look (materials, blur, bubble shapes,
-chrome), not arbitrary recoloring, which is why locked compositions are
-allowed to have them.
+Separate from the four free-form controls, any composition can declare
+curated, named skins via `themes` in its `meta.ts`. A theme is a hand-built
+look (materials, blur, bubble shapes, chrome), not arbitrary recoloring —
+ideal for impersonators that need more than the four universal controls.
 
 ```ts
 export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
@@ -143,13 +143,12 @@ export const messageBubblesInfo: CompositionInfo<MessageBubblesProps> = {
 How it works:
 
 - The Inspector's Style section renders a **Theme picker** whenever a
-  composition declares `themes`. For locked compositions it's the *only*
-  Style control shown. The first entry is the default look — selecting it
-  clears the override.
+  composition declares `themes`. The first entry is the default look —
+  selecting it clears the override.
 - The choice is stored at `clip.style.theme`. `Project.tsx` validates the
   id against `info.themes` and forwards it to the component as a separate
-  `clipTheme?: string` prop (locked and non-locked alike). The component
-  branches on its non-default theme ids:
+  `clipTheme?: string` prop. The component branches on its non-default
+  theme ids:
 
   ```tsx
   export type FooProps = { /* ... */ clipTheme?: string };
@@ -183,18 +182,26 @@ When a composition references an asset via `staticFile()` (e.g. `staticFile("ima
 
 ## Adding a Composition — Required Sync Points
 
-`apps/remotion/src/registry.ts → compositions[]` is the **single source of truth**. The studio Library, Cmd-K palette, `/component/[id]/edit`, `/docs/[id]`, the docs sidebar, the home grid — every surface that lists compositions reads from this array. Adding a composition therefore requires only three files:
+`apps/remotion/src/registry.ts → compositions[]` is the **single source of truth** for *metadata* (what surfaces list & describe a composition), and `apps/remotion/src/componentsBase.ts → componentsByIdBase` is the source of truth for the *render lookup* (what actually draws on the canvas). The studio Library, ⌘K palette, `/component/[id]/edit`, and the home grid read from the registry. **You must update BOTH** — registering only the meta makes the composition show up in lists but renders a **"Missing scene — No component registered for id …"** placeholder.
 
-1. **`apps/remotion/src/compositions/<Name>/<Name>.tsx`** — the React component.
-2. **`apps/remotion/src/compositions/<Name>/meta.ts`** — exports `<name>Info: CompositionInfo<Props>` with `id`, `title`, `description`, dimensions, `defaultProps`, `fields`. The `id` must be a unique PascalCase string.
-3. **`apps/remotion/src/registry.ts` + `apps/remotion/src/componentsBase.ts`** — register the meta in `compositions` and the React component in `componentsByIdBase`. Wrapper compositions that embed other compositions live in `components.ts` instead (see "Remotion Composition Registry" above).
+Adding a composition requires these files **plus a generator step**:
 
-That's it. The composition appears everywhere — including a registry-generated docs page at `/docs/<Id>` rendered via `<AutoDoc id={...} />`, which uses the composition's `title` / `description` / `fields`.
+1. **`apps/remotion/src/compositions/<Name>/<Name>.tsx`** — the React component. Export a named `<Name>` matching the `id`. Wire up the universal clip style (see "Universal Clip Style" above) unless the composition is locked-by-design.
+2. **`apps/remotion/src/compositions/<Name>/meta.ts`** — exports `<name>Info: CompositionInfo<Props>` with a unique PascalCase `id`, `title`, `description`, `category`, dimensions, `defaultProps`, and `fields`.
+3. **`apps/remotion/src/registry.ts`** — `import { <name>Info }` and add it to the `compositions[]` array.
+4. **`apps/remotion/src/componentsBase.ts`** — `import { <Name> }` and add it to the `componentsByIdBase` map (keyed by `id`). Wrapper compositions that embed other compositions go in `components.ts` instead, never here (see "Remotion Composition Registry" above).
+5. **Regenerate `apps/web/lib/generated-sources.ts`** — run `bun run --cwd apps/web sources`. **This step is mandatory**, see below.
 
-### Optional: hand-written docs prose
+### Required: regenerate `generated-sources.ts`
 
-If you want bespoke prose on the docs page (gotchas, examples, design rationale), create `apps/web/content/docs/<kebab-name>.mdx` exporting `meta` + the default component, then add it to the `bespokeMdxByCompositionId` map in `apps/web/lib/docs.ts`. The map's presence overrides the auto-doc fallback for that composition. Compositions without an entry continue to use `AutoDoc`.
+The studio's in-browser renderer (and the fork/edit + export pipeline) does **not** import compositions as live modules — it reads each composition's source code as a string from `apps/web/lib/generated-sources.ts`, an auto-generated file (`scripts/generate-sources.mjs`). If you skip this, the composition shows up in the Library/⌘K (those read the registry) but the **canvas renders "Missing scene — No component registered for id …"** because the renderer's source map has no entry for it.
 
-### Cmd-K palette
+```bash
+bun run --cwd apps/web sources   # rewrites generated-sources.ts from the registry
+```
 
-Press ⌘K (or Ctrl+K) anywhere in the studio. Searches across registered compositions, studio actions (export, screenshot, save, import, play, audio), and every docs page. The palette reads from `registry.compositions` and `lib/docs.docs`, so anything you register surfaces automatically.
+Re-run it any time you add a composition or change an existing composition's source. Never hand-edit `generated-sources.ts` — it has an `AUTO-GENERATED … Do not edit by hand` header.
+
+### ⌘K palette
+
+Press ⌘K (or Ctrl+K) anywhere in the studio. Searches across registered compositions and studio actions (export, screenshot, save, import, play, audio). The palette reads from `registry.compositions`, so anything you register surfaces automatically.

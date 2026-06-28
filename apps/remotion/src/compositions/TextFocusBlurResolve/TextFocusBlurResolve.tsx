@@ -1,6 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -26,6 +26,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { vmin } = useCanvasLayout();
   const s = resolveTitleStyle(clipStyle);
   useFontReady(s.fontFamily);
 
@@ -38,7 +39,7 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
   const headlineBlurPx = Math.round((1 - headlineProgress) * MAX_BLUR_PX);
 
   const scale = snapNear(1.01 - headlineProgress * 0.01, 1);
-  const y = 14 * (1 - headlineProgress);
+  const y = vmin(1.3) * (1 - headlineProgress);
 
   const subtitleStart = HEADLINE_START + HEADLINE_DURATION + 14;
   const subtitleProgress = interpolate(
@@ -49,55 +50,51 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
   );
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7.4)}px`,
+        textAlign: "center",
+      }}
     >
-      <AbsoluteFill
+      <h1
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          textAlign: "center",
+          fontSize: vmin(12.2),
+          fontWeight: 700,
+          letterSpacing: "-0.045em",
+          lineHeight: 1.05,
+          margin: 0,
+          maxWidth: "16em",
+          opacity: headlineProgress,
+          transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
+          filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
-        <h1
+        {headline}
+      </h1>
+
+      {subtitle.trim() && (
+        <p
           style={{
-            fontSize: 132,
-            fontWeight: 700,
-            letterSpacing: "-0.045em",
-            lineHeight: 1.05,
-            margin: 0,
-            opacity: headlineProgress,
-            transform: `translate3d(0, ${snap(y)}px, 0) scale(${scale})`,
-            filter:
-              headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
+            fontSize: vmin(3.5),
+            fontWeight: 400,
+            letterSpacing: "-0.012em",
+            margin: `${vmin(3)}px 0 0`,
+            maxWidth: "40em",
+            color: getSubtitleColor(s.color),
+            opacity: subtitleProgress,
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
           }}
         >
-          {headline}
-        </h1>
-
-        {subtitle.trim() && (
-          <p
-            style={{
-              fontSize: 38,
-              fontWeight: 400,
-              letterSpacing: "-0.012em",
-              margin: "32px 0 0",
-              color: getSubtitleColor(s.color),
-              opacity: subtitleProgress,
-              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+          {subtitle}
+        </p>
+      )}
+    </AbsoluteFill>
   );
 };

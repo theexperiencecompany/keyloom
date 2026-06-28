@@ -9,10 +9,10 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { SPOTIFY_FONT } from "../../fonts";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type SpotifyPlayerProps = {
@@ -30,12 +30,6 @@ export type SpotifyPlayerProps = {
   /** Universal Style — background (gradient tint), text, font, accent. */
   clipStyle?: ClipStyle;
 };
-
-// Native design canvas — Spotify's full-screen "Now Playing" is portrait 9:16.
-const W = 1080;
-const H = 1920;
-// Spotify's now-playing keeps the album art nearly full-bleed (~6% side margin).
-const PAD = 64;
 
 const GREEN = "#1ed760";
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
@@ -70,6 +64,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { width, height, isLandscape, vmin } = useCanvasLayout();
 
   const s = resolveClipStyle(clipStyle, {
     background: "#5b3a8c",
@@ -103,68 +98,82 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
     config: { damping: 16, stiffness: 95, mass: 0.9 },
   });
   const coverScale = 0.93 + coverSpring * 0.07;
-  const float = Math.sin((frame / fps) * 1.05) * 8;
-  const headerY = (1 - enter) * -18;
-  const bodyY = (1 - enter) * 34;
+  const float = Math.sin((frame / fps) * 1.05) * vmin(0.5);
 
-  const ART = W - PAD * 2;
+  // Everything is sized relative to the canvas and laid out with flexbox, so
+  // the whole player REFLOWS to any aspect ratio instead of uniformly scaling.
+  const pad = vmin(6);
+  const contentW = Math.min(width - pad * 2, height * 1.05);
+  const artSize = Math.min(contentW, height * 0.46);
+  const gap = vmin(isLandscape ? 2.6 : 3.4);
+  // Header + bottom utility row only appear when there's spare vertical room
+  // (portrait / square); landscape keeps just art → title → scrubber → controls.
+  const showChrome = !isLandscape;
 
   return (
-    <FitContent designWidth={W} designHeight={H} background={bg}>
-      <AbsoluteFill
+    <AbsoluteFill
+      style={{
+        background: bg,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: pad,
+      }}
+    >
+      <div
         style={{
-          fontFamily: s.fontFamily,
-          color: s.color,
+          width: contentW,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap,
         }}
       >
-        {/* Top bar */}
-        <div
-          style={{
-            position: "absolute",
-            top: 72,
-            left: PAD,
-            right: PAD,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            opacity: enter,
-            transform: `translateY(${snap(headerY)}px)`,
-          }}
-        >
-          <ChevronDownIcon size={54} color="#ffffff" />
+        {showChrome ? (
           <div
             style={{
-              flex: 1,
-              minWidth: 0,
-              textAlign: "center",
-              fontSize: 29,
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              padding: "0 16px",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              opacity: enter,
             }}
           >
-            {playlist}
+            <ChevronDownIcon size={vmin(4.6)} color="#ffffff" />
+            <div
+              style={{
+                flex: 1,
+                minWidth: 0,
+                textAlign: "center",
+                fontSize: vmin(2.6),
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                padding: `0 ${vmin(1.5)}px`,
+              }}
+            >
+              {playlist}
+            </div>
+            <MoreIcon size={vmin(4.6)} color="#ffffff" />
           </div>
-          <MoreIcon size={54} color="#ffffff" />
-        </div>
+        ) : null}
 
         {/* Album art */}
         <div
           style={{
-            position: "absolute",
-            top: 196,
-            left: PAD,
-            width: ART,
-            height: ART,
-            borderRadius: 22,
+            width: artSize,
+            height: artSize,
+            borderRadius: vmin(2),
             overflow: "hidden",
             background: "#2a2a2a",
-            boxShadow: "0 70px 130px rgba(0,0,0,0.6)",
+            boxShadow: "0 40px 90px rgba(0,0,0,0.55)",
             opacity: coverSpring,
             transform: `translateY(${snap(float)}px) scale(${coverScale})`,
+            flexShrink: 0,
           }}
         >
           {albumArt ? (
@@ -181,7 +190,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 240,
+                fontSize: artSize * 0.3,
                 color: "rgba(255,255,255,0.25)",
               }}
             >
@@ -190,152 +199,144 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
           )}
         </div>
 
-        {/* Lower block */}
+        {/* Title + like */}
         <div
           style={{
-            position: "absolute",
-            top: 1196,
-            left: 0,
-            right: 0,
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: vmin(3),
             opacity: enter,
-            transform: `translateY(${snap(bodyY)}px)`,
           }}
         >
-          {/* Title + like */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 28,
-              padding: `0 ${PAD}px`,
-            }}
-          >
-            <div style={{ minWidth: 0 }}>
-              <div
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: vmin(6),
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {trackTitle}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: vmin(1.2),
+                marginTop: vmin(1),
+              }}
+            >
+              {explicit ? <ExplicitBadge size={vmin(2.8)} /> : null}
+              <span
                 style={{
-                  fontSize: 72,
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
+                  fontSize: vmin(3.2),
+                  fontWeight: 500,
+                  color: "rgba(255,255,255,0.6)",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
               >
-                {trackTitle}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  marginTop: 12,
-                }}
-              >
-                {explicit ? <ExplicitBadge /> : null}
-                <span
-                  style={{
-                    fontSize: 38,
-                    fontWeight: 500,
-                    color: "rgba(255,255,255,0.6)",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {artist}
-                </span>
-              </div>
+                {artist}
+              </span>
             </div>
-            <SaveButton liked={liked} accent={accent} />
           </div>
+          <SaveButton liked={liked} accent={accent} size={vmin(5)} />
+        </div>
 
-          {/* Scrubber */}
-          <div style={{ padding: `46px ${PAD}px 0` }}>
+        {/* Scrubber */}
+        <div style={{ width: "100%" }}>
+          <div
+            style={{
+              position: "relative",
+              height: vmin(0.55),
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.3)",
+            }}
+          >
             <div
               style={{
-                position: "relative",
-                height: 6,
+                position: "absolute",
+                inset: 0,
+                width: `${progress * 100}%`,
                 borderRadius: 999,
-                background: "rgba(255,255,255,0.3)",
+                background: "#ffffff",
               }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: `${progress * 100}%`,
-                  borderRadius: 999,
-                  background: "#ffffff",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: `${progress * 100}%`,
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  background: "#ffffff",
-                  transform: "translate(-50%, -50%)",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
-                }}
-              />
-            </div>
+            />
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: 20,
-                fontSize: 26,
-                fontWeight: 500,
-                color: "rgba(255,255,255,0.62)",
-                fontVariantNumeric: "tabular-nums",
+                position: "absolute",
+                top: "50%",
+                left: `${progress * 100}%`,
+                width: vmin(2.1),
+                height: vmin(2.1),
+                borderRadius: "50%",
+                background: "#ffffff",
+                transform: "translate(-50%, -50%)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
               }}
-            >
-              <span>{fmtTime(elapsed)}</span>
-              <span>-{fmtTime(total - elapsed)}</span>
-            </div>
+            />
           </div>
-
-          {/* Transport controls */}
           <div
             style={{
               display: "flex",
-              alignItems: "center",
               justifyContent: "space-between",
-              padding: `56px ${PAD}px 0`,
+              marginTop: vmin(1.6),
+              fontSize: vmin(2.2),
+              fontWeight: 500,
+              color: "rgba(255,255,255,0.62)",
+              fontVariantNumeric: "tabular-nums",
             }}
           >
-            {/* Shuffle is active (green) with the small "on" dot beneath it. */}
-            <IconWithDot accent={accent}>
-              <ShuffleIcon size={64} color={accent} />
-            </IconWithDot>
-            <PrevIcon />
-            <PlayButton frame={frame} />
-            <NextIcon />
-            <SleepTimerIcon size={60} color="rgba(255,255,255,0.92)" />
-          </div>
-
-          {/* Bottom row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: `52px ${PAD}px 0`,
-            }}
-          >
-            <ConnectIcon size={58} color="rgba(255,255,255,0.85)" />
-            <div style={{ display: "flex", alignItems: "center", gap: 56 }}>
-              <ShareIcon size={58} color="rgba(255,255,255,0.85)" />
-              <QueueIcon size={58} color="rgba(255,255,255,0.85)" />
-            </div>
+            <span>{fmtTime(elapsed)}</span>
+            <span>-{fmtTime(total - elapsed)}</span>
           </div>
         </div>
-      </AbsoluteFill>
-    </FitContent>
+
+        {/* Transport controls */}
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <IconWithDot accent={accent}>
+            <ShuffleIcon size={vmin(5.4)} color={accent} />
+          </IconWithDot>
+          <PrevIcon size={vmin(6.4)} />
+          <PlayButton frame={frame} size={vmin(13)} />
+          <NextIcon size={vmin(6.4)} />
+          <SleepTimerIcon size={vmin(5)} color="rgba(255,255,255,0.92)" />
+        </div>
+
+        {/* Bottom utility row */}
+        {showChrome ? (
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <ConnectIcon size={vmin(4.9)} color="rgba(255,255,255,0.85)" />
+            <div
+              style={{ display: "flex", alignItems: "center", gap: vmin(4.8) }}
+            >
+              <ShareIcon size={vmin(4.9)} color="rgba(255,255,255,0.85)" />
+              <QueueIcon size={vmin(4.9)} color="rgba(255,255,255,0.85)" />
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </AbsoluteFill>
   );
 };
 
@@ -408,24 +409,24 @@ function ShuffleIcon({ size, color }: { size: number; color: string }) {
 }
 
 // Spotify Encore "skip-back" / "skip-forward" — solid bar + triangle.
-function PrevIcon() {
+function PrevIcon({ size }: { size: number }) {
   return (
-    <svg width={76} height={76} viewBox="0 0 16 16" fill="#ffffff">
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="#ffffff">
       <path d="M3.3 1a.7.7 0 0 1 .7.7v5.15l9.95-5.744a.7.7 0 0 1 1.05.606v12.575a.7.7 0 0 1-1.05.607L4 9.149V14.3a.7.7 0 0 1-.7.7H1.7a.7.7 0 0 1-.7-.7V1.7a.7.7 0 0 1 .7-.7h1.6z" />
     </svg>
   );
 }
 
-function NextIcon() {
+function NextIcon({ size }: { size: number }) {
   return (
-    <svg width={76} height={76} viewBox="0 0 16 16" fill="#ffffff">
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="#ffffff">
       <path d="M12.7 1a.7.7 0 0 0-.7.7v5.15L2.05 1.107A.7.7 0 0 0 1 1.712v12.575a.7.7 0 0 0 1.05.607L12 9.149V14.3a.7.7 0 0 0 .7.7h1.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-1.6z" />
     </svg>
   );
 }
 
 // Spotify's gray "explicit" badge — a rounded square with a knocked-out E.
-function ExplicitBadge() {
+function ExplicitBadge({ size }: { size: number }) {
   return (
     <span
       style={{
@@ -433,12 +434,12 @@ function ExplicitBadge() {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 32,
-        height: 32,
-        borderRadius: 6,
+        width: size,
+        height: size,
+        borderRadius: size * 0.19,
         background: "rgba(255,255,255,0.6)",
         color: "#2b2b2b",
-        fontSize: 22,
+        fontSize: size * 0.69,
         fontWeight: 700,
         lineHeight: 1,
       }}
@@ -510,7 +511,7 @@ function QueueIcon({ size, color }: { size: number; color: string }) {
   );
 }
 
-function PlayButton({ frame }: { frame: number }) {
+function PlayButton({ frame, size }: { frame: number; size: number }) {
   // White circle with a black PAUSE glyph — the track is actively playing
   // (the scrubber advances), so Spotify shows pause, not the play triangle.
   // Gentle breathing pulse.
@@ -518,8 +519,8 @@ function PlayButton({ frame }: { frame: number }) {
   return (
     <div
       style={{
-        width: 160,
-        height: 160,
+        width: size,
+        height: size,
         borderRadius: "50%",
         background: "#ffffff",
         display: "flex",
@@ -527,9 +528,15 @@ function PlayButton({ frame }: { frame: number }) {
         justifyContent: "center",
         transform: `scale(${pulse})`,
         boxShadow: "0 14px 40px rgba(0,0,0,0.4)",
+        flexShrink: 0,
       }}
     >
-      <svg width={66} height={66} viewBox="0 0 24 24" fill="#000">
+      <svg
+        width={size * 0.41}
+        height={size * 0.41}
+        viewBox="0 0 24 24"
+        fill="#000"
+      >
         <rect x="6" y="5" width="4" height="14" rx="1.4" />
         <rect x="14" y="5" width="4" height="14" rx="1.4" />
       </svg>
@@ -539,13 +546,21 @@ function PlayButton({ frame }: { frame: number }) {
 
 // Spotify's "saved to library" control: a filled green circle with a white
 // check when liked, otherwise a hollow "add" (+) circle.
-function SaveButton({ liked, accent }: { liked: boolean; accent: string }) {
+function SaveButton({
+  liked,
+  accent,
+  size,
+}: {
+  liked: boolean;
+  accent: string;
+  size: number;
+}) {
   if (liked) {
     return (
       <div
         style={{
-          width: 58,
-          height: 58,
+          width: size,
+          height: size,
           borderRadius: "50%",
           background: accent,
           display: "flex",
@@ -555,8 +570,8 @@ function SaveButton({ liked, accent }: { liked: boolean; accent: string }) {
         }}
       >
         <svg
-          width={32}
-          height={32}
+          width={size * 0.55}
+          height={size * 0.55}
           viewBox="0 0 24 24"
           fill="none"
           stroke="#000"
@@ -571,12 +586,13 @@ function SaveButton({ liked, accent }: { liked: boolean; accent: string }) {
   }
   return (
     <svg
-      width={58}
-      height={58}
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="rgba(255,255,255,0.85)"
       strokeWidth={1.6}
+      style={{ flexShrink: 0 }}
     >
       <circle cx="12" cy="12" r="9.3" />
       <path d="M12 7.4v9.2M7.4 12h9.2" strokeLinecap="round" />

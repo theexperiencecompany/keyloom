@@ -102,7 +102,7 @@ export function listScenesInCategory(category: CompositionCategory): Array<{
     fps: c.fps,
     width: c.width,
     height: c.height,
-    brandLocked: c.brandMode === "locked",
+    brandLocked: false,
   }));
 }
 
@@ -123,7 +123,7 @@ function countByCategory(): Map<CompositionCategory, number> {
 
 // Kept so debug callers / docs surfaces can render a one-line list if needed.
 export function formatSceneOneLine(c: AnyCompositionInfo): string {
-  const locked = c.brandMode === "locked" ? " [brand-locked]" : "";
+  const locked = "";
   return `- **${c.id}**${locked} — ${c.description}`;
 }
 
@@ -235,7 +235,7 @@ function toCandidate(
     title: c.title,
     description: c.description,
     agentNotes: c.agentNotes,
-    brandLocked: c.brandMode === "locked",
+    brandLocked: false,
     defaultDurationFrames: c.durationInFrames,
     defaultProps: trim(c.defaultProps),
   };

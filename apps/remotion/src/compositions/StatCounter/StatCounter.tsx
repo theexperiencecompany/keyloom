@@ -7,8 +7,8 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type StatCounterProps = {
@@ -34,6 +34,7 @@ export const StatCounter: React.FC<StatCounterProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
+  const { vw, vh, vmin } = useCanvasLayout();
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -78,56 +79,55 @@ export const StatCounter: React.FC<StatCounterProps> = ({
     ? "rgba(15,16,20,0.55)"
     : "rgba(255,255,255,0.65)";
 
+  // Big single-line number: size by min(vw, vh) so it stays large on landscape
+  // but shrinks to fit the width on portrait instead of overflowing.
+  const numberSize = Math.min(vw(20), vh(26));
+
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(6)}px`,
+        textAlign: "center",
+      }}
     >
-      <AbsoluteFill
+      <div
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          textAlign: "center",
+          fontSize: numberSize,
+          fontWeight: 800,
+          letterSpacing: "-0.06em",
+          lineHeight: 1,
+          opacity: numberPop,
+          transform: `scale(${0.85 + numberPop * 0.15})`,
+          fontVariantNumeric: "tabular-nums",
         }}
       >
+        {prefix}
+        {formatted}
+        {suffix}
+      </div>
+      {label.trim() && (
         <div
           style={{
-            fontSize: 280,
-            fontWeight: 800,
-            letterSpacing: "-0.06em",
-            lineHeight: 1,
-            opacity: numberPop,
-            transform: `scale(${0.85 + numberPop * 0.15})`,
-            fontVariantNumeric: "tabular-nums",
+            marginTop: vmin(3.3),
+            fontSize: vmin(4.4),
+            fontWeight: 500,
+            letterSpacing: "-0.012em",
+            color: labelColor,
+            opacity: labelProgress,
+            transform: `translate3d(0, ${snap((1 - labelProgress) * vmin(1.3))}px, 0)`,
           }}
         >
-          {prefix}
-          {formatted}
-          {suffix}
+          {label}
         </div>
-        {label.trim() && (
-          <div
-            style={{
-              marginTop: 36,
-              fontSize: 48,
-              fontWeight: 500,
-              letterSpacing: "-0.012em",
-              color: labelColor,
-              opacity: labelProgress,
-              transform: `translate3d(0, ${snap((1 - labelProgress) * 14)}px, 0)`,
-            }}
-          >
-            {label}
-          </div>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+      )}
+    </AbsoluteFill>
   );
 };
 

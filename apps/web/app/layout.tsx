@@ -1,7 +1,8 @@
 import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { MotionConfig } from "motion/react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 
 import "@workspace/ui/globals.css";
@@ -20,7 +21,27 @@ export const metadata: Metadata = {
     "A library of cinematic scenes for Remotion. No After Effects, no animation team — drop in, render, ship.",
 };
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const sfPro = localFont({
+  src: [
+    {
+      path: "../public/sf-pro-display/SFPRODISPLAYREGULAR.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/sf-pro-display/SFPRODISPLAYMEDIUM.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/sf-pro-display/SFPRODISPLAYBOLD.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -40,7 +61,7 @@ export default function RootLayout({
         "antialiased",
         fontMono.variable,
         "font-sans",
-        geist.variable,
+        sfPro.variable,
       )}
     >
       <body className="min-h-screen bg-background text-foreground overflow-x-hidden">

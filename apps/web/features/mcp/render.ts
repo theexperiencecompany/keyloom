@@ -12,6 +12,7 @@ import {
 import { compositionsById } from "@workspace/compositions/registry";
 import { rewriteExternalImageUrls } from "@/features/studio/lib/proxy-external-images";
 import { isAgentVisible } from "@/lib/agent/catalog";
+import { getComponent } from "@/lib/components";
 import { resolveCompositionMeta } from "@/lib/composition-meta";
 import { getLambdaConfig } from "./config";
 import { buildDownloadUrl } from "./download-url";
@@ -103,6 +104,88 @@ export async function startRender(
     fps,
     width: meta.width,
     height: meta.height,
+  };
+}
+
+/**
+ * Render a user's forked component. The fork's editable source isn't in the
+ * deployed bundle, so we render the registered "Project" composition and embed
+ * the fork in `customComponents` — exactly how the studio renders forks, so it
+ * goes through the runtime transpile path (DynamicComposition). Returns null if
+ * `forkId` isn't one of this user's forks (caller falls back to a built-in).
+ */
+export async function startForkRender(
+  userId: string,
+  forkId: string,
+  props: Record<string, unknown>,
+  options: RenderComponentOptions = {},
+): Promise<StartRenderResult | null> {
+  const fork = await getComponent(userId, forkId);
+  if (!fork) return null;
+
+  const { region, serveUrl, functionName } = getLambdaConfig();
+  const info = compositionsById[fork.baseId];
+  const fps = options.fps ?? info?.fps ?? 60;
+  const durationInFrames =
+    options.durationInFrames ?? info?.durationInFrames ?? 150;
+  const width = info?.width ?? 1920;
+  const height = info?.height ?? 1080;
+  const scale = Math.min(2, Math.max(0.25, options.scale ?? 1));
+  const bitrateKbps = options.videoBitrateKbps ?? 8000;
+
+  const merged = {
+    ...((info?.defaultProps as Record<string, unknown>) ?? {}),
+    ...props,
+  };
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL)
+    ?.trim()
+    .replace(/\/$/, "");
+  const clipProps = appUrl
+    ? (rewriteExternalImageUrls(merged, appUrl) as Record<string, unknown>)
+    : merged;
+
+  const project = {
+    fps,
+    width,
+    height,
+    clips: [
+      { id: forkId, compositionId: forkId, props: clipProps, durationInFrames },
+    ],
+    customComponents: {
+      [forkId]: {
+        baseId: fork.baseId,
+        name: fork.name,
+        code: fork.code,
+        ...(fork.exportName ? { exportName: fork.exportName } : {}),
+      },
+    },
+  };
+
+  const { renderId, bucketName } = await renderMediaOnLambda({
+    region,
+    functionName,
+    serveUrl,
+    composition: "Project",
+    inputProps: project,
+    codec: "h264",
+    imageFormat: "jpeg",
+    x264Preset: "fast",
+    forceFps: fps,
+    forceDurationInFrames: durationInFrames,
+    scale,
+    videoBitrate: `${bitrateKbps}k`,
+    privacy: "private",
+    maxRetries: 2,
+  });
+
+  return {
+    compositionId: forkId,
+    renderId,
+    bucketName,
+    durationInFrames,
+    fps,
+    width,
+    height,
   };
 }
 

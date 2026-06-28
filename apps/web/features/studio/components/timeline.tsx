@@ -398,6 +398,9 @@ export function Timeline({
                       <Fragment key={clip.id}>
                         <SortableClipBlock
                           clip={clip}
+                          displayName={
+                            project.customComponents?.[clip.compositionId]?.name
+                          }
                           fps={fps}
                           framesPerPx={framesPerPx}
                           bodyWidthPx={bodyWidthPx}

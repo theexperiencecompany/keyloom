@@ -44,10 +44,9 @@ export function buildMentionContext(
 
   const sections = ids.map((id) => {
     const info = compositionsById[id]!;
-    const locked = info.brandMode === "locked";
     const notes = info.agentNotes ? `\nGuidance: ${info.agentNotes}` : "";
     return [
-      `### ${info.title} (\`${info.id}\`)${locked ? " — BRAND-LOCKED" : ""}`,
+      `### ${info.title} (\`${info.id}\`)`,
       info.description,
       notes,
       "",

@@ -3,7 +3,6 @@
 import {
   ArrowReloadHorizontalIcon,
   Cancel01Icon,
-  LockedIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { ClipStyle } from "@workspace/compositions/clip-style";
@@ -77,7 +76,6 @@ export function Inspector({
   onClose,
 }: Props) {
   const clipEffects = clip.effects ?? [];
-  const isLocked = info.brandMode === "locked";
 
   // Chat compositions (MessageBubbles, WhatsApp, …) get a dedicated "Messages"
   // tab for the conversation editor, so it has the full panel height and isn't
@@ -214,19 +212,6 @@ export function Inspector({
           value="style"
           className="min-h-0 flex-1 overflow-y-auto scrollbar-thin"
         >
-          {isLocked && (
-            <div className="mx-5 mt-4 flex items-start gap-2 rounded-lg bg-muted/40 px-3.5 py-3">
-              <HugeiconsIcon
-                icon={LockedIcon}
-                className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
-              />
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                {info.themes?.length
-                  ? "This composition uses authentic brand styling. Pick a curated theme to restyle it."
-                  : "This composition uses authentic brand styling. Color and font changes won’t affect the preview."}
-              </p>
-            </div>
-          )}
           <div className="px-5 pb-2 pt-5">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Frame
@@ -264,7 +249,7 @@ export function Inspector({
             onPatch={onUpdateStyle}
             onReset={onResetStyle}
             themes={info.themes}
-            locked={isLocked}
+            locked={false}
           />
         </TabsContent>
 

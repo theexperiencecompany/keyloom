@@ -7,8 +7,8 @@ import {
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { FitContent } from "../../fit-content";
 import { snap } from "../../snap";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 
 export type TypingSearchProps = {
@@ -25,16 +25,6 @@ const CURSOR_TRAVEL = 30;
 const CLICK_FEEDBACK = 10;
 const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
-const BAR_WIDTH = 1700;
-const BAR_HEIGHT = 200;
-const BUTTON_SIZE = 144;
-const BUTTON_PADDING = 22;
-
-// Native design canvas. Layout below is computed against these fixed dims (not
-// the live canvas) so <FitContent> can scale the whole design to any format.
-const DESIGN_W = 1920;
-const DESIGN_H = 1080;
-
 export const TypingSearch: React.FC<TypingSearchProps> = ({
   query,
   placeholder,
@@ -42,8 +32,21 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
 }) => {
   const frame = useDesignFrame();
   const { fps } = useVideoConfig();
-  const width = DESIGN_W;
-  const height = DESIGN_H;
+  const { width, height, vw, vh, vmin } = useCanvasLayout();
+  // The search bar was authored against a 1920×1080 canvas (min side 1080).
+  // Convert authored px → canvas-relative units so the whole pill reflows to
+  // any aspect instead of uniformly shrinking. The cursor-fly-in target is
+  // recomputed from these relative sizes below so the click still lands on the
+  // button in every format.
+  const r = (px: number) => vmin((px / 1080) * 100);
+
+  // The pill was a fixed 1700px box centered on a 1920-wide canvas. Size it
+  // relative to the canvas and cap it so it fits portrait AND landscape.
+  const BAR_WIDTH = Math.min(vw(88), vh(160), r(1700));
+  const BAR_HEIGHT = r(200);
+  const BUTTON_SIZE = r(144);
+  const BUTTON_PADDING = r(22);
+
   const s = resolveClipStyle(clipStyle, {
     background: "#ffffff",
     color: "#0f1014",
@@ -120,103 +123,97 @@ export const TypingSearch: React.FC<TypingSearchProps> = ({
   const cursorVisible = frame >= cursorStart;
 
   return (
-    <FitContent
-      designWidth={DESIGN_W}
-      designHeight={DESIGN_H}
-      background={s.background}
+    <AbsoluteFill
+      style={{ background: s.background, fontFamily: s.fontFamily }}
     >
-      <AbsoluteFill style={{ fontFamily: s.fontFamily }}>
+      <div
+        style={{
+          position: "absolute",
+          left: barLeft,
+          top: barTop,
+          width: BAR_WIDTH,
+          height: BAR_HEIGHT,
+          background: "#ffffff",
+          borderRadius: BAR_HEIGHT / 2,
+          boxShadow:
+            "0 14px 44px rgba(15,16,20,0.10), 0 2px 8px rgba(15,16,20,0.05)",
+          border: "1px solid rgba(15,16,20,0.06)",
+          display: "flex",
+          alignItems: "center",
+          gap: r(28),
+          padding: `0 ${BUTTON_PADDING}px 0 ${r(56)}px`,
+          opacity: barProgress,
+          transform: `translate3d(0, ${snap((1 - barProgress) * 18)}px, 0) scale(${0.96 + barProgress * 0.04})`,
+        }}
+      >
+        <SearchIcon size={r(56)} />
+
         <div
           style={{
-            position: "absolute",
-            left: barLeft,
-            top: barTop,
-            width: BAR_WIDTH,
-            height: BAR_HEIGHT,
-            background: "#ffffff",
-            borderRadius: BAR_HEIGHT / 2,
-            boxShadow:
-              "0 14px 44px rgba(15,16,20,0.10), 0 2px 8px rgba(15,16,20,0.05)",
-            border: "1px solid rgba(15,16,20,0.06)",
+            flex: 1,
             display: "flex",
             alignItems: "center",
-            gap: 28,
-            padding: `0 ${BUTTON_PADDING}px 0 56px`,
-            opacity: barProgress,
-            transform: `translate3d(0, ${snap((1 - barProgress) * 18)}px, 0) scale(${0.96 + barProgress * 0.04})`,
+            fontSize: r(64),
+            fontWeight: 500,
+            color: "#0f1014",
+            letterSpacing: "-0.015em",
+            minWidth: 0,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
           }}
         >
-          <SearchIcon size={56} />
-
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              fontSize: 64,
-              fontWeight: 500,
-              color: "#0f1014",
-              letterSpacing: "-0.015em",
-              minWidth: 0,
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {charsTyped === 0 ? (
-              <span style={{ color: "rgba(15,16,20,0.35)" }}>
-                {placeholder}
-              </span>
-            ) : (
-              <>
-                <span>{visibleText}</span>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 4,
-                    height: 68,
-                    marginLeft: 6,
-                    background: "#0f1014",
-                    opacity: caretBlink ? 1 : 0,
-                    borderRadius: 1,
-                  }}
-                />
-              </>
-            )}
-          </div>
-
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                border: `3px solid ${accentColor}`,
-                transform: `scale(${ringScale})`,
-                opacity: ringOpacity,
-                pointerEvents: "none",
-              }}
-            />
-            <div
-              style={{
-                width: BUTTON_SIZE,
-                height: BUTTON_SIZE,
-                borderRadius: "50%",
-                background: accentColor,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#ffffff",
-                transform: `scale(${buttonScale})`,
-              }}
-            >
-              <ArrowIcon size={56} />
-            </div>
-          </div>
+          {charsTyped === 0 ? (
+            <span style={{ color: "rgba(15,16,20,0.35)" }}>{placeholder}</span>
+          ) : (
+            <>
+              <span>{visibleText}</span>
+              <span
+                style={{
+                  display: "inline-block",
+                  width: r(4),
+                  height: r(68),
+                  marginLeft: r(6),
+                  background: "#0f1014",
+                  opacity: caretBlink ? 1 : 0,
+                  borderRadius: 1,
+                }}
+              />
+            </>
+          )}
         </div>
 
-        {cursorVisible && <MouseCursor x={cursorX} y={cursorY} />}
-      </AbsoluteFill>
-    </FitContent>
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              border: `${r(3)}px solid ${accentColor}`,
+              transform: `scale(${ringScale})`,
+              opacity: ringOpacity,
+              pointerEvents: "none",
+            }}
+          />
+          <div
+            style={{
+              width: BUTTON_SIZE,
+              height: BUTTON_SIZE,
+              borderRadius: "50%",
+              background: accentColor,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#ffffff",
+              transform: `scale(${buttonScale})`,
+            }}
+          >
+            <ArrowIcon size={r(56)} />
+          </div>
+        </div>
+      </div>
+
+      {cursorVisible && <MouseCursor x={cursorX} y={cursorY} size={r(88)} />}
+    </AbsoluteFill>
   );
 };
 
@@ -256,16 +253,18 @@ function ArrowIcon({ size }: { size: number }) {
   );
 }
 
-function MouseCursor({ x, y }: { x: number; y: number }) {
+function MouseCursor({ x, y, size }: { x: number; y: number; size: number }) {
+  // The pointer tip sits at ~(16,10) within the 88-unit artboard; keep the same
+  // fractional offset so the tip lands on the target at any cursor size.
   return (
     <svg
       viewBox="0 0 24 24"
-      width={88}
-      height={88}
+      width={size}
+      height={size}
       style={{
         position: "absolute",
-        left: x - 16,
-        top: y - 10,
+        left: x - size * (16 / 88),
+        top: y - size * (10 / 88),
         filter: "drop-shadow(0 10px 20px rgba(15,16,20,0.3))",
         pointerEvents: "none",
       }}

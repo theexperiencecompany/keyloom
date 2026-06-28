@@ -69,6 +69,29 @@ export const apiKeys = pgTable("api_keys", {
     .notNull(),
 });
 
+/**
+ * A user-forked composition: editable TSX copied from a base composition and
+ * tweaked (by the agent or by hand). `id` (e.g. "cmp_…") is also the
+ * clip.compositionId that references it inside a project's `customComponents`.
+ */
+export const userComponents = pgTable("user_components", {
+  id: id("cmp"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  baseId: text("base_id").notNull(),
+  code: text("code").notNull(),
+  exportName: text("export_name"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type UserComponentRow = typeof userComponents.$inferSelect;

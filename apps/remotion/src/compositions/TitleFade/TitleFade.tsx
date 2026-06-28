@@ -1,6 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
@@ -25,6 +25,7 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { vmin } = useCanvasLayout();
   const s = resolveTitleStyle(clipStyle);
   useFontReady(s.fontFamily);
 
@@ -52,53 +53,50 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
   );
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7)}px`,
+        textAlign: "center",
+      }}
     >
-      <AbsoluteFill
+      <h1
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 80px",
-          textAlign: "center",
+          fontSize: vmin(12),
+          fontWeight: 700,
+          letterSpacing: "-0.045em",
+          lineHeight: 1.05,
+          margin: 0,
+          maxWidth: "16em",
+          opacity: headlineProgress,
+          transform: `translate3d(0, ${snap((1 - headlineProgress) * vmin(2.2))}px, 0)`,
         }}
       >
-        <h1
+        {headline}
+      </h1>
+
+      {subtitle.trim() && (
+        <p
           style={{
-            fontSize: 132,
-            fontWeight: 700,
-            letterSpacing: "-0.045em",
-            lineHeight: 1.05,
-            margin: 0,
-            opacity: headlineProgress,
-            transform: `translate3d(0, ${snap((1 - headlineProgress) * 24)}px, 0)`,
+            fontSize: vmin(3.5),
+            fontWeight: 400,
+            letterSpacing: "-0.012em",
+            margin: `${vmin(3)}px 0 0`,
+            maxWidth: "40em",
+            color: getSubtitleColor(s.color),
+            opacity: subtitleProgress,
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
           }}
         >
-          {headline}
-        </h1>
-
-        {subtitle.trim() && (
-          <p
-            style={{
-              fontSize: 38,
-              fontWeight: 400,
-              letterSpacing: "-0.012em",
-              margin: "32px 0 0",
-              color: getSubtitleColor(s.color),
-              opacity: subtitleProgress,
-              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+          {subtitle}
+        </p>
+      )}
+    </AbsoluteFill>
   );
 };

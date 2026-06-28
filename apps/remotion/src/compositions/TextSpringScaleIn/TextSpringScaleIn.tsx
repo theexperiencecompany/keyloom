@@ -1,6 +1,6 @@
 "use client";
 import { AbsoluteFill, Easing, interpolate } from "remotion";
-import { FitContent } from "../../fit-content";
+import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import {
   getSubtitleColor,
@@ -24,6 +24,7 @@ export const TextSpringScaleIn: React.FC<TextSpringScaleInProps> = ({
   clipStyle,
 }) => {
   const frame = useDesignFrame();
+  const { vmin } = useCanvasLayout();
   const s = resolveTitleStyle(clipStyle);
   const words = headline.trim().split(/\s+/).filter(Boolean);
 
@@ -42,85 +43,82 @@ export const TextSpringScaleIn: React.FC<TextSpringScaleInProps> = ({
   );
 
   return (
-    <FitContent
-      designWidth={1920}
-      designHeight={1080}
-      background={s.background}
+    <AbsoluteFill
+      style={{
+        background: s.background,
+        color: s.color,
+        fontFamily: s.fontFamily,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: `0 ${vmin(7.4)}px`,
+        textAlign: "center",
+      }}
     >
-      <AbsoluteFill
+      <h1
         style={{
-          color: s.color,
-          fontFamily: s.fontFamily,
+          fontSize: vmin(12.2),
+          maxWidth: "16em",
+          fontWeight: 700,
+          letterSpacing: "-0.045em",
+          lineHeight: 1.05,
+          margin: 0,
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          flexWrap: "wrap",
           justifyContent: "center",
-          padding: "0 80px",
-          textAlign: "center",
+          gap: "0 0.28em",
         }}
       >
-        <h1
+        {words.map((word, i) => {
+          const start = HEADLINE_START + i * WORD_STAGGER;
+          const opacity = interpolate(
+            frame,
+            [start, start + Math.min(WORD_DURATION, 12)],
+            [0, 1],
+            { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+          );
+          const scale = interpolate(
+            frame,
+            [start, start + WORD_DURATION],
+            [0.88, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: SCALE_EASE,
+            },
+          );
+          return (
+            <span
+              key={i}
+              style={{
+                display: "inline-block",
+                opacity,
+                transform: `scale(${scale})`,
+              }}
+            >
+              {word}
+            </span>
+          );
+        })}
+      </h1>
+
+      {subtitle.trim() && (
+        <p
           style={{
-            fontSize: 132,
-            fontWeight: 700,
-            letterSpacing: "-0.045em",
-            lineHeight: 1.05,
-            margin: 0,
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "0 0.28em",
+            fontSize: vmin(3.5),
+            maxWidth: "40em",
+            fontWeight: 400,
+            letterSpacing: "-0.012em",
+            margin: `${vmin(3)}px 0 0`,
+            color: getSubtitleColor(s.color),
+            opacity: subtitleProgress,
+            transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
           }}
         >
-          {words.map((word, i) => {
-            const start = HEADLINE_START + i * WORD_STAGGER;
-            const opacity = interpolate(
-              frame,
-              [start, start + Math.min(WORD_DURATION, 12)],
-              [0, 1],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-            );
-            const scale = interpolate(
-              frame,
-              [start, start + WORD_DURATION],
-              [0.88, 1],
-              {
-                extrapolateLeft: "clamp",
-                extrapolateRight: "clamp",
-                easing: SCALE_EASE,
-              },
-            );
-            return (
-              <span
-                key={i}
-                style={{
-                  display: "inline-block",
-                  opacity,
-                  transform: `scale(${scale})`,
-                }}
-              >
-                {word}
-              </span>
-            );
-          })}
-        </h1>
-
-        {subtitle.trim() && (
-          <p
-            style={{
-              fontSize: 38,
-              fontWeight: 400,
-              letterSpacing: "-0.012em",
-              margin: "32px 0 0",
-              color: getSubtitleColor(s.color),
-              opacity: subtitleProgress,
-              transform: `translate3d(0, ${snap((1 - subtitleProgress) * 14)}px, 0)`,
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
-      </AbsoluteFill>
-    </FitContent>
+          {subtitle}
+        </p>
+      )}
+    </AbsoluteFill>
   );
 };

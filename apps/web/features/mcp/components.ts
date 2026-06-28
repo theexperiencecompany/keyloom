@@ -47,6 +47,6 @@ function toSummary(info: Info): McpComponentSummary {
     title: info.title,
     description: info.description,
     category: info.category,
-    brandLocked: info.brandMode === "locked",
+    brandLocked: false,
   };
 }

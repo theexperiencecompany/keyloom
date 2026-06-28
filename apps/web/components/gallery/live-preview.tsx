@@ -1,9 +1,7 @@
 "use client";
 
 import { Player } from "@remotion/player";
-import { Skeleton } from "@workspace/ui/components/skeleton";
-import dynamic from "next/dynamic";
-import { type ComponentType, useMemo } from "react";
+import { type ComponentType, useCallback } from "react";
 
 // A single live composition preview, autoplaying + looping. This module is only
 // ever reached through a dynamic import (see gallery-browser.tsx), so neither
@@ -30,29 +28,25 @@ export function LivePreview({
   width: number;
   height: number;
 }) {
-  // Lazy-load only this one composition into its own chunk.
-  const Component = useMemo(
+  // Lazy-load only this one composition into its own chunk via Remotion's
+  // native lazyComponent. The Player wraps it in React.Suspense internally and
+  // compiles the chunk on demand. Our composition modules use a named export
+  // keyed by `id`, so we remap it to the default export Suspense requires.
+  const lazyComponent = useCallback(
     () =>
-      dynamic<Record<string, unknown>>(
-        () =>
-          import(`@workspace/compositions/compositions/${modulePath}`).then(
-            (mod) => ({
-              default: (
-                mod as Record<string, ComponentType<Record<string, unknown>>>
-              )[id]!,
-            }),
-          ),
-        {
-          ssr: false,
-          loading: () => <Skeleton className="h-full w-full rounded-none" />,
-        },
+      import(`@workspace/compositions/compositions/${modulePath}`).then(
+        (mod) => ({
+          default: (
+            mod as Record<string, ComponentType<Record<string, unknown>>>
+          )[id]!,
+        }),
       ),
     [modulePath, id],
   );
 
   return (
     <Player
-      component={Component}
+      lazyComponent={lazyComponent}
       inputProps={defaultProps}
       durationInFrames={durationInFrames}
       fps={fps}

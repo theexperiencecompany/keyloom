@@ -85,6 +85,27 @@ export type ProjectAudio = {
   sourceDurationSec?: number;
 };
 
+/**
+ * A user-forked composition: editable TSX source copied from a base
+ * composition, then tweaked (by the agent or by hand). Stored on the project
+ * and keyed by the clip's `compositionId` (always prefixed `custom:`). At
+ * render time `Project.tsx` routes these to `DynamicComposition`, which
+ * transpiles `code` and renders it. See `dynamic/runtime.ts`.
+ */
+export type CustomComponent = {
+  /** The composition this was forked from, e.g. "TweetCard". */
+  baseId: string;
+  /** Display name for the fork. */
+  name: string;
+  /** Editable TSX source. */
+  code: string;
+  /**
+   * Expected named export (defaults to `baseId`). Lets the loader find the
+   * component even if the file declares helpers/types alongside it.
+   */
+  exportName?: string;
+};
+
 export type Project = {
   /** User-facing project title, shown + editable in the studio top bar. */
   name?: string;
@@ -92,6 +113,12 @@ export type Project = {
   width: number;
   height: number;
   clips: Clip[];
+  /**
+   * Forked components used by this project, keyed by `custom:`-prefixed id.
+   * A clip references one via `clip.compositionId`. Serialized with the
+   * project so it travels through save/load and to the Lambda render.
+   */
+  customComponents?: Record<string, CustomComponent>;
   /**
    * Project-level transition applied to every non-first clip that doesn't
    * set its own override. Lets the user pick a global "look" (all fades, or

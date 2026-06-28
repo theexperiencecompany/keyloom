@@ -1,40 +1,101 @@
 import { ArrowRight02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui/components/button";
+import Image from "next/image";
 import Link from "next/link";
-import { DocsHeader } from "@/components/docs-header";
-import { GalleryMount } from "@/components/gallery/gallery-mount";
+import GradualBlur from "@/components/GradualBlur";
+import { ComponentShowcase } from "@/components/landing/component-showcase";
+import { HeroReelBadges } from "@/components/landing/hero-reel-badges";
+import NavbarMenuFull from "@/components/landing/navbar-menu";
+import { PhoneMockup } from "@/components/landing/phone-mockup";
+import { ViralSection } from "@/components/landing/viral-section";
+import { WhyKeyloom } from "@/components/landing/why-keyloom";
 import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
   return (
-    <div className="mx-auto min-h-screen max-w-7xl border-x border-dashed border-border">
-      <DocsHeader />
+    <div className="mx-auto min-h-screen max-w-7xl">
+      <NavbarMenuFull />
 
-      <main className="px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-        {/* Compact intro — the gallery itself is the hero. */}
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end sm:gap-6">
-          <div>
-            <h1 className="text-pretty text-2xl font-semibold tracking-tight sm:text-3xl">
-              Ship videos that look expensive.
-            </h1>
-            <p className="mt-2.5 max-w-xl text-pretty text-[15px] leading-relaxed text-muted-foreground">
-              A library of cinematic scenes for Remotion. Browse, preview, and
-              drop straight into a video.
-            </p>
-          </div>
-          <Button asChild className="w-full shrink-0 sm:w-auto">
+      <main className="flex flex-col items-center px-5 pb-20 pt-20 text-center sm:pt-28">
+        <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+          Ship marketing reels for your product.
+        </h1>
+        <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+          A library of ready-made motion scenes. Compose, customize, and ship
+          reels for{" "}
+          <span className="inline-flex items-center gap-1 align-middle font-medium text-foreground">
+            <Image
+              src="/tiktok_logo.png"
+              alt=""
+              aria-hidden
+              width={20}
+              height={20}
+              className="size-5 rounded-[5px]"
+            />
+            TikTok
+          </span>{" "}
+          and{" "}
+          <span className="inline-flex items-center gap-1 align-middle font-medium text-foreground">
+            <Image
+              src="/instagram_logo.png"
+              alt=""
+              aria-hidden
+              width={20}
+              height={20}
+              className="size-5 rounded-[5px]"
+            />
+            Instagram
+          </span>{" "}
+          right from your browser.
+        </p>
+        <div className="mt-9 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
+          <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/studio">
               Open Studio
               <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
             </Link>
           </Button>
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            <Link href="/components">Browse components</Link>
+          </Button>
         </div>
 
-        <GalleryMount />
+        {/* Phone mockup preview */}
+        <div className="relative mt-16">
+          <div
+            aria-hidden
+            className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(closest-side,rgba(59,130,246,0.28),transparent)] blur-2xl"
+          />
+          {/* Floating platform stat badges around the phone. */}
+          <HeroReelBadges />
+          {/* Plain <video>, not a Remotion component. Autoplays muted + looped. */}
+          <PhoneMockup videoSrc="/landing/wolfofwallstreet.mp4" fit="cover" />
+        </div>
       </main>
 
+      <WhyKeyloom />
+
+      <ComponentShowcase />
+
+      <ViralSection />
+
       <SiteFooter />
+
+      {/* Fixed gradual blur fading the very bottom of the viewport. */}
+      <GradualBlur
+        target="page"
+        position="bottom"
+        height="5rem"
+        strength={1}
+        divCount={5}
+        curve="bezier"
+      />
     </div>
   );
 }

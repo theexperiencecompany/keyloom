@@ -3,8 +3,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { compositionsById } from "@workspace/compositions/registry";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { EditorView } from "./EditorView";
+import { EditorView } from "./editor-view";
+import { ForkEditorView } from "./fork-editor-view";
 
 // Render editor pages ON DEMAND instead of statically prerendering all 79
 // compositions at build time. It's an interactive client editor (zero SEO
@@ -35,9 +35,17 @@ export default async function EditorPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+  const { id: rawId } = await params;
+  const id = decodeURIComponent(rawId);
+
+  // Anything not in the static registry is treated as a user-forked component:
+  // hand off to the client editor, which loads it from the DB (Player + props
+  // + agent) and shows a not-found state if it doesn't exist. It renders its
+  // own header.
   const composition = compositionsById[id];
-  if (!composition) notFound();
+  if (!composition) {
+    return <ForkEditorView id={id} />;
+  }
 
   // Strip non-serializable fields (calculateMetadata is a function)
   // before passing to the "use client" EditorView.

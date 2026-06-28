@@ -133,16 +133,6 @@ export type CompositionTheme = {
 };
 
 /**
- * brandMode controls whether a composition accepts the universal Style
- * controls (background / text / font / accent):
- *   - "branded" (default): the per-clip Style overrides apply.
- *   - "locked": the composition impersonates a real product (Twitter,
- *     WhatsApp, Slack, Discord, iMessage, etc.) and ignores Style overrides
- *     to keep the look authentic.
- */
-export type BrandMode = "branded" | "locked";
-
-/**
  * How a composition fits inside PhoneFrame's screen when nested.
  *   - "width" (default): fit-to-width with vertical centering. Landscape
  *     compositions (Browser, charts, text) render as a horizontal band
@@ -194,7 +184,6 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
   height: number;
   defaultProps: P;
   fields: Field[];
-  brandMode?: BrandMode;
   phoneFitMode?: PhoneFitMode;
   /**
    * Opt in to album-art-style background tinting. Set this to the key of an
