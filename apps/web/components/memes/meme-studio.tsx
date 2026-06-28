@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { type MemeTemplate, memeAsset, memeTemplates } from "@/lib/memes";
-import { MemeEditor } from "./meme-editor";
+import { loadMemeFonts, MemeEditor } from "./meme-editor";
 import { MemeGallery } from "./meme-gallery";
 
 /**
@@ -13,6 +13,11 @@ import { MemeGallery } from "./meme-gallery";
 export function MemeStudio() {
   const [templates, setTemplates] = useState<MemeTemplate[]>(memeTemplates);
   const [selected, setSelected] = useState<MemeTemplate | null>(null);
+
+  // Load the meme fonts up front so gallery caption previews render correctly.
+  useEffect(() => {
+    loadMemeFonts();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

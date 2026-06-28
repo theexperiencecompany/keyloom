@@ -51,15 +51,24 @@ const OUTPUT_WIDTH = 1080;
 const OUTPUT_HEIGHT = 1920;
 const EXPORT_FPS = 30;
 
+// Force the canvas to be exactly 1080x1920 — no devicePixelRatio doubling. Set
+// at module load so it applies BEFORE Konva creates any canvas (a useEffect runs
+// too late, after the layer canvas is already built at devicePixelRatio).
+if (typeof window !== "undefined") {
+  Konva.pixelRatio = 1;
+}
+
 // Caption fonts. The first group are Google Fonts that nail the TikTok/CapCut
 // meme look (rounded, heavy); loaded at runtime in loadMemeFonts() so Konva can
 // draw them on the canvas. The rest are safe system fonts.
 const FONTS = [
+  { value: "TikTok Sans", label: "TikTok Sans" },
   { value: "Poppins", label: "Poppins" },
   { value: "Montserrat", label: "Montserrat" },
   { value: "Anton", label: "Anton" },
   { value: "Bebas Neue", label: "Bebas Neue" },
   { value: "Archivo Black", label: "Archivo Black" },
+  { value: "JetBrains Mono", label: "JetBrains Mono" },
   { value: "Impact", label: "Impact" },
   { value: "Arial", label: "Arial" },
   { value: "Inter", label: "Inter" },
@@ -69,11 +78,13 @@ const FONTS = [
 // Google Fonts to fetch + the weights we render at. Single-weight display faces
 // (Anton, Bebas Neue, Archivo Black) only ship 400.
 const GOOGLE_FONTS: { family: string; weights: number[] }[] = [
+  { family: "TikTok Sans", weights: [400, 700, 800, 900] },
   { family: "Poppins", weights: [400, 700, 800, 900] },
   { family: "Montserrat", weights: [400, 700, 800, 900] },
   { family: "Anton", weights: [400] },
   { family: "Bebas Neue", weights: [400] },
   { family: "Archivo Black", weights: [400] },
+  { family: "JetBrains Mono", weights: [400, 700, 800] },
 ];
 
 const GOOGLE_FONTS_HREF = `https://fonts.googleapis.com/css2?${GOOGLE_FONTS.map(
@@ -85,7 +96,7 @@ const GOOGLE_FONTS_HREF = `https://fonts.googleapis.com/css2?${GOOGLE_FONTS.map(
  * available to the canvas (a CSS link alone doesn't fetch a font until it's
  * used in the DOM). Resolves once the fonts are ready so we can redraw.
  */
-async function loadMemeFonts(): Promise<void> {
+export async function loadMemeFonts(): Promise<void> {
   if (typeof document === "undefined") return;
   const id = "meme-google-fonts";
   if (!document.getElementById(id)) {
@@ -144,6 +155,42 @@ function coverCrop(img: HTMLImageElement) {
   return { x: (iw - cw) / 2, y: (ih - ch) / 2, width: cw, height: ch };
 }
 
+// TikTok/IG cover the bottom ~quarter of the frame with the username, caption,
+// and the like/comment/share buttons. Keep the subject (and its face) above that
+// band so the platform UI never hides it.
+const SAFE_BOTTOM = OUTPUT_HEIGHT * 0.24;
+
+/**
+ * Default subject framing for a TikTok/IG meme: fill the full width and sit just
+ * above the bottom safe band (classic green-screen layout — subject low, but not
+ * so low the platform UI hides it; background + caption fill the top). Falls back
+ * to fit-height if filling the width would overflow the safe area.
+ */
+function defaultVideoFraming(w: number, h: number): NodeAttrs {
+  const maxH = OUTPUT_HEIGHT - SAFE_BOTTOM;
+  let scale = OUTPUT_WIDTH / w;
+  if (h * scale > maxH) scale = maxH / h;
+  const dh = h * scale;
+  return {
+    x: (OUTPUT_WIDTH - w * scale) / 2,
+    y: maxH - dh, // bottom of the subject rests on the safe line
+    scaleX: scale,
+    scaleY: scale,
+    rotation: 0,
+  };
+}
+
+// Caption sits in the upper "safe zone" — clear of TikTok/IG's top status bar
+// and their bottom caption/buttons — wide and centered for readability.
+const DEFAULT_TEXT_ATTRS = {
+  x: OUTPUT_WIDTH * 0.06,
+  y: OUTPUT_HEIGHT * 0.12,
+  scaleX: 1,
+  scaleY: 1,
+  rotation: 0,
+  width: OUTPUT_WIDTH * 0.88,
+};
+
 export function MemeEditor({
   template,
   onBack,
@@ -168,21 +215,16 @@ export function MemeEditor({
     scaleY: 1,
     rotation: 0,
   });
-  const [textAttrs, setTextAttrs] = useState<NodeAttrs & { width: number }>({
-    x: OUTPUT_WIDTH * 0.1,
-    y: OUTPUT_HEIGHT * 0.07,
-    scaleX: 1,
-    scaleY: 1,
-    rotation: 0,
-    width: OUTPUT_WIDTH * 0.8,
-  });
+  const [textAttrs, setTextAttrs] = useState<NodeAttrs & { width: number }>(
+    DEFAULT_TEXT_ATTRS,
+  );
   const [caption, setCaption] = useState<Caption>({
     text: "when the code works and i'm about to find out why",
-    fontFamily: "Poppins",
+    fontFamily: "TikTok Sans",
     fontWeight: 800,
     fontSize: 72,
     color: "#ffffff",
-    stroke: 8,
+    stroke: 9,
   });
 
   const [selected, setSelected] = useState<Selected>(null);
@@ -198,11 +240,6 @@ export function MemeEditor({
   const textNodeRef = useRef<Konva.Text>(null);
   const trRef = useRef<Konva.Transformer>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Export at exactly 1080x1920 (no devicePixelRatio doubling).
-  useEffect(() => {
-    Konva.pixelRatio = 1;
-  }, []);
 
   useEffect(() => setMounted(true), []);
 
@@ -260,15 +297,8 @@ export function MemeEditor({
       const w = v.videoWidth || template.width;
       const h = v.videoHeight || template.height;
       setVsize({ w, h });
-      // contain into 9:16 by default; user resizes with the handles.
-      const scale = Math.min(OUTPUT_WIDTH / w, OUTPUT_HEIGHT / h);
-      setVideoAttrs({
-        x: (OUTPUT_WIDTH - w * scale) / 2,
-        y: (OUTPUT_HEIGHT - h * scale) / 2,
-        scaleX: scale,
-        scaleY: scale,
-        rotation: 0,
-      });
+      // Fill width, anchored to the bottom; user resizes with the handles.
+      setVideoAttrs(defaultVideoFraming(w, h));
     };
     v.addEventListener("loadedmetadata", onMeta);
     v.play().then(
@@ -357,22 +387,8 @@ export function MemeEditor({
   };
 
   const resetFraming = () => {
-    const scale = Math.min(OUTPUT_WIDTH / vsize.w, OUTPUT_HEIGHT / vsize.h);
-    setVideoAttrs({
-      x: (OUTPUT_WIDTH - vsize.w * scale) / 2,
-      y: (OUTPUT_HEIGHT - vsize.h * scale) / 2,
-      scaleX: scale,
-      scaleY: scale,
-      rotation: 0,
-    });
-    setTextAttrs({
-      x: OUTPUT_WIDTH * 0.1,
-      y: OUTPUT_HEIGHT * 0.07,
-      scaleX: 1,
-      scaleY: 1,
-      rotation: 0,
-      width: OUTPUT_WIDTH * 0.8,
-    });
+    setVideoAttrs(defaultVideoFraming(vsize.w, vsize.h));
+    setTextAttrs(DEFAULT_TEXT_ATTRS);
     setSelected(null);
   };
 
@@ -563,7 +579,7 @@ export function MemeEditor({
                       stroke="#000000"
                       strokeWidth={caption.stroke}
                       fillAfterStrokeEnabled
-                      lineHeight={1.15}
+                      lineHeight={1.05}
                       align="center"
                       draggable={!exporting}
                       onMouseDown={() => setSelected("text")}

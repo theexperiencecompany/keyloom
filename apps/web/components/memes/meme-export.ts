@@ -103,13 +103,20 @@ export async function encodePlaythroughToMp4({
   const rvfcVideo = video as RVFCVideo;
   if (!rvfcVideo.requestVideoFrameCallback) return null;
 
+  // Encode at the canvas's REAL pixel size, not the logical 1080x1920. Konva may
+  // back the canvas at devicePixelRatio (2-3x on phones/retina); if the encoder
+  // dims don't match the frame, the output gets cropped/letterboxed to the wrong
+  // aspect. H.264 needs even dimensions, so round down to even.
+  const w = (canvas.width || width) & ~1;
+  const h = (canvas.height || height) & ~1;
+
   const bitrate = 8_000_000;
-  const codec = await pickH264Codec(width, height, fps, bitrate);
+  const codec = await pickH264Codec(w, h, fps, bitrate);
   if (!codec) return null;
 
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),
-    video: { codec: "avc", width, height },
+    video: { codec: "avc", width: w, height: h },
     fastStart: "in-memory",
   });
 
@@ -120,7 +127,7 @@ export async function encodePlaythroughToMp4({
       encodeError = e;
     },
   });
-  encoder.configure({ codec, width, height, framerate: fps, bitrate });
+  encoder.configure({ codec, width: w, height: h, framerate: fps, bitrate });
 
   const frameDuration = Math.round(1_000_000 / fps); // microseconds
   const keyEvery = Math.max(1, fps * 2); // keyframe every ~2s
