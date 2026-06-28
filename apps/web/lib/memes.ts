@@ -60,8 +60,12 @@ export const memeTemplates: MemeTemplate[] = [
 ];
 
 /**
- * Curated backgrounds. Empty for now — none uploaded yet, so the editor shows
- * just the "Upload" tile and users bring their own. Add CDN-hosted entries here
- * once you upload some.
+ * Curated backgrounds, served from apps/web/public/backgrounds (shared with the
+ * remotion app via symlink). The first entry is the editor's default. Users can
+ * still upload their own; ids must be unique + stable.
  */
-export const memeBackgrounds: MemeBackground[] = [];
+export const memeBackgrounds: MemeBackground[] = [
+  { id: "bg1", title: "Background 1", src: "/backgrounds/bg1.jpg" },
+  { id: "bg2", title: "Background 2", src: "/backgrounds/bg2.jpg" },
+  { id: "bg3", title: "Background 3", src: "/backgrounds/bg3.jpg" },
+];

@@ -51,13 +51,55 @@ const OUTPUT_WIDTH = 1080;
 const OUTPUT_HEIGHT = 1920;
 const EXPORT_FPS = 30;
 
+// Caption fonts. The first group are Google Fonts that nail the TikTok/CapCut
+// meme look (rounded, heavy); loaded at runtime in loadMemeFonts() so Konva can
+// draw them on the canvas. The rest are safe system fonts.
 const FONTS = [
+  { value: "Poppins", label: "Poppins" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Anton", label: "Anton" },
+  { value: "Bebas Neue", label: "Bebas Neue" },
+  { value: "Archivo Black", label: "Archivo Black" },
   { value: "Impact", label: "Impact" },
   { value: "Arial", label: "Arial" },
   { value: "Inter", label: "Inter" },
-  { value: "Georgia", label: "Georgia" },
   { value: "Comic Sans MS", label: "Comic Sans" },
 ];
+
+// Google Fonts to fetch + the weights we render at. Single-weight display faces
+// (Anton, Bebas Neue, Archivo Black) only ship 400.
+const GOOGLE_FONTS: { family: string; weights: number[] }[] = [
+  { family: "Poppins", weights: [400, 700, 800, 900] },
+  { family: "Montserrat", weights: [400, 700, 800, 900] },
+  { family: "Anton", weights: [400] },
+  { family: "Bebas Neue", weights: [400] },
+  { family: "Archivo Black", weights: [400] },
+];
+
+const GOOGLE_FONTS_HREF = `https://fonts.googleapis.com/css2?${GOOGLE_FONTS.map(
+  (f) => `family=${f.family.replace(/ /g, "+")}:wght@${f.weights.join(";")}`,
+).join("&")}&display=swap`;
+
+/**
+ * Inject the Google Fonts stylesheet and actively load each weight so they're
+ * available to the canvas (a CSS link alone doesn't fetch a font until it's
+ * used in the DOM). Resolves once the fonts are ready so we can redraw.
+ */
+async function loadMemeFonts(): Promise<void> {
+  if (typeof document === "undefined") return;
+  const id = "meme-google-fonts";
+  if (!document.getElementById(id)) {
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = GOOGLE_FONTS_HREF;
+    document.head.appendChild(link);
+  }
+  const specs = GOOGLE_FONTS.flatMap((f) =>
+    f.weights.map((w) => `${w} 72px '${f.family}'`),
+  );
+  await Promise.all(specs.map((s) => document.fonts.load(s).catch(() => {})));
+}
 
 const WEIGHTS = [
   { value: "400", label: "Normal" },
@@ -136,8 +178,8 @@ export function MemeEditor({
   });
   const [caption, setCaption] = useState<Caption>({
     text: "when the code works and i'm about to find out why",
-    fontFamily: "Impact",
-    fontWeight: 700,
+    fontFamily: "Poppins",
+    fontWeight: 800,
     fontSize: 72,
     color: "#ffffff",
     stroke: 8,
@@ -163,6 +205,17 @@ export function MemeEditor({
   }, []);
 
   useEffect(() => setMounted(true), []);
+
+  // Load the meme Google Fonts, then redraw so the canvas picks them up.
+  useEffect(() => {
+    let cancelled = false;
+    loadMemeFonts().then(() => {
+      if (!cancelled) layerRef.current?.draw();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Fit the full-res stage into the preview box via CSS scale.
   useEffect(() => {
@@ -420,11 +473,25 @@ export function MemeEditor({
         >
           {mounted && (
             <div
+              className="relative"
               style={{
                 width: OUTPUT_WIDTH * displayScale,
                 height: OUTPUT_HEIGHT * displayScale,
               }}
             >
+              {/* Play/pause overlay — pinned to the video's top-right corner. */}
+              <button
+                type="button"
+                onClick={togglePlay}
+                disabled={exporting}
+                aria-label={playing ? "Pause" : "Play"}
+                className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70 disabled:opacity-50"
+              >
+                <HugeiconsIcon
+                  icon={playing ? PauseIcon : PlayIcon}
+                  size={16}
+                />
+              </button>
               <div
                 style={{
                   width: OUTPUT_WIDTH,
@@ -523,10 +590,6 @@ export function MemeEditor({
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={togglePlay} disabled={exporting}>
-            <HugeiconsIcon icon={playing ? PauseIcon : PlayIcon} size={16} />
-            {playing ? "Pause" : "Play"}
-          </Button>
           <Button onClick={handleExport} disabled={exporting}>
             <HugeiconsIcon icon={Download01Icon} size={16} />
             {exporting ? "Exporting…" : "Download MP4"}
