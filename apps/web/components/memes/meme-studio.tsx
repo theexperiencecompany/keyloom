@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { type MemeTemplate, memeAsset, memeTemplates } from "@/lib/memes";
-import { loadMemeFonts, MemeEditor } from "./meme-editor";
+import { MemeEditor } from "./meme-editor";
+import { loadMemeFonts } from "./meme-fonts";
 import { MemeGallery } from "./meme-gallery";
 
 /**

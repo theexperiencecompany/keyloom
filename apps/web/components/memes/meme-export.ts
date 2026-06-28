@@ -17,16 +17,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { ArrayBufferTarget, Muxer } from "mp4-muxer";
 
-// Minimal shape of requestVideoFrameCallback — typed loosely so we don't depend
-// on the exact lib.dom version shipping these definitions.
-type FrameMeta = { mediaTime: number };
-type RVFCVideo = HTMLVideoElement & {
-  requestVideoFrameCallback?: (
-    cb: (now: number, meta: FrameMeta) => void,
-  ) => number;
-};
-
-/** True when the browser can encode frames deterministically via WebCodecs. */
+/** True when the browser can encode frames via WebCodecs. */
 export function isWebCodecsSupported(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -35,13 +26,22 @@ export function isWebCodecsSupported(): boolean {
   );
 }
 
-/** True when the fast frame-callback + WebCodecs export path is available. */
-export function isFastExportSupported(): boolean {
-  return (
-    isWebCodecsSupported() &&
-    typeof HTMLVideoElement !== "undefined" &&
-    "requestVideoFrameCallback" in HTMLVideoElement.prototype
-  );
+/** Seek a video to `time` and resolve once the frame is ready. Falls back on a
+ * timer in case `seeked` never fires (e.g. currentTime already equals `time`). */
+function seekVideo(video: HTMLVideoElement, time: number): Promise<void> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      video.removeEventListener("seeked", done);
+      resolve();
+    };
+    const timer = setTimeout(done, 400);
+    video.addEventListener("seeked", done);
+    video.currentTime = time;
+  });
 }
 
 // H.264 profiles to try, best first: High → Main → Baseline. The first one the
@@ -72,13 +72,13 @@ async function pickH264Codec(
 }
 
 export type PlaythroughOptions = {
-  /** The subject clip. Plays once; each presented frame is captured. */
+  /** The subject clip; stepped frame-by-frame across its full duration. */
   video: HTMLVideoElement;
   /** Canvas holding the composited frame (background + subject + caption). */
   canvas: HTMLCanvasElement;
   width: number;
   height: number;
-  /** Target frame rate — used for keyframe spacing and frame duration. */
+  /** Target frame rate — drives how many frames we step through. */
   fps: number;
   /** Composite the current video frame onto the canvas (e.g. `layer.draw()`). */
   drawFrame: () => void;
@@ -86,9 +86,13 @@ export type PlaythroughOptions = {
 };
 
 /**
- * Play the clip once and encode every presented frame to an H.264 MP4 — no
- * seeking, no ffmpeg. Returns null if the fast path isn't available (caller
- * should fall back to `recordCanvas`).
+ * Encode the full clip to an H.264 MP4 by playing it ONCE in real time and
+ * encoding each frame the browser presents via `requestVideoFrameCallback` —
+ * no per-frame seeking (which is what made this slow) and no ffmpeg. Bounded by
+ * the clip's duration. We start from a clean seek to 0 so it never begins
+ * mid-clip, and finalize on `ended` so it never truncates. Returns null if
+ * WebCodecs / rVFC / a known duration isn't available (caller falls back to
+ * `recordCanvas`).
  */
 export async function encodePlaythroughToMp4({
   video,
@@ -99,9 +103,10 @@ export async function encodePlaythroughToMp4({
   drawFrame,
   onProgress,
 }: PlaythroughOptions): Promise<Blob | null> {
-  if (!isFastExportSupported()) return null;
-  const rvfcVideo = video as RVFCVideo;
-  if (!rvfcVideo.requestVideoFrameCallback) return null;
+  if (!isWebCodecsSupported()) return null;
+
+  const duration = video.duration;
+  if (!duration || !Number.isFinite(duration)) return null;
 
   // Encode at the canvas's REAL pixel size, not the logical 1080x1920. Konva may
   // back the canvas at devicePixelRatio (2-3x on phones/retina); if the encoder
@@ -129,64 +134,81 @@ export async function encodePlaythroughToMp4({
   });
   encoder.configure({ codec, width: w, height: h, framerate: fps, bitrate });
 
-  const frameDuration = Math.round(1_000_000 / fps); // microseconds
-  const keyEvery = Math.max(1, fps * 2); // keyframe every ~2s
-  const duration = video.duration || 0;
+  const keyIntervalSec = 2; // keyframe every ~2s
+  const rvfc = video as HTMLVideoElement & {
+    requestVideoFrameCallback?: (
+      cb: (now: number, meta: { mediaTime: number }) => void,
+    ) => number;
+  };
+  // Without rVFC we can't grab every presented frame in real time — bail to the
+  // MediaRecorder fallback.
+  if (typeof rvfc.requestVideoFrameCallback !== "function") return null;
 
-  try {
-    await new Promise<void>((resolve, reject) => {
-      let frameIndex = 0;
-      let lastTs = -1;
-      let done = false;
+  // Start cleanly at the first frame so capture never begins mid-clip.
+  video.pause();
+  await seekVideo(video, 0);
 
-      const finish = () => {
-        if (done) return;
-        done = true;
-        video.removeEventListener("ended", finish);
-        resolve();
-      };
+  return new Promise<Blob | null>((resolve, reject) => {
+    let finished = false;
+    let lastKeyTime = -Infinity;
+    let lastTs = -1;
 
-      const onFrame = (_now: number, meta: FrameMeta) => {
-        if (done) return;
-        try {
-          if (encodeError) throw encodeError;
-          drawFrame();
-          // Strictly-increasing microsecond timestamp from the frame's own
-          // presentation time, so the MP4 plays back at the right speed.
-          let ts = Math.round(meta.mediaTime * 1_000_000);
-          if (ts <= lastTs) ts = lastTs + frameDuration;
-          lastTs = ts;
-          const frame = new VideoFrame(canvas, {
-            timestamp: ts,
-            duration: frameDuration,
-          });
-          encoder.encode(frame, { keyFrame: frameIndex % keyEvery === 0 });
-          frame.close();
-          frameIndex++;
-          if (duration) {
-            onProgress?.(Math.min(1, meta.mediaTime / duration));
-          }
-          rvfcVideo.requestVideoFrameCallback?.(onFrame);
-        } catch (e) {
-          done = true;
-          video.removeEventListener("ended", finish);
-          reject(e);
-        }
-      };
+    const finish = async () => {
+      if (finished) return;
+      finished = true;
+      video.pause();
+      try {
+        await encoder.flush();
+        if (encodeError) throw encodeError;
+        muxer.finalize();
+        resolve(new Blob([muxer.target.buffer], { type: "video/mp4" }));
+      } catch (e) {
+        reject(e);
+      } finally {
+        if (encoder.state !== "closed") encoder.close();
+      }
+    };
 
-      video.addEventListener("ended", finish);
-      video.currentTime = 0;
-      rvfcVideo.requestVideoFrameCallback?.(onFrame);
-      video.play().catch(reject);
-    });
+    // Encode each frame the browser presents during a single real-time playthrough.
+    const onFrame = (_now: number, meta: { mediaTime: number }) => {
+      if (finished) return;
+      if (encodeError) {
+        void finish();
+        return;
+      }
+      const mediaTime = meta.mediaTime;
+      let ts = Math.round(mediaTime * 1_000_000);
+      if (ts <= lastTs) ts = lastTs + 1; // muxer needs strictly increasing ts
+      lastTs = ts;
 
-    await encoder.flush();
-    if (encodeError) throw encodeError;
-    muxer.finalize();
-    return new Blob([muxer.target.buffer], { type: "video/mp4" });
-  } finally {
-    if (encoder.state !== "closed") encoder.close();
-  }
+      drawFrame();
+      const keyFrame =
+        lastKeyTime < 0 || mediaTime - lastKeyTime >= keyIntervalSec;
+      if (keyFrame) lastKeyTime = mediaTime;
+
+      try {
+        const frame = new VideoFrame(canvas, { timestamp: ts });
+        encoder.encode(frame, { keyFrame });
+        frame.close();
+      } catch (e) {
+        encodeError = e;
+        void finish();
+        return;
+      }
+
+      onProgress?.(Math.min(1, mediaTime / duration));
+
+      if (video.ended) {
+        void finish();
+        return;
+      }
+      rvfc.requestVideoFrameCallback?.(onFrame);
+    };
+
+    video.addEventListener("ended", () => void finish(), { once: true });
+    rvfc.requestVideoFrameCallback?.(onFrame);
+    video.play().catch((e) => reject(e));
+  });
 }
 
 // Single-threaded core — no SharedArrayBuffer, so no COOP/COEP headers needed.
@@ -333,6 +355,67 @@ export async function webmToMp4(
   // data is a Uint8Array; wrap a fresh copy so the buffer is a plain ArrayBuffer.
   const bytes = data as Uint8Array;
   return new Blob([new Uint8Array(bytes)], { type: "video/mp4" });
+}
+
+/**
+ * Mux the source clip's audio into an already-encoded (silent) MP4. The video is
+ * stream-copied (no re-encode, so it's fast) and only the audio is transcoded to
+ * AAC. Used after the WebCodecs path, which is video-only. Returns the original
+ * blob unchanged if the source has no audio or muxing fails.
+ */
+export async function muxAudioFromSource(
+  videoMp4: Blob,
+  sourceUrl: string,
+  volume = 1,
+): Promise<Blob> {
+  try {
+    const ffmpeg = await getFFmpeg();
+    await ffmpeg.writeFile("v.mp4", await fetchFile(videoMp4));
+    await ffmpeg.writeFile("src", await fetchFile(sourceUrl));
+    // Apply the volume level only when it's not unity, to avoid a needless filter.
+    const volumeArgs =
+      volume === 1 ? [] : ["-filter:a", `volume=${volume.toFixed(3)}`];
+    await ffmpeg.exec([
+      "-i",
+      "v.mp4",
+      "-i",
+      "src",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0", // fails the exec if the source has no audio → caught below
+      "-c:v",
+      "copy",
+      ...volumeArgs,
+      "-c:a",
+      "aac",
+      "-shortest",
+      "-movflags",
+      "+faststart",
+      "out.mp4",
+    ]);
+    const data = await ffmpeg.readFile("out.mp4");
+    await ffmpeg.deleteFile("v.mp4").catch(() => {});
+    await ffmpeg.deleteFile("src").catch(() => {});
+    await ffmpeg.deleteFile("out.mp4").catch(() => {});
+    const bytes = data as Uint8Array;
+    return new Blob([new Uint8Array(bytes)], { type: "video/mp4" });
+  } catch (err) {
+    console.warn("Audio mux failed; exporting without audio:", err);
+    return videoMp4;
+  }
+}
+
+/** Whether a clip carries an audio track we can play back / include in export. */
+export function hasAudioTrack(video: HTMLVideoElement): boolean {
+  try {
+    const stream = (
+      video as HTMLVideoElement & { captureStream?: () => MediaStream }
+    ).captureStream?.();
+    return !!stream && stream.getAudioTracks().length > 0;
+  } catch {
+    return false;
+  }
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
