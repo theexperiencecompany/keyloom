@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import Konva from "konva";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  backgroundForTemplate,
   type MemeBackground,
   type MemeTemplate,
   memeBackgrounds,
@@ -50,7 +51,7 @@ export function MemeEditor({
   onBack: () => void;
 }) {
   const [background, setBackground] = useState<MemeBackground | null>(
-    memeBackgrounds[0] ?? null,
+    backgroundForTemplate(template.id) ?? memeBackgrounds[0] ?? null,
   );
   const [customBackgrounds, setCustomBackgrounds] = useState<MemeBackground[]>(
     [],

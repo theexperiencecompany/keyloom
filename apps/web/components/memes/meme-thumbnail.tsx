@@ -2,11 +2,11 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { useEffect, useRef } from "react";
-import { type MemeTemplate, memeBackgrounds } from "@/lib/memes";
+import { backgroundForTemplate, type MemeTemplate } from "@/lib/memes";
+import { DEFAULT_CAPTION } from "./meme-layout";
 
-// Sample caption so previews read like a real meme (matches the editor's font).
-const SAMPLE_CAPTION = "when it finally works";
-const DEFAULT_BG = memeBackgrounds[0]?.src;
+// Preview caption mirrors the editor's default so the gallery matches the edit view.
+const SAMPLE_CAPTION = DEFAULT_CAPTION.text;
 
 type MemeThumbnailProps = {
   template: MemeTemplate;
@@ -27,6 +27,7 @@ export function MemeThumbnail({
   onSelect,
 }: MemeThumbnailProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const bgSrc = backgroundForTemplate(template.id)?.src;
 
   // Reel mode: play (with sound) only the card scrolled into view; pause others.
   useEffect(() => {
@@ -65,10 +66,10 @@ export function MemeThumbnail({
         className,
       )}
     >
-      {DEFAULT_BG ? (
+      {bgSrc ? (
         // biome-ignore lint/performance/noImgElement: local preview thumbnail
         <img
-          src={DEFAULT_BG}
+          src={bgSrc}
           alt=""
           className="absolute inset-0 size-full object-cover"
         />

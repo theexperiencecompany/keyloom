@@ -65,7 +65,26 @@ export const memeTemplates: MemeTemplate[] = [
  * still upload their own; ids must be unique + stable.
  */
 export const memeBackgrounds: MemeBackground[] = [
-  { id: "bg1", title: "Background 1", src: "/backgrounds/bg1.jpg" },
-  { id: "bg2", title: "Background 2", src: "/backgrounds/bg2.jpg" },
-  { id: "bg3", title: "Background 3", src: "/backgrounds/bg3.jpg" },
+  { id: "grocery", title: "Grocery", src: "/backgrounds/grocery.jpg" },
+  { id: "beach", title: "Beach", src: "/backgrounds/beach.jpg" },
+  { id: "park", title: "Park", src: "/backgrounds/park.jpg" },
+  { id: "kitchen", title: "Kitchen", src: "/backgrounds/kitchen.jpg" },
+  { id: "gym", title: "Gym", src: "/backgrounds/gym.jpg" },
+  { id: "office", title: "Office", src: "/backgrounds/bg1.jpg" },
+  { id: "studio", title: "Studio", src: "/backgrounds/bg2.jpg" },
+  { id: "classroom", title: "Classroom", src: "/backgrounds/bg3.jpg" },
 ];
+
+/**
+ * Pick a background for a template deterministically from its id, so each
+ * template consistently gets its own backdrop (instead of every card sharing
+ * `memeBackgrounds[0]`) — both in the gallery preview and as the editor default.
+ */
+export function backgroundForTemplate(id: string): MemeBackground | undefined {
+  if (memeBackgrounds.length === 0) return undefined;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return memeBackgrounds[hash % memeBackgrounds.length];
+}
