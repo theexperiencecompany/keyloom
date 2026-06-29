@@ -11,6 +11,7 @@ import {
   Moon02Icon,
   PlugSocketIcon,
   Settings01Icon,
+  Share08Icon,
   Sun03Icon,
   UnfoldMoreIcon,
   UserCircleIcon,
@@ -87,7 +88,10 @@ const SECTIONS: NavSection[] = [
   },
   {
     label: "Integration",
-    items: [{ label: "MCP", href: "/mcp", icon: PlugSocketIcon }],
+    items: [
+      { label: "Integrations", href: "/integrations", icon: Share08Icon },
+      { label: "MCP", href: "/mcp", icon: PlugSocketIcon },
+    ],
   },
 ];
 
