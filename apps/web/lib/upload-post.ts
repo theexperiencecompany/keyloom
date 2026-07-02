@@ -101,14 +101,17 @@ export async function getProfile(username: string): Promise<{
 }
 
 /**
- * Post (or schedule) a video to the given platforms for a profile. `videoUrl`
- * must be publicly fetchable (e.g. an R2 URL). Pass `scheduledDate` (ISO-8601,
- * in the future) + `timezone` to schedule instead of posting immediately.
+ * Post (or schedule) a video to the given platforms for a profile. `video` is
+ * either a publicly fetchable URL (e.g. an R2 URL) or the MP4 itself as a Blob
+ * — upload-post accepts both on the same endpoint. Pass `scheduledDate`
+ * (ISO-8601, in the future) + `timezone` to schedule instead of posting
+ * immediately.
  */
 export async function uploadVideo(opts: {
   user: string;
   platforms: SocialPlatform[];
-  videoUrl: string;
+  video: string | Blob;
+  filename?: string;
   title?: string;
   scheduledDate?: string;
   timezone?: string;
@@ -119,7 +122,11 @@ export async function uploadVideo(opts: {
   const form = new FormData();
   form.append("user", opts.user);
   for (const p of opts.platforms) form.append("platform[]", p);
-  form.append("video", opts.videoUrl);
+  if (typeof opts.video === "string") {
+    form.append("video", opts.video);
+  } else {
+    form.append("video", opts.video, opts.filename ?? "video.mp4");
+  }
   if (opts.title) form.append("title", opts.title);
   if (opts.scheduledDate) form.append("scheduled_date", opts.scheduledDate);
   if (opts.timezone) form.append("timezone", opts.timezone);
