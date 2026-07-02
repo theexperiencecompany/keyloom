@@ -35,6 +35,7 @@ import {
   type Selected,
   type TextAttrs,
 } from "./meme-layout";
+import { MemePublishDialog } from "./meme-publish-dialog";
 
 // Force the canvas to be exactly 1080x1920 — no devicePixelRatio doubling. Set
 // at module load so it applies BEFORE Konva creates any canvas (a useEffect runs
@@ -257,9 +258,10 @@ export function MemeEditor({
     setMuted(v === 0);
   };
 
-  const handleExport = useCallback(async () => {
+  // Produce the final MP4 — the one pipeline behind both Download and Post.
+  const renderMp4 = useCallback(async (): Promise<Blob> => {
     const layer = layerRef.current;
-    if (!layer || !videoEl) return;
+    if (!layer || !videoEl) throw new Error("Editor is not ready yet");
     setSelected(null);
     const canvas = layer.getNativeCanvasElement();
     const prevLoop = videoEl.loop;
@@ -287,14 +289,9 @@ export function MemeEditor({
           onProgress: (f) => setStatus(`Encoding… ${Math.round(f * 100)}%`),
         });
         if (silent) {
-          let out = silent;
-          if (withAudio) {
-            setStatus("Adding audio…");
-            out = await muxAudioFromSource(silent, template.src, volume);
-          }
-          downloadBlob(out, `${template.id}-meme.mp4`);
-          setStatus("Downloaded ✓");
-          return;
+          if (!withAudio) return silent;
+          setStatus("Adding audio…");
+          return await muxAudioFromSource(silent, template.src, volume);
         }
         // silent === null → fast path unavailable here; fall back below.
       }
@@ -309,12 +306,7 @@ export function MemeEditor({
         onTick: () => {},
       });
       setStatus("Converting to MP4…");
-      const mp4 = await webmToMp4(webm);
-      downloadBlob(mp4, `${template.id}-meme.mp4`);
-      setStatus("Downloaded ✓");
-    } catch (err) {
-      console.error("Meme export failed:", err);
-      setStatus("Export failed — check the console");
+      return await webmToMp4(webm);
     } finally {
       videoEl.loop = prevLoop;
       videoEl.muted = prevMuted;
@@ -322,7 +314,30 @@ export function MemeEditor({
       if (!prevPaused) videoEl.play().catch(() => {});
       setExporting(false);
     }
-  }, [videoEl, template.src, template.id, volume]);
+  }, [videoEl, template.src, volume]);
+
+  const handleExport = useCallback(async () => {
+    try {
+      const mp4 = await renderMp4();
+      downloadBlob(mp4, `${template.id}-meme.mp4`);
+      setStatus("Downloaded ✓");
+    } catch (err) {
+      console.error("Meme export failed:", err);
+      setStatus("Export failed — check the console");
+    }
+  }, [renderMp4, template.id]);
+
+  // The publish dialog reports its own progress; clear the editor status line.
+  const renderForPublish = useCallback(async () => {
+    try {
+      const mp4 = await renderMp4();
+      setStatus(null);
+      return mp4;
+    } catch (err) {
+      setStatus(null);
+      throw err;
+    }
+  }, [renderMp4]);
 
   const patch = (p: Partial<Caption>) => setCaption((c) => ({ ...c, ...p }));
 
@@ -377,6 +392,12 @@ export function MemeEditor({
             <HugeiconsIcon icon={Download01Icon} size={16} />
             {exporting ? "Exporting…" : "Download MP4"}
           </Button>
+          <MemePublishDialog
+            renderVideo={renderForPublish}
+            defaultTitle={caption.text}
+            filename={`${template.id}-meme.mp4`}
+            disabled={exporting}
+          />
           {status && (
             <span className="text-sm text-muted-foreground">{status}</span>
           )}
