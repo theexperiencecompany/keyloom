@@ -7,28 +7,21 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "env": [
         "APP_URL",
+        "APP_BASE_URL",
         "DATABASE_URL",
         "OPENAI_API_KEY",
-        "COMPOSIO_API_KEY",
-        "DODO_*",
-        "WORKOS_*",
+        "GOOGLE_FONTS_API_KEY",
+        "R2_*",
         "REMOTION_*",
+        "EXTERNAL_ASSET_BASE_URL",
+        "VERCEL_PROJECT_PRODUCTION_URL",
         "NEXT_PUBLIC_*"
       ],
       "outputs": [".next/**", "!.next/cache/**"]
     },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "format": {
-      "dependsOn": ["^format"]
-    },
-    "typecheck": {
-      "dependsOn": ["^typecheck"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "lint": {},
+    "format": { "cache": false },
+    "typecheck": { "outputs": [] },
+    "dev": { "cache": false, "persistent": true }
   }
 }

@@ -3,7 +3,6 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { getRemotionBundle } from "@/lib/remotion-bundle";
-import { claimRender } from "@/lib/render-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,11 +20,6 @@ export const maxDuration = 300;
  * POST body: the studio `Project` JSON. Responds with the rendered `video/mp4`.
  */
 export async function POST(req: Request): Promise<Response> {
-  const claim = await claimRender();
-  if (!claim.ok) {
-    return new Response(claim.reason, { status: claim.status });
-  }
-
   const started = Date.now();
   let project: unknown;
   try {

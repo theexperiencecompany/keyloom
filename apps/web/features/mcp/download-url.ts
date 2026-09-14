@@ -1,21 +1,11 @@
 /**
  * Public origin of the deployed app, used to build short download links the MCP
- * hands to clients. Prefers an explicit `APP_BASE_URL`, then derives the origin
- * from the configured app URL (already set per-environment), then Vercel's
+ * hands to clients. Prefers an explicit `APP_BASE_URL`, then Vercel's
  * production URL, falling back to localhost for dev.
  */
 export function publicBaseUrl(): string {
   const explicit = process.env.APP_BASE_URL?.trim();
   if (explicit) return explicit.replace(/\/+$/, "");
-
-  const redirect = process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI?.trim();
-  if (redirect) {
-    try {
-      return new URL(redirect).origin;
-    } catch {
-      // fall through
-    }
-  }
 
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (vercel) return `https://${vercel}`;

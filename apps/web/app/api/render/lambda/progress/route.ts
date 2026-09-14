@@ -4,32 +4,10 @@ import {
   presignUrl,
 } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
+import { env, filenameFromKey, firstErrorMessage } from "@/lib/lambda-render";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function env(name: string): string | null {
-  const value = process.env[name]?.trim();
-  return value ? value : null;
-}
-
-function filenameFromKey(key: string | null, fallback: string): string {
-  if (!key) return fallback;
-  return key.split("/").pop() || fallback;
-}
-
-function firstErrorMessage(errors: unknown): string {
-  if (!Array.isArray(errors) || errors.length === 0) {
-    return "Lambda render failed.";
-  }
-
-  const first = errors[0] as {
-    message?: string;
-    name?: string;
-    stack?: string;
-  };
-  return first.message ?? first.stack ?? first.name ?? "Lambda render failed.";
-}
 
 export async function POST(request: Request) {
   try {

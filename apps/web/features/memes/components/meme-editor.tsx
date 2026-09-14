@@ -11,8 +11,8 @@ import {
   type MemeTemplate,
   memeBackgrounds,
 } from "@/features/memes/lib/memes";
+import { downloadBlob } from "@/lib/download-blob";
 import {
-  downloadBlob,
   encodePlaythroughToMp4,
   hasAudioTrack,
   isWebCodecsSupported,
@@ -35,7 +35,6 @@ import {
 } from "../lib/meme-layout";
 import { MemeCanvas } from "./meme-canvas";
 import { MemeInspector } from "./meme-inspector";
-import { MemePublishDialog } from "./meme-publish-dialog";
 
 // Force the canvas to be exactly 1080x1920 — no devicePixelRatio doubling. Set
 // at module load so it applies BEFORE Konva creates any canvas (a useEffect runs
@@ -268,7 +267,7 @@ export function MemeEditor({
     setMuted(v === 0);
   };
 
-  // Produce the final MP4 — the one pipeline behind both Download and Post.
+  // Produce the final MP4 behind the Download button.
   const renderMp4 = useCallback(async (): Promise<Blob> => {
     const layer = layerRef.current;
     if (!layer || !videoEl) throw new Error("Editor is not ready yet");
@@ -337,18 +336,6 @@ export function MemeEditor({
     }
   }, [renderMp4, template.id]);
 
-  // The publish dialog reports its own progress; clear the editor status line.
-  const renderForPublish = useCallback(async () => {
-    try {
-      const mp4 = await renderMp4();
-      setStatus(null);
-      return mp4;
-    } catch (err) {
-      setStatus(null);
-      throw err;
-    }
-  }, [renderMp4]);
-
   const patch = (p: Partial<Caption>) => setCaption((c) => ({ ...c, ...p }));
 
   return (
@@ -403,12 +390,6 @@ export function MemeEditor({
             <HugeiconsIcon icon={Download01Icon} size={16} />
             {exporting ? "Exporting…" : "Download MP4"}
           </Button>
-          <MemePublishDialog
-            renderVideo={renderForPublish}
-            defaultTitle={caption.text}
-            filename={`${template.id}-meme.mp4`}
-            disabled={exporting}
-          />
           {status && (
             <span className="text-sm text-muted-foreground">{status}</span>
           )}
