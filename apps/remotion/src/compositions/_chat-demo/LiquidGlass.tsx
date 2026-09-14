@@ -37,8 +37,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { continueRender, delayRender, staticFile } from "remotion";
-import { proxyExternalImg } from "../../proxy-image";
+import { continueRender, delayRender } from "remotion";
+import { asset } from "../../lib/asset";
 import { useDesignFrame } from "../../use-design-frame";
 
 const MAX_RECTS = 32;
@@ -78,13 +78,6 @@ export const DEFAULT_GLASS: GlassParams = {
   frostColor: [0.12, 0.12, 0.14],
   frostStrength: 0.55,
 };
-
-function asset(src: string | undefined): string | undefined {
-  if (!src) return src;
-  if (/^(data:|blob:)/i.test(src)) return src;
-  if (/^https?:/i.test(src)) return proxyExternalImg(src);
-  return staticFile(src.replace(/^\//, ""));
-}
 
 function parseHexColor(c: string | undefined): [number, number, number] {
   if (!c) return [255, 255, 255];

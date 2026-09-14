@@ -7,10 +7,8 @@ import { blueGridInfo } from "./compositions/backgrounds/BlueGrid/meta";
 import { futuristicArchInfo } from "./compositions/backgrounds/FuturisticArch/meta";
 import { liquidChromeInfo } from "./compositions/backgrounds/LiquidChrome/meta";
 import { whiteRadialBurstInfo } from "./compositions/backgrounds/WhiteRadialBurst/meta";
-import { captionTrackInfo } from "./compositions/CaptionTrack/meta";
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
-import { gaiaScenarioInfo } from "./compositions/GaiaScenario/meta";
 import { githubStarButtonInfo } from "./compositions/GitHubStarButton/meta";
 import { imageSceneInfo } from "./compositions/ImageScene/meta";
 import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
@@ -43,12 +41,10 @@ import { whatsappMessagesInfo } from "./compositions/WhatsAppMessages/meta";
 import type { AnyCompositionInfo } from "./schema";
 
 export const compositions: AnyCompositionInfo[] = [
-  gaiaScenarioInfo,
   typingSearchInfo,
   typingComposerInfo,
   cursorWalkthroughInfo,
   browserWindowInfo,
-  captionTrackInfo,
   tikTokCaptionInfo,
   statCounterInfo,
   spotifyPlayerInfo,

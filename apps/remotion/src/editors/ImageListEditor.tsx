@@ -73,7 +73,6 @@ export function ImageListEditor({
           >
             <div className="flex items-center gap-2">
               {item.url ? (
-                // eslint-disable-next-line @remotion/warn-native-media-tag
                 <img
                   src={item.url}
                   alt=""

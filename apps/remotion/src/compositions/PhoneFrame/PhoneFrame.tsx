@@ -193,7 +193,6 @@ function ScreenFillScene({
   defaultProps,
   overrideProps,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
   defaultProps: Record<string, unknown>;
   overrideProps?: Record<string, unknown>;
@@ -220,7 +219,6 @@ function ScaledScene({
   insetBottom,
   fitMode,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
   compW: number;
   compH: number;

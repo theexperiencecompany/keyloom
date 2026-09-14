@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 import { useDesignFrame } from "../../use-design-frame";
+import { SF_PRO_STACK } from "./sf-pro";
 
 const KB_W = 402;
 // Keys end at y=226 (row 4 bottom). Below that iOS shows a utility bar with the
@@ -13,9 +14,6 @@ const UTILITY_Y = 262;
 // Side breathing room beyond the native 4px key margin, so the keys sit inset
 // from the panel's rounded edges instead of running right up against them.
 const KB_PAD_X = 16;
-
-const SF_STACK =
-  '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 export type KeyboardTheme = "light" | "dark";
 
@@ -269,7 +267,7 @@ export function Keyboard({
   pressedKey = null,
   pressT = 0,
   width,
-  fontFamily = SF_STACK,
+  fontFamily = SF_PRO_STACK,
 }: KeyboardProps) {
   const frame = useDesignFrame();
   const wrapRef = useRef<HTMLDivElement>(null);

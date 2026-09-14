@@ -37,7 +37,6 @@ const CHART_IDS = new Set([
   "RadarChart",
   "RadialChart",
 ]);
-const GAIA_IDS = new Set(["GaiaScenario"]);
 
 function isText(c: AnyCompositionInfo) {
   return TEXT_PREFIXES.some((p) => c.id.startsWith(p));
@@ -49,12 +48,10 @@ function partition(): Group[] {
   const chat: AnyCompositionInfo[] = [];
   const social: AnyCompositionInfo[] = [];
   const frames: AnyCompositionInfo[] = [];
-  const gaia: AnyCompositionInfo[] = [];
   const text: AnyCompositionInfo[] = [];
 
   for (const c of compositions) {
-    if (GAIA_IDS.has(c.id)) gaia.push(c);
-    else if (CHART_IDS.has(c.id)) charts.push(c);
+    if (CHART_IDS.has(c.id)) charts.push(c);
     else if (CHAT_IDS.has(c.id)) chat.push(c);
     else if (SOCIAL_IDS.has(c.id)) social.push(c);
     else if (FRAME_IDS.has(c.id)) frames.push(c);
@@ -97,13 +94,6 @@ function partition(): Group[] {
       description:
         "Device chrome wrappers — phone, laptop, browser window — that host any other scene inside.",
       items: frames,
-    },
-    {
-      id: "gaia",
-      label: "GAIA",
-      description:
-        "Showcase scenes for GAIA — the personal AI assistant Keyloom is built for.",
-      items: gaia,
     },
     {
       id: "text-animations",

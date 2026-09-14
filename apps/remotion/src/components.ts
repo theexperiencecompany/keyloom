@@ -10,7 +10,6 @@ import { Showcase } from "./compositions/Showcase/Showcase";
 // dependency. To avoid TDZ errors when the bundler evaluates this module
 // mid-cycle, leaf compositions live in `componentsBase`; we layer the
 // wrappers on top here.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentsById: Record<string, ComponentType<any>> = {
   ...componentsByIdBase,
   PhoneFrame,

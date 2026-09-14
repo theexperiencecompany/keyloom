@@ -11,12 +11,7 @@ export const metadata: Metadata = {
     "Components built for short-form creators — TikTok-style captions, vertical voiceover tools, and viral-content scenes.",
 };
 
-const CREATOR_IDS = [
-  "TikTokCaption",
-  "CaptionTrack",
-  "InstagramPost",
-  "TweetCard",
-] as const;
+const CREATOR_IDS = ["TikTokCaption", "InstagramPost", "TweetCard"] as const;
 
 export default function CreatorsPage() {
   // calculateMetadata is a function and can't cross the RSC boundary

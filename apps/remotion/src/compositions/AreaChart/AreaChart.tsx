@@ -9,7 +9,7 @@ import {
   niceMax,
   parseLabels,
   parseSeriesString,
-} from "../_chart-shared";
+} from "../charts-shared";
 
 export type AreaChartProps = {
   title: string;

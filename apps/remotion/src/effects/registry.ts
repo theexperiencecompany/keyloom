@@ -19,7 +19,6 @@ export const effects: AnyEffectInfo[] = [
 export const effectsById: Record<string, AnyEffectInfo | undefined> =
   Object.fromEntries(effects.map((e) => [e.id, e]));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const effectComponentsById: Record<string, ComponentType<any>> = {
   Pop,
   Shake,

@@ -11,7 +11,6 @@ export type EffectInfo<P extends Record<string, unknown>> = {
   fields: PrimitiveField[];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyEffectInfo = EffectInfo<any>;
 
 export type ClipEffect = {

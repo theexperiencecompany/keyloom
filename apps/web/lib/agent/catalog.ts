@@ -5,7 +5,7 @@ import type {
 } from "@workspace/compositions/schema";
 
 // The agent only ever sees this filtered slice — compositions flagged
-// `hideFromAgent: true` (internal/branded scenes like GaiaScenario)
+// `hideFromAgent: true` (internal/branded scenes)
 // are excluded from every discovery surface so the LLM can't pick them.
 // They still appear in the studio library and docs.
 const AGENT_COMPOSITIONS = compositions.filter((c) => !c.hideFromAgent);
@@ -35,8 +35,7 @@ const CATEGORY_DESCRIPTIONS: Record<CompositionCategory, string> = {
     "Promotional UI — Feature/Pricing/Testimonial cards, LogoCloud, GitHub star button, Toast.",
   layout:
     "Wrapper compositions that embed other scenes — PhoneFrame, LaptopFrame, SplitScene, Showcase.",
-  captions:
-    "Voiceover-driven caption tracks — TikTok-style word highlight, CaptionTrack.",
+  captions: "Voiceover-driven caption tracks — TikTok-style word highlight.",
   media:
     "Images, QR codes, marquees, scenario players (ImageScene, PerspectiveMarquee, QrCode).",
   background:
