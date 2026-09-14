@@ -14,12 +14,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.14",
-    "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",
     "typescript": "5.9.3"
   },
@@ -31,10 +28,6 @@
     "apps/*",
     "packages/*"
   ],
-  "dependencies": {
-    "@remotion/player": "4.0.459",
-    "streamdown": "^2.5.0"
-  },
   "patchedDependencies": {
     "@remotion/web-renderer@4.0.459": "patches/@remotion%2Fweb-renderer@4.0.459.patch"
   },
