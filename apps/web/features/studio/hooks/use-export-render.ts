@@ -93,14 +93,6 @@ export function useExportRender() {
       const controller = new AbortController();
       controllerRef.current = controller;
 
-      console.info("[export-hook] start", {
-        width: project.width,
-        height: project.height,
-        fps: project.fps,
-        clips: project.clips?.length,
-        preset: resolved.preset,
-      });
-
       const supported = await isLocalExportSupported(project);
       if (generationRef.current !== myGeneration) return;
       if (!supported.ok) {
@@ -154,13 +146,6 @@ export function useExportRender() {
         blobUrlRef.current = url;
 
         const finishedAt = Date.now();
-        console.info(
-          "[export-hook] done",
-          blob.size,
-          "bytes in",
-          ((finishedAt - startedAt) / 1000).toFixed(2),
-          "s",
-        );
         setState({
           phase: "done",
           progress: 1,
@@ -175,7 +160,6 @@ export function useExportRender() {
         if (generationRef.current !== myGeneration) return;
         const err = e instanceof Error ? e : new Error(String(e));
         if (err.name === "AbortError") {
-          console.info("[export-hook] cancelled");
           setState(INITIAL_STATE);
           return;
         }
@@ -213,13 +197,6 @@ export function useExportRender() {
     const controller = new AbortController();
     controllerRef.current = controller;
 
-    console.info("[export-hook] startServer", {
-      width: project.width,
-      height: project.height,
-      fps: project.fps,
-      clips: project.clips?.length,
-    });
-
     const startedAt = Date.now();
     // Indeterminate: keep phase "starting" (pulsing bar) for the whole render.
     setState({
@@ -241,13 +218,6 @@ export function useExportRender() {
       blobUrlRef.current = url;
 
       const finishedAt = Date.now();
-      console.info(
-        "[export-hook] server done",
-        blob.size,
-        "bytes in",
-        ((finishedAt - startedAt) / 1000).toFixed(2),
-        "s",
-      );
       setState({
         phase: "done",
         progress: 1,
@@ -262,7 +232,6 @@ export function useExportRender() {
       if (generationRef.current !== myGeneration) return;
       const err = e instanceof Error ? e : new Error(String(e));
       if (err.name === "AbortError") {
-        console.info("[export-hook] server cancelled");
         setState(INITIAL_STATE);
         return;
       }
@@ -304,14 +273,6 @@ export function useExportRender() {
       const controller = new AbortController();
       controllerRef.current = controller;
 
-      console.info("[export-hook] startLambda", {
-        width: project.width,
-        height: project.height,
-        fps: project.fps,
-        clips: project.clips?.length,
-        preset: resolved.preset,
-      });
-
       const startedAt = Date.now();
       setState({
         ...INITIAL_STATE,
@@ -344,11 +305,6 @@ export function useExportRender() {
 
         remoteUrlRef.current = url;
         const finishedAt = Date.now();
-        console.info(
-          "[export-hook] lambda done in",
-          ((finishedAt - startedAt) / 1000).toFixed(2),
-          "s",
-        );
         setState({
           phase: "done",
           progress: 1,
@@ -363,7 +319,6 @@ export function useExportRender() {
         if (generationRef.current !== myGeneration) return;
         const err = e instanceof Error ? e : new Error(String(e));
         if (err.name === "AbortError") {
-          console.info("[export-hook] lambda cancelled");
           setState(INITIAL_STATE);
           return;
         }

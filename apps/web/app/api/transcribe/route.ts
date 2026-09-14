@@ -1,21 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
+import type {
+  CaptionWord,
+  TranscribeResponse,
+} from "@/features/caption/lib/transcribe";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 // Whisper rejects files over 25 MB.
 const WHISPER_MAX_BYTES = 25 * 1024 * 1024;
-
-export type CaptionWord = {
-  start: number;
-  end: number;
-  text: string;
-};
-
-export type TranscribeResponse = {
-  duration: number;
-  words: CaptionWord[];
-};
 
 type WhisperResponse = {
   text?: string;

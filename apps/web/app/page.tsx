@@ -264,8 +264,8 @@ export default function LandingPage() {
       <section className="border-b border-dashed border-border px-8 py-16">
         <div className="mx-auto max-w-5xl">
           <HeroVideoDialog
-            videoSrc="/motion-studio-showcase.mp4"
-            thumbnailSrc="/motion-studio-showcase-poster.png"
+            videoSrc="/showcase.mp4"
+            thumbnailSrc="/showcase-poster.png"
             thumbnailAlt="Keyloom showcase video"
             animationStyle="from-center"
           />

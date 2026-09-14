@@ -37,9 +37,9 @@ Style is configurable via the universal `clipStyle` knobs:
 
 ## Generate from audio
 
-The fastest way to get the `words` array right is to feed an MP3 through OpenAI Whisper and let it return timestamps. This project ships that pipeline at **[`/shorts`](/shorts)** — drop an MP3, get a rendered 9:16 video with the caption already tracking the voice.
+The fastest way to get the `words` array right is to feed an MP3 through OpenAI Whisper and let it return timestamps. This project ships that pipeline at **[`/captions`](/captions)** — drop a video, get it back with the caption already tracking the voice.
 
-Under the hood the page POSTs the file to `/api/shorts/transcribe`, which proxies to Whisper's `transcriptions` endpoint with `response_format=verbose_json` and `timestamp_granularities[]=word`, then reshapes the result into the exact `{ start, end, text }` shape this composition consumes. If you're rolling your own pipeline, the only requirement is one entry per word with seconds-based timestamps.
+Under the hood the page POSTs the audio to `/api/transcribe`, which proxies to Whisper's `transcriptions` endpoint with `response_format=verbose_json` and `timestamp_granularities[]=word`, then reshapes the result into the exact `{ start, end, text }` shape this composition consumes. If you're rolling your own pipeline, the only requirement is one entry per word with seconds-based timestamps.
 
 A manual minimal example:
 

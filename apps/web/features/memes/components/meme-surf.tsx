@@ -462,8 +462,8 @@ function GhostCard({
           style={{ backgroundColor: pastelFor(entry.template.id) }}
         />
       )}
-      {/* biome-ignore lint/a11y/useMediaCaption: muted meme template preview, no caption track */}
       <video
+        // biome-ignore lint/a11y/useMediaCaption: muted meme template preview, no caption track
         src={entry.template.src}
         muted
         autoPlay

@@ -11,7 +11,6 @@ import { DEFAULT_CAPTION_THEME } from "@workspace/compositions/compositions/TikT
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { TranscribeResponse } from "@/app/api/shorts/transcribe/route";
 import {
   probeVideo,
   retimeSegment,
@@ -21,6 +20,7 @@ import {
   visibleWords,
 } from "../lib/editor";
 import { prepareWhisperAudio } from "../lib/extract-audio";
+import type { TranscribeResponse } from "../lib/transcribe";
 import { PreviewPanel } from "./preview-panel";
 import type { MusicTrack } from "./preview-toolbar";
 import { SettingsSidebar } from "./settings-sidebar";
@@ -136,7 +136,7 @@ export function CaptionEditor() {
         setStep("transcribe");
         const body = new FormData();
         body.append("file", upload.blob, upload.filename);
-        const res = await fetch("/api/shorts/transcribe", {
+        const res = await fetch("/api/transcribe", {
           method: "POST",
           body,
         });

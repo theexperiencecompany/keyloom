@@ -8,7 +8,7 @@
       "compositionId": "TitleSlideUp",
       "durationInFrames": 240,
       "props": {
-        "headline": "Meet aesthetic",
+        "headline": "Meet Keyloom",
         "subtitle": "Components for motion",
         "backgroundColor": "#0f1014",
         "textColor": "#ffffff"
@@ -19,7 +19,7 @@
       "compositionId": "BrowserWindow",
       "durationInFrames": 280,
       "props": {
-        "url": "https://aesthetic.dev",
+        "url": "https://keyloom.app",
         "pageImageUrl": "",
         "pageBackgroundColor": "#fafafa",
         "backgroundColor": "#ffffff"
@@ -34,7 +34,7 @@
         "handle": "@sankalpa_02",
         "avatarUrl": "https://github.com/sankalpaacharya.png?size=200",
         "verified": "yes",
-        "text": "shipping aesthetic — copy, paste, render. animations should not be this hard.",
+        "text": "shipping Keyloom — copy, paste, render. animations should not be this hard.",
         "timestamp": "10:30 PM · Mar 15, 2025",
         "replies": 248,
         "retweets": 1924,
@@ -85,8 +85,8 @@
       "compositionId": "TitleFade",
       "durationInFrames": 220,
       "props": {
-        "headline": "Built with aesthetic",
-        "subtitle": "aesthetic.dev",
+        "headline": "Built with Keyloom",
+        "subtitle": "keyloom.app",
         "backgroundColor": "#0f1014",
         "textColor": "#ffffff"
       }
