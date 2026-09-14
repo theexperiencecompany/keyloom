@@ -261,7 +261,6 @@ function ImageControl({
         // Framed media well: the preview IS the control. Hover reveals
         // Replace / Clear over a flat scrim (no gradient).
         <div className="group relative overflow-hidden rounded-2xl border border-border bg-muted/30">
-          {/* eslint-disable-next-line @remotion/warn-native-media-tag -- editor preview, not rendered video */}
           <img
             src={value}
             alt="Selected"

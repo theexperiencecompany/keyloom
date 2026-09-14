@@ -232,13 +232,7 @@ export const TweetCard: React.FC<TweetCardProps> = ({
         >
           <div style={{ display: "flex", alignItems: "center", gap: 34 }}>
             {toolbarIcons.map((icon, i) => (
-              <HugeiconsIcon
-                // eslint-disable-next-line react/no-array-index-key
-                key={i}
-                icon={icon}
-                size={40}
-                color={accent}
-              />
+              <HugeiconsIcon key={i} icon={icon} size={40} color={accent} />
             ))}
           </div>
 

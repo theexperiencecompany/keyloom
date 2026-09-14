@@ -27,9 +27,9 @@ export const SF_PRO_FAMILY = "SF Pro Display";
 export const SF_PRO_STACK = `"${SF_PRO_FAMILY}", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
 
 const WEIGHTS = [
-  { weight: 400, file: "SFPRODISPLAYREGULAR.OTF" },
-  { weight: 500, file: "SFPRODISPLAYMEDIUM.OTF" },
-  { weight: 700, file: "SFPRODISPLAYBOLD.OTF" },
+  { weight: 400, file: "SFPRODISPLAYREGULAR.otf" },
+  { weight: 500, file: "SFPRODISPLAYMEDIUM.otf" },
+  { weight: 700, file: "SFPRODISPLAYBOLD.otf" },
 ] as const;
 
 let injected = false;

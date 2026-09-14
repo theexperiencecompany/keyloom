@@ -15,7 +15,6 @@ import {
   DownloadCircleIcon,
   MessageMultiple02Icon,
   PlayIcon,
-  StarIcon,
   UserGroupIcon,
   UserLove02Icon,
 } from "@hugeicons/core-free-icons";
@@ -60,7 +59,6 @@ const CHART_IDS = new Set([
   "RadarChart",
   "RadialChart",
 ]);
-const GAIA_IDS = new Set(["GaiaScenario"]);
 
 const textAnimations = compositions.filter((c) =>
   TEXT_PREFIXES.some((p) => c.id.startsWith(p)),
@@ -69,15 +67,13 @@ const chatComponents = compositions.filter((c) => CHAT_IDS.has(c.id));
 const socialComponents = compositions.filter((c) => SOCIAL_IDS.has(c.id));
 const frameComponents = compositions.filter((c) => FRAME_IDS.has(c.id));
 const chartComponents = compositions.filter((c) => CHART_IDS.has(c.id));
-const gaiaComponents = compositions.filter((c) => GAIA_IDS.has(c.id));
 const sceneComponents = compositions.filter(
   (c) =>
     !TEXT_PREFIXES.some((p) => c.id.startsWith(p)) &&
     !CHAT_IDS.has(c.id) &&
     !SOCIAL_IDS.has(c.id) &&
     !FRAME_IDS.has(c.id) &&
-    !CHART_IDS.has(c.id) &&
-    !GAIA_IDS.has(c.id),
+    !CHART_IDS.has(c.id),
 );
 
 const gettingStarted: NavItem[] = [
@@ -142,15 +138,6 @@ const collapsibleGroups: Group[] = [
     section: "Frames & Mockups",
     icon: BrowserIcon,
     items: frameComponents.map((c) => ({
-      title: c.title,
-      href: `/docs/${c.id}`,
-    })),
-  },
-  {
-    value: "gaia",
-    section: "GAIA",
-    icon: StarIcon,
-    items: gaiaComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
     })),

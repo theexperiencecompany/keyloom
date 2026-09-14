@@ -3,6 +3,7 @@ import { measureText } from "@remotion/layout-utils";
 import { useEffect, useMemo, useState } from "react";
 import { AbsoluteFill, Easing } from "remotion";
 import type { ClipStyle } from "../../clip-style";
+import { clamp01, lerp } from "../../lib/math";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
@@ -30,9 +31,6 @@ export type TextMagicMoveProps = {
   speed: number;
   clipStyle?: ClipStyle;
 };
-
-const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 type WordBox = { text: string; cx: number; cy: number };
 type Layout = { boxes: WordBox[]; widestLine: number };

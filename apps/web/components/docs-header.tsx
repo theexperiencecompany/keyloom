@@ -130,22 +130,6 @@ function MoreMenu() {
   );
 }
 
-// Lazy + Suspense: the account menu is a client component that runs
-// useAuth() on mount. Loading it lazily keeps it off the header's critical path
-// so it can't block/freeze the page — the rest of the navbar paints immediately
-// and the menu streams in behind a lightweight fallback.
-const AccountMenu = React.lazy(() =>
-  import("@/components/account-menu").then((m) => ({ default: m.AccountMenu })),
-);
-
-function AccountMenuFallback() {
-  return (
-    <Button variant="outline" size="sm" className="gap-1.5" disabled>
-      <span className="hidden text-xs sm:inline">Account</span>
-    </Button>
-  );
-}
-
 const navLinks = [
   { label: "Docs", href: "/docs" },
   { label: "Components", href: "/docs/components" },
@@ -236,15 +220,9 @@ export function DocsHeader() {
               <MoreMenu />
             </div>
 
-            {/* Divider sets the personal/identity controls apart from the rest. */}
             <div className="hidden h-5 w-px bg-border sm:block" />
 
-            <div className="flex items-center gap-0.5">
-              <React.Suspense fallback={<AccountMenuFallback />}>
-                <AccountMenu />
-              </React.Suspense>
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>

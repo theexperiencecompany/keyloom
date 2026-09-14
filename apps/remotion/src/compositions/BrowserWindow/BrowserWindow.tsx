@@ -291,15 +291,7 @@ function TrafficLight({ color, size }: { color: string; size: number }) {
   );
 }
 
-function NavButton({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon,
-  u,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any;
-  u: number;
-}) {
+function NavButton({ icon, u }: { icon: any; u: number }) {
   return (
     <div
       style={{

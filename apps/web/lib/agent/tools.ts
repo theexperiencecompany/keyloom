@@ -10,20 +10,13 @@ import {
 } from "./catalog";
 import { ACCENT_COLORS, COLOR_BASES, PREMIUM_FONTS } from "./design-tokens";
 
-// Templates are intentionally NOT exposed to the agent right now —
-// the per-slot category constraint blocked good brand-aware picks
-// (e.g. couldn't pick InstagramPost for an Instagram launch because
-// no slot accepted `social`). Files kept under ./templates/ so we
-// can re-enable with multi-category slots later.
-// import { TEMPLATES, templateDurationInFrames } from "./templates";
-
 /**
  * Trim a defaultProps payload so the agent sees the SHAPE without the
  * bulk. Long strings get truncated with a remaining-char hint; long
  * arrays get the first 3 items plus a remaining-count hint. The agent
  * can still infer the schema from the keys + sample values, but a
- * single getSceneDetails response that was 3,000+ tokens (e.g.
- * GaiaScenario) collapses to a few hundred.
+ * single getSceneDetails response that was 3,000+ tokens collapses to a
+ * few hundred.
  */
 export function trimForAgent(value: unknown, depth = 0): unknown {
   if (depth > 6) return "[deep]";

@@ -179,13 +179,7 @@ export function ExportProgressOverlay({
               </Button>
             )}
             {phase === "error" && onRetry && (
-              <Button
-                size="xs"
-                onClick={() => {
-                  console.info("[export-overlay] retry clicked");
-                  onRetry();
-                }}
-              >
+              <Button size="xs" onClick={onRetry}>
                 Try again
               </Button>
             )}

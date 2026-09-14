@@ -32,6 +32,7 @@ import {
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
 import { useEffect, useReducer, useState } from "react";
+import { downloadBlob } from "@/lib/download-blob";
 import {
   applyPreset,
   DEFAULT_EXPORT_OPTIONS,
@@ -40,7 +41,7 @@ import {
   type ExportOptions,
   type ExportPreset,
 } from "../lib/export-options";
-import { buildExportZip, downloadBlob } from "../lib/export-zip";
+import { buildExportZip } from "../lib/export-zip";
 
 type Props = {
   open: boolean;

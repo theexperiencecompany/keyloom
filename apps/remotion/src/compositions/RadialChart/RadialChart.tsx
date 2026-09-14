@@ -2,7 +2,7 @@
 import { AbsoluteFill } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { useDesignFrame } from "../../use-design-frame";
-import { CHART_PALETTE, chartReveal } from "../_chart-shared";
+import { CHART_PALETTE, chartReveal } from "../charts-shared";
 
 export type RadialChartProps = {
   title: string;

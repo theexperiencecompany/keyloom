@@ -320,7 +320,7 @@ function buildChatState(
           else break;
         }
         composerText = best ? best.text : "";
-        if (best && best.key && best.key !== "backspace") {
+        if (best?.key && best.key !== "backspace") {
           const elapsed = local - best.at;
           if (elapsed < POP_HOLD) {
             pressedKey = best.key;

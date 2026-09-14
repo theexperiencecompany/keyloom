@@ -32,7 +32,7 @@
 
 <p align="center">
   <video
-    src="https://github.com/theexperiencecompany/keyloom/raw/refs/heads/master/apps/remotion/public/motion.mp4"
+    src="https://github.com/theexperiencecompany/keyloom/raw/refs/heads/master/apps/web/public/motion.mp4"
     poster="apps/web/public/images/screenshots/studio.jpg"
     controls
     autoplay
@@ -41,7 +41,7 @@
     playsinline
     width="100%"
   >
-    <a href="https://github.com/theexperiencecompany/keyloom/raw/refs/heads/master/apps/remotion/public/motion.mp4">▶ Watch the Keyloom showcase</a>
+    <a href="https://github.com/theexperiencecompany/keyloom/raw/refs/heads/master/apps/web/public/motion.mp4">▶ Watch the Keyloom showcase</a>
   </video>
 </p>
 
@@ -51,7 +51,7 @@
   <tr>
     <td width="50%" valign="top">
       <img src="apps/web/public/images/screenshots/components.jpg" alt="Browse the Keyloom component library" />
-      <p align="center"><sub><i>Browse 70+ animated scenes — every preview is a one-click drop onto the timeline.</i></sub></p>
+      <p align="center"><sub><i>Browse 40+ animated scenes — every preview is a one-click drop onto the timeline.</i></sub></p>
     </td>
     <td width="50%" valign="top">
       <img src="apps/web/public/images/screenshots/studio.jpg" alt="The Keyloom editor — timeline, preview and inspector" />
@@ -89,8 +89,8 @@ No SDK. No install. The library and the studio share the same scene registry, so
 
 ## What's inside
 
-- **70+ scenes** — text animations, animated charts (bar / line / area / pie / radar / radial), brand-locked chat (iMessage, WhatsApp, Slack, Discord, Telegram, Instagram), tweets, frame mockups (phone / laptop / browser), feature & pricing cards, terminal, toast, GitHub star button, and more.
-- **Universal style controls** — every non-brand-locked scene exposes background / text / font / accent so you can match a brand kit in seconds.
+- **40+ scenes** — text animations, animated charts (bar / line / area / pie / radar / radial), chat mockups (iMessage, WhatsApp, Slack, Discord, Telegram, Instagram), tweets, phone and laptop frames, pricing and testimonial cards, terminal, QR code, GitHub star button, and more.
+- **Universal style controls** — every scene exposes background / text / font / accent so you can match a brand kit in seconds.
 - **Per-clip transitions** — fade, swipe, zoom between scenes.
 - **Stackable effects** — fade-out, slide-out, Ken Burns, zoom-out layered on top of any clip.
 - **Project save / load** as JSON, plus MP4 export.
@@ -135,7 +135,6 @@ Keyloom is a Bun + Turbo monorepo. The web app is Next.js; the video engine is R
   <tr>
     <td><b>State &amp; Interaction</b></td>
     <td>
-      <img src="https://img.shields.io/badge/Zustand-2D3748" alt="Zustand" />
       <img src="https://img.shields.io/badge/dnd--kit-22B5BF" alt="dnd-kit" />
       <img src="https://img.shields.io/badge/Sonner-000" alt="Sonner" />
     </td>
@@ -143,7 +142,6 @@ Keyloom is a Bun + Turbo monorepo. The web app is Next.js; the video engine is R
   <tr>
     <td><b>Data &amp; UI Atoms</b></td>
     <td>
-      <img src="https://img.shields.io/badge/Recharts-22B5BF" alt="Recharts" />
       <img src="https://img.shields.io/badge/HugeIcons-A78BFA" alt="HugeIcons" />
       <img src="https://img.shields.io/badge/MDX-1B1F24?logo=mdx&logoColor=white" alt="MDX" />
     </td>
@@ -180,10 +178,23 @@ packages/
 
 ```bash
 bun install
+cp .env.example apps/web/.env.local   # optional: fill in only what you use
 bun run --cwd apps/web dev
 ```
 
-Then open [http://localhost:3000/studio](http://localhost:3000/studio).
+Then open [http://localhost:3000/studio](http://localhost:3000/studio). The
+Studio, captions editor and split-screen maker work with no environment
+variables; forks need `DATABASE_URL`, Whisper captions need `OPENAI_API_KEY`,
+and cloud export needs the `REMOTION_*` values. See `.env.example`.
+
+Other useful commands:
+
+```bash
+bun run typecheck                      # tsc across every workspace
+bun run check                          # biome lint + format check
+bun run --cwd apps/remotion dev        # Remotion Studio for the compositions
+bun run --cwd apps/web mcp             # local stdio MCP server
+```
 
 ## License
 

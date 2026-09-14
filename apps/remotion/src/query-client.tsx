@@ -43,7 +43,6 @@ export function RemotionQueryProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyComponent = ComponentType<any>;
 
 const wrappedComponents = new WeakMap<AnyComponent, AnyComponent>();

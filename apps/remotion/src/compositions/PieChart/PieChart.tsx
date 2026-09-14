@@ -7,7 +7,7 @@ import {
   chartReveal,
   parseLabels,
   parseSeriesString,
-} from "../_chart-shared";
+} from "../charts-shared";
 
 export type PieChartProps = {
   title: string;

@@ -9,10 +9,8 @@ import { BlueGrid } from "./compositions/backgrounds/BlueGrid/BlueGrid";
 import { FuturisticArch } from "./compositions/backgrounds/FuturisticArch/FuturisticArch";
 import { LiquidChrome } from "./compositions/backgrounds/LiquidChrome/LiquidChrome";
 import { WhiteRadialBurst } from "./compositions/backgrounds/WhiteRadialBurst/WhiteRadialBurst";
-import { CaptionTrack } from "./compositions/CaptionTrack/CaptionTrack";
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
 import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages";
-import { GaiaScenario } from "./compositions/GaiaScenario/GaiaScenario";
 import { GitHubStarButton } from "./compositions/GitHubStarButton/GitHubStarButton";
 import { ImageScene } from "./compositions/ImageScene/ImageScene";
 import { InstagramMessages } from "./compositions/InstagramMessages/InstagramMessages";
@@ -45,9 +43,7 @@ import { WhatsAppMessages } from "./compositions/WhatsAppMessages/WhatsAppMessag
 // Wrapper compositions (PhoneFrame, LaptopFrame, SplitScene) import this
 // module to look up nested compositions. Keep them OUT of this file to avoid
 // circular-import TDZ errors. Add them in components.ts instead.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const componentsByIdBase: Record<string, ComponentType<any>> = {
-  GaiaScenario,
   MessageBubbles,
   LockScreenMessage,
   TypingSearch,
@@ -58,7 +54,6 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   TweetPost,
   CursorWalkthrough,
   BrowserWindow,
-  CaptionTrack,
   TikTokCaption,
   WhatsAppMessages,
   InstagramMessages,

@@ -1,10 +1,9 @@
 /**
- * Local single-user stand-in for the WorkOS AuthKit session.
+ * Local single-user identity.
  *
- * The app no longer authenticates: there is exactly one implicit local user
- * and every server call resolves to it. The shape matches what the call sites
- * already read off an AuthKit user (id, email, names, avatar), so the quota,
- * account and social features keep working against a stable owner id.
+ * The app does not authenticate: there is exactly one implicit local user and
+ * every server call resolves to it. Its `id` is the stable owner key for forked
+ * components (`user_components.user_id`).
  */
 
 export type AuthUser = {
@@ -23,13 +22,7 @@ export const LOCAL_USER: AuthUser = {
   profilePictureUrl: null,
 };
 
-/**
- * Mirrors the old `withAuth()` signature so call sites did not have to change.
- * `ensureSignedIn` is accepted and ignored — the local user is always present,
- * so the signed-out branches below it are simply never taken.
- */
-export async function withAuth(_options?: {
-  ensureSignedIn?: boolean;
-}): Promise<{ user: AuthUser }> {
+/** Resolve the current user. Always the local user — never null. */
+export async function withAuth(): Promise<{ user: AuthUser }> {
   return { user: LOCAL_USER };
 }

@@ -35,7 +35,6 @@ export type PrimitiveField =
 
 export type ShapeField =
   | { kind: "chat"; key: string; label: string }
-  | { kind: "scenario"; key: string; label: string }
   | { kind: "composition"; key: string; label: string; exclude?: string[] }
   | {
       kind: "slots";
@@ -90,7 +89,6 @@ export type CalculatedMetadata = {
   fps?: number;
   width?: number;
   height?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props?: any;
 };
 
@@ -210,14 +208,13 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
   agentNotes?: string;
   // Optional callback Remotion runs at studio load + every prop edit.
   // Use this to recompute durationInFrames (or any metadata) from
-  // current props — e.g. GaiaScenario derives its length from the
-  // active scenarioJson so the timeline card hugs the actual content.
+  // current props — e.g. a chat composition derives its length from the
+  // number of messages so the timeline card hugs the actual content.
   calculateMetadata?: (args: {
     props: P;
   }) => CalculatedMetadata | Promise<CalculatedMetadata>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyCompositionInfo = CompositionInfo<any>;
 
 export type EditorProps<T> = {

@@ -20,29 +20,9 @@ export function getRemotionBundle(): Promise<string> {
 
     const remotionDir = path.resolve(process.cwd(), "../remotion");
     const entryPoint = path.join(remotionDir, "src/index.ts");
-    const shimsDir = path.join(remotionDir, "src/shims");
 
     const webpackOverride: WebpackOverrideFn = (current) =>
-      enableTailwind({
-        ...current,
-        module: {
-          ...current.module,
-          rules: [
-            ...(current.module?.rules ?? []),
-            { test: /\.m?js$/, resolve: { fullySpecified: false } },
-          ],
-        },
-        resolve: {
-          ...current.resolve,
-          alias: {
-            ...current.resolve?.alias,
-            "next/image$": path.join(shimsDir, "next-image.tsx"),
-            "next/dynamic$": path.join(shimsDir, "next-dynamic.tsx"),
-            "next/navigation$": path.join(shimsDir, "next-navigation.tsx"),
-            "next/link$": path.join(shimsDir, "next-link.tsx"),
-          },
-        },
-      });
+      enableTailwind(current);
 
     const serveUrl = await bundle({
       entryPoint,

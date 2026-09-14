@@ -11,7 +11,22 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..", "..", "..");
-const compositionsDir = join(repoRoot, "apps", "remotion", "src", "compositions");
+const remotionSrc = join(repoRoot, "apps", "remotion", "src");
+const compositionsDir = join(remotionSrc, "compositions");
+
+// Only compositions that are actually registered get a source entry: anything
+// imported from `compositions/<path>/meta` in registry.ts, plus anything the
+// render lookup maps (componentsBase.ts / components.ts — this is what keeps
+// the un-registered wrappers PhoneFrame / LaptopFrame exportable). Folders
+// that only exist as building blocks for a dispatcher (the Text*/Title*
+// variants behind `Text`) are skipped so they don't bloat the bundle.
+const registered = new Set();
+for (const file of ["registry.ts", "componentsBase.ts", "components.ts"]) {
+  const src = readFileSync(join(remotionSrc, file), "utf-8");
+  for (const m of src.matchAll(/from "\.\/compositions\/([^"]+)\/[^"/]+"/g)) {
+    registered.add(m[1]);
+  }
+}
 
 const entries = [];
 
@@ -31,6 +46,7 @@ function collect(dir, prefix = "") {
       collect(full, `${prefix}${name}/`); // grouping dir — descend one level
       continue;
     }
+    if (!registered.has(`${prefix}${name}`)) continue;
     let meta = "";
     try {
       meta = readFileSync(join(full, "meta.ts"), "utf-8");

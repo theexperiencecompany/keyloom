@@ -31,6 +31,7 @@ import {
   IMESSAGE_THEM_BG_DARK,
   IMESSAGE_THEM_BG_LIGHT,
   ImageBubble,
+  ov,
   ReadReceipt,
   TypingBubble,
 } from "../_chat-demo/ChatDemo";
@@ -115,11 +116,6 @@ export type IMessageChatProps = {
   clipFontFamily?: string;
   clipAccent?: string;
 };
-
-/** Use the override if set (non-empty), otherwise the authentic default. */
-function ov(value: string | undefined, fallback: string): string {
-  return value && value.trim() !== "" ? value : fallback;
-}
 
 export function IMessageChat({
   messages,

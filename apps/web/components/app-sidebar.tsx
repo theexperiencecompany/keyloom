@@ -2,34 +2,16 @@
 
 import {
   ClosedCaptionIcon,
-  CreditCardIcon,
-  Film01Icon,
-  Folder01Icon,
   FolderLibraryIcon,
   Home01Icon,
   Image02Icon,
   LayoutTwoRowIcon,
   LibrariesIcon,
-  Logout02Icon,
   Moon02Icon,
-  PlugSocketIcon,
-  Settings01Icon,
-  Share08Icon,
   Sun03Icon,
-  UnfoldMoreIcon,
-  UserCircleIcon,
   VideoReplayIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@workspace/ui/components/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -41,7 +23,6 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { TooltipProvider } from "@workspace/ui/components/tooltip";
 import Image from "next/image";
@@ -49,7 +30,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import * as React from "react";
-import { useAuth } from "@/lib/auth-client";
 
 type NavItem = {
   label: string;
@@ -74,11 +54,6 @@ const SECTIONS: NavSection[] = [
         href: "/components/projects",
         icon: FolderLibraryIcon,
       },
-      {
-        label: "Posts",
-        href: "/components/collections",
-        icon: Folder01Icon,
-      },
     ],
   },
   {
@@ -88,24 +63,11 @@ const SECTIONS: NavSection[] = [
       { label: "Memes", href: "/memes", icon: Image02Icon },
       { label: "Split Screen", href: "/split", icon: LayoutTwoRowIcon },
       { label: "Captions", href: "/captions", icon: ClosedCaptionIcon },
-      { label: "Motions", href: "/motions", icon: Film01Icon },
-    ],
-  },
-  {
-    label: "Integration",
-    items: [
-      {
-        label: "Integrations",
-        href: "/integrations",
-        icon: Share08Icon,
-        badge: "Beta",
-      },
-      { label: "MCP", href: "/mcp", icon: PlugSocketIcon },
     ],
   },
 ];
 
-export function AppSidebar({ footer }: { footer?: React.ReactNode }) {
+export function AppSidebar() {
   const pathname = usePathname();
 
   // Exact match for "/" and "/components" so they don't both light up on
@@ -183,11 +145,10 @@ export function AppSidebar({ footer }: { footer?: React.ReactNode }) {
           ))}
         </SidebarContent>
 
-        <SidebarFooter className="gap-2 p-2">
-          {footer}
+        <SidebarFooter className="p-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarUser />
+              <SidebarThemeToggle />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
@@ -196,33 +157,7 @@ export function AppSidebar({ footer }: { footer?: React.ReactNode }) {
   );
 }
 
-function UserAvatar({
-  src,
-  fallback,
-}: {
-  src?: string | null;
-  fallback: string;
-}) {
-  if (src) {
-    // External avatar URL — plain <img> avoids next/image remote config.
-    return (
-      <img
-        src={src}
-        alt=""
-        className="size-8 shrink-0 rounded-md object-cover"
-      />
-    );
-  }
-  return (
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-sm font-semibold text-primary-foreground">
-      {fallback}
-    </div>
-  );
-}
-
-function SidebarUser() {
-  const { user, loading, signOut } = useAuth();
-  const { isMobile } = useSidebar();
+function SidebarThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
@@ -231,96 +166,15 @@ function SidebarUser() {
   }, []);
 
   const isDark = mounted ? resolvedTheme === "dark" : true;
-
-  if (loading) {
-    return (
-      <SidebarMenuButton size="lg" disabled className="gap-2">
-        <div className="size-8 shrink-0 animate-pulse rounded-md bg-muted" />
-        <div className="flex flex-col gap-1 group-data-[collapsible=icon]:hidden">
-          <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          <div className="h-2.5 w-28 animate-pulse rounded bg-muted" />
-        </div>
-      </SidebarMenuButton>
-    );
-  }
-
-  const name = user.firstName
-    ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
-    : user.email;
-  const initial = (user.firstName || user.email || "?")
-    .slice(0, 1)
-    .toUpperCase();
+  const label = isDark ? "Light theme" : "Dark theme";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <SidebarMenuButton
-          size="lg"
-          tooltip={name}
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <UserAvatar src={user.profilePictureUrl} fallback={initial} />
-          <div className="flex min-w-0 flex-1 flex-col text-left leading-tight">
-            <span className="truncate text-sm font-medium">{name}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </span>
-          </div>
-          <HugeiconsIcon icon={UnfoldMoreIcon} size={16} className="ml-auto" />
-        </SidebarMenuButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56"
-        side={isMobile ? "bottom" : "right"}
-        align="end"
-        sideOffset={8}
-      >
-        <DropdownMenuLabel className="flex items-center gap-2 font-normal">
-          <UserAvatar src={user.profilePictureUrl} fallback={initial} />
-          <div className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-sm font-medium">{name}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </span>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/account">
-              <HugeiconsIcon icon={UserCircleIcon} size={16} />
-              Profile
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/account/billing">
-              <HugeiconsIcon icon={CreditCardIcon} size={16} />
-              Billing
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/account/settings">
-              <HugeiconsIcon icon={Settings01Icon} size={16} />
-              Settings
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={(e) => {
-            e.preventDefault();
-            setTheme(isDark ? "light" : "dark");
-          }}
-        >
-          <HugeiconsIcon icon={isDark ? Sun03Icon : Moon02Icon} size={16} />
-          {isDark ? "Light theme" : "Dark theme"}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ returnTo: "/" })}>
-          <HugeiconsIcon icon={Logout02Icon} size={16} />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <SidebarMenuButton
+      tooltip={label}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+    >
+      <HugeiconsIcon icon={isDark ? Sun03Icon : Moon02Icon} size={18} />
+      <span>{label}</span>
+    </SidebarMenuButton>
   );
 }

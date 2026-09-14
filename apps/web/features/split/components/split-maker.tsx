@@ -17,7 +17,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PlayerControls } from "@/features/caption/components/player-controls";
 import { probeVideo, type VideoMeta } from "@/features/caption/lib/editor";
-import { downloadBlob } from "@/features/caption/lib/export";
+import { downloadBlob } from "@/lib/download-blob";
 import { exportSplitVideo, SPLIT_FPS } from "../lib/export";
 import { ClipRail, type GameplayClip, useGameplayClips } from "./clip-rail";
 

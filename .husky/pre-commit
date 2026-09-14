@@ -1,2 +1,1 @@
-bun run check:write
-git add -A
+bunx lint-staged

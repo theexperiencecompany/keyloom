@@ -53,7 +53,6 @@ type MdxModule = { default: ComponentType; meta: DocMeta };
  * one lazy-loader map entry below. Optional.
  */
 const bespokeMdxByCompositionId: Record<string, () => Promise<MdxModule>> = {
-  GaiaScenario: () => import("@/content/docs/gaia-scenario.mdx"),
   TitleSlideUp: () => import("@/content/docs/title-slide-up.mdx"),
   TitleType: () => import("@/content/docs/title-type.mdx"),
   TitlePopup: () => import("@/content/docs/title-popup.mdx"),
@@ -97,7 +96,6 @@ const bespokeMdxByCompositionId: Record<string, () => Promise<MdxModule>> = {
   TypingComposer: () => import("@/content/docs/typing-composer.mdx"),
   CursorWalkthrough: () => import("@/content/docs/cursor-walkthrough.mdx"),
   BrowserWindow: () => import("@/content/docs/browser-window.mdx"),
-  CaptionTrack: () => import("@/content/docs/caption-track.mdx"),
   TikTokCaption: () => import("@/content/docs/tiktok-caption.mdx"),
   StatCounter: () => import("@/content/docs/stat-counter.mdx"),
   TweetCard: () => import("@/content/docs/tweet-card.mdx"),

@@ -1,13 +1,9 @@
 import { type AwsRegion, deleteRender } from "@remotion/lambda/client";
 import { NextResponse } from "next/server";
+import { env } from "@/lib/lambda-render";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function env(name: string): string | null {
-  const value = process.env[name]?.trim();
-  return value ? value : null;
-}
 
 export async function POST(request: Request) {
   try {

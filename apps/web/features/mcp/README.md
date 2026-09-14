@@ -16,6 +16,8 @@ The **logic, types, and data live here**; `server.ts` is just the thin MCP
 | `config.ts` | Reads the Lambda env config (region / serve URL / function name). |
 | `components.ts` | `listComponents()` + `getComponentSchema(id)` from the registry. |
 | `render.ts` | `renderComponent(id, props, opts)` / `renderProject(clips, opts)` — Lambda render + poll + presign + optional download. |
+| `download-url.ts` | Builds the short `/api/r/<renderId>` link returned alongside the presigned URL. |
+| `components-edit.ts` | Fork / read / write helpers over the `user_components` table (not yet exposed as stdio tools). |
 | `server.ts` | The MCP stdio server exposing the four tools. |
 
 ## Tools
@@ -53,7 +55,7 @@ Add to the client's MCP config:
   "mcpServers": {
     "keyloom-video": {
       "command": "bun",
-      "args": ["run", "--cwd", "/ABSOLUTE/PATH/TO/aesthetic/apps/web", "mcp"]
+      "args": ["run", "--cwd", "/ABSOLUTE/PATH/TO/keyloom/apps/web", "mcp"]
     }
   }
 }
@@ -63,10 +65,11 @@ Then ask the client, e.g. *"Fill MessageBubbles as a breakup convo, dark theme,
 keyboard on, and render it."* — it will call `get_component_schema`, compose the
 props, and call `render_component`.
 
-## Notes / limits (v1)
+## Notes / limits
 
-- Renders **one component** at a time (no multi-clip timelines yet).
-- Whoever runs the server pays the AWS render cost — keep it local/trusted for
-  now. A hosted HTTP transport + auth is the natural next step.
-- External `http(s)` image props aren't proxied yet (GitHub/Google CDNs can
-  block Lambda IPs); prefer `staticFile` asset paths or data URLs in props.
+- The server runs locally over stdio only; whoever runs it pays the AWS render
+  cost, so keep it on a trusted machine.
+- External `http(s)` image props are proxied through the app only when
+  `NEXT_PUBLIC_APP_URL` / `APP_URL` points at a publicly reachable deployment
+  (GitHub/Google CDNs can block Lambda IPs); otherwise prefer `staticFile`
+  asset paths or data URLs in props.

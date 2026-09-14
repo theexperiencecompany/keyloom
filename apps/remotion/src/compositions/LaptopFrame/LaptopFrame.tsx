@@ -225,7 +225,6 @@ function ScaledScene({
   overrideProps,
   cover,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Component: React.ComponentType<any>;
   compW: number;
   compH: number;

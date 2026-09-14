@@ -66,8 +66,6 @@ function describeType(field: Field): string {
       return "boolean";
     case "section":
       return "(group)";
-    case "scenario":
-      return "string (Scenario JSON)";
     case "imageList":
       return "Array<{ name: string; url: string }>";
     case "terminalLines":

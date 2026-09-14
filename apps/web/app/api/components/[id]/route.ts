@@ -9,7 +9,6 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Ctx) {
   const { user } = await withAuth();
-  if (!user) return new Response("Unauthorized", { status: 401 });
   const { id } = await params;
   const row = await getComponent(user.id, id);
   if (!row) return new Response("Not found", { status: 404 });
@@ -18,7 +17,6 @@ export async function GET(_req: Request, { params }: Ctx) {
 
 export async function PATCH(req: Request, { params }: Ctx) {
   const { user } = await withAuth();
-  if (!user) return new Response("Unauthorized", { status: 401 });
   const { id } = await params;
 
   const body = (await req.json().catch(() => null)) as {
@@ -36,7 +34,6 @@ export async function PATCH(req: Request, { params }: Ctx) {
 
 export async function DELETE(_req: Request, { params }: Ctx) {
   const { user } = await withAuth();
-  if (!user) return new Response("Unauthorized", { status: 401 });
   const { id } = await params;
   await deleteComponent(user.id, id);
   return new Response(null, { status: 204 });
