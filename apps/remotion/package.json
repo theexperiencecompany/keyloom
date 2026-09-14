@@ -131,7 +131,7 @@
     "deploy:site": "remotion lambda sites create src/index.ts --site-name=motion-studio",
     "deploy:function": "remotion lambda functions deploy",
     "upgrade": "remotionb upgrade",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write ."
   },

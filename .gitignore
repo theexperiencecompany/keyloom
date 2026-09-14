@@ -52,3 +52,12 @@ worktrees/
 # needs to be committed — 71 revisions of it were pure history weight.
 apps/web/lib/generated-sources.ts
 apps/web/lib/preview-loaders.ts
+
+# Other package managers' lockfiles (this repo uses bun.lock)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Claude Code local state
+.claude/*.lock
+.claude/settings.local.json

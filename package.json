@@ -1,5 +1,5 @@
 {
-  "name": "aesthetic",
+  "name": "keyloom",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -17,6 +17,7 @@
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "turbo": "^2.8.17",
@@ -36,5 +37,9 @@
   },
   "patchedDependencies": {
     "@remotion/web-renderer@4.0.459": "patches/@remotion%2Fweb-renderer@4.0.459.patch"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,jsx,mjs,ts,tsx,json,css}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   }
 }
