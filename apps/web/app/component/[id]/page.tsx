@@ -1,3 +1,5 @@
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   compositions,
   compositionsById,
@@ -32,29 +34,31 @@ export default async function ScenePage({ params }: Props) {
         scene.category === info.category &&
         !scene.hideFromAgent,
     )
-    .slice(0, 3);
+    .slice(0, 4);
 
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-10">
         <Link
           href="/components"
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          Back to Explore
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={15} />
+          Explore
         </Link>
         <SceneShowcase
           key={id}
           id={id}
           relatedIds={related.map((scene) => scene.id)}
         />
-        <details className="mt-12 border-t border-border py-6">
-          <summary className="cursor-pointer text-sm font-medium">
-            View code
+        <details className="group mt-16 rounded-2xl bg-card px-5 py-4 shadow-sm">
+          <summary className="cursor-pointer list-none text-sm font-medium [&::-webkit-details-marker]:hidden">
+            <span className="text-muted-foreground">Building with React?</span>{" "}
+            Get the source
           </summary>
           <div className="mt-4 min-w-0">
             <p className="mb-4 text-sm text-muted-foreground">
-              Building with React? Copy the source or read the{" "}
+              Copy the component and its settings, or read the{" "}
               <Link
                 href={`/docs/${id}`}
                 className="underline underline-offset-4"

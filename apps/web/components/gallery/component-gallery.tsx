@@ -21,6 +21,11 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
 import { LatestDrop } from "@/components/dashboard/latest-drop";
+import {
+  CATEGORY_COLORS,
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+} from "@/lib/scene-categories";
 
 // Browse scenes and open their interactive showcase pages.
 
@@ -28,31 +33,6 @@ const LivePreview = dynamic(
   () => import("./live-preview").then((m) => m.LivePreview),
   { ssr: false },
 );
-
-const CATEGORY_LABELS: Record<CompositionCategory, string> = {
-  text: "Text",
-  social: "Social Media",
-  data: "Charts & Data",
-  devtools: "Dev Tools",
-  marketing: "Marketing",
-  layout: "Frames & Mockups",
-  captions: "Captions",
-  media: "Media",
-  background: "Backgrounds",
-};
-const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
-
-const CATEGORY_DOTS: Record<CompositionCategory, string> = {
-  text: "#8b5cf6",
-  social: "#ec4899",
-  data: "#06b6d4",
-  devtools: "#22c55e",
-  marketing: "#f59e0b",
-  layout: "#64748b",
-  captions: "#f43f5e",
-  media: "#3b82f6",
-  background: "#a1a1aa",
-};
 
 type Filter = "all" | CompositionCategory;
 
@@ -245,7 +225,7 @@ function CategoryTab({
 }
 
 function CategoryChip({ category }: { category: CompositionCategory }) {
-  const color = CATEGORY_DOTS[category];
+  const color = CATEGORY_COLORS[category];
   return (
     <span
       className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em]"

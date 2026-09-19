@@ -3,7 +3,6 @@
 import { VideoAiIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
-import type { CompositionCategory } from "@workspace/compositions/schema";
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,21 +12,9 @@ import {
   CommandList,
 } from "@workspace/ui/components/command";
 import { useRouter } from "next/navigation";
+import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/lib/scene-categories";
 
 // Product search opens the scene showcase before entering Studio.
-const CATEGORY_LABELS: Record<CompositionCategory, string> = {
-  text: "Text",
-  social: "Social Media",
-  data: "Charts & Data",
-  devtools: "Dev Tools",
-  marketing: "Marketing",
-  layout: "Frames & Mockups",
-  captions: "Captions",
-  media: "Media",
-  background: "Backgrounds",
-};
-
-const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
 
 type SearchItem = { title: string; description: string; href: string };
 type SearchGroup = { heading: string; items: SearchItem[] };
