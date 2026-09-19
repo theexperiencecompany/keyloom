@@ -21,39 +21,18 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
 import { LatestDrop } from "@/components/dashboard/latest-drop";
+import {
+  CATEGORY_COLORS,
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+} from "@/lib/scene-categories";
 
-// The dashboard's component gallery. Clicking a card opens it in the editor
-// (/component/[id]/edit).
+// Browse scenes and open their interactive showcase pages.
 
 const LivePreview = dynamic(
   () => import("./live-preview").then((m) => m.LivePreview),
   { ssr: false },
 );
-
-const CATEGORY_LABELS: Record<CompositionCategory, string> = {
-  text: "Text",
-  social: "Social Media",
-  data: "Charts & Data",
-  devtools: "Dev Tools",
-  marketing: "Marketing",
-  layout: "Frames & Mockups",
-  captions: "Captions",
-  media: "Media",
-  background: "Backgrounds",
-};
-const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
-
-const CATEGORY_DOTS: Record<CompositionCategory, string> = {
-  text: "#8b5cf6",
-  social: "#ec4899",
-  data: "#06b6d4",
-  devtools: "#22c55e",
-  marketing: "#f59e0b",
-  layout: "#64748b",
-  captions: "#f43f5e",
-  media: "#3b82f6",
-  background: "#a1a1aa",
-};
 
 type Filter = "all" | CompositionCategory;
 
@@ -113,7 +92,7 @@ export function ComponentGallery() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-heading text-3xl font-semibold tracking-tight">
-          Components
+          Explore scenes
         </h1>
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -125,6 +104,7 @@ export function ComponentGallery() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search scenes"
               placeholder="Search scenes..."
               className="h-9 w-48 rounded-full pl-8 text-[13px] sm:w-60"
             />
@@ -189,7 +169,7 @@ export function ComponentGallery() {
         ) : null}
         {items.length === 0 ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
-            No components match “{query}”.
+            No scenes match “{query}”.
           </p>
         ) : (
           <div
@@ -223,6 +203,7 @@ function CategoryTab({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
         "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors",
         active
@@ -244,7 +225,7 @@ function CategoryTab({
 }
 
 function CategoryChip({ category }: { category: CompositionCategory }) {
-  const color = CATEGORY_DOTS[category];
+  const color = CATEGORY_COLORS[category];
   return (
     <span
       className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em]"
@@ -282,7 +263,7 @@ function FeaturedCard({ info }: { info: AnyCompositionInfo }) {
   return (
     <Link
       ref={ref}
-      href={`/component/${info.id}/edit`}
+      href={`/component/${info.id}`}
       prefetch={false}
       className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
     >
@@ -315,7 +296,7 @@ function GalleryCard({ info }: { info: AnyCompositionInfo }) {
   return (
     <Link
       ref={ref}
-      href={`/component/${info.id}/edit`}
+      href={`/component/${info.id}`}
       prefetch={false}
       className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
     >

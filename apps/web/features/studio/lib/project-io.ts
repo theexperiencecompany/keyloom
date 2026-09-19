@@ -138,6 +138,7 @@ export function parseProjectJson(text: string): ParseResult {
     ok: true,
     warnings,
     project: {
+      ...(typeof obj.name === "string" ? { name: obj.name } : {}),
       fps,
       width,
       height,

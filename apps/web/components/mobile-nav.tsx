@@ -14,8 +14,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const navLinks = [
-  { label: "Components", href: "/" },
+  { label: "Explore", href: "/components" },
   { label: "Studio", href: "/studio" },
+  { label: "Help", href: "/help" },
 ];
 
 export function MobileNav() {

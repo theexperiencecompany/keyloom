@@ -3,7 +3,6 @@
 import { VideoAiIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { compositions } from "@workspace/compositions/registry";
-import type { CompositionCategory } from "@workspace/compositions/schema";
 import {
   CommandDialog,
   CommandEmpty,
@@ -13,22 +12,9 @@ import {
   CommandList,
 } from "@workspace/ui/components/command";
 import { useRouter } from "next/navigation";
+import { CATEGORY_LABELS, CATEGORY_ORDER } from "@/lib/scene-categories";
 
-// Product search: jump straight to a component's editor. (Docs were removed —
-// this used to index doc pages; now it indexes the component library.)
-const CATEGORY_LABELS: Record<CompositionCategory, string> = {
-  text: "Text",
-  social: "Social Media",
-  data: "Charts & Data",
-  devtools: "Dev Tools",
-  marketing: "Marketing",
-  layout: "Frames & Mockups",
-  captions: "Captions",
-  media: "Media",
-  background: "Backgrounds",
-};
-
-const CATEGORY_ORDER = Object.keys(CATEGORY_LABELS) as CompositionCategory[];
+// Product search opens the scene showcase before entering Studio.
 
 type SearchItem = { title: string; description: string; href: string };
 type SearchGroup = { heading: string; items: SearchItem[] };
@@ -37,11 +23,14 @@ const searchGroups: SearchGroup[] = CATEGORY_ORDER.map((cat) => ({
   heading: CATEGORY_LABELS[cat],
   // Backgrounds are studio-only backdrops — not searchable as components.
   items: compositions
-    .filter((c) => c.category === cat && c.category !== "background")
+    .filter(
+      (c) =>
+        c.category === cat && c.category !== "background" && !c.hideFromAgent,
+    )
     .map((c) => ({
       title: c.title,
       description: c.description,
-      href: `/component/${c.id}/edit`,
+      href: `/component/${c.id}`,
     })),
 })).filter((g) => g.items.length > 0);
 
@@ -77,11 +66,11 @@ export function DocsSearch({ open, onOpenChange }: DocsSearchProps) {
     <CommandDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Search components"
-      description="Search the component library"
+      title="Search scenes"
+      description="Search the scene library"
       filter={scoreItem}
     >
-      <CommandInput placeholder="Search components..." />
+      <CommandInput placeholder="Search scenes..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         {searchGroups.map((group) => (

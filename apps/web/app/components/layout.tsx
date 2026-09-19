@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
-  title: "Components",
-  description: "Browse components, fork them, and manage your projects.",
+  title: "Explore scenes",
+  description: "Find a scene, make it yours, and use it in your next video.",
 };
 
 export default function ComponentsLayout({
