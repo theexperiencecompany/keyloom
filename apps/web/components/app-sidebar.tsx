@@ -3,6 +3,7 @@
 import {
   ClosedCaptionIcon,
   FolderLibraryIcon,
+  HelpCircleIcon,
   Home01Icon,
   Image02Icon,
   LayoutTwoRowIcon,
@@ -48,7 +49,7 @@ const SECTIONS: NavSection[] = [
   {
     items: [
       { label: "Home", href: "/home", icon: Home01Icon },
-      { label: "Components", href: "/components", icon: LibrariesIcon },
+      { label: "Explore", href: "/components", icon: LibrariesIcon },
       {
         label: "My Projects",
         href: "/components/projects",
@@ -63,6 +64,7 @@ const SECTIONS: NavSection[] = [
       { label: "Memes", href: "/memes", icon: Image02Icon },
       { label: "Split Screen", href: "/split", icon: LayoutTwoRowIcon },
       { label: "Captions", href: "/captions", icon: ClosedCaptionIcon },
+      { label: "Help", href: "/help", icon: HelpCircleIcon },
     ],
   },
 ];
@@ -74,7 +76,8 @@ export function AppSidebar() {
   // nested routes like /components/projects; prefix match for the rest.
   const isActive = (href: string) =>
     href === "/" || href === "/components"
-      ? pathname === href
+      ? pathname === href ||
+        (href === "/components" && pathname.startsWith("/component/"))
       : pathname.startsWith(href);
 
   return (

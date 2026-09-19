@@ -28,7 +28,7 @@ export function FeaturedComponents({ items }: Props) {
           return (
             <Link
               key={c.id}
-              href={`/docs/${c.id}`}
+              href={`/component/${c.id}`}
               // Defense in depth: untrusted (programmatic) clicks bubbling
               // up from descendant compositions shouldn't trigger Link
               // navigation. The source composition handles this at its

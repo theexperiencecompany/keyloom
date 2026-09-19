@@ -131,18 +131,16 @@ function MoreMenu() {
 }
 
 const navLinks = [
-  { label: "Docs", href: "/docs" },
-  { label: "Components", href: "/docs/components" },
+  { label: "Explore", href: "/components" },
   { label: "Studio", href: "/studio" },
+  { label: "Help", href: "/help" },
 ];
 
 export function DocsHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);
   const pathname = usePathname();
 
-  // Only the most specific link lights up. "/docs" is a prefix of
-  // "/docs/components", so a plain startsWith would mark both active on the
-  // components page; the longest matching href wins instead.
+  // Only the most specific matching navigation link lights up.
   const activeHref = React.useMemo(() => {
     const matches = navLinks.filter((l) =>
       l.href === "/"
@@ -195,7 +193,7 @@ export function DocsHeader() {
               size="icon-sm"
               className="sm:hidden"
               onClick={() => setSearchOpen(true)}
-              aria-label="Search components"
+              aria-label="Search scenes"
             >
               <HugeiconsIcon icon={Search01Icon} size={14} />
             </Button>
@@ -207,7 +205,7 @@ export function DocsHeader() {
             >
               <HugeiconsIcon icon={Search01Icon} size={13} />
               <span className="flex-1 text-left text-[13px]">
-                Search components...
+                Search scenes...
               </span>
               <kbd className="font-mono text-[11px] text-muted-foreground/60">
                 ⌘K

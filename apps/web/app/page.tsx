@@ -244,13 +244,13 @@ export default function LandingPage() {
               that look expensive.
             </h1>
             <p className="mt-6 max-w-xl text-sm text-muted-foreground text-balance sm:text-lg">
-              A library of cinematic scenes for Remotion. No After Effects, no
-              animation team — drop in, render, ship.
+              Pick a scene, make it yours, and create your next video right in
+              your browser.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:mt-10">
               <Button asChild>
-                <Link href="/docs">Get started</Link>
+                <Link href="/components">Explore scenes</Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/studio">Open Studio</Link>
@@ -278,7 +278,7 @@ export default function LandingPage() {
           <div className="mb-8 flex flex-col items-start justify-between gap-3 sm:mb-12 sm:flex-row sm:items-end sm:gap-6">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight sm:text-4xl">
-                Browse the components.
+                Find your next scene.
               </h2>
               <p className="mt-2 text-sm text-muted-foreground sm:mt-3 sm:text-base">
                 Premium scenes you can drop straight into a video. Tap the
@@ -291,7 +291,7 @@ export default function LandingPage() {
               asChild
               className="hidden shrink-0 sm:inline-flex"
             >
-              <Link href="/docs">
+              <Link href="/components">
                 View all
                 <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
               </Link>
@@ -309,12 +309,12 @@ export default function LandingPage() {
             Start shipping motion in minutes.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
-            Read the docs, copy a component, render your first scene.
+            Choose a scene, customize it, and bring your video to life.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:mt-8">
             <Button asChild>
-              <Link href="/docs">
-                Read the docs
+              <Link href="/components">
+                Explore scenes
                 <HugeiconsIcon icon={ArrowRight02Icon} data-icon="inline-end" />
               </Link>
             </Button>

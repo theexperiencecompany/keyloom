@@ -18,6 +18,10 @@ export function LivePreview({
   fps,
   width,
   height,
+  controls = false,
+  autoPlay = true,
+  playbackRate = 0.7,
+  initialFrame = 0,
 }: {
   // Pre-computed by the caller from registry metadata so this component never
   // imports the all-compositions barrel.
@@ -28,6 +32,10 @@ export function LivePreview({
   fps: number;
   width: number;
   height: number;
+  controls?: boolean;
+  autoPlay?: boolean;
+  playbackRate?: number;
+  initialFrame?: number;
 }) {
   // Lazy-load only this one composition into its own chunk via Remotion's
   // native lazyComponent. The generated loader map keeps every import() a
@@ -59,13 +67,14 @@ export function LivePreview({
       compositionHeight={height}
       style={{ width: "100%", height: "100%" }}
       loop
-      autoPlay
+      autoPlay={autoPlay}
       // Slow the loops down so a grid of autoplaying previews reads as calm
       // ambient motion rather than a wall of frenetic animation.
-      playbackRate={0.7}
+      playbackRate={playbackRate}
+      initialFrame={initialFrame}
       initiallyMuted
-      controls={false}
-      numberOfSharedAudioTags={0}
+      controls={controls}
+      numberOfSharedAudioTags={controls ? 12 : 0}
       acknowledgeRemotionLicense
     />
   );
