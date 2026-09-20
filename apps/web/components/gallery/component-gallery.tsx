@@ -21,6 +21,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
 import { LatestDrop } from "@/components/dashboard/latest-drop";
+import { resolveCompositionMeta } from "@/lib/composition-meta";
 import {
   CATEGORY_COLORS,
   CATEGORY_LABELS,
@@ -40,29 +41,22 @@ const VISIBLE = compositions.filter(
   (c) => !c.hideFromAgent && c.category !== "background",
 );
 
+// Scenes whose focal element is small on a full 1920px canvas get zoomed in
+// the grid so the tile shows the part that matters. Display-only: the
+// showcase page and Studio always render the full frame.
+const PREVIEW_ZOOM: Record<string, number> = {
+  TypingComposer: 1.35,
+  CursorWalkthrough: 1.3,
+  StatCounter: 1.25,
+  GitHubStarButton: 1.6,
+  QrCode: 1.3,
+  Text: 1.15,
+};
+
 const COUNT_BY_CATEGORY = VISIBLE.reduce((counts, c) => {
   counts.set(c.category, (counts.get(c.category) ?? 0) + 1);
   return counts;
 }, new Map<CompositionCategory, number>());
-
-// Hand-picked scenes for the featured row; anything missing from the registry
-// is skipped, and the row tops up from the front of the library.
-const FEATURED_IDS = ["TikTokCaption", "TweetCard", "Terminal"];
-const FEATURED_COUNT = 3;
-const FEATURED = [
-  ...FEATURED_IDS.map((id) => VISIBLE.find((c) => c.id === id)).filter(
-    (c): c is (typeof VISIBLE)[number] => Boolean(c),
-  ),
-  ...VISIBLE.filter((c) => !FEATURED_IDS.includes(c.id)),
-].slice(0, FEATURED_COUNT);
-
-// Tall 4:5 portrait preview frame — responsive components reflow to fill it.
-const PREVIEW_W = 1080;
-const PREVIEW_H = 1350;
-
-// Landscape frame for the larger featured cards.
-const FEATURED_PREVIEW_W = 1280;
-const FEATURED_PREVIEW_H = 800;
 
 export function ComponentGallery() {
   const [filter, setFilter] = React.useState<Filter>("all");
@@ -84,9 +78,6 @@ export function ComponentGallery() {
       );
     });
   }, [filter, query]);
-
-  // The featured row only makes sense in the unfiltered default view.
-  const showFeatured = filter === "all" && query.trim() === "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -148,42 +139,17 @@ export function ComponentGallery() {
         ))}
       </nav>
 
-      {showFeatured ? (
-        <section>
-          <h2 className="font-heading text-xl font-semibold tracking-tight">
-            Featured
-          </h2>
-          <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURED.map((info) => (
-              <FeaturedCard key={info.id} info={info} />
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <section>
-        {showFeatured ? (
-          <h2 className="font-heading text-xl font-semibold tracking-tight">
-            All scenes
-          </h2>
-        ) : null}
-        {items.length === 0 ? (
-          <p className="py-20 text-center text-sm text-muted-foreground">
-            No scenes match “{query}”.
-          </p>
-        ) : (
-          <div
-            className={cn(
-              "grid grid-cols-2 items-start gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-              showFeatured && "mt-4",
-            )}
-          >
-            {items.map((info) => (
-              <GalleryCard key={info.id} info={info} />
-            ))}
-          </div>
-        )}
-      </section>
+      {items.length === 0 ? (
+        <p className="py-20 text-center text-sm text-muted-foreground">
+          No scenes match “{query}”.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          {items.map((info) => (
+            <SceneTile key={info.id} info={info} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -224,18 +190,6 @@ function CategoryTab({
   );
 }
 
-function CategoryChip({ category }: { category: CompositionCategory }) {
-  const color = CATEGORY_COLORS[category];
-  return (
-    <span
-      className="shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em]"
-      style={{ backgroundColor: `${color}1f`, color }}
-    >
-      {CATEGORY_LABELS[category]}
-    </span>
-  );
-}
-
 function useMountOnVisible() {
   const ref = React.useRef<HTMLAnchorElement | null>(null);
   const [visible, setVisible] = React.useState(false);
@@ -257,68 +211,71 @@ function useMountOnVisible() {
   return { ref, visible };
 }
 
-function FeaturedCard({ info }: { info: AnyCompositionInfo }) {
+/**
+ * A scene shown as itself: the video at its real aspect ratio, edge to
+ * edge, with the name underneath. Portrait scenes sit centered on a dark
+ * stage inside the same 16:9 tile so the grid stays even.
+ */
+export function SceneTile({
+  info,
+  showDescription = true,
+}: {
+  info: AnyCompositionInfo;
+  showDescription?: boolean;
+}) {
   const { ref, visible } = useMountOnVisible();
+  const meta = resolveCompositionMeta(info);
+  const landscape = meta.width >= meta.height;
+  const zoom = PREVIEW_ZOOM[info.id] ?? 1;
 
   return (
     <Link
       ref={ref}
       href={`/component/${info.id}`}
       prefetch={false}
-      className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
+      className="group block min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
     >
-      <div className="relative m-2 aspect-[16/10] overflow-hidden rounded-xl bg-muted/40">
+      <div
+        className={cn(
+          "relative aspect-video overflow-hidden rounded-2xl",
+          landscape ? "bg-muted/40" : "bg-[#0e0e12]",
+        )}
+      >
         {visible ? (
-          <LivePreview
-            modulePath={compositionModulePath(info)}
-            id={info.id}
-            defaultProps={info.defaultProps as Record<string, unknown>}
-            durationInFrames={info.durationInFrames}
-            fps={info.fps}
-            width={FEATURED_PREVIEW_W}
-            height={FEATURED_PREVIEW_H}
-          />
+          <div
+            className="absolute inset-0"
+            style={zoom === 1 ? undefined : { transform: `scale(${zoom})` }}
+          >
+            <LivePreview
+              modulePath={compositionModulePath(info)}
+              id={info.id}
+              defaultProps={info.defaultProps as Record<string, unknown>}
+              durationInFrames={meta.durationInFrames}
+              fps={meta.fps}
+              width={meta.width}
+              height={meta.height}
+            />
+          </div>
         ) : null}
       </div>
-      <div className="flex items-center justify-between gap-3 px-4 pb-3.5 pt-1">
+      <div className="mt-3 flex items-baseline justify-between gap-3 px-0.5">
         <h3 className="truncate text-[15px] font-semibold leading-tight">
           {info.title}
         </h3>
-        <CategoryChip category={info.category} />
-      </div>
-    </Link>
-  );
-}
-
-function GalleryCard({ info }: { info: AnyCompositionInfo }) {
-  const { ref, visible } = useMountOnVisible();
-
-  return (
-    <Link
-      ref={ref}
-      href={`/component/${info.id}`}
-      prefetch={false}
-      className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
-    >
-      <div className="relative m-2 aspect-[4/5] overflow-hidden rounded-xl bg-muted/40">
-        {visible ? (
-          <LivePreview
-            modulePath={compositionModulePath(info)}
-            id={info.id}
-            defaultProps={info.defaultProps as Record<string, unknown>}
-            durationInFrames={info.durationInFrames}
-            fps={info.fps}
-            width={PREVIEW_W}
-            height={PREVIEW_H}
+        <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-muted-foreground">
+          <span
+            aria-hidden
+            className="size-1.5 rounded-full"
+            style={{ backgroundColor: CATEGORY_COLORS[info.category] }}
           />
-        ) : null}
+          {CATEGORY_LABELS[info.category]}
+        </span>
       </div>
-      <div className="flex items-center justify-between gap-2 px-3 pb-3 pt-1">
-        <h3 className="truncate text-[13px] font-semibold leading-tight">
-          {info.title}
-        </h3>
-        <CategoryChip category={info.category} />
-      </div>
+      {showDescription ? (
+        <p className="mt-1 line-clamp-1 px-0.5 text-[13px] text-muted-foreground">
+          {info.description}
+        </p>
+      ) : null}
     </Link>
   );
 }

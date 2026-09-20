@@ -45,6 +45,7 @@ import {
   SCENE_LOOKS,
   type SceneLook,
 } from "@/lib/scene-looks";
+import { SceneTile } from "./component-gallery";
 
 const LivePreview = dynamic(
   () => import("./live-preview").then((m) => m.LivePreview),
@@ -437,38 +438,14 @@ export function SceneShowcase({
               See all
             </Link>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {relatedIds.map((relatedId) => {
-              const scene = compositionsById[relatedId]!;
-              const relatedMeta = resolveCompositionMeta(scene);
-              return (
-                <Link
-                  key={scene.id}
-                  href={`/component/${scene.id}`}
-                  prefetch={false}
-                  className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <div
-                    className="pointer-events-none relative m-2 aspect-[4/5] overflow-hidden rounded-xl bg-muted/40"
-                    aria-hidden="true"
-                  >
-                    <LivePreview
-                      modulePath={compositionModulePath(scene)}
-                      id={scene.id}
-                      defaultProps={scene.defaultProps}
-                      {...relatedMeta}
-                      autoPlay={false}
-                      initialFrame={Math.floor(
-                        relatedMeta.durationInFrames / 2,
-                      )}
-                    />
-                  </div>
-                  <h3 className="truncate px-3 pb-3 pt-1 text-[13px] font-semibold leading-tight">
-                    {scene.title}
-                  </h3>
-                </Link>
-              );
-            })}
+          <div className="mt-5 grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedIds.map((relatedId) => (
+              <SceneTile
+                key={relatedId}
+                info={compositionsById[relatedId]!}
+                showDescription={false}
+              />
+            ))}
           </div>
         </section>
       )}
