@@ -17,11 +17,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Keyloom — Cinematic scenes for Remotion",
+    default: "Keyloom — Create with cinematic scenes",
     template: "%s — Keyloom",
   },
   description:
-    "A library of cinematic scenes for Remotion. No After Effects, no animation team — drop in, render, ship.",
+    "Pick a scene, make it yours, and create your next video right in your browser.",
 };
 
 const fontSans = Instrument_Sans({

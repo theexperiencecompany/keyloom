@@ -23,13 +23,13 @@ export function SiteFooter() {
             href="/docs"
             className="transition-colors hover:text-foreground"
           >
-            Docs
+            For developers
           </Link>
           <Link
-            href="/docs/components"
+            href="/components"
             className="transition-colors hover:text-foreground"
           >
-            Components
+            Explore
           </Link>
           <Link
             href="/studio"

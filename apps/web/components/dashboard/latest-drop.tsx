@@ -32,7 +32,7 @@ export function LatestDrop() {
           {names} and more — fresh off the loom.
         </p>
         <Button asChild size="sm" className="mt-5">
-          <Link href={`/component/${featured.id}/edit`} prefetch={false}>
+          <Link href={`/component/${featured.id}`} prefetch={false}>
             Open the newest scene
           </Link>
         </Button>
