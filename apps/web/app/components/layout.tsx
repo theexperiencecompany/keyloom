@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppShell } from "@/components/app-shell";
+import { BrowseShell } from "@/components/browse-shell";
 
 export const metadata: Metadata = {
   title: "Explore scenes",
@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 export default function ComponentsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return <AppShell>{children}</AppShell>;
+  return <BrowseShell>{children}</BrowseShell>;
 }

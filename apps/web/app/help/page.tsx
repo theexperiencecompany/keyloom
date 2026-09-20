@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AppShell } from "@/components/app-shell";
+import { BrowseShell } from "@/components/browse-shell";
 
 export const metadata: Metadata = {
   title: "Help",
@@ -18,7 +18,7 @@ const guides = [
   },
   {
     title: "How do I add captions?",
-    text: "Open Captions from the sidebar and upload your video to get started. You can review the words and change how the captions look before exporting.",
+    text: "Open Studio, choose Captions in its sidebar, and upload your video to get started. You can review the words and change how the captions look before exporting.",
   },
   {
     title: "How do I download my video?",
@@ -32,8 +32,8 @@ const guides = [
 
 export default function HelpPage() {
   return (
-    <AppShell>
-      <div className="mx-auto max-w-3xl px-5 py-10 sm:px-8">
+    <BrowseShell>
+      <div className="mx-auto max-w-3xl py-10">
         <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
           A little help getting started
         </h1>
@@ -64,6 +64,6 @@ export default function HelpPage() {
           covers setup and component details.
         </p>
       </div>
-    </AppShell>
+    </BrowseShell>
   );
 }

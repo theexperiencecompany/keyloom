@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  Cancel01Icon,
-  PlusSignIcon,
-  Search01Icon,
-} from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   compositionModulePath,
@@ -14,7 +10,6 @@ import type {
   AnyCompositionInfo,
   CompositionCategory,
 } from "@workspace/compositions/schema";
-import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cn } from "@workspace/ui/lib/utils";
 import dynamic from "next/dynamic";
@@ -110,12 +105,6 @@ export function ComponentGallery() {
               </button>
             ) : null}
           </div>
-          <Button asChild className="rounded-full">
-            <Link href="/studio">
-              <HugeiconsIcon icon={PlusSignIcon} size={15} />
-              New project
-            </Link>
-          </Button>
         </div>
       </div>
 

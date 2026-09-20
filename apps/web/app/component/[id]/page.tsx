@@ -7,7 +7,7 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/app-shell";
+import { BrowseShell } from "@/components/browse-shell";
 import { ComponentCode } from "@/components/docs/component-code";
 import { SceneShowcase } from "@/components/gallery/scene-showcase";
 
@@ -37,8 +37,8 @@ export default async function ScenePage({ params }: Props) {
     .slice(0, 4);
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-10">
+    <BrowseShell>
+      <div className="py-6">
         <Link
           href="/components"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -71,6 +71,6 @@ export default async function ScenePage({ params }: Props) {
           </div>
         </details>
       </div>
-    </AppShell>
+    </BrowseShell>
   );
 }
