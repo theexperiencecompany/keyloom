@@ -10,57 +10,8 @@
   }
 }
 
-@keyframes waveSpinnerFade {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes waveSpinnerBounce {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(-25%) scale(1.1);
-    opacity: 1;
-  }
-}
-
-@keyframes waveSpinnerGrow {
-  0%,
-  100% {
-    transform: scale(0.5);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 .wave-spinner-dot--pulse {
   animation: waveSpinnerPulse var(--wave-spinner-duration) ease-out infinite;
-  animation-delay: var(--wave-spinner-delay);
-}
-
-.wave-spinner-dot--fade {
-  animation: waveSpinnerFade var(--wave-spinner-duration) ease-in-out infinite;
-  animation-delay: var(--wave-spinner-delay);
-}
-
-.wave-spinner-dot--bounce {
-  animation: waveSpinnerBounce var(--wave-spinner-duration) ease-in-out infinite;
-  animation-delay: var(--wave-spinner-delay);
-}
-
-.wave-spinner-dot--grow {
-  animation: waveSpinnerGrow var(--wave-spinner-duration) ease-in-out infinite;
   animation-delay: var(--wave-spinner-delay);
 }
 
