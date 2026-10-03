@@ -7,7 +7,6 @@
 import {
   AnalyticsUpIcon,
   Book01Icon,
-  BrowserIcon,
   CameraVideoIcon,
   CursorMagicSelection02Icon,
   CursorTextIcon,
@@ -47,32 +46,21 @@ const CHAT_IDS = new Set([
   "SlackMessages",
   "DiscordMessages",
   "InstagramMessages",
-  "MessagePopup",
 ]);
-const SOCIAL_IDS = new Set(["TweetCard", "TwitterFollow", "GitHubStarButton"]);
-const FRAME_IDS = new Set(["BrowserWindow", "LaptopFrame", "PhoneFrame"]);
-const CHART_IDS = new Set([
-  "BarChart",
-  "LineChart",
-  "AreaChart",
-  "PieChart",
-  "RadarChart",
-  "RadialChart",
-]);
+const SOCIAL_IDS = new Set(["TweetPost", "GitHubStarButton"]);
+const CHART_IDS = new Set(["BarChart", "LineChart", "RadialChart"]);
 
 const textAnimations = compositions.filter((c) =>
   TEXT_PREFIXES.some((p) => c.id.startsWith(p)),
 );
 const chatComponents = compositions.filter((c) => CHAT_IDS.has(c.id));
 const socialComponents = compositions.filter((c) => SOCIAL_IDS.has(c.id));
-const frameComponents = compositions.filter((c) => FRAME_IDS.has(c.id));
 const chartComponents = compositions.filter((c) => CHART_IDS.has(c.id));
 const sceneComponents = compositions.filter(
   (c) =>
     !TEXT_PREFIXES.some((p) => c.id.startsWith(p)) &&
     !CHAT_IDS.has(c.id) &&
     !SOCIAL_IDS.has(c.id) &&
-    !FRAME_IDS.has(c.id) &&
     !CHART_IDS.has(c.id),
 );
 
@@ -129,15 +117,6 @@ const collapsibleGroups: Group[] = [
     section: "Social",
     icon: UserGroupIcon,
     items: socialComponents.map((c) => ({
-      title: c.title,
-      href: `/docs/${c.id}`,
-    })),
-  },
-  {
-    value: "frames",
-    section: "Frames & Mockups",
-    icon: BrowserIcon,
-    items: frameComponents.map((c) => ({
       title: c.title,
       href: `/docs/${c.id}`,
     })),

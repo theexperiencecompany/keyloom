@@ -10,7 +10,7 @@ export const TEXT_HEIGHT = 1080;
 export const textDefaultProps: TextProps = {
   headline: "Designed in California",
   subtitle: "",
-  animation: "fade",
+  animation: "soft-blur",
 };
 
 export const textInfo: CompositionInfo<TextProps> = {
@@ -18,7 +18,7 @@ export const textInfo: CompositionInfo<TextProps> = {
   category: "text",
   title: "Text",
   description:
-    "Animated headline + subtitle. Pick from 28 animation styles in the Animation field.",
+    "Animated headline + subtitle. Pick from 5 animation styles in the Animation field.",
   durationInFrames: TEXT_DURATION,
   fps: TEXT_FPS,
   width: TEXT_WIDTH,

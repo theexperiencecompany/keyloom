@@ -53,53 +53,10 @@ type MdxModule = { default: ComponentType; meta: DocMeta };
  * one lazy-loader map entry below. Optional.
  */
 const bespokeMdxByCompositionId: Record<string, () => Promise<MdxModule>> = {
-  TitleSlideUp: () => import("@/content/docs/title-slide-up.mdx"),
-  TitleType: () => import("@/content/docs/title-type.mdx"),
-  TitlePopup: () => import("@/content/docs/title-popup.mdx"),
-  TitleFade: () => import("@/content/docs/title-fade.mdx"),
-  FontHook: () => import("@/content/docs/font-hook.mdx"),
-  TextBlurOutUp: () => import("@/content/docs/text-blur-out-up.mdx"),
-  TextBottomUpLetters: () =>
-    import("@/content/docs/text-bottom-up-letters.mdx"),
-  TextDepthParallaxWords: () =>
-    import("@/content/docs/text-depth-parallax-words.mdx"),
-  TextFadeThrough: () => import("@/content/docs/text-fade-through.mdx"),
-  TextFocusBlurResolve: () =>
-    import("@/content/docs/text-focus-blur-resolve.mdx"),
-  TextKineticCenterBuild: () =>
-    import("@/content/docs/text-kinetic-center-build.mdx"),
-  TextLineByLineSlide: () =>
-    import("@/content/docs/text-line-by-line-slide.mdx"),
-  TextMaskRevealUp: () => import("@/content/docs/text-mask-reveal-up.mdx"),
-  TextMicroScaleFade: () => import("@/content/docs/text-micro-scale-fade.mdx"),
-  TextPerCharacterRise: () =>
-    import("@/content/docs/text-per-character-rise.mdx"),
-  TextPerWordCrossfade: () =>
-    import("@/content/docs/text-per-word-crossfade.mdx"),
-  TextScaleDownFade: () => import("@/content/docs/text-scale-down-fade.mdx"),
-  TextSharedAxisX: () => import("@/content/docs/text-shared-axis-x.mdx"),
-  TextSharedAxisY: () => import("@/content/docs/text-shared-axis-y.mdx"),
-  TextSharedAxisZ: () => import("@/content/docs/text-shared-axis-z.mdx"),
-  TextShimmerSweep: () => import("@/content/docs/text-shimmer-sweep.mdx"),
-  TextShortSlideDown: () => import("@/content/docs/text-short-slide-down.mdx"),
-  TextShortSlideRight: () =>
-    import("@/content/docs/text-short-slide-right.mdx"),
-  TextSoftBlurIn: () => import("@/content/docs/text-soft-blur-in.mdx"),
-  TextSpringScaleIn: () => import("@/content/docs/text-spring-scale-in.mdx"),
-  TextStaggerFromCenter: () =>
-    import("@/content/docs/text-stagger-from-center.mdx"),
-  TextStaggerFromEdges: () =>
-    import("@/content/docs/text-stagger-from-edges.mdx"),
-  TextTopDownLetters: () => import("@/content/docs/text-top-down-letters.mdx"),
-  TextTypewriter: () => import("@/content/docs/text-typewriter.mdx"),
   TypingSearch: () => import("@/content/docs/typing-search.mdx"),
-  TypingComposer: () => import("@/content/docs/typing-composer.mdx"),
   CursorWalkthrough: () => import("@/content/docs/cursor-walkthrough.mdx"),
-  BrowserWindow: () => import("@/content/docs/browser-window.mdx"),
   TikTokCaption: () => import("@/content/docs/tiktok-caption.mdx"),
   StatCounter: () => import("@/content/docs/stat-counter.mdx"),
-  TweetCard: () => import("@/content/docs/tweet-card.mdx"),
-  TwitterFollow: () => import("@/content/docs/twitter-follow.mdx"),
   InstagramPost: () => import("@/content/docs/instagram-post.mdx"),
   MessageBubbles: () => import("@/content/docs/message-bubbles.mdx"),
   WhatsAppMessages: () => import("@/content/docs/whatsapp-messages.mdx"),
@@ -107,25 +64,16 @@ const bespokeMdxByCompositionId: Record<string, () => Promise<MdxModule>> = {
   SlackMessages: () => import("@/content/docs/slack-messages.mdx"),
   DiscordMessages: () => import("@/content/docs/discord-messages.mdx"),
   InstagramMessages: () => import("@/content/docs/instagram-messages.mdx"),
-  MessagePopup: () => import("@/content/docs/message-popup.mdx"),
   PhoneFrame: () => import("@/content/docs/phone-frame.mdx"),
   LaptopFrame: () => import("@/content/docs/laptop-frame.mdx"),
-  SplitScene: () => import("@/content/docs/split-scene.mdx"),
-  FeatureCard: () => import("@/content/docs/feature-card.mdx"),
-  MetricCard: () => import("@/content/docs/metric-card.mdx"),
   TestimonialCard: () => import("@/content/docs/testimonial-card.mdx"),
   LogoCloud: () => import("@/content/docs/logo-cloud.mdx"),
   PricingCard: () => import("@/content/docs/pricing-card.mdx"),
   QrCode: () => import("@/content/docs/qr-code.mdx"),
   Terminal: () => import("@/content/docs/terminal.mdx"),
   GitHubStarButton: () => import("@/content/docs/github-star-button.mdx"),
-  Toast: () => import("@/content/docs/toast.mdx"),
-  PerspectiveMarquee: () => import("@/content/docs/perspective-marquee.mdx"),
   BarChart: () => import("@/content/docs/bar-chart.mdx"),
   LineChart: () => import("@/content/docs/line-chart.mdx"),
-  AreaChart: () => import("@/content/docs/area-chart.mdx"),
-  PieChart: () => import("@/content/docs/pie-chart.mdx"),
-  RadarChart: () => import("@/content/docs/radar-chart.mdx"),
   RadialChart: () => import("@/content/docs/radial-chart.mdx"),
   Showcase: () => import("@/content/docs/showcase.mdx"),
 };

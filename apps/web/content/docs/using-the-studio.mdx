@@ -40,7 +40,7 @@ The agent doesn't need to invent animations — it just picks scenes and fills p
 
 Scenes are designed to compose:
 
-- **Frames** (`PhoneFrame`, `LaptopFrame`, `BrowserWindow`) take another composition's id as a prop and render it inside a device chrome. Stack a `MessageBubbles` inside a `PhoneFrame` for a phone-mockup reel.
+- **Frames** (`PhoneFrame`, `LaptopFrame`, `Showcase`) take another composition's id as a prop and render it inside a device chrome. Stack a `MessageBubbles` inside a `PhoneFrame` for a phone-mockup reel.
 - **SplitScene** renders two compositions side-by-side. Pair a `Terminal` with a `LineChart` for a "code drives metric" beat.
 - **Text animations** layer well on top of card scenes — most of them have transparent backgrounds when the brand background is set to `transparent`.
 

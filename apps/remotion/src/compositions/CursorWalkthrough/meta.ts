@@ -21,7 +21,7 @@ export const cursorWalkthroughInfo: CompositionInfo<CursorWalkthroughProps> = {
   id: "CursorWalkthrough",
   category: "devtools",
   agentNotes:
-    "Animated cursor moving across the screen and clicking elements — pair with BrowserWindow as the inner scene. Use to show a multi-step UI walkthrough. Each click step is a separate prop entry. Keep to 2–4 click points; more feels frantic.",
+    "Animated cursor moving across the screen and clicking elements over a screenshot. Use to show a multi-step UI walkthrough. Each click step is a separate prop entry. Keep to 2–4 click points; more feels frantic.",
   title: "Cursor Walkthrough",
   description:
     "A cursor that demonstrates a click → type → click flow over a screenshot. Drop in a background image and pin the click coordinates.",

@@ -85,7 +85,7 @@ No SDK. No install. The library and the studio share the same scene registry, so
 ## Two ways to use it
 
 - **You drive it.** Open the Studio, pick scenes from the Library, edit props in the Inspector, set transitions, hit Export.
-- **An agent drives it.** Every scene has a typed props interface that AI coding agents (Claude Code, Codex, Cursor) read trivially. Tell an agent "build me a 12-second SaaS launch reel" and it composes `TitlePopup` → `Terminal` → `BarChart` → `Toast` → `LogoCloud` for you.
+- **An agent drives it.** Every scene has a typed props interface that AI coding agents (Claude Code, Codex, Cursor) read trivially. Tell an agent "build me a 12-second SaaS launch reel" and it composes `Text` → `Terminal` → `BarChart` → `TweetPost` → `LogoCloud` for you.
 
 ## What's inside
 

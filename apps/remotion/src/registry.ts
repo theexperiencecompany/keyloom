@@ -1,7 +1,5 @@
-import { areaChartInfo } from "./compositions/AreaChart/meta";
 import { barChartInfo } from "./compositions/BarChart/meta";
 import { bounceCardsInfo } from "./compositions/BounceCards/meta";
-import { browserWindowInfo } from "./compositions/BrowserWindow/meta";
 import { auroraGradientInfo } from "./compositions/backgrounds/AuroraGradient/meta";
 import { blueGridInfo } from "./compositions/backgrounds/BlueGrid/meta";
 import { futuristicArchInfo } from "./compositions/backgrounds/FuturisticArch/meta";
@@ -17,10 +15,8 @@ import { lineChartInfo } from "./compositions/LineChart/meta";
 import { lockScreenMessageInfo } from "./compositions/LockScreenMessage/meta";
 import { logoCloudInfo } from "./compositions/LogoCloud/meta";
 import { messageBubblesInfo } from "./compositions/MessageBubbles/meta";
-import { pieChartInfo } from "./compositions/PieChart/meta";
 import { pricingCardInfo } from "./compositions/PricingCard/meta";
 import { qrCodeInfo } from "./compositions/QrCode/meta";
-import { radarChartInfo } from "./compositions/RadarChart/meta";
 import { radialChartInfo } from "./compositions/RadialChart/meta";
 import { showcaseInfo } from "./compositions/Showcase/meta";
 import { slackMessagesInfo } from "./compositions/SlackMessages/meta";
@@ -33,22 +29,17 @@ import { textInfo } from "./compositions/Text/meta";
 import { textMagicMoveInfo } from "./compositions/TextMagicMove/meta";
 import { textMorphInfo } from "./compositions/TextMorph/meta";
 import { tikTokCaptionInfo } from "./compositions/TikTokCaption/meta";
-import { tweetCardInfo } from "./compositions/TweetCard/meta";
 import { tweetPostInfo } from "./compositions/TweetPost/meta";
-import { typingComposerInfo } from "./compositions/TypingComposer/meta";
 import { typingSearchInfo } from "./compositions/TypingSearch/meta";
 import { whatsappMessagesInfo } from "./compositions/WhatsAppMessages/meta";
 import type { AnyCompositionInfo } from "./schema";
 
 export const compositions: AnyCompositionInfo[] = [
   typingSearchInfo,
-  typingComposerInfo,
   cursorWalkthroughInfo,
-  browserWindowInfo,
   tikTokCaptionInfo,
   statCounterInfo,
   spotifyPlayerInfo,
-  tweetCardInfo,
   tweetPostInfo,
   instagramPostInfo,
   messageBubblesInfo,
@@ -71,9 +62,6 @@ export const compositions: AnyCompositionInfo[] = [
   qrCodeInfo,
   barChartInfo,
   lineChartInfo,
-  areaChartInfo,
-  pieChartInfo,
-  radarChartInfo,
   radialChartInfo,
   blueGridInfo,
   auroraGradientInfo,

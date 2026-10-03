@@ -68,7 +68,7 @@ const COUNT_BY_CATEGORY = VISIBLE.reduce((counts, c) => {
 
 // Hand-picked scenes for the featured row; anything missing from the registry
 // is skipped, and the row tops up from the front of the library.
-const FEATURED_IDS = ["TikTokCaption", "TweetCard", "Terminal"];
+const FEATURED_IDS = ["TikTokCaption", "TweetPost", "Terminal"];
 const FEATURED_COUNT = 3;
 const FEATURED = [
   ...FEATURED_IDS.map((id) => VISIBLE.find((c) => c.id === id)).filter(

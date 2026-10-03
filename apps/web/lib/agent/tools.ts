@@ -111,7 +111,9 @@ const ClipSchema = z.object({
   compositionId: z
     .string()
     .min(1)
-    .describe("PascalCase composition id from the catalog (e.g. 'TitlePopup')"),
+    .describe(
+      "PascalCase composition id from the catalog (e.g. 'TextMagicMove')",
+    ),
   props: z
     .record(z.string(), z.unknown())
     .describe(
