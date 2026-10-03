@@ -26,7 +26,7 @@ const PLANNING_PHRASES = [
 const WORKING_PHRASES = [
   "Auditioning scenes…",
   "Mixing colors that don't clash…",
-  "Refusing to pick TitlePopup again…",
+  "Refusing to pick the same text animation again…",
   "Negotiating with composition #47…",
   "Picking fonts that don't suck…",
   "Trying not to use Toast…",

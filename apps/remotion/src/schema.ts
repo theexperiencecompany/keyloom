@@ -176,7 +176,7 @@ export type CompositionInfo<P extends Record<string, unknown>> = {
    *   "Best for CLI install/build/deploy with 2–4 lines. Use for the
    *    'how it works' beat in a launch video. Avoid for long-form."
    *   "Use for Instagram-themed launches or social mockups. Pair the
-   *    InstagramPost reveal with a TextScaleDownFade hook."
+   *    InstagramPost reveal with a Text hook."
    */
   agentNotes?: string;
   // Optional callback Remotion runs at studio load + every prop edit.

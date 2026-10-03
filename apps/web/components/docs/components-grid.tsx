@@ -16,27 +16,13 @@ type Group = {
 
 const TEXT_PREFIXES = ["Title", "Text"];
 const CHAT_IDS = new Set([
-  "MessagePopup",
   "MessageBubbles",
   "WhatsAppMessages",
   "SlackMessages",
   "DiscordMessages",
 ]);
-const SOCIAL_IDS = new Set([
-  "TweetCard",
-  "TwitterFollow",
-  "GitHubStarButton",
-  "InstagramPost",
-]);
-const FRAME_IDS = new Set(["BrowserWindow", "LaptopFrame", "PhoneFrame"]);
-const CHART_IDS = new Set([
-  "BarChart",
-  "LineChart",
-  "AreaChart",
-  "PieChart",
-  "RadarChart",
-  "RadialChart",
-]);
+const SOCIAL_IDS = new Set(["TweetPost", "GitHubStarButton", "InstagramPost"]);
+const CHART_IDS = new Set(["BarChart", "LineChart", "RadialChart"]);
 
 function isText(c: AnyCompositionInfo) {
   return TEXT_PREFIXES.some((p) => c.id.startsWith(p));
@@ -47,14 +33,12 @@ function partition(): Group[] {
   const charts: AnyCompositionInfo[] = [];
   const chat: AnyCompositionInfo[] = [];
   const social: AnyCompositionInfo[] = [];
-  const frames: AnyCompositionInfo[] = [];
   const text: AnyCompositionInfo[] = [];
 
   for (const c of compositions) {
     if (CHART_IDS.has(c.id)) charts.push(c);
     else if (CHAT_IDS.has(c.id)) chat.push(c);
     else if (SOCIAL_IDS.has(c.id)) social.push(c);
-    else if (FRAME_IDS.has(c.id)) frames.push(c);
     else if (isText(c)) text.push(c);
     else scenes.push(c);
   }
@@ -70,8 +54,7 @@ function partition(): Group[] {
     {
       id: "charts",
       label: "Charts",
-      description:
-        "Animated data charts — bar, line, area, pie, radar, radial.",
+      description: "Animated data charts — bar, line, radial.",
       items: charts,
     },
     {
@@ -85,15 +68,8 @@ function partition(): Group[] {
       id: "social",
       label: "Social",
       description:
-        "Brand-locked social UI — tweets, follow buttons, GitHub stars, Instagram posts.",
+        "Brand-locked social UI — tweets, GitHub stars, Instagram posts.",
       items: social,
-    },
-    {
-      id: "frames-mockups",
-      label: "Frames & Mockups",
-      description:
-        "Device chrome wrappers — phone, laptop, browser window — that host any other scene inside.",
-      items: frames,
     },
     {
       id: "text-animations",

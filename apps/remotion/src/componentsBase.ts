@@ -1,9 +1,7 @@
 "use client";
 import type { ComponentType } from "react";
-import { AreaChart } from "./compositions/AreaChart/AreaChart";
 import { BarChart } from "./compositions/BarChart/BarChart";
 import { BounceCards } from "./compositions/BounceCards/BounceCards";
-import { BrowserWindow } from "./compositions/BrowserWindow/BrowserWindow";
 import { AuroraGradient } from "./compositions/backgrounds/AuroraGradient/AuroraGradient";
 import { BlueGrid } from "./compositions/backgrounds/BlueGrid/BlueGrid";
 import { FuturisticArch } from "./compositions/backgrounds/FuturisticArch/FuturisticArch";
@@ -19,10 +17,8 @@ import { LineChart } from "./compositions/LineChart/LineChart";
 import { LockScreenMessage } from "./compositions/LockScreenMessage/LockScreenMessage";
 import { LogoCloud } from "./compositions/LogoCloud/LogoCloud";
 import { MessageBubbles } from "./compositions/MessageBubbles/MessageBubbles";
-import { PieChart } from "./compositions/PieChart/PieChart";
 import { PricingCard } from "./compositions/PricingCard/PricingCard";
 import { QrCode } from "./compositions/QrCode/QrCode";
-import { RadarChart } from "./compositions/RadarChart/RadarChart";
 import { RadialChart } from "./compositions/RadialChart/RadialChart";
 import { SlackMessages } from "./compositions/SlackMessages/SlackMessages";
 import { SpotifyPlayer } from "./compositions/SpotifyPlayer/SpotifyPlayer";
@@ -34,9 +30,7 @@ import { Text } from "./compositions/Text/Text";
 import { TextMagicMove } from "./compositions/TextMagicMove/TextMagicMove";
 import { TextMorph } from "./compositions/TextMorph/TextMorph";
 import { TikTokCaption } from "./compositions/TikTokCaption/TikTokCaption";
-import { TweetCard } from "./compositions/TweetCard/TweetCard";
 import { TweetPost } from "./compositions/TweetPost/TweetPost";
-import { TypingComposer } from "./compositions/TypingComposer/TypingComposer";
 import { TypingSearch } from "./compositions/TypingSearch/TypingSearch";
 import { WhatsAppMessages } from "./compositions/WhatsAppMessages/WhatsAppMessages";
 
@@ -47,13 +41,10 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   MessageBubbles,
   LockScreenMessage,
   TypingSearch,
-  TypingComposer,
   StatCounter,
   SpotifyPlayer,
-  TweetCard,
   TweetPost,
   CursorWalkthrough,
-  BrowserWindow,
   TikTokCaption,
   WhatsAppMessages,
   InstagramMessages,
@@ -74,9 +65,6 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   QrCode,
   BarChart,
   LineChart,
-  AreaChart,
-  PieChart,
-  RadarChart,
   RadialChart,
   BlueGrid,
   AuroraGradient,

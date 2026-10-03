@@ -92,7 +92,7 @@ export type ProjectAudio = {
  * transpiles `code` and renders it. See `dynamic/runtime.ts`.
  */
 export type CustomComponent = {
-  /** The composition this was forked from, e.g. "TweetCard". */
+  /** The composition this was forked from, e.g. "TweetPost". */
   baseId: string;
   /** Display name for the fork. */
   name: string;
