@@ -27,6 +27,7 @@ import type {
 import { type Project, projectDuration } from "@workspace/compositions/project";
 
 import type { ExportOptions } from "./export-options";
+import { prepareProjectForExport } from "./prepare-export-project";
 
 export type LocalExportResult = {
   blob: Blob;
@@ -139,50 +140,8 @@ export async function renderProjectLocally({
     "@workspace/compositions/compositions/Project/Project"
   );
 
-  // Scale the project's frame counts to the export fps. The project is
-  // designed at `project.fps` (typically 60); each clip's
-  // `durationInFrames` represents `durationInFrames / project.fps`
-  // wall-clock seconds. To render the same wall-clock content at a
-  // different fps, multiply every frame count by `exportFps / project.fps`
-  // and tell Remotion the new fps. Compositions use `useDesignFrame()`
-  // internally so their hardcoded timing constants stay tied to
-  // wall-clock time regardless of the actual render fps.
   const exportFps = options.fps;
-  const fpsScale = exportFps / project.fps;
-  const scaledProject: Project =
-    fpsScale === 1
-      ? project
-      : {
-          ...project,
-          fps: exportFps,
-          clips: project.clips.map((c) => ({
-            ...c,
-            durationInFrames: Math.max(
-              1,
-              Math.round(c.durationInFrames * fpsScale),
-            ),
-            transition: c.transition
-              ? {
-                  ...c.transition,
-                  durationInFrames: Math.max(
-                    0,
-                    Math.round(c.transition.durationInFrames * fpsScale),
-                  ),
-                }
-              : c.transition,
-          })),
-          defaultTransition: project.defaultTransition
-            ? {
-                ...project.defaultTransition,
-                durationInFrames: Math.max(
-                  0,
-                  Math.round(
-                    project.defaultTransition.durationInFrames * fpsScale,
-                  ),
-                ),
-              }
-            : project.defaultTransition,
-        };
+  const scaledProject = prepareProjectForExport(project, options);
 
   const result = await renderWithAccelerationFallback({
     composition: {
@@ -224,15 +183,4 @@ export async function renderProjectLocally({
     .replace(/[:.]/g, "-")
     .slice(0, 19)}.mp4`;
   return { blob, filename };
-}
-
-export function downloadMp4Blob(blob: Blob, filename = "project.mp4"): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Project } from "@workspace/compositions/project";
+import { downloadBlob } from "@/lib/download-blob";
 import type { ExportOptions } from "./export-options";
 
 export type LambdaExportResult = {
@@ -128,21 +129,6 @@ export async function renderProjectOnLambda({
   }
 }
 
-/** Trigger a real "Save as" download from an in-memory blob (deferred revoke
- *  so the browser doesn't cancel the download — same mechanism the in-browser
- *  export uses, which is reliable across browsers). */
-function triggerBlobDownload(blob: Blob, filename: string): void {
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = objectUrl;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  // Revoke AFTER the download has kicked off; revoking synchronously aborts it.
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-}
-
 export async function downloadRemoteUrl(
   url: string,
   filename: string,
@@ -161,7 +147,7 @@ export async function downloadRemoteUrl(
     if (!res.ok) {
       throw new Error(`Download proxy responded ${res.status}`);
     }
-    triggerBlobDownload(await res.blob(), filename);
+    downloadBlob(await res.blob(), filename);
   } catch (err) {
     console.error(
       "[lambda-export] proxied download failed; opening the file directly",

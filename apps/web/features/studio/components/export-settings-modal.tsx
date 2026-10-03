@@ -31,8 +31,9 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
-import { useEffect, useReducer, useState } from "react";
+import { useReducer, useState } from "react";
 import { downloadBlob } from "@/lib/download-blob";
+import { formatElapsed, useElapsed } from "../hooks/use-elapsed";
 import {
   applyPreset,
   DEFAULT_EXPORT_OPTIONS,
@@ -145,7 +146,7 @@ export function ExportSettingsModal({
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zip, dispatchZip] = useReducer(zipReducer, INITIAL_ZIP);
-  const zipElapsedMs = useTicker(zip.startedAt, zip.finishedAt, zip.busy);
+  const zipElapsedMs = useElapsed(zip.startedAt, zip.finishedAt, zip.busy);
 
   async function handleDownloadZip() {
     dispatchZip({ type: "start", startedAt: Date.now() });
@@ -369,29 +370,6 @@ export function ExportSettingsModal({
       </DialogContent>
     </Dialog>
   );
-}
-
-function useTicker(
-  startedAt: number | null,
-  finishedAt: number | null,
-  ticking: boolean,
-): number {
-  const [, force] = useState(0);
-  useEffect(() => {
-    if (!ticking || startedAt == null || finishedAt != null) return;
-    const id = window.setInterval(() => force((n) => n + 1), 100);
-    return () => window.clearInterval(id);
-  }, [ticking, startedAt, finishedAt]);
-  if (startedAt == null) return 0;
-  return (finishedAt ?? Date.now()) - startedAt;
-}
-
-function formatElapsed(ms: number): string {
-  if (ms < 0) return "0.0s";
-  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
-  const min = Math.floor(ms / 60_000);
-  const sec = Math.round((ms % 60_000) / 1000);
-  return `${min}m ${sec}s`;
 }
 
 function Field({

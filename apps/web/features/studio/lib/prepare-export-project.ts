@@ -1,6 +1,15 @@
 import type { Project } from "@workspace/compositions/project";
 import type { ExportOptions } from "./export-options";
 
+/**
+ * Scale the project's frame counts to the export fps. The project is designed
+ * at `project.fps` (typically 60); each clip's `durationInFrames` represents
+ * `durationInFrames / project.fps` wall-clock seconds, so rendering the same
+ * content at a different fps multiplies every frame count by
+ * `exportFps / project.fps`. Compositions use `useDesignFrame()` internally so
+ * their hardcoded timing constants stay tied to wall-clock time regardless of
+ * the actual render fps.
+ */
 export function prepareProjectForExport(
   project: Project,
   options: ExportOptions,

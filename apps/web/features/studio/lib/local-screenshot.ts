@@ -55,20 +55,6 @@ export async function captureCurrentFrame(
   return await result.blob({ format: "png" });
 }
 
-export function downloadPngBlob(
-  blob: Blob,
-  filename = "keyloom-frame.png",
-): void {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
 /** Filename helper — ISO timestamp with colons/dots replaced. */
 export function screenshotFilename(now: Date = new Date()): string {
   const iso = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);

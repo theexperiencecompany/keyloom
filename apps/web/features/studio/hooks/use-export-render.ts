@@ -2,13 +2,13 @@
 
 import type { Project } from "@workspace/compositions/project";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { downloadBlob } from "@/lib/download-blob";
 import {
   DEFAULT_EXPORT_OPTIONS,
   type ExportOptions,
 } from "../lib/export-options";
 import { downloadRemoteUrl, renderProjectOnLambda } from "../lib/lambda-export";
 import {
-  downloadMp4Blob,
   isLocalExportSupported,
   renderProjectLocally,
 } from "../lib/local-export";
@@ -287,7 +287,7 @@ export function useExportRender() {
     if (!url) return;
     fetch(url)
       .then((r) => r.blob())
-      .then((b) => downloadMp4Blob(b, filename))
+      .then((b) => downloadBlob(b, filename))
       .catch((err) => console.error("[export-hook] download failed", err));
   }, [state.filename]);
 
