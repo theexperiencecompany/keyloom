@@ -1,18 +1,17 @@
 "use client";
-import { AbsoluteFill, Easing, interpolate } from "remotion";
+import { AbsoluteFill, interpolate } from "remotion";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
-  getSubtitleColor,
+  APPLE_EASE,
   resolveTitleStyle,
   snap,
   type TitleProps,
+  TitleSubtitle,
 } from "../title-shared";
 
 export type TitleFadeProps = TitleProps;
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 const HEADLINE_START = 8;
 const HEADLINE_DURATION = 36;
@@ -81,22 +80,11 @@ export const TitleFade: React.FC<TitleFadeProps> = ({
         {headline}
       </h1>
 
-      {subtitle.trim() && (
-        <p
-          style={{
-            fontSize: vmin(3.5),
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: `${vmin(3)}px 0 0`,
-            maxWidth: "40em",
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
-          }}
-        >
-          {subtitle}
-        </p>
-      )}
+      <TitleSubtitle
+        text={subtitle}
+        progress={subtitleProgress}
+        textColor={s.color}
+      />
     </AbsoluteFill>
   );
 };

@@ -4,16 +4,16 @@ import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
 import {
-  getSubtitleColor,
+  APPLE_EASE,
   resolveTitleStyle,
   snap,
   snapNear,
   type TitleProps,
+  TitleSubtitle,
 } from "../title-shared";
 
 export type TextFocusBlurResolveProps = TitleProps;
 
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 const FOCUS_EASE = Easing.bezier(0.22, 1, 0.36, 1);
 
 const HEADLINE_START = 8;
@@ -79,22 +79,11 @@ export const TextFocusBlurResolve: React.FC<TextFocusBlurResolveProps> = ({
         {headline}
       </h1>
 
-      {subtitle.trim() && (
-        <p
-          style={{
-            fontSize: vmin(3.5),
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: `${vmin(3)}px 0 0`,
-            maxWidth: "40em",
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
-          }}
-        >
-          {subtitle}
-        </p>
-      )}
+      <TitleSubtitle
+        text={subtitle}
+        progress={subtitleProgress}
+        textColor={s.color}
+      />
     </AbsoluteFill>
   );
 };
