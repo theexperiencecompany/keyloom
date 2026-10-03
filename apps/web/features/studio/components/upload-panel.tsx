@@ -3,7 +3,6 @@
 import {
   Cancel01Icon,
   MultiplicationSignIcon,
-  MusicNote01Icon,
   PauseCircleIcon,
   PlayCircleIcon,
   PlusSignIcon,
@@ -431,7 +430,3 @@ function decodeAudioDuration(url: string): Promise<number> {
     probe.src = url;
   });
 }
-
-// Provide the HugeIcons music marker for downstream imports that want a
-// consistent icon for the audio asset button.
-export const UPLOAD_AUDIO_ICON = MusicNote01Icon;

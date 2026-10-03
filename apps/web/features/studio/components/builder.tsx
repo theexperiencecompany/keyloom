@@ -10,14 +10,7 @@ import {
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
 import dynamic from "next/dynamic";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAudioSearch } from "../hooks/use-audio-search";
 import { useExportRender } from "../hooks/use-export-render";
@@ -81,8 +74,6 @@ export function Builder() {
   const selectedInfo = selectedClip
     ? compositionsById[selectedClip.compositionId]
     : undefined;
-
-  const playerInputProps = useMemo(() => project, [project]);
 
   // ----------------------------------------------------------------------
   // Export-to-MP4 (separate from Save / Load JSON below)
@@ -296,7 +287,7 @@ export function Builder() {
               >
                 <PreviewStage
                   project={project}
-                  playerInputProps={playerInputProps}
+                  playerInputProps={project}
                   totalDuration={totalDuration}
                   hasClips={hasClips}
                   onOpenLibrary={() =>

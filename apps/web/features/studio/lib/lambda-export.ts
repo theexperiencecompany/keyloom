@@ -71,34 +71,17 @@ async function cancelLambdaRender(render: StartResponse): Promise<void> {
   });
 }
 
-export type LambdaCompositionExportArgs = {
-  composition: string;
-  inputProps: Record<string, unknown>;
-  options: ExportOptions;
-  /** Overrides metadata duration so a non-native fps keeps wall-clock length. */
-  forceDurationInFrames?: number;
-  signal?: AbortSignal;
-  onProgress?: (progress: number) => void;
-};
-
-type StartBody =
-  | { project: Project; options: ExportOptions }
-  | {
-      composition: string;
-      inputProps: Record<string, unknown>;
-      options: ExportOptions;
-      forceDurationInFrames?: number;
-    };
-
-async function runLambdaRender(
-  body: StartBody,
-  signal?: AbortSignal,
-  onProgress?: (progress: number) => void,
-): Promise<LambdaExportResult> {
+/** Renders the Studio timeline (the "Project" composition) on Lambda. */
+export async function renderProjectOnLambda({
+  project,
+  options,
+  signal,
+  onProgress,
+}: LambdaExportArgs): Promise<LambdaExportResult> {
   const startResponse = await fetch("/api/render/lambda", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ project, options }),
     signal,
   });
   const render = await readJson<StartResponse>(startResponse);
@@ -143,32 +126,6 @@ async function runLambdaRender(
     }
     throw err;
   }
-}
-
-/** Renders the Studio timeline (the "Project" composition) on Lambda. */
-export function renderProjectOnLambda({
-  project,
-  options,
-  signal,
-  onProgress,
-}: LambdaExportArgs): Promise<LambdaExportResult> {
-  return runLambdaRender({ project, options }, signal, onProgress);
-}
-
-/** Renders a single registered composition by id on Lambda (component editor). */
-export function renderCompositionOnLambda({
-  composition,
-  inputProps,
-  options,
-  forceDurationInFrames,
-  signal,
-  onProgress,
-}: LambdaCompositionExportArgs): Promise<LambdaExportResult> {
-  return runLambdaRender(
-    { composition, inputProps, options, forceDurationInFrames },
-    signal,
-    onProgress,
-  );
 }
 
 /** Trigger a real "Save as" download from an in-memory blob (deferred revoke

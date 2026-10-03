@@ -249,7 +249,6 @@ export function Inspector({
             onPatch={onUpdateStyle}
             onReset={onResetStyle}
             themes={info.themes}
-            locked={false}
           />
         </TabsContent>
 

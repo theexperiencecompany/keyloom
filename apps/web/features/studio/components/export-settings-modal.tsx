@@ -56,7 +56,6 @@ type Props = {
    * render.
    */
   onStartServer?: (options: ExportOptions) => void;
-  initialOptions?: ExportOptions;
   project: Project;
   projectWidth: number;
   projectHeight: number;
@@ -137,16 +136,13 @@ export function ExportSettingsModal({
   onOpenChange,
   onStart,
   onStartServer,
-  initialOptions,
   project,
   projectWidth,
   projectHeight,
   durationInFrames,
   fps,
 }: Props) {
-  const [options, setOptions] = useState<ExportOptions>(
-    initialOptions ?? DEFAULT_EXPORT_OPTIONS,
-  );
+  const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [zip, dispatchZip] = useReducer(zipReducer, INITIAL_ZIP);
   const zipElapsedMs = useTicker(zip.startedAt, zip.finishedAt, zip.busy);
