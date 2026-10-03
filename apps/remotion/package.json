@@ -22,7 +22,6 @@
     "@remotion/media": "4.0.459",
     "@remotion/tailwind-v4": "4.0.459",
     "@remotion/transitions": "4.0.459",
-    "@tanstack/react-query": "^5.100.9",
     "@workspace/ui": "workspace:*",
     "qrcode": "^1.5.4",
     "react": "^19.2.6",

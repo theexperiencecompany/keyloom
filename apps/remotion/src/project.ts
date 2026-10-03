@@ -2,7 +2,6 @@ import type { ClipStyle } from "./clip-style";
 import type { ClipEffect } from "./effects/schema";
 import {
   DEFAULT_SCENE_TRANSITION,
-  normalizeSceneTransition,
   resolveTransition,
   type SceneTransition,
 } from "./transitions";
@@ -164,5 +163,3 @@ export function projectDuration(project: Project): number {
   }
   return Math.max(1, total);
 }
-
-export { normalizeSceneTransition };

@@ -43,35 +43,6 @@ export function buildKeeps(cuts: TimeRange[], duration: number): TimeRange[] {
   return keeps;
 }
 
-export function editedDuration(keeps: TimeRange[]): number {
-  return keeps.reduce((sum, k) => sum + (k.end - k.start), 0);
-}
-
-export function originalToEdited(t: number, keeps: TimeRange[]): number {
-  let offset = 0;
-  for (const k of keeps) {
-    if (t < k.start) return offset;
-    if (t <= k.end) return offset + (t - k.start);
-    offset += k.end - k.start;
-  }
-  return offset;
-}
-
-export function editedToOriginal(t: number, keeps: TimeRange[]): number {
-  let offset = 0;
-  for (const k of keeps) {
-    const len = k.end - k.start;
-    if (t <= offset + len) return k.start + (t - offset);
-    offset += len;
-  }
-  const last = keeps[keeps.length - 1];
-  return last ? last.end : 0;
-}
-
-export function isKept(t: number, keeps: TimeRange[]): boolean {
-  return keeps.some((k) => t >= k.start && t <= k.end);
-}
-
 /**
  * Re-times words from the original video timeline onto the edited (post-cut)
  * timeline. Words whose midpoint falls inside a cut are dropped; the rest are

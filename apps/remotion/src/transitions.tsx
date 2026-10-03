@@ -115,7 +115,7 @@ const LEGACY_KIND_MAP: Record<LegacyKind, Partial<SceneTransition>> = {
   "zoom-out": { kind: "zoom", zoomMode: "out" },
 };
 
-export function normalizeSceneTransition(
+function normalizeSceneTransition(
   t: SceneTransition | undefined,
 ): SceneTransition | undefined {
   if (!t) return t;

@@ -14,11 +14,6 @@
 @source "../../../../apps/remotion/src/**/*.{ts,tsx}";
 @source "../../../../apps/web/node_modules/streamdown/dist/*.js";
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
-/* @heygaia/chat-ui inlines Tailwind utility classes inside its bundled
-   JS — Tailwind v4 in lyon won't scan node_modules .js by default, so
-   GaiaScenario.tsx ships a small <style> tag for the few rules that
-   actually need to render (animate-shine, pl-11.5, outline-dashed).
-   No global Tailwind config changes needed. */
 
 @theme inline {
   --font-heading: var(--font-display, var(--font-sans));

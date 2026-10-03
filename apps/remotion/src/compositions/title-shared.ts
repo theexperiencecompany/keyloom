@@ -49,18 +49,3 @@ export function getSubtitleColor(textColor: string): string {
     ? "rgba(15,16,20,0.55)"
     : "rgba(255,255,255,0.65)";
 }
-
-/**
- * Field set for every Title* / Text* composition. Note: NO color or font
- * fields here — those are handled universally via the Studio's Style
- * section (see `clip-style.ts`).
- */
-export const TITLE_FIELDS = [
-  { kind: "textarea" as const, key: "headline", label: "Headline", rows: 2 },
-  {
-    kind: "textarea" as const,
-    key: "subtitle",
-    label: "Subtitle (optional)",
-    rows: 2,
-  },
-];
