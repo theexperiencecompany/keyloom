@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Slider } from "@workspace/ui/components/slider";
 import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
@@ -36,22 +35,9 @@ type Props = {
   field: PrimitiveField;
   value: unknown;
   onChange: (v: unknown) => void;
-  /**
-   * Some primitive fields (currently `audio`) edit two keys at
-   * once. Callers that want to render those fields must pass through
-   * the sibling key's current value and a setter for it.
-   */
-  extraValue?: unknown;
-  onExtraChange?: (v: unknown) => void;
 };
 
-export function PrimitiveControl({
-  field,
-  value,
-  onChange,
-  extraValue,
-  onExtraChange,
-}: Props) {
+export function PrimitiveControl({ field, value, onChange }: Props) {
   switch (field.kind) {
     case "text":
       return (
@@ -101,31 +87,6 @@ export function PrimitiveControl({
         </Wrapper>
       );
 
-    case "slider": {
-      const raw = typeof value === "number" ? value : field.min;
-      const v = Math.min(field.max, Math.max(field.min, raw));
-      return (
-        <Wrapper htmlFor={field.key} label={field.label}>
-          <div className="flex items-center gap-3">
-            <Slider
-              id={field.key}
-              min={field.min}
-              max={field.max}
-              step={field.step ?? 1}
-              value={[v]}
-              onValueChange={([nv]) => {
-                if (nv !== undefined) onChange(nv);
-              }}
-              className="flex-1"
-            />
-            <span className="w-9 text-right font-mono text-[11px] text-muted-foreground">
-              {v}
-            </span>
-          </div>
-        </Wrapper>
-      );
-    }
-
     case "color":
       return (
         <Wrapper htmlFor={field.key} label={field.label}>
@@ -157,8 +118,6 @@ export function PrimitiveControl({
       const setBoth = (url: string, words: unknown[]) => {
         onChange({ __audioBoth: true, audioUrl: url, words });
       };
-      void onExtraChange;
-      void extraValue;
       return (
         <Wrapper htmlFor={field.key} label={field.label}>
           <AudioControl value={audioUrl} onChange={setBoth} />
