@@ -65,10 +65,7 @@ export const TelegramMessages: React.FC<TelegramMessagesProps> = ({
         title={contactName}
         headerAvatar={contactAvatar}
         messages={items}
-        clipBackground={s.background}
-        clipColor={s.color}
-        clipFontFamily={s.fontFamily}
-        clipAccent={s.accent}
+        clip={s}
       />
     </ChatFill>
   );

@@ -19,6 +19,7 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { Easing, Img, interpolate } from "remotion";
+import type { ClipStyleDefaults } from "../../clip-style";
 import { useDesignFrame } from "../../use-design-frame";
 import {
   asset,
@@ -26,12 +27,9 @@ import {
   BubbleReveal,
   type ChatMessageItem,
   DotsToMessage,
-  IMESSAGE_GRADIENT,
-  IMESSAGE_TAIL_ME_COLOR,
   IMESSAGE_THEM_BG_DARK,
   IMESSAGE_THEM_BG_LIGHT,
   ImageBubble,
-  ov,
   ReadReceipt,
   TypingBubble,
 } from "../_chat-demo/ChatDemo";
@@ -104,16 +102,11 @@ export type IMessageChatProps = {
   /** Overlay a "Made with Halo AI" badge on outgoing photo bubbles. */
   imageWatermark?: boolean;
   /**
-   * Universal Style overrides forwarded from the (now unlocked) MessageBubbles
-   * composition. Each maps to the one clean slot in the iMessage layout:
-   * `clipBackground` → chat sheet, `clipColor` → received-bubble text,
-   * `clipFontFamily` → root font, `clipAccent` → the sent (blue) bubble +
-   * tail. Unset (empty) means keep the authentic default.
+   * Universal Style, already resolved against MessageBubbles' defaults.
+   * `background` colors the chat sheet, `color` the received-bubble text,
+   * `fontFamily` the root font, and `accent` the sent bubble and its tail.
    */
-  clipBackground?: string;
-  clipColor?: string;
-  clipFontFamily?: string;
-  clipAccent?: string;
+  clip: ClipStyleDefaults;
 };
 
 export function IMessageChat({
@@ -136,10 +129,7 @@ export function IMessageChat({
   designWidth,
   galleryImages,
   imageWatermark = false,
-  clipBackground,
-  clipColor,
-  clipFontFamily,
-  clipAccent,
+  clip,
 }: IMessageChatProps) {
   const grouped = groupThread(messages);
   // Caret blink for the idle (placeholder) composer — a ~1s cycle: on, quick
@@ -212,20 +202,18 @@ export function IMessageChat({
   const photoY = riseIn;
   const photoOpacity = fadeIn * (1 - sendT);
 
-  // The chat sheet (when there's no wallpaper) follows the appearance — or the
-  // universal background override when one is set.
-  const sheetBg = ov(clipBackground, dark ? "#000000" : "#ffffff");
+  // The chat sheet (when there's no wallpaper) follows the universal background.
+  const sheetBg = clip.background;
   // Chrome text/icons go light over a wallpaper OR in dark mode.
   const lightUI = hasBg || dark;
   const headerText = lightUI ? "#ffffff" : "#000000";
   // Received bubbles use Apple's exact grays per appearance; their text follows
   // the universal text override. Sent bubbles use the universal accent (default
   // iMessage blue) for both the fill and the tail.
-  const themText = ov(clipColor, dark ? "#ffffff" : "#000000");
+  const themText = clip.color;
   const themBubbleBg = dark ? IMESSAGE_THEM_BG_DARK : IMESSAGE_THEM_BG_LIGHT;
-  const sentBg = ov(clipAccent, IMESSAGE_GRADIENT);
-  const sentTail = ov(clipAccent, IMESSAGE_TAIL_ME_COLOR);
-  const fontStack = ov(clipFontFamily, SF_PRO_STACK);
+  const sentBg = clip.accent;
+  const fontStack = clip.fontFamily;
   // Over a wallpaper the header/composer strips stay transparent so the image
   // shows through; on a plain sheet they paint the sheet color.
   const chromeBg = hasBg ? "transparent" : sheetBg;
@@ -604,7 +592,7 @@ export function IMessageChat({
                               <TypingBubble
                                 from={group.from}
                                 background={isMe ? sentBg : themBubbleBg}
-                                tailColor={isMe ? sentTail : themBubbleBg}
+                                tailColor={isMe ? sentBg : themBubbleBg}
                                 color={isMe ? "#fff" : themText}
                                 dotsColor={
                                   isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"
@@ -624,7 +612,7 @@ export function IMessageChat({
                             from={group.from}
                             tail={isLast}
                             background={isMe ? sentBg : themBubbleBg}
-                            tailColor={isMe ? sentTail : themBubbleBg}
+                            tailColor={isMe ? sentBg : themBubbleBg}
                             color={isMe ? "#fff" : themText}
                             dotsColor={
                               isMe ? "rgba(255,255,255,0.9)" : "#8e8e93"

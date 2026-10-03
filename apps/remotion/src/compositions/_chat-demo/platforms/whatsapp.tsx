@@ -2,11 +2,10 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { Img, staticFile } from "remotion";
+import type { ClipStyleDefaults } from "../../../clip-style";
 import { asset } from "../../../lib/asset";
 import { BubbleEnter, CurvedBubble, DoodleTiles, TypingDots } from "../bubbles";
 import { CameraIcon, EmojiIcon, MicIcon } from "../icons";
-import { type ClipOverrides, ov } from "../overrides";
-import { SF_PRO_STACK } from "../sf-pro";
 import { curvedThread } from "../threads";
 import type { ChatMessageItem } from "../types";
 
@@ -18,38 +17,32 @@ import type { ChatMessageItem } from "../types";
 export function WhatsAppDemo({
   messages,
   title,
-  subtitle: _subtitle,
   headerAvatar,
-  showComposer,
-  className,
   clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
-  subtitle?: string;
   headerAvatar?: string;
-  showComposer: boolean;
-  className?: string;
-  clip?: ClipOverrides;
+  clip: ClipStyleDefaults;
 }) {
   // Palette extracted from WhatsApp Chat.svg. The universal Style controls
   // override the chat-screen background, primary text, root font, and the
   // signature green outgoing bubble (accent); chrome/incoming/meta stay
   // authentic.
-  const bg = ov(clip?.background, "#EFEFF4");
+  const bg = clip.background;
   const chromeBg = "#F6F6F6";
-  const myBubble = ov(clip?.accent, "#DCF7C5");
+  const myBubble = clip.accent;
   const theirBubble = "#FFFFFF";
-  const textColor = ov(clip?.color, "#060606");
+  const textColor = clip.color;
   const metaColor = "rgba(0,0,0,0.45)";
   const accent = "#007AFF";
-  const fontStack = ov(clip?.fontFamily, SF_PRO_STACK);
+  const fontStack = clip.fontFamily;
 
   const grouped = curvedThread(messages);
 
   return (
     <div
-      className={cn("flex h-full flex-col", className)}
+      className="flex h-full flex-col"
       style={{ background: bg, fontFamily: fontStack, color: textColor }}
     >
       {/* Header — iOS chrome from WhatsApp Chat.svg (#F6F6F6) */}
@@ -172,7 +165,7 @@ export function WhatsAppDemo({
               >
                 {group.items.map((m, i) => {
                   const isLast = i === group.items.length - 1;
-                  const showMeta = !m.typing && (m.time || (isMe && m.status));
+                  const showMeta = !m.typing && m.time;
                   return (
                     <BubbleEnter
                       key={m.id ?? `${gi}-${i}`}
@@ -196,9 +189,6 @@ export function WhatsAppDemo({
                               }}
                             >
                               {m.time ?? ""}
-                              {isMe && m.status && (
-                                <WhatsAppTicks status={m.status} />
-                              )}
                             </span>
                           ) : undefined
                         }
@@ -214,96 +204,58 @@ export function WhatsAppDemo({
         </div>
       </div>
 
-      {showComposer && (
-        <div
-          className="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5"
-          style={{ background: chromeBg }}
+      <div
+        className="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5"
+        style={{ background: chromeBg }}
+      >
+        <button
+          type="button"
+          aria-label="Camera"
+          className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+          style={{ width: 32, height: 32, color: "#3C3C43" }}
         >
-          <button
-            type="button"
-            aria-label="Camera"
-            className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-            style={{ width: 32, height: 32, color: "#3C3C43" }}
-          >
-            <CameraIcon />
-          </button>
-          <div
-            className="flex flex-1 items-center justify-between gap-2"
+          <CameraIcon />
+        </button>
+        <div
+          className="flex flex-1 items-center justify-between gap-2"
+          style={{
+            background: "#FFFFFF",
+            border: "0.5px solid #8E8E93",
+            borderRadius: 16,
+            padding: "0 10px",
+            height: 32,
+            color: "#8E8E93",
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Message"
+            className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#8E8E93]"
             style={{
-              background: "#FFFFFF",
-              border: "0.5px solid #8E8E93",
-              borderRadius: 16,
-              padding: "0 10px",
-              height: 32,
-              color: "#8E8E93",
+              fontSize: 15,
+              color: "#000",
+              letterSpacing: "-0.01em",
+              fontFamily: "inherit",
             }}
-          >
-            <input
-              type="text"
-              placeholder="Message"
-              className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#8E8E93]"
-              style={{
-                fontSize: 15,
-                color: "#000",
-                letterSpacing: "-0.01em",
-                fontFamily: "inherit",
-              }}
-            />
-            <button
-              type="button"
-              aria-label="Emoji"
-              className="flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-              style={{ color: "#8E8E93", width: 22, height: 22 }}
-            >
-              <EmojiIcon size={18} />
-            </button>
-          </div>
+          />
           <button
             type="button"
-            aria-label="Voice message"
-            className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-            style={{ width: 32, height: 32, color: "#3C3C43" }}
+            aria-label="Emoji"
+            className="flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+            style={{ color: "#8E8E93", width: 22, height: 22 }}
           >
-            <MicIcon />
+            <EmojiIcon size={18} />
           </button>
         </div>
-      )}
+        <button
+          type="button"
+          aria-label="Voice message"
+          className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+          style={{ width: 32, height: 32, color: "#3C3C43" }}
+        >
+          <MicIcon />
+        </button>
+      </div>
     </div>
-  );
-}
-
-function WhatsAppTicks({ status }: { status: "sent" | "delivered" | "read" }) {
-  const color = status === "read" ? "#3497F9" : "rgba(0,0,0,0.4)";
-  if (status === "sent") {
-    return (
-      <svg width="14" height="11" viewBox="0 0 14 11" aria-hidden fill="none">
-        <path
-          d="M1 6l3.5 3.5L11 2"
-          stroke={color}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-  // TickDouble02-style: two clean overlapping check marks
-  return (
-    <svg width="16" height="11" viewBox="0 0 18 14" aria-hidden fill="none">
-      <path
-        d="M1 7l3.2 3.5L11 3.5"
-        stroke={color}
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6 7l3.2 3.5L17 3.5"
-        stroke={color}
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

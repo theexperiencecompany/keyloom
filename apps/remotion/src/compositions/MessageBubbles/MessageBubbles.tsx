@@ -577,10 +577,7 @@ export const MessageBubbles: React.FC<MessageBubblesProps> = ({
           designWidth={PHONE_DESIGN_WIDTH}
           galleryImages={galleryImages}
           imageWatermark={showImageWatermark}
-          clipBackground={s.background}
-          clipColor={s.color}
-          clipFontFamily={s.fontFamily}
-          clipAccent={s.accent}
+          clip={s}
         />
       </ChatFill>
     </>
