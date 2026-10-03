@@ -37,7 +37,6 @@ import {
 } from "../_chat-demo/ChatDemo";
 import { CssLiquidGlass } from "../_chat-demo/CssLiquidGlass";
 import { Keyboard } from "../_chat-demo/Keyboard";
-import { GlassStage } from "../_chat-demo/LiquidGlass";
 import { SF_PRO_STACK } from "../_chat-demo/sf-pro";
 import { PhotoPicker } from "./PhotoPicker";
 
@@ -164,16 +163,9 @@ export function IMessageChat({
   });
   const hasBg = !!backgroundImage;
   const hasUnread = Number(unreadCount) > 0;
-  // Glass runs with or without a wallpaper. With one it refracts the image;
-  // without, it refracts the solid sheet and draws a self-defining adaptive
-  // edge so the buttons/composer still read as liquid glass.
-  // WebGL liquid glass is intentionally dropped for MessageBubbles: it was the
-  // main render-vs-preview mismatch and the biggest per-frame cost, and over a
-  // dark sheet its refraction is barely visible. The chrome still reads as glass
-  // via the flat translucent CssLiquidGlass fills below — those render
-  // identically in the studio Player and in the export. GlassStage stays only as
-  // a plain backdrop + wallpaper layer (enabled={false} = no WebGL).
-  const glassOn = false;
+  // The chrome uses flat translucent CssLiquidGlass fills instead of WebGL
+  // refraction. The fills render the same in the studio Player and the export,
+  // and refraction over a dark sheet is barely visible.
   const dark = theme === "dark";
 
   // Photo attachment in the composer. Only AFTER the gallery photo is tapped and
@@ -234,24 +226,18 @@ export function IMessageChat({
   const sentBg = ov(clipAccent, IMESSAGE_GRADIENT);
   const sentTail = ov(clipAccent, IMESSAGE_TAIL_ME_COLOR);
   const fontStack = ov(clipFontFamily, SF_PRO_STACK);
-  // The header/composer strips must NOT paint an opaque sheet color over the
-  // WebGL glass canvas, or the glass chrome (buttons, name chip, composer pill)
-  // is buried and only the bare icons show. Whenever glass is on we keep the
-  // strips transparent so the canvas — drawn over the GlassStage's own solid
-  // backdrop (sheetBg) — shows through. Only the plain, non-glass mode paints
-  // the sheet color here.
-  const chromeBg = hasBg || glassOn ? "transparent" : sheetBg;
+  // Over a wallpaper the header/composer strips stay transparent so the image
+  // shows through; on a plain sheet they paint the sheet color.
+  const chromeBg = hasBg ? "transparent" : sheetBg;
   const chipBg = hasBg
     ? "rgba(120,120,128,0.42)"
     : dark
       ? "rgba(120,120,128,0.32)"
       : "#E9E9EB";
-  // Glass chrome (back/FaceTime/plus buttons + name chip). Over a wallpaper the
-  // WebGL layer refracts the image; over a solid sheet there's nothing to
-  // refract, so we render a real frosted CSS pill — a translucent light fill
-  // that lifts off the dark sheet, a bright top rim + soft inner/outer shadow
-  // (the Apple "liquid glass" bezel), and a blur. `forceCss` (passed below when
-  // there's no wallpaper) keeps this look instead of the flat shader shape.
+  // Glass chrome for the back, FaceTime and plus buttons and the name chip.
+  // Over a wallpaper it is a blurred translucent chip. Over a solid sheet it is
+  // a frosted CSS pill with a lighter translucent fill, a bright top rim, and a
+  // soft inner and outer shadow, like Apple's "liquid glass" bezel.
   const chromeGlassStyle: React.CSSProperties = hasBg
     ? {
         background: chipBg,
@@ -289,15 +275,25 @@ export function IMessageChat({
     ? "rgba(235,235,245,0.55)"
     : "rgba(60,60,67,0.5)";
 
+  const wallpaper = asset(backgroundImage);
+
   return (
-    <GlassStage
-      enabled={glassOn}
-      bgImage={backgroundImage}
-      bgColor={sheetBg}
+    <div
       className={cn("h-full", className)}
-      style={{ fontFamily: fontStack }}
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        fontFamily: fontStack,
+      }}
     >
-      <div className="relative flex h-full flex-col">
+      <div className="absolute inset-0 z-0" style={{ background: sheetBg }} />
+      {wallpaper && (
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center"
+          style={{ backgroundImage: `url('${wallpaper}')` }}
+        />
+      )}
+      <div className="relative z-2 flex h-full flex-col">
         {/* Subtle top darkness — a soft top-down gradient sitting ABOVE the
             messages but BELOW the header chrome (z-10 < header z-20), so the
             thread fades under the status bar + avatar/icons like real iMessage.
@@ -982,6 +978,6 @@ export function IMessageChat({
           </div>
         )}
       </div>
-    </GlassStage>
+    </div>
   );
 }
