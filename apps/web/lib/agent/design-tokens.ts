@@ -219,15 +219,3 @@ export const PREMIUM_FONTS: PremiumFont[] = [
     vibe: "Tall condensed impact font. Pick for bold marketing reveals, sports, launch teasers.",
   },
 ];
-
-/* ───────── Lookup helpers ───────── */
-
-export function colorBaseById(id: string): ColorBase | undefined {
-  return COLOR_BASES.find((b) => b.id === id);
-}
-export function accentById(id: string): AccentColor | undefined {
-  return ACCENT_COLORS.find((a) => a.id === id);
-}
-export function fontById(id: string): PremiumFont | undefined {
-  return PREMIUM_FONTS.find((f) => f.id === id);
-}

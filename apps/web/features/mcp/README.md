@@ -17,7 +17,6 @@ The **logic, types, and data live here**; `server.ts` is just the thin MCP
 | `components.ts` | `listComponents()` + `getComponentSchema(id)` from the registry. |
 | `render.ts` | `renderComponent(id, props, opts)` / `renderProject(clips, opts)` — Lambda render + poll + presign + optional download. |
 | `download-url.ts` | Builds the short `/api/r/<renderId>` link returned alongside the presigned URL. |
-| `components-edit.ts` | Fork / read / write helpers over the `user_components` table (not yet exposed as stdio tools). |
 | `server.ts` | The MCP stdio server exposing the four tools. |
 
 ## Tools

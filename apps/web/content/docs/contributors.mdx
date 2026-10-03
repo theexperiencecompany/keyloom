@@ -33,7 +33,7 @@ Every scene needs to be wired through six sync points, all in the same change:
 5. `apps/web/content/docs/<kebab-name>.mdx` — the docs page (mirror an existing one).
 6. `apps/web/lib/docs.ts` — import the MDX and add to the `docs` array.
 
-Each scene should expose the universal `clipStyle` prop (background / text / font / accent) unless it impersonates a real product (Twitter, GitHub, WhatsApp) — in which case mark it `brandMode: "locked"` in `meta.ts`.
+Every scene accepts the universal `clipStyle` prop (background, text color, font and accent) and reads it through `resolveClipStyle(clipStyle, defaults)`. A scene that imitates a real product such as Twitter, GitHub or WhatsApp passes the brand's real colors and font as those defaults. It then matches the brand until a user overrides a control.
 
 ## Maintainers
 
