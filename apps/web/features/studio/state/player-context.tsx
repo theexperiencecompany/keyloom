@@ -41,10 +41,6 @@ function useCtx(): Ctx {
   return ctx;
 }
 
-export function usePlayerRef(): RefObject<PlayerRef | null> {
-  return useCtx().playerRef;
-}
-
 export function usePlayerFrame(): number {
   const { playerRef, version } = useCtx();
   const [frame, setFrame] = useState(0);

@@ -10,15 +10,9 @@ import {
   ResizablePanelGroup,
 } from "@workspace/ui/components/resizable";
 import dynamic from "next/dynamic";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { toast } from "sonner";
+import { downloadBlob } from "@/lib/download-blob";
 import { useAudioSearch } from "../hooks/use-audio-search";
 import { useExportRender } from "../hooks/use-export-render";
 import { useForceDarkTheme } from "../hooks/use-force-dark-theme";
@@ -30,7 +24,6 @@ import type { ExportOptions } from "../lib/export-options";
 import { extractTintColor } from "../lib/image-tint";
 import {
   captureCurrentFrame,
-  downloadPngBlob,
   screenshotFilename,
 } from "../lib/local-screenshot";
 import { registerImageProxy } from "../lib/register-image-proxy";
@@ -81,8 +74,6 @@ export function Builder() {
   const selectedInfo = selectedClip
     ? compositionsById[selectedClip.compositionId]
     : undefined;
-
-  const playerInputProps = useMemo(() => project, [project]);
 
   // ----------------------------------------------------------------------
   // Export-to-MP4 (separate from Save / Load JSON below)
@@ -155,7 +146,7 @@ export function Builder() {
     if (wasPlaying) player.pause();
     try {
       const blob = await captureCurrentFrame(playerRef, projectRef.current);
-      downloadPngBlob(blob, screenshotFilename());
+      downloadBlob(blob, screenshotFilename());
       toast.success("Frame saved to Downloads");
     } catch (err) {
       const message =
@@ -296,7 +287,7 @@ export function Builder() {
               >
                 <PreviewStage
                   project={project}
-                  playerInputProps={playerInputProps}
+                  playerInputProps={project}
                   totalDuration={totalDuration}
                   hasClips={hasClips}
                   onOpenLibrary={() =>

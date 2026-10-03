@@ -1,6 +1,7 @@
 "use client";
 
 import type { Project } from "@workspace/compositions/project";
+import { downloadBlob } from "@/lib/download-blob";
 import type { ExportOptions } from "./export-options";
 
 export type LambdaExportResult = {
@@ -71,34 +72,17 @@ async function cancelLambdaRender(render: StartResponse): Promise<void> {
   });
 }
 
-export type LambdaCompositionExportArgs = {
-  composition: string;
-  inputProps: Record<string, unknown>;
-  options: ExportOptions;
-  /** Overrides metadata duration so a non-native fps keeps wall-clock length. */
-  forceDurationInFrames?: number;
-  signal?: AbortSignal;
-  onProgress?: (progress: number) => void;
-};
-
-type StartBody =
-  | { project: Project; options: ExportOptions }
-  | {
-      composition: string;
-      inputProps: Record<string, unknown>;
-      options: ExportOptions;
-      forceDurationInFrames?: number;
-    };
-
-async function runLambdaRender(
-  body: StartBody,
-  signal?: AbortSignal,
-  onProgress?: (progress: number) => void,
-): Promise<LambdaExportResult> {
+/** Renders the Studio timeline (the "Project" composition) on Lambda. */
+export async function renderProjectOnLambda({
+  project,
+  options,
+  signal,
+  onProgress,
+}: LambdaExportArgs): Promise<LambdaExportResult> {
   const startResponse = await fetch("/api/render/lambda", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ project, options }),
     signal,
   });
   const render = await readJson<StartResponse>(startResponse);
@@ -145,47 +129,6 @@ async function runLambdaRender(
   }
 }
 
-/** Renders the Studio timeline (the "Project" composition) on Lambda. */
-export function renderProjectOnLambda({
-  project,
-  options,
-  signal,
-  onProgress,
-}: LambdaExportArgs): Promise<LambdaExportResult> {
-  return runLambdaRender({ project, options }, signal, onProgress);
-}
-
-/** Renders a single registered composition by id on Lambda (component editor). */
-export function renderCompositionOnLambda({
-  composition,
-  inputProps,
-  options,
-  forceDurationInFrames,
-  signal,
-  onProgress,
-}: LambdaCompositionExportArgs): Promise<LambdaExportResult> {
-  return runLambdaRender(
-    { composition, inputProps, options, forceDurationInFrames },
-    signal,
-    onProgress,
-  );
-}
-
-/** Trigger a real "Save as" download from an in-memory blob (deferred revoke
- *  so the browser doesn't cancel the download — same mechanism the in-browser
- *  export uses, which is reliable across browsers). */
-function triggerBlobDownload(blob: Blob, filename: string): void {
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = objectUrl;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  // Revoke AFTER the download has kicked off; revoking synchronously aborts it.
-  setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-}
-
 export async function downloadRemoteUrl(
   url: string,
   filename: string,
@@ -204,7 +147,7 @@ export async function downloadRemoteUrl(
     if (!res.ok) {
       throw new Error(`Download proxy responded ${res.status}`);
     }
-    triggerBlobDownload(await res.blob(), filename);
+    downloadBlob(await res.blob(), filename);
   } catch (err) {
     console.error(
       "[lambda-export] proxied download failed; opening the file directly",

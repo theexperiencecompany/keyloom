@@ -1,17 +1,13 @@
 "use client";
 
-import { cn } from "@workspace/ui/lib/utils";
 import { Img } from "remotion";
+import type { ClipStyleDefaults } from "../../../clip-style";
 import { asset } from "../../../lib/asset";
 import { BubbleEnter, TypingDots } from "../bubbles";
 import { DEFAULT_AVATAR } from "../defaults";
 import { DiscordGiftIcon, DiscordStickerIcon, MicIcon } from "../icons";
-import { type ClipOverrides, ov } from "../overrides";
 import { groupByAuthor, pickColor } from "../threads";
 import type { ChatMessageItem } from "../types";
-
-const DISCORD_STACK =
-  '"gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* =========================================================================
  * Discord — chrome and composer matched to the iOS screenshot
@@ -21,33 +17,27 @@ const DISCORD_STACK =
 export function DiscordDemo({
   messages,
   title,
-  subtitle: _subtitle,
-  showComposer,
-  className,
   clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
-  subtitle?: string;
-  showComposer: boolean;
-  className?: string;
-  clip?: ClipOverrides;
+  clip: ClipStyleDefaults;
 }) {
   // Universal Style overrides the dark channel background, primary text, root
   // font, and the blurple accent (the gift icon — the one obvious brand-accent
   // element in this layout). Other chrome stays authentic.
-  const bg = ov(clip?.background, "#1E1F22");
-  const fg = ov(clip?.color, "#DBDEE1");
+  const bg = clip.background;
+  const fg = clip.color;
   const muted = "#949BA4";
   const iconBg = "#2B2D31";
-  const accent = ov(clip?.accent, "#5865F2");
-  const fontStack = ov(clip?.fontFamily, DISCORD_STACK);
+  const accent = clip.accent;
+  const fontStack = clip.fontFamily;
 
   const groups = groupByAuthor(messages);
 
   return (
     <div
-      className={cn("flex h-full flex-col", className)}
+      className="flex h-full flex-col"
       style={{ background: bg, color: fg, fontFamily: fontStack }}
     >
       {/* Channel header */}
@@ -203,88 +193,62 @@ export function DiscordDemo({
                   </BubbleEnter>
                 ))}
               </div>
-              {g.items.some((m) => m.reactions?.length) && (
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {g.items.flatMap((m) =>
-                    (m.reactions ?? []).map((r, ri) => (
-                      <span
-                        key={`${ri}-${r.emoji}`}
-                        className="inline-flex items-center gap-1"
-                        style={{
-                          padding: "2px 7px",
-                          borderRadius: 8,
-                          border: "1px solid rgba(88,101,242,0.3)",
-                          background: "rgba(88,101,242,0.15)",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#A8B6FF",
-                        }}
-                      >
-                        <span>{r.emoji}</span>
-                        {r.count}
-                      </span>
-                    )),
-                  )}
-                </div>
-              )}
             </div>
           </div>
         ))}
       </div>
 
       {/* Composer — 4 circular buttons + flat pill input + mic, per screenshot */}
-      {showComposer && (
-        <div
-          className="flex shrink-0 items-center gap-2 px-3 pt-2 pb-2"
-          style={{ background: bg }}
-        >
-          <DiscordCircleButton bg={iconBg} fg={fg} label="Add">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              aria-hidden
-              fill="none"
-            >
-              <path
-                d="M12 5v14M5 12h14"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-            </svg>
-          </DiscordCircleButton>
-          <DiscordCircleButton bg={iconBg} fg={fg} label="Stickers">
-            <DiscordStickerIcon size={20} />
-          </DiscordCircleButton>
-          <DiscordCircleButton bg={iconBg} fg={accent} label="Gift">
-            <DiscordGiftIcon size={20} />
-          </DiscordCircleButton>
-          <div
-            className="flex flex-1 items-center"
-            style={{
-              background: iconBg,
-              borderRadius: 20,
-              padding: "0 12px",
-              height: 36,
-            }}
+      <div
+        className="flex shrink-0 items-center gap-2 px-3 pt-2 pb-2"
+        style={{ background: bg }}
+      >
+        <DiscordCircleButton bg={iconBg} fg={fg} label="Add">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            aria-hidden
+            fill="none"
           >
-            <input
-              type="text"
-              placeholder="Message"
-              className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#949BA4]"
-              style={{
-                fontSize: 15,
-                color: fg,
-                fontFamily: "inherit",
-              }}
+            <path
+              d="M12 5v14M5 12h14"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
             />
-          </div>
-          <DiscordCircleButton bg={iconBg} fg={fg} label="Voice">
-            <MicIcon size={18} />
-          </DiscordCircleButton>
+          </svg>
+        </DiscordCircleButton>
+        <DiscordCircleButton bg={iconBg} fg={fg} label="Stickers">
+          <DiscordStickerIcon size={20} />
+        </DiscordCircleButton>
+        <DiscordCircleButton bg={iconBg} fg={accent} label="Gift">
+          <DiscordGiftIcon size={20} />
+        </DiscordCircleButton>
+        <div
+          className="flex flex-1 items-center"
+          style={{
+            background: iconBg,
+            borderRadius: 20,
+            padding: "0 12px",
+            height: 36,
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Message"
+            className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#949BA4]"
+            style={{
+              fontSize: 15,
+              color: fg,
+              fontFamily: "inherit",
+            }}
+          />
         </div>
-      )}
+        <DiscordCircleButton bg={iconBg} fg={fg} label="Voice">
+          <MicIcon size={18} />
+        </DiscordCircleButton>
+      </div>
     </div>
   );
 }

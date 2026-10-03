@@ -5,9 +5,11 @@ import { useDesignFrame } from "../../use-design-frame";
 import {
   CHART_PALETTE,
   chartReveal,
+  GRID_FRACTIONS,
   niceMax,
   parseLabels,
   parseSeriesString,
+  TICK_FRACTIONS,
 } from "../charts-shared";
 
 export type BarChartProps = {
@@ -20,9 +22,6 @@ export type BarChartProps = {
   showValues: boolean;
   clipStyle?: ClipStyle;
 };
-
-const GRID_FRACTIONS = [0.25, 0.5, 0.75, 1];
-const TICK_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 
 export const BarChart: React.FC<BarChartProps> = ({
   title,

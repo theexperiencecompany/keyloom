@@ -1,12 +1,7 @@
 "use client";
-import {
-  AbsoluteFill,
-  Easing,
-  interpolate,
-  spring,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, interpolate, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { APPLE_EASE } from "../../lib/easing";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
@@ -23,7 +18,6 @@ const FRAMES_PER_CHAR = 5;
 const POST_TYPE_PAUSE = 18;
 const CURSOR_TRAVEL = 30;
 const CLICK_FEEDBACK = 10;
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 export const TypingSearch: React.FC<TypingSearchProps> = ({
   query,

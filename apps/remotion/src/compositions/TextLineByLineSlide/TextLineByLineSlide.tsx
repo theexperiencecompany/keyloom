@@ -3,15 +3,15 @@ import { AbsoluteFill, Easing, interpolate } from "remotion";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import {
-  getSubtitleColor,
+  APPLE_EASE,
   resolveTitleStyle,
   snap,
   type TitleProps,
+  TitleSubtitle,
 } from "../title-shared";
 
 export type TextLineByLineSlideProps = TitleProps;
 
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 const LINE_EASE = Easing.bezier(0.22, 1, 0.36, 1);
 
 const HEADLINE_START = 8;
@@ -92,22 +92,11 @@ export const TextLineByLineSlide: React.FC<TextLineByLineSlideProps> = ({
         })}
       </h1>
 
-      {subtitle.trim() && (
-        <p
-          style={{
-            fontSize: vmin(3.5),
-            maxWidth: "40em",
-            fontWeight: 400,
-            letterSpacing: "-0.012em",
-            margin: `${vmin(3)}px 0 0`,
-            color: getSubtitleColor(s.color),
-            opacity: subtitleProgress,
-            transform: `translate3d(0, ${snap((1 - subtitleProgress) * vmin(1.3))}px, 0)`,
-          }}
-        >
-          {subtitle}
-        </p>
-      )}
+      <TitleSubtitle
+        text={subtitle}
+        progress={subtitleProgress}
+        textColor={s.color}
+      />
     </AbsoluteFill>
   );
 };

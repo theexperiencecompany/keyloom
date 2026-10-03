@@ -3,7 +3,6 @@ import { Composition } from "remotion";
 import { componentsById } from "./components";
 import { ProjectComposition } from "./compositions/Project/Project";
 import { DEFAULT_PROJECT, type Project, projectDuration } from "./project";
-import { withRemotionQueryClient } from "./query-client";
 import { compositions } from "./registry";
 
 export const RemotionRoot: React.FC = () => {
@@ -13,7 +12,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition
           key={c.id}
           id={c.id}
-          component={withRemotionQueryClient(componentsById[c.id]!)}
+          component={componentsById[c.id]!}
           durationInFrames={c.durationInFrames}
           fps={c.fps}
           width={c.width}
@@ -24,7 +23,7 @@ export const RemotionRoot: React.FC = () => {
       ))}
       <Composition
         id="Project"
-        component={withRemotionQueryClient(ProjectComposition)}
+        component={ProjectComposition}
         durationInFrames={projectDuration(DEFAULT_PROJECT)}
         fps={DEFAULT_PROJECT.fps}
         width={DEFAULT_PROJECT.width}

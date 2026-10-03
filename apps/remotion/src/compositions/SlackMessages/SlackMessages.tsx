@@ -86,9 +86,7 @@ export const SlackMessages: React.FC<SlackMessagesProps> = ({
         title={contactName}
         theme={theme}
         messages={items}
-        clipBackground={s.background}
-        clipColor={s.color}
-        clipFontFamily={s.fontFamily}
+        clip={s}
       />
     </ChatFill>
   );

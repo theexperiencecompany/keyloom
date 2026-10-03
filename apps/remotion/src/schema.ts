@@ -2,14 +2,6 @@ export type PrimitiveField =
   | { kind: "text"; key: string; label: string; placeholder?: string }
   | { kind: "textarea"; key: string; label: string; rows?: number }
   | { kind: "number"; key: string; label: string; min?: number; max?: number }
-  | {
-      kind: "slider";
-      key: string;
-      label: string;
-      min: number;
-      max: number;
-      step?: number;
-    }
   | { kind: "color"; key: string; label: string }
   | { kind: "image"; key: string; label: string; placeholder?: string }
   | {
@@ -36,25 +28,6 @@ export type PrimitiveField =
 export type ShapeField =
   | { kind: "chat"; key: string; label: string }
   | { kind: "composition"; key: string; label: string; exclude?: string[] }
-  | {
-      kind: "slots";
-      key: string;
-      label: string;
-      layoutKey: string;
-      counts: Record<string, number>;
-      exclude?: string[];
-    }
-  | {
-      // Renders the editor for whatever composition is selected at
-      // `compositionKey`, merged on top of that composition's defaultProps.
-      // Used by wrappers like PhoneFrame / LaptopFrame so the inner
-      // composition's fields show up in the inspector instead of being
-      // locked behind JSON-only editing.
-      kind: "innerProps";
-      key: string;
-      label: string;
-      compositionKey: string;
-    }
   | {
       kind: "imageList";
       key: string;

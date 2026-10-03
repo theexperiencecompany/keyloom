@@ -3,6 +3,7 @@ import type { ClipEffect } from "@workspace/compositions/effects/schema";
 import type { Project, ProjectAudio } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
 import type { SceneTransition } from "@workspace/compositions/transitions";
+import { downloadBlob } from "@/lib/download-blob";
 
 export type ParseResult =
   | { ok: true; project: Project; warnings: string[] }
@@ -237,13 +238,5 @@ function parseAudio(raw: unknown, warnings: string[]): ProjectAudio | null {
 
 export function downloadProject(project: Project, filename = "project.json") {
   const text = JSON.stringify(project, null, 2);
-  const blob = new Blob([text], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(new Blob([text], { type: "application/json" }), filename);
 }

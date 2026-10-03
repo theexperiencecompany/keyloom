@@ -8,30 +8,17 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   AbsoluteFill,
-  Easing,
   Img,
   interpolate,
   spring,
-  staticFile,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { proxyExternalImg } from "../../proxy-image";
+import { asset } from "../../lib/asset";
+import { APPLE_EASE } from "../../lib/easing";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
-
-// Remotion's bundle server only serves public/ assets through staticFile() —
-// literal "/foo.png" strings fail with 404 inside `remotion render`. Resolve
-// bare paths through staticFile() and let proxyExternalImg handle absolute
-// http(s) URLs (which need to go through the /api/img/ proxy so the export
-// canvas stays untainted).
-function resolveAsset(src: string): string {
-  if (!src) return src;
-  if (/^(data:|blob:)/i.test(src)) return src;
-  if (/^https?:/i.test(src)) return proxyExternalImg(src);
-  return staticFile(src.replace(/^\//, ""));
-}
 
 export type BrowserWindowProps = {
   url: string;
@@ -39,8 +26,6 @@ export type BrowserWindowProps = {
   pageBackgroundColor: string;
   clipStyle?: ClipStyle;
 };
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 const URL_TYPE_START = 28;
 const FRAMES_PER_CHAR = 3;
@@ -170,7 +155,7 @@ export const BrowserWindow: React.FC<BrowserWindowProps> = ({
           >
             {pageImageUrl.trim() ? (
               <Img
-                src={resolveAsset(pageImageUrl)}
+                src={asset(pageImageUrl)}
                 crossOrigin="anonymous"
                 style={{
                   width: "100%",

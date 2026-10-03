@@ -13,7 +13,6 @@
         "GOOGLE_FONTS_API_KEY",
         "R2_*",
         "REMOTION_*",
-        "EXTERNAL_ASSET_BASE_URL",
         "VERCEL_PROJECT_PRODUCTION_URL",
         "NEXT_PUBLIC_*"
       ],

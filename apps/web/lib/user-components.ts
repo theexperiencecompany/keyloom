@@ -16,13 +16,6 @@ export type UserComponent = {
   updatedAt: string;
 };
 
-export type NewUserComponent = {
-  baseId: string;
-  name: string;
-  code: string;
-  exportName?: string | null;
-};
-
 export async function listUserComponents(): Promise<UserComponent[]> {
   const res = await fetch("/api/components");
   if (!res.ok) return [];
@@ -33,18 +26,6 @@ export async function getUserComponent(
   id: string,
 ): Promise<UserComponent | null> {
   const res = await fetch(`/api/components/${encodeURIComponent(id)}`);
-  if (!res.ok) return null;
-  return (await res.json()) as UserComponent;
-}
-
-export async function createUserComponent(
-  input: NewUserComponent,
-): Promise<UserComponent | null> {
-  const res = await fetch("/api/components", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(input),
-  });
   if (!res.ok) return null;
   return (await res.json()) as UserComponent;
 }

@@ -26,16 +26,10 @@ type Props = {
    * entry is the default look — selecting it clears the override.
    */
   themes?: CompositionTheme[];
-  /**
-   * Brand-locked compositions never receive free-form clipStyle, so only
-   * the Theme picker is shown (themes are hand-built skins and apply to
-   * locked compositions too).
-   */
-  locked?: boolean;
 };
 
 /**
- * Renders the universal Style controls every non-locked clip exposes:
+ * Renders the universal Style controls every clip exposes:
  * Background, Text color, Font, Accent color. Stored on `Clip.style` and
  * forwarded to the composition through the `clipStyle` prop.
  *
@@ -44,13 +38,7 @@ type Props = {
  * (see `Project.tsx`). The parent keys this component by clip id, so the
  * Color/Scene view mode resets when a different clip is selected.
  */
-export function ClipStyleSection({
-  style,
-  onPatch,
-  onReset,
-  themes,
-  locked = false,
-}: Props) {
+export function ClipStyleSection({ style, onPatch, onReset, themes }: Props) {
   const value = style ?? {};
   const hasThemes = Boolean(themes && themes.length > 0);
   const isCustomized =
@@ -77,63 +65,47 @@ export function ClipStyleSection({
     setBgMode(mode);
   }
 
-  const themePicker =
-    hasThemes && themes ? (
-      <div className="space-y-1.5">
-        <Label className="text-[12px]">Theme</Label>
-        <div className="grid grid-cols-2 gap-1.5">
-          {themes.map((t, i) => {
-            const selected = (value.theme ?? themes[0]?.id) === t.id;
-            return (
-              <Button
-                key={t.id}
-                variant={selected ? "default" : "outline"}
-                size="sm"
-                title={t.description}
-                onClick={() =>
-                  // First theme = the composition's default look, stored
-                  // as "no override".
-                  onPatch({ theme: i === 0 ? undefined : t.id })
-                }
-                className="h-8 text-[11px]"
-              >
-                {t.label}
-              </Button>
-            );
-          })}
-        </div>
-      </div>
-    ) : null;
-
-  const resetRow = isCustomized ? (
-    <div className="flex items-center justify-end">
-      <Button
-        variant="ghost"
-        size="xs"
-        onClick={onReset}
-        className="h-6 text-[11px]"
-      >
-        Reset to default
-      </Button>
-    </div>
-  ) : null;
-
-  // Brand-locked compositions ignore free-form clipStyle entirely — the
-  // curated Theme picker is the only Style control that applies.
-  if (locked) {
-    return (
-      <div className="space-y-4 px-5 py-5">
-        {resetRow}
-        {themePicker}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4 px-5 py-5">
-      {resetRow}
+      {isCustomized ? (
+        <div className="flex items-center justify-end">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={onReset}
+            className="h-6 text-[11px]"
+          >
+            Reset to default
+          </Button>
+        </div>
+      ) : null}
 
-      {themePicker}
+      {hasThemes && themes ? (
+        <div className="space-y-1.5">
+          <Label className="text-[12px]">Theme</Label>
+          <div className="grid grid-cols-2 gap-1.5">
+            {themes.map((t, i) => {
+              const selected = (value.theme ?? themes[0]?.id) === t.id;
+              return (
+                <Button
+                  key={t.id}
+                  variant={selected ? "default" : "outline"}
+                  size="sm"
+                  title={t.description}
+                  onClick={() =>
+                    // The first theme is the composition's default look, so
+                    // picking it clears the override.
+                    onPatch({ theme: i === 0 ? undefined : t.id })
+                  }
+                  className="h-8 text-[11px]"
+                >
+                  {t.label}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="space-y-1.5">
         <Label className="text-[12px]">Background</Label>

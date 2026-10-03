@@ -6,6 +6,8 @@ import { proxyExternalImg } from "../proxy-image";
 // helper resolves bare paths, and routes absolute http(s) URLs through the
 // `/api/img/<encoded>` proxy so the export canvas stays untainted when the
 // scenario references third-party avatars.
+export function asset(src: string): string;
+export function asset(src: string | undefined): string | undefined;
 export function asset(src: string | undefined): string | undefined {
   if (!src) return src;
   if (/^(data:|blob:)/i.test(src)) return src;

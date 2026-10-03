@@ -46,8 +46,6 @@ function describeType(field: Field): string {
       return "ChatMessage[]";
     case "composition":
       return "string (composition id)";
-    case "slots":
-      return "Record<string, string[]>";
     case "text":
     case "textarea":
       return "string";
@@ -58,7 +56,6 @@ function describeType(field: Field): string {
     case "audio":
       return "string (url, with CaptionWord[] on sibling key)";
     case "number":
-    case "slider":
       return "number";
     case "select":
       return field.options.map((o) => `"${o.value}"`).join(" | ");
@@ -70,8 +67,6 @@ function describeType(field: Field): string {
       return "Array<{ name: string; url: string }>";
     case "terminalLines":
       return "Array<{ kind: string; text: string }>";
-    case "innerProps":
-      return "Record<string, unknown>";
     default:
       return "unknown";
   }

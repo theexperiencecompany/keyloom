@@ -2,11 +2,10 @@
 
 import { cn } from "@workspace/ui/lib/utils";
 import { Img, staticFile } from "remotion";
+import type { ClipStyleDefaults } from "../../../clip-style";
 import { asset } from "../../../lib/asset";
 import { BubbleEnter, CurvedBubble, DoodleTiles, TypingDots } from "../bubbles";
 import { AttachmentIcon, EmojiIcon, MicIcon } from "../icons";
-import { type ClipOverrides, ov } from "../overrides";
-import { SF_PRO_STACK } from "../sf-pro";
 import { curvedThread } from "../threads";
 import type { ChatMessageItem } from "../types";
 
@@ -18,39 +17,32 @@ import type { ChatMessageItem } from "../types";
 export function TelegramDemo({
   messages,
   title,
-  subtitle,
   headerAvatar,
-  showComposer,
-  className,
   clip,
 }: {
   messages: ChatMessageItem[];
   title?: string;
-  subtitle?: string;
   headerAvatar?: string;
-  showComposer: boolean;
-  className?: string;
-  clip?: ClipOverrides;
+  clip: ClipStyleDefaults;
 }) {
   // Palette extracted from Telegram Chat.svg. The universal Style overrides the
   // chat-screen wallpaper (blueOverlay), primary text, root font, and the
   // Telegram-blue accent (header/composer icons). Bubbles/meta stay authentic.
   const chromeBg = "#F6F6F6";
-  const hasBgOverride = !!clip?.background && clip.background.trim() !== "";
-  const blueOverlay = ov(clip?.background, "#2B78CD"); // 50% over the doodle pattern
+  const blueOverlay = clip.background;
   const myBubble = "#E1FEC6";
   const theirBubble = "#FFFFFF";
-  const textColor = ov(clip?.color, "#060606");
+  const textColor = clip.color;
   const metaColor = "#858E99";
   const myMeta = "#3EAA3C";
-  const accent = ov(clip?.accent, "#037EE5");
-  const fontStack = ov(clip?.fontFamily, SF_PRO_STACK);
+  const accent = clip.accent;
+  const fontStack = clip.fontFamily;
 
   const grouped = curvedThread(messages);
 
   return (
     <div
-      className={cn("flex h-full flex-col", className)}
+      className="flex h-full flex-col"
       style={{ fontFamily: fontStack, color: textColor, background: chromeBg }}
     >
       {/* iOS header */}
@@ -101,7 +93,7 @@ export function TelegramDemo({
               {title ?? "GAIA"}
             </span>
             <span style={{ fontSize: 12, color: metaColor, marginTop: 1 }}>
-              {subtitle ?? "last seen recently"}
+              last seen recently
             </span>
           </div>
           <div
@@ -141,17 +133,6 @@ export function TelegramDemo({
           cols={3}
           rows={2}
         />
-        {!hasBgOverride && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "rgba(43,120,205,0.5)",
-              pointerEvents: "none",
-              zIndex: 1,
-            }}
-          />
-        )}
         <div
           className="relative flex flex-1 flex-col"
           style={{ gap: 8, zIndex: 2 }}
@@ -169,7 +150,7 @@ export function TelegramDemo({
               >
                 {group.items.map((m, i) => {
                   const isLast = i === group.items.length - 1;
-                  const showMeta = !m.typing && (m.time || (isMe && m.status));
+                  const showMeta = !m.typing && m.time;
                   return (
                     <BubbleEnter
                       key={m.id ?? `${gi}-${i}`}
@@ -193,12 +174,6 @@ export function TelegramDemo({
                               }}
                             >
                               {m.time ?? ""}
-                              {isMe && m.status && (
-                                <TelegramTicks
-                                  status={m.status}
-                                  color={myMeta}
-                                />
-                              )}
                             </span>
                           ) : undefined
                         }
@@ -218,100 +193,58 @@ export function TelegramDemo({
         </div>
       </div>
 
-      {showComposer && (
-        <div
-          className="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5"
-          style={{ background: chromeBg }}
+      <div
+        className="flex shrink-0 items-center gap-2 px-2 pt-2 pb-1.5"
+        style={{ background: chromeBg }}
+      >
+        <button
+          type="button"
+          aria-label="Attach"
+          className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+          style={{ width: 30, height: 30, color: accent }}
         >
-          <button
-            type="button"
-            aria-label="Attach"
-            className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-            style={{ width: 30, height: 30, color: accent }}
-          >
-            <AttachmentIcon />
-          </button>
-          <div
-            className="flex flex-1 items-center justify-between gap-2"
+          <AttachmentIcon />
+        </button>
+        <div
+          className="flex flex-1 items-center justify-between gap-2"
+          style={{
+            background: "#FFFFFF",
+            border: "0.5px solid #D1D1D6",
+            borderRadius: 16,
+            padding: "0 12px",
+            height: 32,
+            color: metaColor,
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Message"
+            className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#858E99]"
             style={{
-              background: "#FFFFFF",
-              border: "0.5px solid #D1D1D6",
-              borderRadius: 16,
-              padding: "0 12px",
-              height: 32,
-              color: metaColor,
+              fontSize: 15,
+              color: "#000",
+              letterSpacing: "-0.01em",
+              fontFamily: "inherit",
             }}
-          >
-            <input
-              type="text"
-              placeholder="Message"
-              className="chat-demo-input min-w-0 flex-1 border-0 bg-transparent p-0 outline-none placeholder:text-[#858E99]"
-              style={{
-                fontSize: 15,
-                color: "#000",
-                letterSpacing: "-0.01em",
-                fontFamily: "inherit",
-              }}
-            />
-            <button
-              type="button"
-              aria-label="Emoji"
-              className="flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-              style={{ color: metaColor, width: 22, height: 22 }}
-            >
-              <EmojiIcon size={18} />
-            </button>
-          </div>
+          />
           <button
             type="button"
-            aria-label="Voice"
-            className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
-            style={{ width: 30, height: 30, color: accent }}
+            aria-label="Emoji"
+            className="flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+            style={{ color: metaColor, width: 22, height: 22 }}
           >
-            <MicIcon />
+            <EmojiIcon size={18} />
           </button>
         </div>
-      )}
+        <button
+          type="button"
+          aria-label="Voice"
+          className="flex cursor-pointer items-center justify-center rounded-full transition-colors hover:bg-black/[0.06]"
+          style={{ width: 30, height: 30, color: accent }}
+        >
+          <MicIcon />
+        </button>
+      </div>
     </div>
-  );
-}
-
-function TelegramTicks({
-  status,
-  color,
-}: {
-  status: "sent" | "delivered" | "read";
-  color: string;
-}) {
-  if (status === "sent") {
-    return (
-      <svg width="14" height="11" viewBox="0 0 14 11" aria-hidden fill="none">
-        <path
-          d="M1 6l3.5 3.5L11 2"
-          stroke={color}
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-  return (
-    <svg width="16" height="11" viewBox="0 0 16 11" aria-hidden fill="none">
-      <path
-        d="M0.5 6.5l3.5 3.5L10.5 2.5"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 6.5l3.5 3.5L13.5 2.5"
-        stroke={color}
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

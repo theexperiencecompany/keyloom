@@ -1,3 +1,5 @@
+import type { ClipStyleDefaults } from "../../clip-style";
+
 export type ChatPlatform = "whatsapp" | "slack" | "discord" | "telegram";
 
 export interface ChatMessageItem {
@@ -10,8 +12,6 @@ export interface ChatMessageItem {
   author?: string;
   authorColor?: string;
   avatar?: string;
-  status?: "sent" | "delivered" | "read";
-  reactions?: { emoji: string; count: number }[];
   typing?: boolean;
   /** Frames since this message first became visible. Drives the pop-in animation. */
   enterFrames?: number;
@@ -28,21 +28,14 @@ export interface ChatDemoProps {
   platform: ChatPlatform;
   messages: ChatMessageItem[];
   title?: string;
-  subtitle?: string;
   headerAvatar?: string;
-  showComposer?: boolean;
   theme?: "light" | "dark";
-  className?: string;
   /**
-   * Universal Style overrides forwarded by the (now unlocked) chat
-   * compositions. Each platform renderer applies the single clean mapping that
-   * fits its layout: `clipBackground` → chat-screen background, `clipColor` →
-   * primary message text, `clipFontFamily` → root font, `clipAccent` → the one
-   * obvious brand accent (outgoing bubble / send button / header tint). Unset
-   * (undefined) means keep the authentic default.
+   * Universal Style, already resolved against the composition's defaults.
+   * Each platform maps `background` to the chat-screen background, `color` to
+   * the primary message text, `fontFamily` to the root font, and `accent` to
+   * its main brand accent, such as the outgoing bubble, send button or header
+   * tint.
    */
-  clipBackground?: string;
-  clipColor?: string;
-  clipFontFamily?: string;
-  clipAccent?: string;
+  clip: ClipStyleDefaults;
 }

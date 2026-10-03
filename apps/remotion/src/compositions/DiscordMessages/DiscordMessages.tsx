@@ -79,10 +79,7 @@ export const DiscordMessages: React.FC<DiscordMessagesProps> = ({
         platform="discord"
         title={contactName}
         messages={items}
-        clipBackground={s.background}
-        clipColor={s.color}
-        clipFontFamily={s.fontFamily}
-        clipAccent={s.accent}
+        clip={s}
       />
     </ChatFill>
   );

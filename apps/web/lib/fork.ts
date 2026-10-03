@@ -1,35 +1,17 @@
 "use client";
 /**
- * Fork helpers: turn a built-in composition into an editable user copy, and
- * hand a project off to the studio.
+ * Fork helpers: turn a user fork into a studio project, and hand a project off
+ * to the studio.
  */
 import type { Project } from "@workspace/compositions/project";
 import { compositionsById } from "@workspace/compositions/registry";
-import { compositionSources } from "./generated-sources";
-import type { NewUserComponent, UserComponent } from "./user-components";
+import type { UserComponent } from "./user-components";
 
 function clipId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID().slice(0, 8);
   }
   return Math.random().toString(36).slice(2, 10);
-}
-
-/**
- * Build the payload for a new fork of a built-in composition by copying its
- * source. The server assigns the id; returns null if the base id is unknown or
- * has no captured source. Persist via `createUserComponent`.
- */
-export function forkPayload(baseId: string): NewUserComponent | null {
-  const source = compositionSources[baseId]?.component;
-  const info = compositionsById[baseId];
-  if (!source || !info) return null;
-  return {
-    baseId,
-    name: `${info.title} (copy)`,
-    code: source,
-    exportName: baseId,
-  };
 }
 
 /** Build a single-clip studio project that renders the given fork. */

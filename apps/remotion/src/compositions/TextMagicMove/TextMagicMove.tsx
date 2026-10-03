@@ -1,13 +1,13 @@
 "use client";
 import { measureText } from "@remotion/layout-utils";
 import { useEffect, useMemo, useState } from "react";
-import { AbsoluteFill, Easing } from "remotion";
+import { AbsoluteFill } from "remotion";
 import type { ClipStyle } from "../../clip-style";
 import { clamp01, lerp } from "../../lib/math";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
 import { useFontReady } from "../../use-font-ready";
-import { resolveTitleStyle, snap, snapZero } from "../title-shared";
+import { APPLE_EASE, resolveTitleStyle, snap, snapZero } from "../title-shared";
 import {
   MAGIC_ENTER,
   MAGIC_HOLD,
@@ -15,8 +15,6 @@ import {
   normalizeSpeed,
   parsePhrases,
 } from "./timing";
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 const FONT_WEIGHT = 700;
 const LETTER_SPACING = "-0.02em";

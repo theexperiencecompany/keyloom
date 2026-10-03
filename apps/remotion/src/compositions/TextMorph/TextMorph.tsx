@@ -1,7 +1,7 @@
 "use client";
 import { AbsoluteFill, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { DESIGN_FPS, useDesignFrame } from "../../use-design-frame";
+import { useDesignFrame } from "../../use-design-frame";
 
 export type TextMorphProps = {
   /** One word/phrase per line — the text morphs from each to the next. */
@@ -117,5 +117,3 @@ export const TextMorph: React.FC<TextMorphProps> = ({ text, clipStyle }) => {
     </AbsoluteFill>
   );
 };
-
-export const TEXT_MORPH_DESIGN_FPS = DESIGN_FPS;

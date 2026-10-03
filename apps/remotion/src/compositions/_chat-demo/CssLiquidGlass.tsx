@@ -3,17 +3,13 @@
 /**
  * CSS Liquid Glass — the archisvaze/liquid-glass technique.
  *
- * Real glass refracts whatever is BEHIND it. The WebGL layer can't here — it
- * sits behind the chat DOM and only sees the wallpaper/sheet, never the
+ * Real glass refracts whatever is BEHIND it, including live DOM like the
  * bubbles. The web way to bend live DOM behind an element is `backdrop-filter`
  * + an SVG `feDisplacementMap`: we paint a per-size displacement map (R = x
  * shift, G = y shift, concentrated in a lens band just inside the rounded edge)
  * and reference it from the element's `backdrop-filter`. The backdrop — the
  * message bubbles scrolling under the header — gets warped toward the edges
  * like a real glass lens, plus a blur, a translucent fill and a bright rim.
- *
- * Drop-in for <LiquidGlass> (same `radius` / `style` / `glassStyle` props), but
- * CSS-only — no GlassStage/WebGL needed.
  *
  * Caveat: `backdrop-filter: url(#…)` is a live-Chromium feature (studio Player +
  * `remotion render`). The @remotion/web-renderer canvas export drops it, so the

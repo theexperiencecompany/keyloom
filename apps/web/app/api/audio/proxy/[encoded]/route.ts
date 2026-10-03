@@ -1,3 +1,5 @@
+import { decodeBase64Url, isBlockedHost } from "@/lib/proxy-guard";
+
 export const runtime = "edge";
 
 /**
@@ -16,73 +18,6 @@ export const runtime = "edge";
 const ALLOWED_PROTOCOLS = new Set(["http:", "https:"]);
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB — audio files run larger than images.
 const FETCH_TIMEOUT_MS = 20_000;
-
-function decodeBase64Url(input: string): string | null {
-  try {
-    let s = input.replace(/-/g, "+").replace(/_/g, "/");
-    const pad = s.length % 4;
-    if (pad === 2) s += "==";
-    else if (pad === 3) s += "=";
-    else if (pad !== 0) return null;
-    return atob(s);
-  } catch {
-    return null;
-  }
-}
-
-function isBlockedHost(hostname: string): boolean {
-  const h = hostname.toLowerCase().trim();
-  if (!h) return true;
-  if (h === "localhost") return true;
-  if (
-    h === "broadcasthost" ||
-    h.endsWith(".localhost") ||
-    h.endsWith(".local") ||
-    h.endsWith(".internal")
-  ) {
-    return true;
-  }
-
-  // IPv4 literal.
-  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
-  if (v4) {
-    const a = Number(v4[1]);
-    const b = Number(v4[2]);
-    if ([a, b, Number(v4[3]), Number(v4[4])].some((n) => n > 255)) return true;
-    if (a === 0) return true;
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 192 && b === 0) return true;
-    if (a === 198 && (b === 18 || b === 19)) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a >= 224) return true;
-    return false;
-  }
-
-  // IPv6 literal.
-  if (h.includes(":") && /^[0-9a-f:.]+$/.test(h)) {
-    if (h === "::" || h === "::1") return true;
-    if (h.startsWith("::ffff:")) {
-      return isBlockedHost(h.slice("::ffff:".length));
-    }
-    if (
-      h.startsWith("fe8") ||
-      h.startsWith("fe9") ||
-      h.startsWith("fea") ||
-      h.startsWith("feb")
-    ) {
-      return true;
-    }
-    if (h.startsWith("fc") || h.startsWith("fd")) return true;
-    if (h.startsWith("ff")) return true;
-    return false;
-  }
-
-  return false;
-}
 
 export async function GET(
   req: Request,

@@ -71,13 +71,6 @@ function weekSeeds(now: Date, count: number): string[] {
   });
 }
 
-export function chartWeekLabel(now: Date): string {
-  return weekStart(now).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
-
 export function tagForTemplate(id: string): string | undefined {
   return CHART_TAGS.find((t) => t.test.test(id))?.label;
 }

@@ -1,7 +1,8 @@
 "use client";
-import { AbsoluteFill, Easing, Img, interpolate, staticFile } from "remotion";
+import { AbsoluteFill, Img, interpolate } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { proxyExternalImg } from "../../proxy-image";
+import { asset } from "../../lib/asset";
+import { APPLE_EASE } from "../../lib/easing";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
@@ -11,15 +12,6 @@ export type ImageSceneProps = {
   caption: string;
   clipStyle?: ClipStyle;
 };
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
-
-function resolveAsset(src: string | undefined): string | undefined {
-  if (!src) return undefined;
-  if (/^(data:|blob:)/i.test(src)) return src;
-  if (/^https?:/i.test(src)) return proxyExternalImg(src);
-  return staticFile(src.replace(/^\//, ""));
-}
 
 export const ImageScene: React.FC<ImageSceneProps> = ({
   src,
@@ -47,7 +39,7 @@ export const ImageScene: React.FC<ImageSceneProps> = ({
     easing: APPLE_EASE,
   });
 
-  const resolved = resolveAsset(src);
+  const resolved = asset(src);
   const trimmedCaption = caption.trim();
 
   return (

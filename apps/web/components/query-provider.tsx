@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 
 function createQueryClient() {
-  const queryClient = new QueryClient({
+  return new QueryClient({
     defaultOptions: {
       queries: {
         retry: 1,
@@ -13,26 +13,6 @@ function createQueryClient() {
       },
     },
   });
-
-  // Compositions can render chat-ui inside the web studio preview. chat-ui has
-  // internal integration queries whose real backend does not exist here, so
-  // seed the same inert data shape the Remotion renderer uses.
-  queryClient.setQueryDefaults(["integrations"], {
-    queryFn: async () => null,
-    retry: false,
-    staleTime: Number.POSITIVE_INFINITY,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchInterval: false,
-  });
-  queryClient.setQueryData(["integrations", "config"], {
-    configurations: [],
-  });
-  queryClient.setQueryData(["integrations", "user"], { integrations: [] });
-  queryClient.setQueryData(["integrations", "status"], { status: {} });
-
-  return queryClient;
 }
 
 export function QueryProvider({ children }: { children: ReactNode }) {

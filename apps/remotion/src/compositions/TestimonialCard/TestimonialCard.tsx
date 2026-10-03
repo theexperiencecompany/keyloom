@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { tint } from "../../lib/color";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
@@ -19,9 +20,6 @@ export type TestimonialCardProps = {
 const D_STARS = 0;
 const D_QUOTE = 5;
 const D_AUTHOR = 16;
-
-const tint = (color: string, pct: number) =>
-  `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   quote,

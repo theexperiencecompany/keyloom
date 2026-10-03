@@ -1,8 +1,11 @@
+import { Easing } from "remotion";
 import {
   type ClipStyle,
   type ClipStyleDefaults,
   resolveClipStyle,
 } from "../clip-style";
+import { snap } from "../snap";
+import { useCanvasLayout } from "../use-canvas-layout";
 
 export { snap, snapNear, snapZero } from "../snap";
 
@@ -16,6 +19,8 @@ export type TitleProps = {
   subtitle: string;
   clipStyle?: ClipStyle;
 };
+
+export const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 export const TITLE_FONT_FAMILY =
   "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
@@ -31,7 +36,7 @@ export function resolveTitleStyle(clipStyle: ClipStyle | undefined) {
   return resolveClipStyle(clipStyle, TITLE_DEFAULTS);
 }
 
-export function isDarkColor(color: string): boolean {
+function isLightColor(color: string): boolean {
   const c = color.trim().toLowerCase();
   if (c === "white" || c === "#fff" || c === "#ffffff") return true;
   if (c.startsWith("#") && c.length === 7) {
@@ -44,23 +49,39 @@ export function isDarkColor(color: string): boolean {
   return false;
 }
 
-export function getSubtitleColor(textColor: string): string {
-  return isDarkColor(textColor)
-    ? "rgba(15,16,20,0.55)"
-    : "rgba(255,255,255,0.65)";
-}
-
 /**
- * Field set for every Title* / Text* composition. Note: NO color or font
- * fields here — those are handled universally via the Studio's Style
- * section (see `clip-style.ts`).
+ * The subtitle line under every Title* / Text* headline. It fades in with
+ * `progress` while rising `rise` px into place (defaults to `vmin(1.3)`).
  */
-export const TITLE_FIELDS = [
-  { kind: "textarea" as const, key: "headline", label: "Headline", rows: 2 },
-  {
-    kind: "textarea" as const,
-    key: "subtitle",
-    label: "Subtitle (optional)",
-    rows: 2,
-  },
-];
+export function TitleSubtitle({
+  text,
+  progress,
+  textColor,
+  rise,
+}: {
+  text: string;
+  progress: number;
+  textColor: string;
+  rise?: number;
+}) {
+  const { vmin } = useCanvasLayout();
+  if (!text.trim()) return null;
+  return (
+    <p
+      style={{
+        fontSize: vmin(3.5),
+        fontWeight: 400,
+        letterSpacing: "-0.012em",
+        margin: `${vmin(3)}px 0 0`,
+        maxWidth: "40em",
+        color: isLightColor(textColor)
+          ? "rgba(15,16,20,0.55)"
+          : "rgba(255,255,255,0.65)",
+        opacity: progress,
+        transform: `translate3d(0, ${snap((1 - progress) * (rise ?? vmin(1.3)))}px, 0)`,
+      }}
+    >
+      {text}
+    </p>
+  );
+}
