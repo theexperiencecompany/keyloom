@@ -6,9 +6,12 @@ import { useDesignFrame } from "../../use-design-frame";
 import {
   CHART_PALETTE,
   chartReveal,
+  GRID_FRACTIONS,
   niceMax,
   parseLabels,
   parseSeriesString,
+  smoothPath,
+  TICK_FRACTIONS,
 } from "../charts-shared";
 
 export type AreaChartProps = {
@@ -20,9 +23,6 @@ export type AreaChartProps = {
   showGrid: boolean;
   clipStyle?: ClipStyle;
 };
-
-const GRID_FRACTIONS = [0.25, 0.5, 0.75, 1];
-const TICK_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 
 export const AreaChart: React.FC<AreaChartProps> = ({
   title,
@@ -235,16 +235,3 @@ export const AreaChart: React.FC<AreaChartProps> = ({
     </AbsoluteFill>
   );
 };
-
-function smoothPath(points: { x: number; y: number }[]): string {
-  if (points.length === 0) return "";
-  let d = `M ${points[0]!.x} ${points[0]!.y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1]!;
-    const curr = points[i]!;
-    const cp1x = prev.x + (curr.x - prev.x) / 3;
-    const cp2x = prev.x + ((curr.x - prev.x) * 2) / 3;
-    d += ` C ${cp1x} ${prev.y}, ${cp2x} ${curr.y}, ${curr.x} ${curr.y}`;
-  }
-  return d;
-}

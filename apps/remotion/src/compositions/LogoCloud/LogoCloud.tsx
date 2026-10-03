@@ -1,6 +1,7 @@
 "use client";
 import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { tint } from "../../lib/color";
 import { proxyExternalImg } from "../../proxy-image";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
@@ -21,9 +22,6 @@ export type LogoCloudProps = {
 const D_HEADLINE = 0;
 const D_LOGOS_START = 8;
 const STAGGER = 4;
-
-const tint = (color: string, pct: number) =>
-  `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 
 export const LogoCloud: React.FC<LogoCloudProps> = ({
   headline,

@@ -1,16 +1,15 @@
 "use client";
 import {
   AbsoluteFill,
-  Easing,
   Img,
   interpolate,
   spring,
-  staticFile,
   useVideoConfig,
 } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { SPOTIFY_FONT } from "../../fonts";
-import { proxyExternalImg } from "../../proxy-image";
+import { asset } from "../../lib/asset";
+import { APPLE_EASE } from "../../lib/easing";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
@@ -32,17 +31,6 @@ export type SpotifyPlayerProps = {
 };
 
 const GREEN = "#1ed760";
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
-
-function resolveSrc(src: string): string {
-  if (!src) return "";
-  // Uploaded images arrive as data: URLs (and hosted uploads briefly as blob:);
-  // pass them through untouched. Without this they'd hit staticFile() below and
-  // resolve to a broken path — the album cover would stay blank after upload.
-  if (/^(data:|blob:)/i.test(src)) return src;
-  if (/^https?:/i.test(src)) return proxyExternalImg(src);
-  return staticFile(src.replace(/^\//, ""));
-}
 
 function fmtTime(sec: number): string {
   const s = Math.max(0, Math.floor(sec));
@@ -178,7 +166,7 @@ export const SpotifyPlayer: React.FC<SpotifyPlayerProps> = ({
         >
           {albumArt ? (
             <Img
-              src={resolveSrc(albumArt)}
+              src={asset(albumArt)}
               crossOrigin="anonymous"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />

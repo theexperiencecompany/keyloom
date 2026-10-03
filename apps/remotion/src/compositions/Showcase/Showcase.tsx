@@ -1,14 +1,9 @@
 "use client";
-import {
-  AbsoluteFill,
-  Easing,
-  Img,
-  interpolate,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, interpolate, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase } from "../../componentsBase";
 import { FitTargetContext } from "../../fit-content";
+import { APPLE_EASE } from "../../lib/easing";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { snap } from "../../snap";
@@ -39,8 +34,6 @@ export type ShowcaseProps = {
   borderColor: string;
   clipStyle?: ClipStyle;
 };
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 export const Showcase: React.FC<ShowcaseProps> = ({
   eyebrow,

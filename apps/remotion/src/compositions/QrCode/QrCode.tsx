@@ -1,15 +1,9 @@
 "use client";
 import QRCode from "qrcode";
 import { useMemo } from "react";
-import {
-  AbsoluteFill,
-  Img,
-  spring,
-  staticFile,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
-import { proxyExternalImg } from "../../proxy-image";
+import { asset } from "../../lib/asset";
 import { useDesignFrame } from "../../use-design-frame";
 import { QR_LOGO_PRESETS, resolveQrLogo } from "./logo-presets";
 
@@ -25,13 +19,6 @@ export type QrCodeProps = {
   logoPadding: number;
   clipStyle?: ClipStyle;
 };
-
-function resolveAsset(src: string | undefined): string | undefined {
-  if (!src) return undefined;
-  if (/^(data:|blob:)/i.test(src)) return src;
-  if (/^https?:/i.test(src)) return proxyExternalImg(src);
-  return staticFile(src.replace(/^\//, ""));
-}
 
 type Matrix = { size: number; bits: Uint8Array };
 
@@ -219,8 +206,8 @@ export const QrCode: React.FC<QrCodeProps> = ({
   const renderedSize = pixelSize * matrix.size;
 
   const logoSrc = logoCustom.trim()
-    ? resolveAsset(logoCustom)
-    : resolveAsset(resolveQrLogo(logoPreset));
+    ? asset(logoCustom)
+    : asset(resolveQrLogo(logoPreset));
 
   const wrapperFade = spring({
     frame,

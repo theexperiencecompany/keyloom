@@ -3,6 +3,7 @@ import { AbsoluteFill, Img, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
 import { componentsByIdBase as componentsById } from "../../componentsBase";
 import { FitTargetContext } from "../../fit-content";
+import { FallbackScreen } from "../../lib/fallback-screen";
 import { proxyExternalImg } from "../../proxy-image";
 import { compositionsById } from "../../registry";
 import { SafeAreaContext } from "../../safe-area";
@@ -276,26 +277,6 @@ function ScaledScene({
           <Component {...merged} />
         </FitTargetContext.Provider>
       </SafeAreaContext.Provider>
-    </div>
-  );
-}
-
-function FallbackScreen() {
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "rgba(255,255,255,0.4)",
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
-        fontSize: 28,
-      }}
-    >
-      Pick a composition
     </div>
   );
 }

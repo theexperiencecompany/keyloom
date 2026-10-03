@@ -1,12 +1,7 @@
 "use client";
-import {
-  AbsoluteFill,
-  Easing,
-  interpolate,
-  spring,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, interpolate, spring, useVideoConfig } from "remotion";
 import { type ClipStyle, resolveClipStyle } from "../../clip-style";
+import { APPLE_EASE } from "../../lib/easing";
 import { snap } from "../../snap";
 import { useCanvasLayout } from "../../use-canvas-layout";
 import { useDesignFrame } from "../../use-design-frame";
@@ -40,8 +35,6 @@ export type TerminalProps = {
   maxWidth: number;
   clipStyle?: ClipStyle;
 };
-
-const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);
 
 const WINDOW_BG = "#0c1016";
 
