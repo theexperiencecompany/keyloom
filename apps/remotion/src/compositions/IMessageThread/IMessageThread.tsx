@@ -59,10 +59,12 @@ const MIN_KEY_GAP_S = 0.07;
 function keyTapTimes(text: string, start: number, compose: number) {
   const n = Array.from(text).length;
   const times: number[] = [];
+  let last = Number.NEGATIVE_INFINITY;
   for (let i = 1; i <= n; i++) {
     const at = start + (compose * (i - 0.5)) / n;
-    if (times.length === 0 || at - times[times.length - 1] >= MIN_KEY_GAP_S) {
+    if (at - last >= MIN_KEY_GAP_S) {
       times.push(at);
+      last = at;
     }
   }
   return times;

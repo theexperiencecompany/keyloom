@@ -34,10 +34,16 @@ const typeTime = (s: string) =>
   Math.min(1.3, Math.max(0.4, Array.from(s).length / 70));
 const words = (s: string) => s.trim().split(/\s+/).length;
 
-// "3:10 PM" -> minutes since midnight
-function minutes(time: string) {
-  const [, h, m, ap] = time.match(/^(\d+):(\d+) (AM|PM)$/) as RegExpMatchArray;
-  return ((+h % 12) + (ap === "PM" ? 12 : 0)) * 60 + +m;
+// "3:10 PM" -> its status-bar form, meridiem and minutes since midnight.
+function parseClock(time: string) {
+  const match = time.match(/^(\d+):(\d+) (AM|PM)$/);
+  if (!match) throw new Error(`Beat time "${time}" must look like "3:10 PM"`);
+  const [, h = "", m = "", ap = ""] = match;
+  return {
+    hm: `${h}:${m}`,
+    ap,
+    minutes: ((+h % 12) + (ap === "PM" ? 12 : 0)) * 60 + +m,
+  };
 }
 
 export type BuiltThread = {
@@ -62,9 +68,10 @@ export function buildThread(beats: Beat[]): BuiltThread {
   // Called at the moment a beat starts on screen (typing dots or user typing).
   const begin = (b: Beat) => {
     if (b.time && b.time !== time) {
-      const min = minutes(b.time);
+      const clockTime = parseClock(b.time);
+      const min = clockTime.minutes;
       if (min - lastMin >= STAMP_GAP_MIN) {
-        const [hm, ap] = b.time.split(" ");
+        const { hm, ap } = clockTime;
         items.push({
           id: `stamp-${b.id}`,
           kind: "divider",
@@ -75,7 +82,7 @@ export function buildThread(beats: Beat[]): BuiltThread {
         clock.push({ at: t, time: hm });
         t += STAMP_LEAD;
       } else {
-        clock.push({ at: t, time: b.time.split(" ")[0] });
+        clock.push({ at: t, time: clockTime.hm });
       }
       time = b.time;
       lastMin = min;
@@ -85,10 +92,12 @@ export function buildThread(beats: Beat[]): BuiltThread {
   for (const b of beats) {
     if ("react" in b) {
       // afterRead: the reaction answers the message, so it comes once it's been read.
-      const at = Math.max(
-        landedAt[b.react] + REACTION_DELAY,
-        b.afterRead ? t : 0,
-      );
+      const targetAt = landedAt[b.react];
+      if (targetAt === undefined)
+        throw new Error(
+          `Reaction "${b.id}" targets "${b.react}", which hasn't landed earlier`,
+        );
+      const at = Math.max(targetAt + REACTION_DELAY, b.afterRead ? t : 0);
       items.push({
         id: b.id,
         kind: "reaction",
@@ -134,9 +143,9 @@ export function buildThread(beats: Beat[]): BuiltThread {
         typing: b.chain ? undefined : BROWSER_TYPING,
       });
       if (b.time) {
-        clock.push({ at, time: b.time.split(" ")[0] });
+        clock.push({ at, time: parseClock(b.time).hm });
         time = b.time;
-        lastMin = minutes(b.time);
+        lastMin = parseClock(b.time).minutes;
       }
       landedAt[b.id] = imagesAt = lastAt = at;
       t = at + b.hold;

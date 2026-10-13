@@ -441,8 +441,9 @@ export function Thread({
     );
     const revealed = Math.round(chars.length * k);
     draft = chars.slice(0, revealed).join("");
-    if (k < 1 && revealed > 0) {
-      pressedKey = chars[revealed - 1].toLowerCase();
+    const lastTyped = chars[revealed - 1];
+    if (k < 1 && lastTyped) {
+      pressedKey = lastTyped.toLowerCase();
       pressT = (chars.length * k + 0.5) % 1;
     }
   }

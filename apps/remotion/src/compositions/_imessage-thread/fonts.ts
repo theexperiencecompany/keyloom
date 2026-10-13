@@ -99,11 +99,10 @@ const TRACKING: Record<number, number> = {
 
 /** letter-spacing in em for a given point size (nearest HIG row). */
 export function tracking(size: number): string {
-  const keys = Object.keys(TRACKING).map(Number);
-  const k = keys.reduce((a, b) =>
-    Math.abs(b - size) < Math.abs(a - size) ? b : a,
+  const [, value] = Object.entries(TRACKING).reduce((best, row) =>
+    Math.abs(+row[0] - size) < Math.abs(+best[0] - size) ? row : best,
   );
-  return `${TRACKING[k] / 1000}em`;
+  return `${value / 1000}em`;
 }
 
 /**

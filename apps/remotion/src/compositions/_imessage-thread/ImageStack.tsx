@@ -111,7 +111,9 @@ export function ImageStack({
   const h = width / aspect;
   const n = Math.min(srcs.length, REAR.length);
   const dir = side === "left" ? 1 : -1;
-  const fan = REAR[n - 1].dx - ((1 - REAR[n - 1].s) * width) / 2 + 8;
+  const back = REAR[n - 1];
+  if (!back) return null;
+  const fan = back.dx - ((1 - back.s) * width) / 2 + 8;
 
   // Cards land back-to-front, one by one; the fan opens as the front lands.
   const step = n > 1 ? 0.45 / (n - 1) : 0;
@@ -123,6 +125,7 @@ export function ImageStack({
     const t = clamp01((progress - order * step) / 0.55);
     const e = easeOut(t);
     const pose = REAR[depth];
+    if (!pose) return null;
     const rot = pose.rot * fanOpen + (1 - e) * 4;
     const dx = pose.dx * fanOpen * dir;
     const dy = pose.dy * fanOpen + (1 - e) * 26;
