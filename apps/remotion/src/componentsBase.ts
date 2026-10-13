@@ -10,6 +10,7 @@ import { WhiteRadialBurst } from "./compositions/backgrounds/WhiteRadialBurst/Wh
 import { CursorWalkthrough } from "./compositions/CursorWalkthrough/CursorWalkthrough";
 import { DiscordMessages } from "./compositions/DiscordMessages/DiscordMessages";
 import { GitHubStarButton } from "./compositions/GitHubStarButton/GitHubStarButton";
+import { IMessageThread } from "./compositions/IMessageThread/IMessageThread";
 import { ImageScene } from "./compositions/ImageScene/ImageScene";
 import { InstagramMessages } from "./compositions/InstagramMessages/InstagramMessages";
 import { InstagramPost } from "./compositions/InstagramPost/InstagramPost";
@@ -42,6 +43,7 @@ export const componentsByIdBase: Record<string, ComponentType<any>> = {
   LockScreenMessage,
   TypingSearch,
   StatCounter,
+  IMessageThread,
   SpotifyPlayer,
   TweetPost,
   CursorWalkthrough,
