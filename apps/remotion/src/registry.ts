@@ -8,6 +8,7 @@ import { whiteRadialBurstInfo } from "./compositions/backgrounds/WhiteRadialBurs
 import { cursorWalkthroughInfo } from "./compositions/CursorWalkthrough/meta";
 import { discordMessagesInfo } from "./compositions/DiscordMessages/meta";
 import { githubStarButtonInfo } from "./compositions/GitHubStarButton/meta";
+import { iMessageThreadInfo } from "./compositions/IMessageThread/meta";
 import { imageSceneInfo } from "./compositions/ImageScene/meta";
 import { instagramMessagesInfo } from "./compositions/InstagramMessages/meta";
 import { instagramPostInfo } from "./compositions/InstagramPost/meta";
@@ -39,6 +40,7 @@ export const compositions: AnyCompositionInfo[] = [
   cursorWalkthroughInfo,
   tikTokCaptionInfo,
   statCounterInfo,
+  iMessageThreadInfo,
   spotifyPlayerInfo,
   tweetPostInfo,
   instagramPostInfo,
