@@ -12,7 +12,14 @@ export type Beat =
       link: { url: string; title: string; domain: string; image?: string };
       hold: number;
     })
-  | (Base & { tap: string; hold: number })
+  | (Base & {
+      tap: string;
+      hold: number;
+      /** Fullscreen slideshow while expanded: image paths under public/imessage-thread/. Defaults to the tapped photo alone. */
+      cycle?: string[];
+      /** Seconds per fullscreen image. Defaults to the whole hold (no cycling). */
+      interval?: number;
+    })
   | (Base & { react: string; by: Sender; emoji: string; afterRead?: boolean });
 
 // Pacing (seconds).
@@ -114,6 +121,9 @@ export function buildThread(beats: Beat[]): BuiltThread {
       if (target?.kind === "images") {
         target.tapAt = at;
         target.expandUntil = at + b.hold;
+        const first = target.srcs[0];
+        target.cycle = b.cycle ?? (first ? [first] : []);
+        target.cycleInterval = b.interval ?? b.hold;
       }
       t = at + b.hold;
     } else if ("text" in b) {

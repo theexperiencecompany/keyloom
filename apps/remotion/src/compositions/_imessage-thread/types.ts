@@ -23,6 +23,10 @@ export type ThreadItem =
       tapAt?: number;
       /** tapAt + tap beat hold: fullscreen overlay shows in [tapAt, expandUntil). */
       expandUntil?: number;
+      /** Fullscreen slideshow frames (defaults to the tapped photo). */
+      cycle?: string[];
+      /** Seconds per fullscreen frame. */
+      cycleInterval?: number;
     }
   | {
       id: string;

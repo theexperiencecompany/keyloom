@@ -468,8 +468,9 @@ export function Thread({
     }
   }
 
-  // Fullscreen photo viewer: a tap on an images beat expands its front photo
-  // over the whole thread for the tap's hold, iOS Photos style.
+  // Fullscreen photo viewer: a tap on an images beat expands it edge to
+  // edge over the whole thread for the tap's hold. With `cycle`, it flicks
+  // through fullscreen frames (hard cuts) instead of holding one photo.
   let expandedSrc: string | null = null;
   let expandedK = 0;
   for (const s of slots) {
@@ -480,9 +481,12 @@ export function Thread({
       t >= s.tapAt &&
       t < s.expandUntil
     ) {
-      const first = s.srcs[0];
-      if (first) {
-        expandedSrc = first;
+      const frames = s.cycle?.length ? s.cycle : s.srcs.slice(0, 1);
+      const interval = s.cycleInterval ?? s.expandUntil - s.tapAt;
+      const frame =
+        frames[Math.floor((t - s.tapAt) / interval) % frames.length];
+      if (frame) {
+        expandedSrc = frame;
         const dt = t - s.tapAt;
         const total = s.expandUntil - s.tapAt;
         const fade = 0.15;
@@ -551,9 +555,9 @@ export function Thread({
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "contain",
+              objectFit: "cover",
+              objectPosition: "center top",
               display: "block",
-              transform: `scale(${0.92 + 0.08 * Math.max(0, Math.min(1, expandedK))})`,
             }}
           />
         </div>
