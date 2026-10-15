@@ -18,6 +18,14 @@ const HEADLINE_START = 8;
 const CHAR_DURATION = 54;
 const CHAR_STAGGER = 1.5;
 const MAX_BLUR_PX = 12;
+// Frames the headline + subtitle animation needs, plus a beat to sit on the end card.
+export const TITLE_HOLD_FRAMES = 30;
+
+export function textSoftBlurInFrames(headline: string): number {
+  const lastCharEnd =
+    HEADLINE_START + (headline.length - 1) * CHAR_STAGGER + CHAR_DURATION;
+  return Math.ceil(lastCharEnd + 14 + 26 + TITLE_HOLD_FRAMES);
+}
 
 // Soft-blur-in without inter-character halo bleed.
 //
@@ -38,12 +46,22 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
   headline,
   subtitle,
   clipStyle,
+  headlineSizeVmin,
 }) => {
   const frame = useDesignFrame();
   const { vmin } = useCanvasLayout();
   const s = resolveTitleStyle(clipStyle);
   useFontReady(s.fontFamily);
   const chars = headline.split("");
+
+  // Words stay intact: flexbox wraps between these spans, never mid-word.
+  const words = headline.split(" ");
+  const wordStart: number[] = [];
+  let cursor = 0;
+  for (const word of words) {
+    wordStart.push(cursor);
+    cursor += Array.from(word).length + 1;
+  }
 
   const lastCharEnd =
     HEADLINE_START + (chars.length - 1) * CHAR_STAGGER + CHAR_DURATION;
@@ -88,7 +106,7 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
     >
       <h1
         style={{
-          fontSize: vmin(12.2),
+          fontSize: vmin(headlineSizeVmin ?? 12.2),
           maxWidth: "16em",
           fontWeight: 700,
           letterSpacing: "-0.045em",
@@ -100,31 +118,44 @@ export const TextSoftBlurIn: React.FC<TextSoftBlurInProps> = ({
           filter: headlineBlurPx > 0 ? `blur(${headlineBlurPx}px)` : undefined,
         }}
       >
-        {chars.map((char, i) => {
-          const startFrame = HEADLINE_START + i * CHAR_STAGGER;
-          const progress = interpolate(
-            frame,
-            [startFrame, startFrame + CHAR_DURATION],
-            [0, 1],
-            {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-              easing: CHAR_EASE,
-            },
-          );
-          return (
-            <span
-              key={i}
-              style={{
-                display: "inline-block",
-                opacity: progress,
-                whiteSpace: "pre",
-              }}
-            >
-              {char === " " ? " " : char}
-            </span>
-          );
-        })}
+        {words.map((word, wi) => (
+          <span
+            key={wi}
+            style={{
+              display: "inline-block",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {Array.from(word).map((char, k) => {
+              const i = (wordStart[wi] ?? 0) + k;
+              const startFrame = HEADLINE_START + i * CHAR_STAGGER;
+              const progress = interpolate(
+                frame,
+                [startFrame, startFrame + CHAR_DURATION],
+                [0, 1],
+                {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                  easing: CHAR_EASE,
+                },
+              );
+              return (
+                <span
+                  key={k}
+                  style={{
+                    display: "inline-block",
+                    opacity: progress,
+                  }}
+                >
+                  {char}
+                </span>
+              );
+            })}
+            {wi < words.length - 1 ? (
+              <span style={{ whiteSpace: "pre" }}> </span>
+            ) : null}
+          </span>
+        ))}
       </h1>
 
       <TitleSubtitle

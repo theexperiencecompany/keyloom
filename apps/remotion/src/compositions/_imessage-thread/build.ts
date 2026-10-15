@@ -7,12 +7,19 @@ import type { Sender, ThreadItem } from "./types";
 type Base = { id: string; time?: string; chain?: boolean };
 export type Beat =
   | (Base & { from: Sender; text: string; think?: number })
-  | (Base & { images: string[]; hold: number })
+  | (Base & { images: string[]; hold: number; aspect?: number })
   | (Base & {
       link: { url: string; title: string; domain: string; image?: string };
       hold: number;
     })
-  | (Base & { tap: string; hold: number })
+  | (Base & {
+      tap: string;
+      hold: number;
+      /** Fullscreen slideshow while expanded: image paths under public/imessage-thread/. Defaults to the tapped photo alone. */
+      cycle?: string[];
+      /** Seconds per fullscreen image. Defaults to the whole hold (no cycling). */
+      interval?: number;
+    })
   | (Base & { react: string; by: Sender; emoji: string; afterRead?: boolean });
 
 // Pacing (seconds).
@@ -111,6 +118,13 @@ export function buildThread(beats: Beat[]): BuiltThread {
       const at = t;
       const target = items.find((i) => i.id === b.tap);
       if (target?.kind === "link") target.tapAt = at;
+      if (target?.kind === "images") {
+        target.tapAt = at;
+        target.expandUntil = at + b.hold;
+        const first = target.srcs[0];
+        target.cycle = b.cycle ?? (first ? [first] : []);
+        target.cycleInterval = b.interval ?? b.hold;
+      }
       t = at + b.hold;
     } else if ("text" in b) {
       begin(b);
@@ -141,6 +155,7 @@ export function buildThread(beats: Beat[]): BuiltThread {
         from: "gaia",
         srcs: b.images,
         typing: b.chain ? undefined : BROWSER_TYPING,
+        aspect: b.aspect,
       });
       if (b.time) {
         clock.push({ at, time: parseClock(b.time).hm });
