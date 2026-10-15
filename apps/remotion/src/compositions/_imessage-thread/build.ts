@@ -7,7 +7,7 @@ import type { Sender, ThreadItem } from "./types";
 type Base = { id: string; time?: string; chain?: boolean };
 export type Beat =
   | (Base & { from: Sender; text: string; think?: number })
-  | (Base & { images: string[]; hold: number })
+  | (Base & { images: string[]; hold: number; aspect?: number })
   | (Base & {
       link: { url: string; title: string; domain: string; image?: string };
       hold: number;
@@ -111,6 +111,10 @@ export function buildThread(beats: Beat[]): BuiltThread {
       const at = t;
       const target = items.find((i) => i.id === b.tap);
       if (target?.kind === "link") target.tapAt = at;
+      if (target?.kind === "images") {
+        target.tapAt = at;
+        target.expandUntil = at + b.hold;
+      }
       t = at + b.hold;
     } else if ("text" in b) {
       begin(b);
@@ -141,6 +145,7 @@ export function buildThread(beats: Beat[]): BuiltThread {
         from: "gaia",
         srcs: b.images,
         typing: b.chain ? undefined : BROWSER_TYPING,
+        aspect: b.aspect,
       });
       if (b.time) {
         clock.push({ at, time: parseClock(b.time).hm });

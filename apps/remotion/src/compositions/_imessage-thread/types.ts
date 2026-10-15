@@ -18,6 +18,11 @@ export type ThreadItem =
       from: Sender;
       srcs: string[];
       typing?: number;
+      aspect?: number;
+      /** When the user taps the photo (press-in + fullscreen expand). */
+      tapAt?: number;
+      /** tapAt + tap beat hold: fullscreen overlay shows in [tapAt, expandUntil). */
+      expandUntil?: number;
     }
   | {
       id: string;
