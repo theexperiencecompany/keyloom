@@ -18,6 +18,14 @@ const HEADLINE_START = 8;
 const CHAR_DURATION = 54;
 const CHAR_STAGGER = 1.5;
 const MAX_BLUR_PX = 12;
+// Frames the headline + subtitle animation needs, plus a beat to sit on the end card.
+export const TITLE_HOLD_FRAMES = 30;
+
+export function textSoftBlurInFrames(headline: string): number {
+  const lastCharEnd =
+    HEADLINE_START + (headline.length - 1) * CHAR_STAGGER + CHAR_DURATION;
+  return Math.ceil(lastCharEnd + 14 + 26 + TITLE_HOLD_FRAMES);
+}
 
 // Soft-blur-in without inter-character halo bleed.
 //

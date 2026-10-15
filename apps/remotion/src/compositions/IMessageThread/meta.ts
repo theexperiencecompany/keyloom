@@ -1,6 +1,7 @@
 import type { CompositionInfo } from "../../schema";
 import { buildThread } from "../_imessage-thread/build";
 import { outroSeconds, videoHookSeconds } from "../_imessage-thread/segments";
+import { textSoftBlurInFrames } from "../TextSoftBlurIn/TextSoftBlurIn";
 import type { IMessageThreadProps } from "./IMessageThread";
 
 export const IMESSAGE_THREAD_FPS = 60;
@@ -123,7 +124,10 @@ export const iMessageThreadInfo: CompositionInfo<IMessageThreadProps> = {
   ],
   calculateMetadata: ({ props }) => ({
     durationInFrames: Math.ceil(
-      (videoHookSeconds(props.hook) +
+      ((props.title
+        ? textSoftBlurInFrames(props.title.headline) / IMESSAGE_THREAD_FPS
+        : 0) +
+        videoHookSeconds(props.hook) +
         buildThread(props.beats).end +
         outroSeconds(props.outro)) *
         IMESSAGE_THREAD_FPS,

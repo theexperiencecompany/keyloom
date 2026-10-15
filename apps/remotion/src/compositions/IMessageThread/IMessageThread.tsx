@@ -25,6 +25,10 @@ import {
 } from "../_imessage-thread/segments";
 import { Thread } from "../_imessage-thread/Thread";
 import type { ThreadItem } from "../_imessage-thread/types";
+import {
+  TextSoftBlurIn,
+  textSoftBlurInFrames,
+} from "../TextSoftBlurIn/TextSoftBlurIn";
 
 export type IMessageThreadProps = {
   beats: Beat[];
@@ -34,6 +38,8 @@ export type IMessageThreadProps = {
   /** "phone": iPhone mockup on a soft backdrop. "fullscreen": the screen itself, like a screen recording. */
   layout: "phone" | "fullscreen";
   hook?: IMessageThreadHook;
+  /** Blur-in title card before the chat ("daily briefings are here"). */
+  title?: { headline: string; subtitle?: string };
   /** Logo call to action after the chat. */
   outro?: IMessageThreadOutro;
   /** Background music under the whole video; loops if shorter. */
@@ -76,6 +82,7 @@ export const IMessageThread: React.FC<IMessageThreadProps> = ({
   contactAvatar,
   layout,
   hook,
+  title,
   outro,
   music,
   keyboard = false,
@@ -101,10 +108,26 @@ export const IMessageThread: React.FC<IMessageThreadProps> = ({
 
   const hookFrames = Math.round(videoHookSeconds(hook) * fps);
   const chatFrames = Math.ceil(built.end * fps);
+  const titleFrames = title
+    ? Math.round((textSoftBlurInFrames(title.headline) * fps) / DESIGN_FPS)
+    : 0;
   return (
     <AbsoluteFill style={{ background: "#000" }}>
+      {title && (
+        <Sequence durationInFrames={titleFrames} name="title">
+          <TextSoftBlurIn
+            headline={title.headline}
+            subtitle={title.subtitle ?? ""}
+            clipStyle={{ backgroundColor: "#08090d", textColor: "#ffffff" }}
+          />
+        </Sequence>
+      )}
       {hook?.video && (
-        <Sequence durationInFrames={hookFrames} name="video-hook">
+        <Sequence
+          from={titleFrames}
+          durationInFrames={hookFrames}
+          name="video-hook"
+        >
           <AbsoluteFill>
             <SmartVideo
               src={threadAsset(hook.video)}
@@ -117,14 +140,14 @@ export const IMessageThread: React.FC<IMessageThreadProps> = ({
         </Sequence>
       )}
       <Sequence
-        from={hookFrames}
+        from={titleFrames + hookFrames}
         durationInFrames={outro ? chatFrames : undefined}
         name="chat"
       >
         {chat(hook?.video ? undefined : hook)}
       </Sequence>
       {outro && (
-        <Sequence from={hookFrames + chatFrames} name="outro">
+        <Sequence from={titleFrames + hookFrames + chatFrames} name="outro">
           <Outro url={outro.url} />
         </Sequence>
       )}
