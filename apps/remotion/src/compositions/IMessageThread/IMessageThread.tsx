@@ -25,6 +25,7 @@ import {
 } from "../_imessage-thread/segments";
 import { Thread } from "../_imessage-thread/Thread";
 import type { ThreadItem } from "../_imessage-thread/types";
+import { TEXT_VARIANTS } from "../Text/Text";
 import {
   TextSoftBlurIn,
   textSoftBlurInFrames,
@@ -39,7 +40,13 @@ export type IMessageThreadProps = {
   layout: "phone" | "fullscreen";
   hook?: IMessageThreadHook;
   /** Blur-in title card before the chat ("daily briefings are here"). */
-  title?: { headline: string; subtitle?: string; size?: number };
+  title?: {
+    headline: string;
+    subtitle?: string;
+    size?: number;
+    /** Any Text picker animation value. Defaults to soft-blur. */
+    animation?: string;
+  };
   /** Logo call to action after the chat. */
   outro?: IMessageThreadOutro;
   /** Background music under the whole video; loops if shorter. */
@@ -111,11 +118,14 @@ export const IMessageThread: React.FC<IMessageThreadProps> = ({
   const titleFrames = title
     ? Math.round((textSoftBlurInFrames(title.headline) * fps) / DESIGN_FPS)
     : 0;
+  const TitleCard = title
+    ? (TEXT_VARIANTS[title.animation ?? ""] ?? TextSoftBlurIn)
+    : null;
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      {title && (
+      {title && TitleCard && (
         <Sequence durationInFrames={titleFrames} name="title">
-          <TextSoftBlurIn
+          <TitleCard
             headline={title.headline}
             subtitle={title.subtitle ?? ""}
             clipStyle={{ backgroundColor: "#08090d", textColor: "#ffffff" }}

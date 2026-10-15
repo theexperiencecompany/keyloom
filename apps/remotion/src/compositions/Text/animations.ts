@@ -2,6 +2,9 @@
 // any component imports so `meta.ts` (and therefore the registry) can use it for
 // the select field WITHOUT dragging the animation components into the
 // metadata graph. Text.tsx maps these same `value`s to the actual components.
+//
+// `value`s are stable identifiers (old saved clips reference them) — only the
+// `label`s are display names, written in plain language describing the motion.
 export type TextAnimation = { value: string; label: string };
 
 export const TEXT_ANIMATIONS: TextAnimation[] = [
@@ -12,25 +15,25 @@ export const TEXT_ANIMATIONS: TextAnimation[] = [
   { value: "typewriter", label: "Typewriter" },
   { value: "typewriter-mono", label: "Typewriter (mono)" },
   { value: "soft-blur", label: "Soft blur in" },
-  { value: "blur-out", label: "Blur rise" },
-  { value: "focus-pull", label: "Focus pull" },
+  { value: "blur-out", label: "Words rise from blur" },
+  { value: "focus-pull", label: "Blurry to sharp" },
   { value: "shimmer", label: "Shimmer sweep" },
-  { value: "settle", label: "Settle in" },
-  { value: "scale-fade", label: "Scale fade" },
-  { value: "fade-through", label: "Fade through" },
-  { value: "line-reveal", label: "Line reveal" },
-  { value: "line-slide", label: "Line slide" },
-  { value: "char-rise", label: "Character rise" },
-  { value: "word-crossfade", label: "Word crossfade" },
-  { value: "stagger-center", label: "Stagger from center" },
-  { value: "stagger-edges", label: "Stagger from edges" },
-  { value: "letters-rise", label: "Letters rise" },
+  { value: "settle", label: "Ease into place" },
+  { value: "scale-fade", label: "Zoom in fade" },
+  { value: "fade-through", label: "Fade and rise" },
+  { value: "line-reveal", label: "Lines wipe up" },
+  { value: "line-slide", label: "Lines slide in from left" },
+  { value: "char-rise", label: "Letters float up" },
+  { value: "word-crossfade", label: "Words fade in one by one" },
+  { value: "stagger-center", label: "Letters bloom outward" },
+  { value: "stagger-edges", label: "Letters sweep inward" },
+  { value: "letters-rise", label: "Letters pop up" },
   { value: "letters-drop", label: "Letters drop" },
-  { value: "depth-parallax", label: "Word parallax" },
-  { value: "kinetic-center", label: "Kinetic center build" },
-  { value: "slide-down", label: "Slide down stack" },
-  { value: "slide-right", label: "Slide right reveal" },
-  { value: "shared-axis-x", label: "Shared axis X" },
-  { value: "shared-axis-y", label: "Shared axis Y" },
-  { value: "shared-axis-z", label: "Shared axis Z" },
+  { value: "depth-parallax", label: "Words rush forward" },
+  { value: "kinetic-center", label: "Words slide together" },
+  { value: "slide-down", label: "Words drop from above" },
+  { value: "slide-right", label: "Wipe in from the left" },
+  { value: "shared-axis-x", label: "Glide in sideways" },
+  { value: "shared-axis-y", label: "Words appear in sequence" },
+  { value: "shared-axis-z", label: "Zoom in through blur" },
 ];

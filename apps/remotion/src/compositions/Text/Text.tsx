@@ -40,9 +40,10 @@ export type TextProps = {
   clipStyle?: ClipStyle;
 };
 
-// Every variant is a headline+subtitle composition taking TitleProps. `Text`
-// delegates to the one the user picked — 28 motions behind one picker.
-const ANIMATIONS: Record<string, ComponentType<TitleProps>> = {
+// Every variant is just an existing headline+subtitle composition. `Text`
+// delegates to the one the user picked — this is a re-wiring of the 28 separate
+// text compositions into one plug-and-play picker, not a reimplementation.
+export const TEXT_VARIANTS: Record<string, ComponentType<TitleProps>> = {
   fade: TitleFade,
   "slide-up": TitleSlideUp,
   pop: TitlePopup,
@@ -79,7 +80,7 @@ export const Text: React.FC<TextProps> = ({
   animation,
   clipStyle,
 }) => {
-  const Variant = ANIMATIONS[animation] ?? TextSoftBlurIn;
+  const Variant = TEXT_VARIANTS[animation] ?? TextSoftBlurIn;
   return (
     <Variant headline={headline} subtitle={subtitle} clipStyle={clipStyle} />
   );
