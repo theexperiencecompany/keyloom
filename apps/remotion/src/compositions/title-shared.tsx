@@ -18,6 +18,8 @@ export type TitleProps = {
   headline: string;
   subtitle: string;
   clipStyle?: ClipStyle;
+  /** Headline size in vmin. Defaults to 12.2. */
+  headlineSizeVmin?: number;
 };
 
 export const APPLE_EASE = Easing.bezier(0.16, 1, 0.3, 1);

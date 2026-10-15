@@ -39,7 +39,7 @@ export type IMessageThreadProps = {
   layout: "phone" | "fullscreen";
   hook?: IMessageThreadHook;
   /** Blur-in title card before the chat ("daily briefings are here"). */
-  title?: { headline: string; subtitle?: string };
+  title?: { headline: string; subtitle?: string; size?: number };
   /** Logo call to action after the chat. */
   outro?: IMessageThreadOutro;
   /** Background music under the whole video; loops if shorter. */
@@ -119,6 +119,7 @@ export const IMessageThread: React.FC<IMessageThreadProps> = ({
             headline={title.headline}
             subtitle={title.subtitle ?? ""}
             clipStyle={{ backgroundColor: "#08090d", textColor: "#ffffff" }}
+            headlineSizeVmin={title.size}
           />
         </Sequence>
       )}
